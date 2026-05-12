@@ -49,7 +49,8 @@ import TypingDojo from './components/TypingDojo';
 
 // Main App component that needs to be inside AuthProvider
 const AppContent: React.FC = () => {
-  const { user, isLoading: authLoading, hasPremiumAccess, isAuthenticated } = useAuth();
+  const { user, isLoading: authLoading, hasPremiumAccess, isAuthenticated, refreshUser } = useAuth();
+  const { showToast } = useToastContext();
   const { actions: srsActions } = useSRS();
   const [theme, setTheme] = useLocalStorage<'dark' | 'light'>(LS_THEME_KEY, 'light');
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -89,6 +90,20 @@ const AppContent: React.FC = () => {
       }, 300);
     }
   }, []);
+
+  // After returning from Gumroad, refresh user to pick up premium upgrade from ping
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('purchase') === 'success' && isAuthenticated) {
+      // Remove param from URL without reload
+      window.history.replaceState({}, '', window.location.pathname);
+      // Wait 3s for the Gumroad ping to reach the backend, then refresh
+      setTimeout(() => {
+        refreshUser();
+        showToast('🎉 Welcome to Premium! Your account has been upgraded.', 'success');
+      }, 3000);
+    }
+  }, [isAuthenticated]);
 
   // Separate effect to handle activeSection validation for unauthenticated users
   useEffect(() => {
