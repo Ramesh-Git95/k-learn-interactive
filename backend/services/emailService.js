@@ -10,14 +10,14 @@ class EmailService {
     if (process.env.RESEND_API_KEY) {
       this.transporter = nodemailer.createTransport({
         host: 'smtp.resend.com',
-        port: 465,
-        secure: true,
+        port: 587,
+        secure: false,
         auth: {
           user: 'resend',
           pass: process.env.RESEND_API_KEY,
         },
       });
-      console.log('📧 Email service initialized with Resend');
+      console.log('📧 Email service initialized with Resend (port 587)');
     } else if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
       this.transporter = nodemailer.createTransport({
         service: 'gmail',
