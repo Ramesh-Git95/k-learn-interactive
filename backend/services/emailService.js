@@ -7,38 +7,19 @@ class EmailService {
   }
 
   initializeTransporter() {
-    // For development, use Ethereal Email (fake SMTP service)
-    // For production, use real email service like SendGrid, AWS SES, etc.
-    
-    if (process.env.NODE_ENV === 'production') {
-      // Production email service (configure based on your provider)
+    // Always prefer Gmail credentials when available (works in both dev and production)
+    if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
       this.transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        secure: true, // true for 465, false for other ports
+        service: 'gmail',
         auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_APP_PASSWORD,
         },
       });
+      console.log('📧 Email service initialized with Gmail SMTP');
     } else {
-      // Development - use Gmail SMTP for real emails during testing
-      // You can also use Ethereal but it's often unreliable
-      
-      // Option 1: Use Gmail SMTP (requires app password)
-      if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
-        this.transporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: {
-            user: process.env.GMAIL_USER,
-            pass: process.env.GMAIL_APP_PASSWORD, // Use App Password, not regular password
-          },
-        });
-        console.log('📧 Email service initialized with Gmail SMTP');
-      } else {
-        // Option 2: Fallback to Ethereal with better error handling
-        this.initializeEtherealWithRetry();
-      }
+      // Fallback to Ethereal test accounts in development
+      this.initializeEtherealWithRetry();
     }
   }
 
