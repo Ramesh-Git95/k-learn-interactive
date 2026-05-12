@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useToastContext } from '../contexts/ToastContext';
 
-const GUMROAD_URL = 'https://gumroad.com/l/klearn-lifetime';
+const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5001/api';
 
 const UserProfile: React.FC = () => {
-  const { user, isAuthenticated, hasPremiumAccess } = useAuth();
+  const { user, isAuthenticated, hasPremiumAccess, refreshUser } = useAuth();
+  const { showToast } = useToastContext();
+  const [licenseKey, setLicenseKey] = useState('');
+  const [licenseLoading, setLicenseLoading] = useState(false);
 
   if (!isAuthenticated || !user) {
     return (
@@ -25,6 +30,31 @@ const UserProfile: React.FC = () => {
     { label: 'Lessons Done',  value: user.progress?.completedLessons?.length || 0,      color: '#8B5CF6' },
     { label: 'Cards Learned', value: user.progress?.srsData?.totalCards || 0,           color: '#F59E0B' },
   ];
+
+  const redeemLicense = async () => {
+    if (!licenseKey.trim()) return;
+    setLicenseLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE}/gumroad/verify-license`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ licenseKey: licenseKey.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        await refreshUser();
+        showToast('🎉 License verified! You now have Premium access.', 'success');
+        setLicenseKey('');
+      } else {
+        showToast(data.message || 'Invalid license key. Please try again.', 'error');
+      }
+    } catch {
+      showToast('Network error. Please try again.', 'error');
+    } finally {
+      setLicenseLoading(false);
+    }
+  };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
@@ -132,15 +162,40 @@ const UserProfile: React.FC = () => {
             >
               <p className="text-xs font-black text-violet-700 dark:text-violet-300 mb-1">Upgrade to Lifetime Access 🚀</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                Unlock advanced features, unlimited quizzes, and detailed progress tracking.
+                Unlock unlimited AI conversations, advanced SRS, and detailed analytics.
               </p>
               <button
                 onClick={() => window.open(GUMROAD_URL, '_blank')}
                 className="w-full py-2 text-white text-xs font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
                 style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
               >
-                Get Lifetime Access — $39
+                Get Lifetime Access
               </button>
+
+              {/* License key redemption */}
+              <div className="mt-4 pt-4 border-t border-violet-200 dark:border-violet-800/30">
+                <p className="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                  Already purchased? Enter your license key
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={licenseKey}
+                    onChange={e => setLicenseKey(e.target.value)}
+                    placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+                    className="flex-1 px-3 py-2 text-xs rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono focus:outline-none focus:border-violet-400"
+                    disabled={licenseLoading}
+                  />
+                  <button
+                    onClick={redeemLicense}
+                    disabled={!licenseKey.trim() || licenseLoading}
+                    className="px-3 py-2 text-white text-xs font-black rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    style={{ background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' }}
+                  >
+                    {licenseLoading ? '...' : 'Redeem'}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
