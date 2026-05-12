@@ -63,16 +63,19 @@ const AppContent: React.FC = () => {
     }
   }, [user]);
 
-  // Show onboarding wizard exactly once per login session for new users.
-  // sessionStorage survives component remounts but clears on logout/tab close.
+  // Show onboarding wizard for new users. Write 'pending' to localStorage
+  // immediately on trigger so re-renders never cause a second instance.
   useEffect(() => {
     if (isAuthenticated) {
-      if (!localStorage.getItem('k-learn-onboarding') && !sessionStorage.getItem('k-learn-wizard-shown')) {
-        sessionStorage.setItem('k-learn-wizard-shown', '1');
+      if (!localStorage.getItem('k-learn-onboarding')) {
+        localStorage.setItem('k-learn-onboarding', 'pending');
         setShowOnboarding(true);
       }
     } else {
-      sessionStorage.removeItem('k-learn-wizard-shown');
+      // Clear 'pending' on logout so wizard shows again on next login if not completed
+      if (localStorage.getItem('k-learn-onboarding') === 'pending') {
+        localStorage.removeItem('k-learn-onboarding');
+      }
       setShowOnboarding(false);
     }
   }, [isAuthenticated]);
