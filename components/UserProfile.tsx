@@ -161,9 +161,14 @@ const UserProfile: React.FC = () => {
               style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.08), rgba(236,72,153,0.08))' }}
             >
               <p className="text-xs font-black text-violet-700 dark:text-violet-300 mb-1">Upgrade to Lifetime Access 🚀</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                 Unlock unlimited AI conversations, advanced SRS, and detailed analytics.
               </p>
+              <div className="bg-violet-50 dark:bg-violet-900/20 rounded-xl p-2.5 mb-3">
+                <p className="text-[11px] text-violet-600 dark:text-violet-400 font-bold">
+                  ⚠️ Use <strong>{user.email}</strong> when purchasing — your account upgrades automatically.
+                </p>
+              </div>
               <button
                 onClick={() => window.open(GUMROAD_URL, '_blank')}
                 className="w-full py-2 text-white text-xs font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
@@ -172,17 +177,30 @@ const UserProfile: React.FC = () => {
                 Get Lifetime Access
               </button>
 
-              {/* License key redemption */}
+              {/* Already purchased section */}
               <div className="mt-4 pt-4 border-t border-violet-200 dark:border-violet-800/30">
                 <p className="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                  Already purchased? Enter your license key
+                  Already purchased?
                 </p>
+                <button
+                  onClick={async () => { setLicenseLoading(true); await refreshUser(); setLicenseLoading(false); showToast('Subscription status refreshed.', 'info'); }}
+                  disabled={licenseLoading}
+                  className="w-full py-2 text-xs font-black rounded-xl border-2 border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-all disabled:opacity-40 mb-2"
+                >
+                  {licenseLoading ? 'Checking…' : '🔄 Check upgrade status'}
+                </button>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mb-3">
+                  Click after purchase to refresh your account status
+                </p>
+
+                {/* License key fallback */}
+                <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-1.5">Or enter your license key if you have one:</p>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={licenseKey}
                     onChange={e => setLicenseKey(e.target.value)}
-                    placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+                    placeholder="Paste license key here"
                     className="flex-1 px-3 py-2 text-xs rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono focus:outline-none focus:border-violet-400"
                     disabled={licenseLoading}
                   />
@@ -192,7 +210,7 @@ const UserProfile: React.FC = () => {
                     className="px-3 py-2 text-white text-xs font-black rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     style={{ background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' }}
                   >
-                    {licenseLoading ? '...' : 'Redeem'}
+                    {licenseLoading ? '…' : 'Redeem'}
                   </button>
                 </div>
               </div>
