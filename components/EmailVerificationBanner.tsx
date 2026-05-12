@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Icon from './Icon';
 
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5001/api';
+
 const EmailVerificationBanner: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const [isResending, setIsResending] = useState(false);
@@ -18,7 +20,7 @@ const EmailVerificationBanner: React.FC = () => {
       setIsResending(true);
       setMessage('');
       
-      const response = await fetch('http://localhost:5001/api/auth/resend-verification', {
+      const response = await fetch(`${API_BASE}/auth/resend-verification`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,7 +49,7 @@ const EmailVerificationBanner: React.FC = () => {
     <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4 mb-4">
       <div className="flex items-start">
         <div className="flex-shrink-0">
-          <Icon icon="mail" className="h-5 w-5 text-yellow-400" />
+          <span className="text-lg">📧</span>
         </div>
         <div className="ml-3 flex-1">
           <div className="flex items-center justify-between">
