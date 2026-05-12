@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PayPal Test - Simple</title>
+    <script src="https://www.paypal.com/sdk/js?client-id=Aa-iCAOutWockxTzJg7SqHatpnPjvuWd9uhv8sms2sTf36pkBLZYCb8sKf_hNZVVHqNUyo9-3Iy9IIb5&vault=true&intent=subscription&currency=USD&disable-funding=credit,card,venmo,bancontact,eps,giropay,ideal,mybank,p24,sepa,sofort&enable-funding=paypal&debug=true"></script>
+</head>
+<body>
+    <h1>PayPal Subscription Test</h1>
+    <div id="paypal-button-container"></div>
+
+    <script>
+        paypal.Buttons({
+            style: {
+                shape: 'rect',
+                color: 'blue',
+                layout: 'vertical',
+                label: 'subscribe'
+            },
+            createSubscription: function(data, actions) {
+                return actions.subscription.create({
+                    'plan_id': 'P-7NG533434M885384WNC2ADRI',
+                    'quantity': '1',
+                    'subscriber': {
+                        'name': {
+                            'given_name': 'Test',
+                            'surname': 'User'
+                        },
+                        'email_address': 'sb-oq9ms31932099@personal.example.com'
+                    },
+                    'application_context': {
+                        'brand_name': 'K-Learn Test',
+                        'locale': 'en-US',
+                        'shipping_preference': 'NO_SHIPPING',
+                        'user_action': 'SUBSCRIBE_NOW',
+                        'payment_method': {
+                            'payer_selected': 'PAYPAL',
+                            'payee_preferred': 'IMMEDIATE_PAYMENT_REQUIRED'
+                        }
+                    }
+                });
+            },
+            onApprove: function(data, actions) {
+                alert('Subscription successful! ID: ' + data.subscriptionID);
+                console.log('Subscription ID:', data.subscriptionID);
+            },
+            onError: function(err) {
+                alert('Error: ' + JSON.stringify(err));
+                console.error('PayPal Error:', err);
+            },
+            onCancel: function(data) {
+                alert('Subscription cancelled');
+                console.log('Cancelled:', data);
+            }
+        }).render('#paypal-button-container');
+    </script>
+</body>
+</html>

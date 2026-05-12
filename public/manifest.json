@@ -1,0 +1,73 @@
+{
+  "name": "K-Learn Interactive - Korean Language Learning",
+  "short_name": "K-Learn",
+  "description": "Interactive Korean language learning platform with vocabulary, grammar, and cultural insights",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3D5A80",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["education", "languages"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshots/mobile.png", 
+      "sizes": "375x812",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Vocabulary",
+      "short_name": "Vocab",
+      "description": "Study Korean vocabulary",
+      "url": "/?section=vocabulary",
+      "icons": [{ "src": "/icons/vocab-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Quiz",
+      "short_name": "Quiz",
+      "description": "Take a Korean quiz",
+      "url": "/?section=quiz",
+      "icons": [{ "src": "/icons/quiz-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Culture",
+      "short_name": "Culture",
+      "description": "Explore Korean culture",
+      "url": "/?section=culture",
+      "icons": [{ "src": "/icons/culture-96x96.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

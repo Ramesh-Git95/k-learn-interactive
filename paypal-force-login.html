@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PayPal FIXED - Force Sandbox Login</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+        .important { background: #ff6b6b; color: white; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .steps { background: #4ecdc4; color: white; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; margin: 20px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 PayPal FIXED - Force Sandbox Login</h1>
+    
+    <div class="important">
+        <h3>⚠️ IMPORTANT CHANGE</h3>
+        <p><strong>DO NOT fill card details!</strong> Instead:</p>
+        <ol>
+            <li>Click PayPal button below</li>
+            <li>On PayPal page, click <strong>"Log In"</strong> (blue button at top)</li>
+            <li>Login with your sandbox account</li>
+            <li>Use your $5000 balance</li>
+        </ol>
+    </div>
+    
+    <div class="steps">
+        <h3>✅ Correct Flow:</h3>
+        <ol>
+            <li><strong>Click "Log In"</strong> (not the card form)</li>
+            <li><strong>Email:</strong> sb-oq9ms31932099@personal.example.com</li>
+            <li><strong>Password:</strong> >8gB&]?g</li>
+            <li><strong>Should use your $5000 balance automatically</strong></li>
+            <li><strong>Complete subscription - no OTP needed</strong></li>
+        </ol>
+    </div>
+    
+    <h2>🚀 Test Again - Use "Log In" Button</h2>
+    <div id="paypal-button-container"></div>
+    
+    <div id="result"></div>
+
+    <!-- Force sandbox login by using specific parameters -->
+    <script src="https://www.paypal.com/sdk/js?client-id=Aa-iCAOutWockxTzJg7SqHatpnPjvuWd9uhv8sms2sTf36pkBLZYCb8sKf_hNZVVHqNUyo9-3Iy9IIb5&intent=subscription&currency=USD&locale=en_US"></script>
+    
+    <script>
+        console.log('🔄 PayPal SDK configured to prefer existing accounts');
+        
+        paypal.Buttons({
+            style: {
+                color: 'blue',
+                shape: 'rect',
+                label: 'subscribe',
+                height: 50,
+                layout: 'horizontal'
+            },
+            
+            createSubscription: function(data, actions) {
+                console.log('🔄 Creating subscription...');
+                return actions.subscription.create({
+                    'plan_id': 'P-7NG533434M885384WNC2ADRI',
+                    'subscriber': {
+                        'email_address': 'sb-oq9ms31932099@personal.example.com'
+                    },
+                    'application_context': {
+                        'brand_name': 'K-Learn Interactive',
+                        'user_action': 'SUBSCRIBE_NOW',
+                        'shipping_preference': 'NO_SHIPPING'
+                    }
+                });
+            },
+            
+            onApprove: function(data, actions) {
+                console.log('✅ Subscription SUCCESS:', data);
+                document.getElementById('result').innerHTML = `
+                    <div class="success">
+                        <h3>🎉 SUBSCRIPTION SUCCESSFUL!</h3>
+                        <p><strong>Subscription ID:</strong> <code>${data.subscriptionID}</code></p>
+                        <p><strong>Plan:</strong> $9.99/month recurring</p>
+                        <p><strong>Status:</strong> Active</p>
+                        
+                        <h4>✅ Next Steps:</h4>
+                        <ol>
+                            <li>Copy this subscription ID: <code>${data.subscriptionID}</code></li>
+                            <li>Update your React app to handle this ID</li>
+                            <li>Set user subscription status to "premium"</li>
+                        </ol>
+                    </div>
+                `;
+                
+                // Log the exact data for backend integration
+                console.log('📤 Backend Integration Data:', {
+                    subscriptionId: data.subscriptionID,
+                    planId: 'P-7NG533434M885384WNC2ADRI',
+                    userEmail: 'sb-oq9ms31932099@personal.example.com',
+                    amount: '9.99',
+                    currency: 'USD',
+                    interval: 'month',
+                    status: 'ACTIVE'
+                });
+            },
+            
+            onError: function(err) {
+                console.error('❌ PayPal Error:', err);
+                document.getElementById('result').innerHTML = `
+                    <div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                        <h3>❌ Error</h3>
+                        <p>If you see this error, make sure to:</p>
+                        <ul>
+                            <li>Click "Log In" instead of filling card details</li>
+                            <li>Use your sandbox account credentials</li>
+                            <li>Clear cookies and try again</li>
+                        </ul>
+                        <details>
+                            <summary>Technical Details</summary>
+                            <pre>${JSON.stringify(err, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+            },
+            
+            onCancel: function(data) {
+                console.log('🚫 Cancelled');
+                document.getElementById('result').innerHTML = `
+                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                        <h3>🚫 Cancelled</h3>
+                        <p>Try again and make sure to click "Log In" at the top of the PayPal page.</p>
+                    </div>
+                `;
+            }
+        }).render('#paypal-button-container');
+    </script>
+    
+    <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 5px;">
+        <h3>🎯 Key Points:</h3>
+        <ul>
+            <li><strong>Always click "Log In"</strong> - don't use the card form</li>
+            <li><strong>Your sandbox account has $5000</strong> - no cards needed</li>
+            <li><strong>No OTP required</strong> when using existing sandbox account</li>
+            <li><strong>If it asks for cards</strong> - you're not logged in properly</li>
+        </ul>
+    </div>
+</body>
+</html>

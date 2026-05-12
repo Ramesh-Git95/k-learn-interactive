@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear localStorage</title>
+</head>
+<body>
+    <h1>Clear localStorage</h1>
+    <button onclick="clearStorage()">Clear All Storage</button>
+    <div id="result"></div>
+    
+    <script>
+        function clearStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            document.getElementById('result').innerHTML = 'Storage cleared! Refresh the main app.';
+        }
+        
+        // Show current storage
+        console.log('Current localStorage:', localStorage);
+        console.log('SRS Decks:', localStorage.getItem('srs-decks'));
+    </script>
+</body>
+</html>

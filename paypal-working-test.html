@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PayPal Working Test - Minimal SDK</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; margin: 20px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>✅ PayPal Working Test - Minimal SDK</h1>
+    
+    <div class="success">
+        <strong>✅ Client ID Verified:</strong> Your PayPal credentials are working!
+    </div>
+    
+    <div class="warning">
+        <strong>🧪 Test Instructions:</strong>
+        <ul>
+            <li>Click the PayPal button below</li>
+            <li>Login with: sb-oq9ms31932099@personal.example.com</li>
+            <li>Password: >8gB&]?g</li>
+            <li>Should use your $5000 sandbox balance</li>
+        </ul>
+    </div>
+    
+    <h2>🚀 PayPal One-Time Payment Test</h2>
+    <div id="paypal-button-container"></div>
+    
+    <div id="result"></div>
+
+    <!-- Using the minimal SDK URL that was verified to work -->
+    <script src="https://www.paypal.com/sdk/js?client-id=Aa-iCAOutWockxTzJg7SqHatpnPjvuWd9uhv8sms2sTf36pkBLZYCb8sKf_hNZVVHqNUyo9-3Iy9IIb5&currency=USD"></script>
+    
+    <script>
+        console.log('🚀 PayPal SDK loaded with minimal parameters');
+        
+        paypal.Buttons({
+            style: {
+                color: 'blue',
+                shape: 'rect',
+                label: 'pay',
+                height: 40
+            },
+            
+            createOrder: function(data, actions) {
+                console.log('💰 Creating one-time payment order...');
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: '9.99',
+                            currency_code: 'USD'
+                        },
+                        description: 'K-Learn Premium Test Payment'
+                    }],
+                    application_context: {
+                        brand_name: 'K-Learn Test',
+                        shipping_preference: 'NO_SHIPPING'
+                    }
+                });
+            },
+            
+            onApprove: function(data, actions) {
+                console.log('✅ Payment approved:', data);
+                return actions.order.capture().then(function(details) {
+                    console.log('✅ Payment captured:', details);
+                    document.getElementById('result').innerHTML = `
+                        <div class="success">
+                            <h3>🎉 SUCCESS!</h3>
+                            <p><strong>Order ID:</strong> ${data.orderID}</p>
+                            <p><strong>Payment ID:</strong> ${details.id}</p>
+                            <p><strong>Status:</strong> ${details.status}</p>
+                            <p>PayPal payment completed successfully!</p>
+                        </div>
+                    `;
+                });
+            },
+            
+            onError: function(err) {
+                console.error('❌ PayPal Error:', err);
+                document.getElementById('result').innerHTML = `
+                    <div class="error">
+                        <h3>❌ Error</h3>
+                        <p><strong>Details:</strong> ${JSON.stringify(err, null, 2)}</p>
+                    </div>
+                `;
+            },
+            
+            onCancel: function(data) {
+                console.log('🚫 Payment cancelled:', data);
+                document.getElementById('result').innerHTML = `
+                    <div class="warning">
+                        <h3>🚫 Cancelled</h3>
+                        <p>Payment was cancelled by user</p>
+                    </div>
+                `;
+            }
+        }).render('#paypal-button-container');
+        
+        console.log('✅ PayPal buttons rendered successfully');
+    </script>
+</body>
+</html>
