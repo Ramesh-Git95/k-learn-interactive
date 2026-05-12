@@ -7,8 +7,18 @@ class EmailService {
   }
 
   initializeTransporter() {
-    // Always prefer Gmail credentials when available (works in both dev and production)
-    if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+    if (process.env.RESEND_API_KEY) {
+      this.transporter = nodemailer.createTransport({
+        host: 'smtp.resend.com',
+        port: 465,
+        secure: true,
+        auth: {
+          user: 'resend',
+          pass: process.env.RESEND_API_KEY,
+        },
+      });
+      console.log('📧 Email service initialized with Resend');
+    } else if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
       this.transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -18,7 +28,6 @@ class EmailService {
       });
       console.log('📧 Email service initialized with Gmail SMTP');
     } else {
-      // Fallback to Ethereal test accounts in development
       this.initializeEtherealWithRetry();
     }
   }
