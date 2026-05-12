@@ -52,16 +52,25 @@ const AppContent: React.FC = () => {
   const { user, isLoading: authLoading, hasPremiumAccess, isAuthenticated } = useAuth();
   const { actions: srsActions } = useSRS();
   const [theme, setTheme] = useLocalStorage<'dark' | 'light'>(LS_THEME_KEY, 'light');
-  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('k-learn-onboarding'));
+  const [showOnboarding, setShowOnboarding] = useState(false);
   // Initialize activeSection as null for landing page, dashboard for authenticated users
   const [activeSection, setActiveSection] = useState<Section | null>(null);
-  
+
   // Initialize dashboard for authenticated users only on first load
   useEffect(() => {
     if (user && activeSection === null) {
       setActiveSection('dashboard');
     }
   }, [user]);
+
+  // Show onboarding wizard only for freshly logged-in/registered users who haven't seen it
+  useEffect(() => {
+    if (isAuthenticated) {
+      setShowOnboarding(!localStorage.getItem('k-learn-onboarding'));
+    } else {
+      setShowOnboarding(false);
+    }
+  }, [isAuthenticated]);
 
   // Auto-open login modal after a successful password reset redirect
   useEffect(() => {

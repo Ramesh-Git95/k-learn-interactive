@@ -83,48 +83,32 @@ router.post('/register', authRateLimit, async (req, res) => {
     const verificationToken = user.generateEmailVerificationToken();
     
     await user.save();
-    
-    // Send verification email
-    try {
-      const emailResult = await emailService.sendVerificationEmail(
-        user.email,
-        user.name,
-        verificationToken
-      );
-      
-      console.log(`✅ New user registered: ${email}`);
-      console.log(`📧 Verification email sent`);
-      
-      res.status(201).json({
-        message: 'Registration successful! Please check your email to verify your account.',
-        user: {
-          id: user._id,
-          email: user.email,
-          name: user.name,
-          emailVerified: user.emailVerified,
-          createdAt: user.createdAt
-        },
-        emailSent: true,
-        emailPreview: emailResult.previewUrl // Only in development
-      });
-      
-    } catch (emailError) {
-      console.error('Failed to send verification email:', emailError);
-      
-      // User is created but email failed - still return success
-      res.status(201).json({
-        message: 'Registration successful! However, we could not send the verification email. Please try requesting a new verification email.',
-        user: {
-          id: user._id,
-          email: user.email,
-          name: user.name,
-          emailVerified: user.emailVerified,
-          createdAt: user.createdAt
-        },
-        emailSent: false,
-        emailError: 'Failed to send verification email'
-      });
-    }
+
+    const token = generateToken(user._id);
+
+    // Respond immediately so the frontend isn't blocked by email sending
+    res.status(201).json({
+      message: 'Registration successful! Please check your email to verify your account.',
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        subscription: user.subscription,
+        progress: user.progress,
+        preferences: user.preferences,
+        emailVerified: user.emailVerified,
+        createdAt: user.createdAt
+      },
+      emailSent: true,
+    });
+
+    // Send verification email in background — never blocks the response
+    emailService.sendVerificationEmail(user.email, user.name, verificationToken)
+      .then(() => console.log(`📧 Verification email sent to ${email}`))
+      .catch(err => console.error('Verification email failed:', err.message));
+
+    console.log(`✅ New user registered: ${email}`);
     
   } catch (error) {
     console.error('Registration error:', error);
