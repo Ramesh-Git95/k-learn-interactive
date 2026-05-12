@@ -53,6 +53,7 @@ const AppContent: React.FC = () => {
   const { actions: srsActions } = useSRS();
   const [theme, setTheme] = useLocalStorage<'dark' | 'light'>(LS_THEME_KEY, 'light');
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const onboardingTriggered = React.useRef(false);
   // Initialize activeSection as null for landing page, dashboard for authenticated users
   const [activeSection, setActiveSection] = useState<Section | null>(null);
 
@@ -63,11 +64,16 @@ const AppContent: React.FC = () => {
     }
   }, [user]);
 
-  // Show onboarding wizard only for freshly logged-in/registered users who haven't seen it
+  // Show onboarding wizard exactly once per login session for new users
   useEffect(() => {
-    if (isAuthenticated) {
-      setShowOnboarding(!localStorage.getItem('k-learn-onboarding'));
-    } else {
+    if (isAuthenticated && !onboardingTriggered.current) {
+      if (!localStorage.getItem('k-learn-onboarding')) {
+        onboardingTriggered.current = true;
+        setShowOnboarding(true);
+      }
+    }
+    if (!isAuthenticated) {
+      onboardingTriggered.current = false;
       setShowOnboarding(false);
     }
   }, [isAuthenticated]);
