@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Icon from './Icon';
 
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5001/api';
+
 interface EmailVerificationProps {
   onVerified?: () => void;
 }
 
 const EmailVerification: React.FC<EmailVerificationProps> = ({ onVerified }) => {
-  const [status, setStatus] = useState<'verifying' | 'success' | 'error' | 'resending'>('verifying');
+  const [status, setStatus] = useState<'verifying' | 'success' | 'error' | 'resending' | 'resent'>('verifying');
   const [message, setMessage] = useState('Verifying your email address...');
   const [email, setEmail] = useState('');
   const [showResendForm, setShowResendForm] = useState(false);
@@ -47,7 +49,7 @@ const EmailVerification: React.FC<EmailVerificationProps> = ({ onVerified }) => 
     try {
       console.log('🔍 Starting email verification for token:', verificationToken);
       
-      const response = await fetch(`http://localhost:5001/api/auth/verify-email/${verificationToken}`, {
+      const response = await fetch(`${API_BASE}/auth/verify-email/${verificationToken}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +96,7 @@ const EmailVerification: React.FC<EmailVerificationProps> = ({ onVerified }) => 
     try {
       setStatus('resending');
       
-      const response = await fetch('http://localhost:5001/api/auth/resend-verification', {
+      const response = await fetch(`${API_BASE}/auth/resend-verification`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -203,7 +205,7 @@ const EmailVerification: React.FC<EmailVerificationProps> = ({ onVerified }) => 
                 />
                 <button
                   onClick={resendVerification}
-                  disabled={!email || status === 'resending'}
+                  disabled={!email}
                   className="w-full mt-3 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Resend Verification Email
