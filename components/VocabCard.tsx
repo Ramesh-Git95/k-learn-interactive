@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { VocabItem, Bookmark } from '../types';
 import AddToSRS from './AddToSRS';
+import PronunciationButton from './PronunciationButton';
 import { useAuth } from '../contexts/AuthContext';
 
 interface VocabCardProps {
@@ -155,6 +156,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
         >
           ＋ SRS
         </button>
+        <PronunciationButton korean={item.korean} romanization={item.romanization} size="sm" />
       </div>
 
       {/* Examples Modal */}

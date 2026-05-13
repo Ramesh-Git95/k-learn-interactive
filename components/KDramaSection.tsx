@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useAuthModal } from '../contexts/AuthModalContext';
 import { useToastContext } from '../contexts/ToastContext';
 import useSRS from '../hooks/useSRS';
+import PronunciationButton from './PronunciationButton';
 
 const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
 
@@ -14,13 +15,6 @@ const difficultyStyle: Record<string, string> = {
   advanced: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
 };
 
-const speak = (text: string) => {
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'ko-KR';
-  utter.rate = 0.8;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(utter);
-};
 
 type DifficultyFilter = 'all' | 'beginner' | 'intermediate' | 'advanced';
 
@@ -53,7 +47,8 @@ const KDramaSection: React.FC = () => {
       korean: word.korean,
       romanization: word.romanization,
       english: word.english,
-      notes: word.context,
+      type: 'vocabulary',
+      category: `K-Drama: ${drama.titleEnglish}`,
     });
 
     setAddedCards(prev => new Set(prev).add(cardKey));
@@ -303,16 +298,9 @@ const KDramaSection: React.FC = () => {
 
                   {/* Action buttons */}
                   <div className="flex gap-2 mt-auto pt-1">
-                    <button
-                      onClick={() => speak(word.korean)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 flex-1 justify-center"
-                      title="Hear pronunciation"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
-                      </svg>
-                      Speak
-                    </button>
+                    <div className="flex-1">
+                      <PronunciationButton korean={word.korean} romanization={word.romanization} size="sm" />
+                    </div>
                     <button
                       onClick={() => handleAddToSRS(word, selectedDrama)}
                       disabled={isAdded}
