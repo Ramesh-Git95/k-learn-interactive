@@ -158,9 +158,9 @@ export function RegisterForm({ onToggleMode, onSuccess }: RegisterFormProps) {
               />
               <span className="text-xs text-gray-600 dark:text-gray-400">
                 I agree to the{' '}
-                <a href="/terms" className="text-pink-500 hover:underline font-bold">Terms of Service</a>
+                <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-pink-500 hover:underline font-bold">Terms of Service</a>
                 {' '}and{' '}
-                <a href="/privacy" className="text-pink-500 hover:underline font-bold">Privacy Policy</a>
+                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-pink-500 hover:underline font-bold">Privacy Policy</a>
               </span>
             </label>
 

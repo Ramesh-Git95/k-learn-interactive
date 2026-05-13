@@ -22,6 +22,8 @@ import SRSManager from './components/SRSManager';
 import SRSStudySession from './components/SRSStudySession';
 import ToastContainer from './components/ToastContainer';
 import EmailVerification from './components/EmailVerification';
+import TermsOfService from './components/TermsOfService';
+import PrivacyPolicy from './components/PrivacyPolicy';
 import EmailVerificationBanner from './components/EmailVerificationBanner';
 import OnboardingWizard from './components/OnboardingWizard';
 import Footer from './components/Footer';
@@ -152,11 +154,26 @@ const AppContent: React.FC = () => {
   const currentPath = window.location.pathname;
   const isVerifyEmailPage = currentPath.startsWith('/verify-email');
 
-  // If we're on the email verification page, render the EmailVerification component
   if (isVerifyEmailPage) {
     return (
       <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}>
         <EmailVerification />
+      </div>
+    );
+  }
+
+  if (currentPath === '/terms') {
+    return (
+      <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}>
+        <TermsOfService />
+      </div>
+    );
+  }
+
+  if (currentPath === '/privacy') {
+    return (
+      <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}>
+        <PrivacyPolicy />
       </div>
     );
   }
