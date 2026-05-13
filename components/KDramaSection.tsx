@@ -298,6 +298,22 @@ const KDramaSection: React.FC = () => {
 
                   {/* Action buttons */}
                   <div className="flex gap-2 mt-auto pt-1">
+                    {/* Speak (TTS) */}
+                    <button
+                      onClick={() => {
+                        const u = new SpeechSynthesisUtterance(word.korean);
+                        u.lang = 'ko-KR'; u.rate = 0.8;
+                        window.speechSynthesis.cancel();
+                        window.speechSynthesis.speak(u);
+                      }}
+                      className="flex items-center gap-1 px-2.5 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+                      title="Hear pronunciation"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+                      </svg>
+                      <span>Hear</span>
+                    </button>
                     <div className="flex-1">
                       <PronunciationButton korean={word.korean} romanization={word.romanization} size="sm" />
                     </div>
