@@ -9,7 +9,7 @@ import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import SpotlightSearch from './SpotlightSearch';
 import DeleteAccountModal from './DeleteAccountModal';
 
-const GUMROAD_URL = 'https://gumroad.com/l/klearn-lifetime';
+const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
 
 interface HeaderProps {
   activeSection: Section | null;
@@ -19,7 +19,24 @@ interface HeaderProps {
 }
 
 const primarySections = SECTIONS.filter(s => ['dashboard', 'hangul', 'vocabulary', 'conversation'].includes(s.id));
-const secondarySections = SECTIONS.filter(s => ['grammar', 'phrases', 'culture', 'quiz', 'srs', 'bookmarks', 'topik', 'honorifics', 'culture-cards', 'typing'].includes(s.id));
+
+const megaMenuGroups = [
+  {
+    label: 'LEARN',
+    items: SECTIONS.filter(s => ['grammar', 'phrases', 'topik', 'honorifics'].includes(s.id)),
+  },
+  {
+    label: 'PRACTICE',
+    items: SECTIONS.filter(s => ['quiz', 'typing', 'srs', 'bookmarks'].includes(s.id)),
+  },
+  {
+    label: 'CULTURE',
+    items: [
+      ...SECTIONS.filter(s => ['culture', 'culture-cards'].includes(s.id)),
+      { ...SECTIONS.find(s => s.id === 'kdrama')!, _isNew: true },
+    ],
+  },
+] as { label: string; items: (typeof SECTIONS[number] & { _isNew?: boolean })[] }[];
 
 const isKoreanChar = (s: string) => s.length <= 2 && /[㄰-㆏가-힣]/.test(s);
 
@@ -221,12 +238,12 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                 <NavItem key={s.id} id={s.id} title={s.title} icon={s.icon} isActive={activeSection === s.id} onClick={() => handleNav(s.id)} />
               ))}
 
-              {/* More dropdown */}
+              {/* Mega menu */}
               <div ref={moreMenuRef} className="relative">
                 <button
                   onClick={() => setShowMoreMenu(v => !v)}
                   className={`nav-more-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                    secondarySections.some(s => s.id === activeSection)
+                    megaMenuGroups.flatMap(g => g.items).some(s => s.id === activeSection)
                       ? 'active shadow-md'
                       : 'text-gray-600 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-pink-50 dark:hover:bg-gray-800'
                   }`}
@@ -238,22 +255,40 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                 </button>
 
                 {showMoreMenu && (
-                  <div className="dropdown-enter absolute top-full left-0 mt-2 w-52 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 py-2 z-50 overflow-hidden">
-                    {secondarySections.map(({ id, title, icon }) => (
-                      <button
-                        key={id}
-                        onClick={() => handleNav(id)}
-                        className={`w-full px-4 py-2.5 text-left flex items-center gap-3 text-sm font-medium transition-colors duration-150 ${
-                          activeSection === id
-                            ? 'bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400'
-                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
-                        }`}
-                      >
-                        <span className="text-base">{icon}</span>
-                        <span>{title}</span>
-                        {activeSection === id && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-pink-500" />}
-                      </button>
-                    ))}
+                  <div className="dropdown-enter absolute top-full left-0 mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 z-50 overflow-hidden"
+                    style={{ minWidth: '560px' }}
+                  >
+                    <div className="grid grid-cols-3 divide-x divide-gray-100 dark:divide-gray-800">
+                      {megaMenuGroups.map(group => (
+                        <div key={group.label} className="py-3 px-2">
+                          <div className="px-3 pb-2 text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest">
+                            {group.label}
+                          </div>
+                          {group.items.map(item => (
+                            <button
+                              key={item.id}
+                              onClick={() => handleNav(item.id as Section)}
+                              className={`w-full px-3 py-2 rounded-xl text-left flex items-center gap-2.5 text-sm font-medium transition-colors duration-150 ${
+                                activeSection === item.id
+                                  ? 'bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400'
+                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                              }`}
+                            >
+                              <span className="text-base w-5 text-center">{item.icon}</span>
+                              <span className="flex-1">{item.title}</span>
+                              {item._isNew && (
+                                <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full text-white leading-none" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
+                                  NEW
+                                </span>
+                              )}
+                              {activeSection === item.id && !item._isNew && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-pink-500" />
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -439,8 +474,8 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
         {isMenuOpen && (
           <div className="mobile-menu-enter md:hidden border-t border-gray-100 dark:border-gray-800 bg-white/98 dark:bg-gray-950/98 backdrop-blur-xl">
             <div className="max-w-7xl mx-auto px-4 py-4 space-y-1">
-              {/* All sections */}
-              {[...primarySections, ...secondarySections].map(({ id, title, icon }) => (
+              {/* Primary sections */}
+              {primarySections.map(({ id, title, icon }) => (
                 <button
                   key={id}
                   onClick={() => handleNav(id)}
@@ -455,6 +490,36 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                   <span>{title}</span>
                   {activeSection === id && <span className="ml-auto w-2 h-2 rounded-full bg-white/70" />}
                 </button>
+              ))}
+
+              {/* Grouped sections */}
+              {megaMenuGroups.map(group => (
+                <div key={group.label}>
+                  <div className="px-4 pt-3 pb-1 text-[10px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest">
+                    {group.label}
+                  </div>
+                  {group.items.map(item => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleNav(item.id as Section)}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        activeSection === item.id
+                          ? 'text-white shadow-md'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
+                      style={activeSection === item.id ? { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' } : {}}
+                    >
+                      <span className="text-lg">{item.icon}</span>
+                      <span className="flex-1">{item.title}</span>
+                      {item._isNew && activeSection !== item.id && (
+                        <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full text-white leading-none" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
+                          NEW
+                        </span>
+                      )}
+                      {activeSection === item.id && <span className="ml-auto w-2 h-2 rounded-full bg-white/70" />}
+                    </button>
+                  ))}
+                </div>
               ))}
 
               {/* Mobile auth */}

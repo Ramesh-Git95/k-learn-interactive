@@ -17,6 +17,7 @@ export const SECTIONS: { id: Section; title: string; icon: string }[] = [
   { id: 'honorifics', title: 'Honorifics', icon: '🎭' },
   { id: 'culture-cards', title: 'Culture Cards', icon: '🌸' },
   { id: 'typing', title: 'Typing Dojo', icon: '⌨️' },
+  { id: 'kdrama', title: 'K-Drama', icon: '🎬' },
 ];
 
 export const LS_THEME_KEY = 'k-learn-theme';

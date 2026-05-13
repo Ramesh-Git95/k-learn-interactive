@@ -1,4 +1,4 @@
-export type Section = 'dashboard' | 'hangul' | 'vocabulary' | 'grammar' | 'phrases' | 'culture' | 'quiz' | 'conversation' | 'bookmarks' | 'srs' | 'profile' | 'cookie-demo' | 'topik' | 'honorifics' | 'culture-cards' | 'typing';
+export type Section = 'dashboard' | 'hangul' | 'vocabulary' | 'grammar' | 'phrases' | 'culture' | 'quiz' | 'conversation' | 'bookmarks' | 'srs' | 'profile' | 'cookie-demo' | 'topik' | 'honorifics' | 'culture-cards' | 'typing' | 'kdrama';
 
 export interface HangulCharacter {
   char: string;

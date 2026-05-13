@@ -41,6 +41,7 @@ import TopikPrepSection from './components/TopikPrepSection';
 import HonorificEngine from './components/HonorificEngine';
 import CultureCards from './components/CultureCards';
 import TypingDojo from './components/TypingDojo';
+import KDramaSection from './components/KDramaSection';
 
 // Load cookie testing utilities in development
 // Commented out temporarily - these files are optional for production
@@ -197,7 +198,7 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
-      if (hash && ['dashboard', 'hangul', 'vocabulary', 'grammar', 'phrases', 'culture', 'quiz', 'conversation', 'bookmarks', 'srs', 'profile', 'cookie-demo', 'topik', 'honorifics', 'culture-cards', 'typing'].includes(hash as Section)) {
+      if (hash && ['dashboard', 'hangul', 'vocabulary', 'grammar', 'phrases', 'culture', 'quiz', 'conversation', 'bookmarks', 'srs', 'profile', 'cookie-demo', 'topik', 'honorifics', 'culture-cards', 'typing', 'kdrama'].includes(hash as Section)) {
         setActiveSection(hash as Section);
       }
     };
@@ -468,6 +469,8 @@ const AppContent: React.FC = () => {
         return <CultureCards />;
       case 'typing':
         return <TypingDojo />;
+      case 'kdrama':
+        return <KDramaSection />;
       case 'bookmarks':
         return <BookmarkList bookmarks={bookmarks} toggleBookmark={toggleBookmark} />;
       case 'srs':
