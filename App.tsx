@@ -95,15 +95,25 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('purchase') === 'success' && isAuthenticated) {
-      // Remove param from URL without reload
       window.history.replaceState({}, '', window.location.pathname);
-      // Wait 3s for the Gumroad ping to reach the backend, then refresh
       setTimeout(() => {
         refreshUser();
         showToast('🎉 Welcome to Premium! Your account has been upgraded.', 'success');
       }, 3000);
     }
   }, [isAuthenticated]);
+
+  // Global tab-return refresh — catches Gumroad ping upgrade from any page
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && !hasPremiumAccess()) {
+        refreshUser();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [isAuthenticated, hasPremiumAccess, refreshUser]);
 
   // Separate effect to handle activeSection validation for unauthenticated users
   useEffect(() => {

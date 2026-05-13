@@ -15,18 +15,33 @@ const UserProfile: React.FC = () => {
   const [claimCode, setClaimCode] = useState('');
   const [claimStep, setClaimStep] = useState<'email' | 'code'>('email');
   const [claimLoading, setClaimLoading] = useState(false);
+  const [isPolling, setIsPolling] = useState(false);
+  const isPremiumRef = React.useRef(false);
+  const pollCountRef = React.useRef(0);
 
-  // Auto-refresh when user returns to this tab from Gumroad
+  // Keep ref in sync so the polling interval always reads the latest value
+  isPremiumRef.current = hasPremiumAccess();
+
+  // Poll every 5 s (max 5 min) after user clicks the Gumroad button
   React.useEffect(() => {
-    if (!isAuthenticated) return;
-    const handleVisibility = async () => {
-      if (document.visibilityState === 'visible' && !hasPremiumAccess()) {
-        await refreshUser();
+    if (!isPolling) return;
+    pollCountRef.current = 0;
+    const interval = setInterval(async () => {
+      pollCountRef.current += 1;
+      await refreshUser();
+      if (isPremiumRef.current) {
+        clearInterval(interval);
+        setIsPolling(false);
+        showToast('🎉 Your account has been upgraded to Premium!', 'success');
+        return;
       }
-    };
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [isAuthenticated, hasPremiumAccess, refreshUser]);
+      if (pollCountRef.current >= 60) {   // 60 × 5 s = 5 min
+        clearInterval(interval);
+        setIsPolling(false);
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isPolling, refreshUser, showToast]);
 
   if (!isAuthenticated || !user) {
     return (
@@ -243,12 +258,21 @@ const UserProfile: React.FC = () => {
                 </p>
               </div>
               <button
-                onClick={() => window.open(GUMROAD_URL, '_blank')}
+                onClick={() => { window.open(GUMROAD_URL, '_blank'); setIsPolling(true); }}
                 className="w-full py-2 text-white text-xs font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
                 style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
               >
                 Get Lifetime Access
               </button>
+
+              {isPolling && (
+                <div className="flex items-center gap-2 mt-2 px-3 py-2 rounded-xl bg-violet-50 dark:bg-violet-900/20">
+                  <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse flex-shrink-0" />
+                  <p className="text-[11px] text-violet-600 dark:text-violet-400 font-bold">
+                    Waiting for purchase confirmation… upgrading automatically
+                  </p>
+                </div>
+              )}
 
               {/* Already purchased section */}
               <div className="mt-4 pt-4 border-t border-violet-200 dark:border-violet-800/30">
