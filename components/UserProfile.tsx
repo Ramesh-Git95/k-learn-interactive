@@ -10,6 +10,21 @@ const UserProfile: React.FC = () => {
   const { showToast } = useToastContext();
   const [licenseKey, setLicenseKey] = useState('');
   const [licenseLoading, setLicenseLoading] = useState(false);
+  const [showClaimForm, setShowClaimForm] = useState(false);
+  const [claimEmail, setClaimEmail] = useState('');
+  const [claimLoading, setClaimLoading] = useState(false);
+
+  // Auto-refresh when user returns to this tab from Gumroad
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+    const handleVisibility = async () => {
+      if (document.visibilityState === 'visible' && !hasPremiumAccess()) {
+        await refreshUser();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [isAuthenticated, hasPremiumAccess, refreshUser]);
 
   if (!isAuthenticated || !user) {
     return (
@@ -53,6 +68,34 @@ const UserProfile: React.FC = () => {
       showToast('Network error. Please try again.', 'error');
     } finally {
       setLicenseLoading(false);
+    }
+  };
+
+  const claimPurchase = async () => {
+    if (!claimEmail.trim()) return;
+    setClaimLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE}/gumroad/claim-purchase`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ purchaseEmail: claimEmail.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        await refreshUser();
+        showToast('🎉 Purchase verified! You now have Premium access.', 'success');
+        setShowClaimForm(false);
+        setClaimEmail('');
+      } else if (data.error === 'NOT_FOUND') {
+        showToast('No purchase found for that email. Your purchase may still be processing — please wait a few minutes and try again.', 'error');
+      } else {
+        showToast(data.message || 'Could not verify purchase. Please try again.', 'error');
+      }
+    } catch {
+      showToast('Network error. Please try again.', 'error');
+    } finally {
+      setClaimLoading(false);
     }
   };
 
@@ -192,6 +235,39 @@ const UserProfile: React.FC = () => {
                 <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mb-3">
                   Click after purchase to refresh your account status
                 </p>
+
+                {/* Different email claim */}
+                <button
+                  onClick={() => setShowClaimForm(v => !v)}
+                  className="w-full py-1.5 text-[11px] font-black rounded-lg text-violet-600 dark:text-violet-400 hover:underline mb-2 text-left"
+                >
+                  {showClaimForm ? '▲ Hide' : '▼ Used a different email?'}
+                </button>
+                {showClaimForm && (
+                  <div className="mb-3">
+                    <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-1.5">
+                      Enter the email you used on Gumroad to claim your purchase:
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="email"
+                        value={claimEmail}
+                        onChange={e => setClaimEmail(e.target.value)}
+                        placeholder="Gumroad purchase email"
+                        className="flex-1 px-3 py-2 text-xs rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-violet-400"
+                        disabled={claimLoading}
+                      />
+                      <button
+                        onClick={claimPurchase}
+                        disabled={!claimEmail.trim() || claimLoading}
+                        className="px-3 py-2 text-white text-xs font-black rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                        style={{ background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' }}
+                      >
+                        {claimLoading ? '…' : 'Claim'}
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* License key fallback */}
                 <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-1.5">Or enter your license key if you have one:</p>

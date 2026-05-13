@@ -1,6 +1,7 @@
 const express = require('express');
 const https = require('https');
 const querystring = require('querystring');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const { authenticateToken } = require('../middleware/auth');
 
@@ -8,13 +9,22 @@ const router = express.Router();
 
 const GUMROAD_PRODUCT_PERMALINK = process.env.GUMROAD_PRODUCT_PERMALINK || 'klearn-lifetime';
 
+// Stores purchases where the buyer email didn't match any K-Learn account
+const pendingUpgradeSchema = new mongoose.Schema({
+  email:      { type: String, required: true, lowercase: true, trim: true },
+  saleId:     String,
+  licenseKey: String,
+  createdAt:  { type: Date, default: Date.now, expires: '30d' },
+});
+const PendingUpgrade = mongoose.models.PendingUpgrade
+  || mongoose.model('PendingUpgrade', pendingUpgradeSchema);
+
 // Helper: upgrade a user to premium (lifetime)
 async function upgradeToPremium(user, licenseKey, saleId) {
   user.subscription.type = 'premium';
   user.subscription.status = 'active';
-  user.subscription.currentPeriodEnd = null;   // lifetime — never expires
+  user.subscription.currentPeriodEnd = null;
   user.subscription.cancelAtPeriodEnd = false;
-  // Reuse stripeSubscriptionId field to store Gumroad sale/license reference
   user.subscription.stripeSubscriptionId = saleId || licenseKey || 'gumroad-lifetime';
   await user.save();
 }
@@ -27,7 +37,6 @@ function verifyWithGumroad(licenseKey) {
       license_key: licenseKey,
       increment_uses_count: 'false',
     });
-
     const options = {
       hostname: 'api.gumroad.com',
       path: '/v2/licenses/verify',
@@ -37,7 +46,6 @@ function verifyWithGumroad(licenseKey) {
         'Content-Length': Buffer.byteLength(postData),
       },
     };
-
     const req = https.request(options, (res) => {
       let data = '';
       res.on('data', chunk => { data += chunk; });
@@ -46,7 +54,6 @@ function verifyWithGumroad(licenseKey) {
         catch { reject(new Error('Invalid Gumroad response')); }
       });
     });
-
     req.on('error', reject);
     req.write(postData);
     req.end();
@@ -54,32 +61,32 @@ function verifyWithGumroad(licenseKey) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// POST /api/gumroad/ping
-// Gumroad calls this automatically when someone completes a purchase.
-// No auth — Gumroad sends its own seller_id for verification.
+// POST /api/gumroad/ping  — called by Gumroad on every purchase
 // ─────────────────────────────────────────────────────────────────────────────
 router.post('/ping', async (req, res) => {
   try {
-    // Always respond 200 fast — Gumroad retries if it doesn't get a quick reply
-    res.sendStatus(200);
+    res.sendStatus(200); // respond fast — Gumroad retries on timeout
 
     const { product_permalink, email, sale_id, license_key } = req.body;
+    console.log(`🛒 Gumroad ping — email: ${email}, product: ${product_permalink}`);
 
-    console.log(`🛒 Gumroad ping received — email: ${email}, product: ${product_permalink}`);
-
-    // Basic sanity check
     if (!email || !product_permalink) return;
 
-    // Find a K-Learn account with the same email
     const user = await User.findOne({ email: email.toLowerCase().trim() });
+
     if (!user) {
-      // No matching account — store the license key so they can redeem it later
-      console.log(`⚠️  No K-Learn account found for ${email} — license key available for manual redemption`);
+      // Save for later — buyer can claim via /claim-purchase
+      await PendingUpgrade.findOneAndUpdate(
+        { email: email.toLowerCase().trim() },
+        { email: email.toLowerCase().trim(), saleId: sale_id, licenseKey: license_key },
+        { upsert: true }
+      );
+      console.log(`⚠️  No K-Learn account for ${email} — stored as pending upgrade`);
       return;
     }
 
     if (user.subscription.type !== 'free') {
-      console.log(`ℹ️  User ${email} already has premium — skipping`);
+      console.log(`ℹ️  ${email} already has premium`);
       return;
     }
 
@@ -91,8 +98,50 @@ router.post('/ping', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// POST /api/gumroad/claim-purchase
+// User bought with a different email — lets them claim it by entering
+// the email they used on Gumroad.
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/claim-purchase', authenticateToken, async (req, res) => {
+  try {
+    const { purchaseEmail } = req.body;
+    const user = req.user;
+
+    if (!purchaseEmail || !purchaseEmail.trim()) {
+      return res.status(400).json({ message: 'Purchase email is required' });
+    }
+
+    if (user.subscription.type !== 'free') {
+      return res.status(400).json({ message: 'Your account already has premium access' });
+    }
+
+    const pending = await PendingUpgrade.findOne({ email: purchaseEmail.toLowerCase().trim() });
+
+    if (!pending) {
+      return res.status(404).json({
+        message: 'No purchase found for that email. Make sure you use the exact email from your Gumroad receipt.',
+        error: 'NOT_FOUND',
+      });
+    }
+
+    await upgradeToPremium(user, pending.licenseKey, pending.saleId);
+    await PendingUpgrade.deleteOne({ _id: pending._id });
+
+    console.log(`✅ ${user.email} claimed purchase from ${purchaseEmail}`);
+
+    res.json({
+      message: 'Purchase verified! Your account has been upgraded to Premium.',
+      subscription: { type: 'premium', status: 'active' },
+    });
+  } catch (err) {
+    console.error('Claim purchase error:', err);
+    res.status(500).json({ message: 'Something went wrong. Please try again.', error: 'CLAIM_ERROR' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // POST /api/gumroad/verify-license
-// Called when a logged-in user manually enters their Gumroad license key.
+// Manual license key entry fallback
 // ─────────────────────────────────────────────────────────────────────────────
 router.post('/verify-license', authenticateToken, async (req, res) => {
   try {
