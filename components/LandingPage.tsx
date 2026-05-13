@@ -7,7 +7,7 @@ interface LandingPageProps {
   onGetStarted: () => void;
 }
 
-const GUMROAD_URL = 'https://gumroad.com/l/klearn-lifetime';
+const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 
@@ -345,22 +345,26 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         <div className={`relative z-10 max-w-5xl mx-auto text-center ${loaded ? 'fade-up' : 'opacity-0'}`}>
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-50 to-violet-50 dark:from-pink-900/30 dark:to-violet-900/30 border border-pink-200 dark:border-pink-700/50 rounded-full px-5 py-2 mb-8">
-            <span className="text-base">🎵</span>
-            <span className="text-sm font-semibold text-pink-600 dark:text-pink-400">K-Pop · K-Drama · 한국어</span>
+            <span className="text-base">🎬</span>
+            <span className="text-sm font-semibold text-pink-600 dark:text-pink-400">Built for K-Drama fans · Not another Duolingo</span>
             <span className="text-base">🇰🇷</span>
           </div>
 
           {/* Headline */}
           <h1 className="text-5xl sm:text-7xl md:text-8xl font-black leading-none mb-5 tracking-tight">
-            <span className="block text-gray-900 dark:text-white">Learn Korean</span>
-            <span className="block gradient-text">the Fun Way</span>
+            <span className="block text-gray-900 dark:text-white">Stop Watching</span>
+            <span className="block gradient-text">With Subtitles</span>
           </h1>
 
           <p className="text-xl sm:text-2xl mb-3 font-bold" style={{ fontFamily: 'Noto Sans KR,sans-serif', color: '#EC4899' }}>
-            지금 시작해요! ✨
+            한국어를 진짜로 배워봐요! ✨
           </p>
-          <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-10 max-w-xl mx-auto leading-relaxed">
-            AI conversation · spaced repetition · Hangul · honorifics · culture cards — the complete Korean platform. Start free, upgrade once, own it forever.
+          <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-4 max-w-xl mx-auto leading-relaxed">
+            The only Korean learning app built for K-drama fans.
+            AI conversations, 1,000+ words, real grammar — not tourist phrases.
+          </p>
+          <p className="text-sm sm:text-base font-black mb-10 max-w-lg mx-auto" style={{ color: '#8B5CF6' }}>
+            Pay once. Own it forever. No monthly fees. Ever.
           </p>
 
           {/* CTAs */}
@@ -373,13 +377,18 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             </a>
           </div>
 
-          <p className="text-sm text-gray-400 dark:text-gray-500 mb-10">
+          <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
             No subscription · pay once · 30-day money-back guarantee
           </p>
 
+          {/* vs Duolingo pill */}
+          <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/40 rounded-full px-4 py-1.5 mb-10">
+            <span className="text-xs font-black text-green-700 dark:text-green-400">💰 Duolingo costs $84–168/year. K-Learn is $39 once.</span>
+          </div>
+
           {/* Trust row */}
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-400 dark:text-gray-500 mb-14">
-            {['⚡ Free to start', '🔒 No credit card', '🌍 10,000+ learners', '⭐ 4.9 / 5 rating'].map((t, i, arr) => (
+            {['⚡ Free to start', '🔒 No credit card', '🎬 K-Drama vocab packs', '⭐ 4.9 / 5 rating'].map((t, i, arr) => (
               <React.Fragment key={t}>
                 <span>{t}</span>
                 {i < arr.length - 1 && <span className="hidden sm:inline">·</span>}
