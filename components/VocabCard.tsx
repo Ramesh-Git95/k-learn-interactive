@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { VocabItem, Bookmark } from '../types';
 import AddToSRS from './AddToSRS';
+import { useAuth } from '../contexts/AuthContext';
 
 interface VocabCardProps {
   item: VocabItem;
@@ -12,9 +13,19 @@ interface VocabCardProps {
 }
 
 const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmark, onStudy, isStudied = false, disabled = false }) => {
+  const { isAuthenticated } = useAuth();
   const [isFlipped, setIsFlipped] = useState(false);
   const [showExamples, setShowExamples] = useState(false);
   const [showAddToSRS, setShowAddToSRS] = useState(false);
+
+  const requireAuth = (e: React.MouseEvent, action: () => void) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }));
+      return;
+    }
+    action();
+  };
 
   const speak = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -130,7 +141,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
       <div className="mt-3 flex items-center justify-center gap-1 flex-wrap">
         {examples.length > 0 && (
           <button
-            onClick={e => { e.stopPropagation(); setShowExamples(true); }}
+            onClick={e => requireAuth(e, () => setShowExamples(true))}
             className="text-xs font-semibold px-3 py-1.5 rounded-xl transition-all hover:scale-105"
             style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.1), rgba(139,92,246,0.1))', color: '#EC4899' }}
           >
@@ -138,7 +149,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
           </button>
         )}
         <button
-          onClick={() => setShowAddToSRS(true)}
+          onClick={e => requireAuth(e, () => setShowAddToSRS(true))}
           className="text-xs font-semibold px-3 py-1.5 rounded-xl transition-all hover:scale-105"
           style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(6,182,212,0.1))', color: '#8B5CF6' }}
         >
