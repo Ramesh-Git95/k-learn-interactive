@@ -21,6 +21,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // needed for Gumroad ping (form-encoded)
 
 // Request logging middleware
 app.use((req, res, next) => {
