@@ -4,10 +4,20 @@ const querystring = require('querystring');
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const { authenticateToken } = require('../middleware/auth');
+const emailService = require('../services/emailService');
 
 const router = express.Router();
 
 const GUMROAD_PRODUCT_PERMALINK = process.env.GUMROAD_PRODUCT_PERMALINK || 'klearn-lifetime';
+
+// Stores short-lived codes sent to the Gumroad purchase email for ownership proof
+const claimCodeSchema = new mongoose.Schema({
+  email:     { type: String, required: true, lowercase: true, trim: true },
+  code:      { type: String, required: true },
+  createdAt: { type: Date, default: Date.now, expires: '15m' },
+});
+const ClaimCode = mongoose.models.ClaimCode
+  || mongoose.model('ClaimCode', claimCodeSchema);
 
 // Stores purchases where the buyer email didn't match any K-Learn account
 const pendingUpgradeSchema = new mongoose.Schema({
@@ -98,11 +108,11 @@ router.post('/ping', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// POST /api/gumroad/claim-purchase
-// User bought with a different email — lets them claim it by entering
-// the email they used on Gumroad.
+// POST /api/gumroad/send-claim-code
+// Step 1: verify a purchase exists for the given email, then email a
+// 6-digit code to that address so the user can prove they own it.
 // ─────────────────────────────────────────────────────────────────────────────
-router.post('/claim-purchase', authenticateToken, async (req, res) => {
+router.post('/send-claim-code', authenticateToken, async (req, res) => {
   try {
     const { purchaseEmail } = req.body;
     const user = req.user;
@@ -115,7 +125,8 @@ router.post('/claim-purchase', authenticateToken, async (req, res) => {
       return res.status(400).json({ message: 'Your account already has premium access' });
     }
 
-    const pending = await PendingUpgrade.findOne({ email: purchaseEmail.toLowerCase().trim() });
+    const normalised = purchaseEmail.toLowerCase().trim();
+    const pending = await PendingUpgrade.findOne({ email: normalised });
 
     if (!pending) {
       return res.status(404).json({
@@ -124,10 +135,69 @@ router.post('/claim-purchase', authenticateToken, async (req, res) => {
       });
     }
 
-    await upgradeToPremium(user, pending.licenseKey, pending.saleId);
-    await PendingUpgrade.deleteOne({ _id: pending._id });
+    // Generate a fresh 6-digit code, replacing any existing one
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    await ClaimCode.findOneAndUpdate(
+      { email: normalised },
+      { email: normalised, code },
+      { upsert: true }
+    );
 
-    console.log(`✅ ${user.email} claimed purchase from ${purchaseEmail}`);
+    await emailService.sendClaimCode(normalised, code);
+    console.log(`📧 Claim code sent to ${normalised} for user ${user.email}`);
+
+    res.json({ message: `Verification code sent to ${normalised}` });
+  } catch (err) {
+    console.error('Send claim code error:', err);
+    res.status(500).json({ message: 'Failed to send verification code. Please try again.', error: 'SEND_CODE_ERROR' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/gumroad/claim-purchase
+// Step 2: verify the code the user received, then upgrade their account.
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/claim-purchase', authenticateToken, async (req, res) => {
+  try {
+    const { purchaseEmail, code } = req.body;
+    const user = req.user;
+
+    if (!purchaseEmail || !purchaseEmail.trim()) {
+      return res.status(400).json({ message: 'Purchase email is required' });
+    }
+    if (!code || !code.trim()) {
+      return res.status(400).json({ message: 'Verification code is required' });
+    }
+
+    if (user.subscription.type !== 'free') {
+      return res.status(400).json({ message: 'Your account already has premium access' });
+    }
+
+    const normalised = purchaseEmail.toLowerCase().trim();
+
+    const claimCode = await ClaimCode.findOne({ email: normalised });
+    if (!claimCode || claimCode.code !== code.trim()) {
+      return res.status(400).json({
+        message: 'Invalid or expired verification code. Please request a new one.',
+        error: 'INVALID_CODE',
+      });
+    }
+
+    const pending = await PendingUpgrade.findOne({ email: normalised });
+    if (!pending) {
+      return res.status(404).json({
+        message: 'Purchase record no longer found. Please contact support.',
+        error: 'NOT_FOUND',
+      });
+    }
+
+    await upgradeToPremium(user, pending.licenseKey, pending.saleId);
+    await Promise.all([
+      PendingUpgrade.deleteOne({ _id: pending._id }),
+      ClaimCode.deleteOne({ email: normalised }),
+    ]);
+
+    console.log(`✅ ${user.email} claimed purchase from ${purchaseEmail} (code verified)`);
 
     res.json({
       message: 'Purchase verified! Your account has been upgraded to Premium.',

@@ -12,6 +12,8 @@ const UserProfile: React.FC = () => {
   const [licenseLoading, setLicenseLoading] = useState(false);
   const [showClaimForm, setShowClaimForm] = useState(false);
   const [claimEmail, setClaimEmail] = useState('');
+  const [claimCode, setClaimCode] = useState('');
+  const [claimStep, setClaimStep] = useState<'email' | 'code'>('email');
   const [claimLoading, setClaimLoading] = useState(false);
 
   // Auto-refresh when user returns to this tab from Gumroad
@@ -71,15 +73,41 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  const claimPurchase = async () => {
+  const sendClaimCode = async () => {
     if (!claimEmail.trim()) return;
+    setClaimLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE}/gumroad/send-claim-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ purchaseEmail: claimEmail.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setClaimStep('code');
+        showToast(`Code sent to ${claimEmail.trim()}. Check your inbox.`, 'success');
+      } else if (data.error === 'NOT_FOUND') {
+        showToast('No purchase found for that email. Check the exact email on your Gumroad receipt.', 'error');
+      } else {
+        showToast(data.message || 'Could not send code. Please try again.', 'error');
+      }
+    } catch {
+      showToast('Network error. Please try again.', 'error');
+    } finally {
+      setClaimLoading(false);
+    }
+  };
+
+  const claimPurchase = async () => {
+    if (!claimCode.trim()) return;
     setClaimLoading(true);
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(`${API_BASE}/gumroad/claim-purchase`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ purchaseEmail: claimEmail.trim() }),
+        body: JSON.stringify({ purchaseEmail: claimEmail.trim(), code: claimCode.trim() }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -87,10 +115,12 @@ const UserProfile: React.FC = () => {
         showToast('🎉 Purchase verified! You now have Premium access.', 'success');
         setShowClaimForm(false);
         setClaimEmail('');
-      } else if (data.error === 'NOT_FOUND') {
-        showToast('No purchase found for that email. Your purchase may still be processing — please wait a few minutes and try again.', 'error');
+        setClaimCode('');
+        setClaimStep('email');
+      } else if (data.error === 'INVALID_CODE') {
+        showToast('Invalid or expired code. Request a new one.', 'error');
       } else {
-        showToast(data.message || 'Could not verify purchase. Please try again.', 'error');
+        showToast(data.message || 'Could not verify. Please try again.', 'error');
       }
     } catch {
       showToast('Network error. Please try again.', 'error');
@@ -238,34 +268,69 @@ const UserProfile: React.FC = () => {
 
                 {/* Different email claim */}
                 <button
-                  onClick={() => setShowClaimForm(v => !v)}
+                  onClick={() => { setShowClaimForm(v => !v); setClaimStep('email'); setClaimCode(''); }}
                   className="w-full py-1.5 text-[11px] font-black rounded-lg text-violet-600 dark:text-violet-400 hover:underline mb-2 text-left"
                 >
                   {showClaimForm ? '▲ Hide' : '▼ Used a different email?'}
                 </button>
                 {showClaimForm && (
                   <div className="mb-3">
-                    <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-1.5">
-                      Enter the email you used on Gumroad to claim your purchase:
-                    </p>
-                    <div className="flex gap-2">
-                      <input
-                        type="email"
-                        value={claimEmail}
-                        onChange={e => setClaimEmail(e.target.value)}
-                        placeholder="Gumroad purchase email"
-                        className="flex-1 px-3 py-2 text-xs rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-violet-400"
-                        disabled={claimLoading}
-                      />
-                      <button
-                        onClick={claimPurchase}
-                        disabled={!claimEmail.trim() || claimLoading}
-                        className="px-3 py-2 text-white text-xs font-black rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                        style={{ background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' }}
-                      >
-                        {claimLoading ? '…' : 'Claim'}
-                      </button>
-                    </div>
+                    {claimStep === 'email' ? (
+                      <>
+                        <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-1.5">
+                          Enter the email you used on Gumroad. We'll send a verification code to confirm you own it.
+                        </p>
+                        <div className="flex gap-2">
+                          <input
+                            type="email"
+                            value={claimEmail}
+                            onChange={e => setClaimEmail(e.target.value)}
+                            placeholder="Gumroad purchase email"
+                            className="flex-1 px-3 py-2 text-xs rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-violet-400"
+                            disabled={claimLoading}
+                          />
+                          <button
+                            onClick={sendClaimCode}
+                            disabled={!claimEmail.trim() || claimLoading}
+                            className="px-3 py-2 text-white text-xs font-black rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                            style={{ background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' }}
+                          >
+                            {claimLoading ? '…' : 'Send Code'}
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-1.5">
+                          Enter the 6-digit code sent to <strong className="text-gray-700 dark:text-gray-300">{claimEmail}</strong>:
+                        </p>
+                        <div className="flex gap-2 mb-1.5">
+                          <input
+                            type="text"
+                            value={claimCode}
+                            onChange={e => setClaimCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                            placeholder="123456"
+                            className="flex-1 px-3 py-2 text-xs rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono tracking-widest focus:outline-none focus:border-violet-400"
+                            disabled={claimLoading}
+                            maxLength={6}
+                          />
+                          <button
+                            onClick={claimPurchase}
+                            disabled={claimCode.length !== 6 || claimLoading}
+                            className="px-3 py-2 text-white text-xs font-black rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                            style={{ background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' }}
+                          >
+                            {claimLoading ? '…' : 'Verify'}
+                          </button>
+                        </div>
+                        <button
+                          onClick={() => { setClaimStep('email'); setClaimCode(''); }}
+                          className="text-[10px] text-violet-500 dark:text-violet-400 hover:underline"
+                        >
+                          ← Change email / resend code
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
 
