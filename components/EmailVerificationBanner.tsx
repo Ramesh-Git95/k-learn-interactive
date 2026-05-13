@@ -46,68 +46,46 @@ const EmailVerificationBanner: React.FC = () => {
   };
 
   return (
-    <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4 mb-4">
-      <div className="flex items-start">
-        <div className="flex-shrink-0">
-          <span className="text-lg">📧</span>
+    <div className="mb-4 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 py-3">
+        {/* Icon */}
+        <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center flex-shrink-0">
+          <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
         </div>
-        <div className="ml-3 flex-1">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                📧 Please verify your email address
-              </h3>
-              <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
-                We sent a verification email to <strong>{user.email}</strong>. 
-                Please check your email and click the verification link to access all features.
-              </p>
-              
-              {message && (
-                <p className="mt-2 text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                  {message}
-                </p>
-              )}
-              
-              <div className="mt-3 flex space-x-3">
-                <button
-                  onClick={resendVerification}
-                  disabled={isResending}
-                  className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-yellow-800 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-800/30 hover:bg-yellow-200 dark:hover:bg-yellow-700/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {isResending ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-yellow-800 border-t-transparent mr-2"></div>
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Icon icon="refresh" className="h-4 w-4 mr-1" />
-                      Resend Email
-                    </>
-                  )}
-                </button>
-                
-                <button
-                  onClick={() => setIsDismissed(true)}
-                  className="inline-flex items-center px-3 py-1 text-sm font-medium text-yellow-700 dark:text-yellow-300 hover:text-yellow-900 dark:hover:text-yellow-100 transition-colors"
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-            
-            <div className="ml-auto pl-3">
-              <div className="-mx-1.5 -my-1.5">
-                <button
-                  onClick={() => setIsDismissed(true)}
-                  className="inline-flex rounded-md p-1.5 text-yellow-500 hover:bg-yellow-100 dark:hover:bg-yellow-800/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-yellow-50 focus:ring-yellow-600 transition-colors"
-                >
-                  <span className="sr-only">Dismiss</span>
-                  <Icon icon="x" className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-          </div>
+
+        {/* Text */}
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-black text-amber-800 dark:text-amber-200 leading-tight">Verify your email</p>
+          <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-tight mt-0.5">
+            Check <strong>{user.email}</strong> for your verification link
+          </p>
+          {message && (
+            <p className="text-[11px] font-bold text-amber-800 dark:text-amber-200 mt-1">{message}</p>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={resendVerification}
+            disabled={isResending}
+            className="inline-flex items-center gap-1.5 text-[11px] font-black px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            {isResending ? (
+              <><div className="w-3 h-3 rounded-full border-2 border-white border-t-transparent animate-spin" />Sending…</>
+            ) : (
+              <><Icon icon="refresh" className="w-3 h-3" />Resend</>
+            )}
+          </button>
+          <button
+            onClick={() => setIsDismissed(true)}
+            className="w-7 h-7 flex items-center justify-center rounded-xl text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-800/40 transition-colors"
+            aria-label="Dismiss"
+          >
+            <Icon icon="x" className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
     </div>
