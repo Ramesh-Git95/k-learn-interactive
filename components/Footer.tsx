@@ -113,7 +113,11 @@ const Footer: React.FC = () => {
                 {company.map(({ name, page }) => (
                   <li key={name}>
                     <button
-                      onClick={() => setActivePage(page)}
+                      onClick={() =>
+                        page === 'terms' || page === 'privacy'
+                          ? window.open(`/${page}`, '_blank')
+                          : setActivePage(page)
+                      }
                       className="text-xs text-gray-600 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors duration-200 text-left"
                     >
                       {name}
