@@ -6,11 +6,23 @@ interface PronunciationButtonProps {
   korean: string;
   romanization?: string;
   size?: 'sm' | 'md';
+  /** Pass 'vocab' or 'kdrama' on the first button of each page to enable the hint system */
+  hintKey?: 'vocab' | 'kdrama';
 }
 
-// Module-level flag: only the FIRST button on the page claims the hint slot
-let hintClaimed = false;
+// ── Hint system constants ─────────────────────────────────────────────────────
+const INITIAL_DELAY_MS  = 3_000;          // show hint 3 s after page load
+const RESHOW_DELAY_MS   = 3.5 * 60_000;  // re-show every 3.5 min if not used
+const AUTO_HIDE_MS      = 7_000;          // auto-hide after 7 s
 
+const usedKey   = (k: string) => `pronunciation-used-${k}`;
+const hasUsed   = (k: string) => !!localStorage.getItem(usedKey(k));
+const markUsed  = (k: string) => localStorage.setItem(usedKey(k), '1');
+
+// One hint owner per hintKey at a time (module-level, reset on unmount)
+const hintOwners: Record<string, boolean> = {};
+
+// ── Sub-components ────────────────────────────────────────────────────────────
 const MicIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
@@ -30,73 +42,91 @@ const WaveBar: React.FC<{ delay: string }> = ({ delay }) => (
 
 const FREE_LIMIT = 10;
 
+// ── Main component ────────────────────────────────────────────────────────────
 const PronunciationButton: React.FC<PronunciationButtonProps> = ({
   korean,
   romanization,
   size = 'sm',
+  hintKey,
 }) => {
   const { hasPremiumAccess, isAuthenticated } = useAuth();
   const isPremium = hasPremiumAccess();
   const { state, result, isSupported, start, reset } = useSpeechRecognition();
 
-  // Hint tooltip state — only the first button on the page shows it
   const [showHint, setShowHint] = useState(false);
-  const isHintOwner = useRef(false);
-  const hintTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const isOwner    = useRef(false);
+  const timers     = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = []; };
+
+  // Schedule a single show → auto-hide cycle, then re-schedule
+  const scheduleHint = (delay: number) => {
+    clearTimers();
+    if (!isOwner.current) return;
+
+    const show = setTimeout(() => {
+      setShowHint(true);
+      // Auto-hide after AUTO_HIDE_MS, then re-schedule
+      const hide = setTimeout(() => {
+        setShowHint(false);
+        scheduleHint(RESHOW_DELAY_MS);   // user hasn't tried yet → show again later
+      }, AUTO_HIDE_MS);
+      timers.current.push(hide);
+    }, delay);
+    timers.current.push(show);
+  };
 
   useEffect(() => {
-    if (!isSupported) return;
-    // Skip if another button already claimed the hint, or user has already seen it this session
-    if (hintClaimed) return;
-    if (sessionStorage.getItem('pronunciation-hint-shown')) return;
+    if (!isSupported || !hintKey) return;
+    if (hasUsed(hintKey)) return;        // user already tried it on this page
+    if (hintOwners[hintKey]) return;     // another button on this page already owns the hint
 
-    hintClaimed = true;
-    isHintOwner.current = true;
+    hintOwners[hintKey] = true;
+    isOwner.current = true;
 
-    // Show hint after 3 s
-    const showTimer = setTimeout(() => {
-      setShowHint(true);
-    }, 3000);
+    scheduleHint(INITIAL_DELAY_MS);
 
-    // Auto-dismiss after 7 s
-    const hideTimer = setTimeout(() => {
-      setShowHint(false);
-    }, 10000);
+    return () => {
+      clearTimers();
+      if (isOwner.current) hintOwners[hintKey] = false;
+    };
+  }, [isSupported, hintKey]);
 
-    hintTimers.current = [showTimer, hideTimer];
-    return () => hintTimers.current.forEach(clearTimeout);
-  }, [isSupported]);
-
+  // Dismiss without marking used — will re-appear after RESHOW_DELAY_MS
   const dismissHint = () => {
-    if (!isHintOwner.current) return;
-    hintTimers.current.forEach(clearTimeout);
+    clearTimers();
     setShowHint(false);
-    sessionStorage.setItem('pronunciation-hint-shown', '1');
+    if (isOwner.current && hintKey) {
+      scheduleHint(RESHOW_DELAY_MS);
+    }
+  };
+
+  // User actually clicked Pronounce — mark as used, stop forever
+  const markHintUsed = () => {
+    clearTimers();
+    setShowHint(false);
+    if (hintKey) markUsed(hintKey);
   };
 
   if (!isSupported) return null;
 
-  const canTry = !isAuthenticated || hasAttemptsRemaining(isPremium);
-  const remaining = attemptsLeft(isPremium);
+  const canTry      = !isAuthenticated || hasAttemptsRemaining(isPremium);
+  const remaining   = attemptsLeft(isPremium);
+  const isListening = state === 'listening';
+  const isDone      = state === 'done';
+  const isSm        = size === 'sm';
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    dismissHint();
-
     if (state === 'done')      { reset(); return; }
     if (state === 'listening') { reset(); return; }
-
     if (!canTry) {
       window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' }));
       return;
     }
-
+    markHintUsed();   // ← user actually used it, stop hinting on this page
     start(korean, romanization);
   };
-
-  const isListening = state === 'listening';
-  const isDone      = state === 'done';
-  const isSm        = size === 'sm';
 
   return (
     <>
@@ -110,12 +140,12 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
           50%       { transform: translateY(-4px); }
         }
         @keyframes hintPulseRing {
-          0%   { transform: scale(1);    opacity: 0.7; }
-          100% { transform: scale(1.55); opacity: 0;   }
+          0%   { transform: scale(1);    opacity: 0.8; }
+          100% { transform: scale(1.6); opacity: 0;   }
         }
         @keyframes hintFadeIn {
-          from { opacity: 0; transform: translateY(6px); }
-          to   { opacity: 1; transform: translateY(0);   }
+          from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0);   }
         }
       `}</style>
 
@@ -128,28 +158,29 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
             style={{
               bottom: 'calc(100% + 10px)',
               left: '50%',
-              transform: 'translateX(-50%)',
               animation: 'hintFadeIn 0.3s ease forwards',
               whiteSpace: 'nowrap',
             }}
           >
-            {/* Bubble */}
             <div
               className="relative flex items-center gap-2 px-3 py-2 rounded-xl shadow-xl text-white text-xs font-bold"
               style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
             >
-              <span style={{ animation: 'hintBounce 1s ease-in-out infinite' }}>🎤</span>
+              <span style={{ display: 'inline-block', animation: 'hintBounce 1s ease-in-out infinite' }}>
+                🎤
+              </span>
               <span>Try pronouncing!</span>
               <button
                 onClick={e => { e.stopPropagation(); dismissHint(); }}
-                className="ml-1 opacity-70 hover:opacity-100 text-white font-black leading-none"
+                className="ml-1 opacity-70 hover:opacity-100 font-black leading-none"
               >
                 ✕
               </button>
               {/* Arrow pointing down */}
               <span
-                className="absolute left-1/2 -bottom-1.5"
+                className="absolute left-1/2"
                 style={{
+                  bottom: '-7px',
                   transform: 'translateX(-50%)',
                   width: 0, height: 0,
                   borderLeft: '6px solid transparent',
@@ -161,23 +192,21 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
           </div>
         )}
 
-        {/* ── Button wrapper with pulse ring ── */}
+        {/* ── Button with optional pulse ring ── */}
         <div className="relative">
-          {/* Pulsing ring — only while hint is visible */}
           {showHint && (
             <span
-              className="absolute inset-0 rounded-xl"
+              className="absolute inset-0 rounded-xl pointer-events-none"
               style={{
                 border: '2px solid #EC4899',
                 animation: 'hintPulseRing 1.2s ease-out infinite',
               }}
             />
           )}
-
           <button
             onClick={handleClick}
             title={
-              !canTry     ? `Daily limit reached (${FREE_LIMIT} attempts). Upgrade for unlimited.`
+              !canTry      ? `Daily limit reached (${FREE_LIMIT} attempts). Upgrade for unlimited.`
               : isListening ? 'Tap to stop'
               : isDone      ? 'Tap to try again'
               :               'Practice pronunciation'

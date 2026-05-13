@@ -233,7 +233,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
                   return (
                     <>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                        {visibleItems.map((item) => (
+                        {visibleItems.map((item, idx) => (
                           <VocabCard
                             key={item.korean}
                             item={item}
@@ -242,6 +242,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
                             onStudy={() => markItemWithLimit(item)}
                             isStudied={!!progress[`vocab_item_${item.korean}`]}
                             disabled={limitReached}
+                            showPronunciationHint={idx === 0}
                           />
                         ))}
                       </div>

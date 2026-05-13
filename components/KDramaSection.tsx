@@ -269,7 +269,7 @@ const KDramaSection: React.FC = () => {
 
           {/* Word grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredWords.map(word => {
+            {filteredWords.map((word, idx) => {
               const cardKey = `${selectedDrama.id}-${word.korean}`;
               const isAdded = addedCards.has(cardKey);
               return (
@@ -315,7 +315,7 @@ const KDramaSection: React.FC = () => {
                       <span>Hear</span>
                     </button>
                     <div className="flex-1">
-                      <PronunciationButton korean={word.korean} romanization={word.romanization} size="sm" />
+                      <PronunciationButton korean={word.korean} romanization={word.romanization} size="sm" hintKey={idx === 0 ? 'kdrama' : undefined} />
                     </div>
                     <button
                       onClick={() => handleAddToSRS(word, selectedDrama)}

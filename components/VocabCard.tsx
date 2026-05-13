@@ -11,9 +11,10 @@ interface VocabCardProps {
   onStudy?: () => boolean | void;
   isStudied?: boolean;
   disabled?: boolean;
+  showPronunciationHint?: boolean;
 }
 
-const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmark, onStudy, isStudied = false, disabled = false }) => {
+const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmark, onStudy, isStudied = false, disabled = false, showPronunciationHint = false }) => {
   const { isAuthenticated } = useAuth();
   const [isFlipped, setIsFlipped] = useState(false);
   const [showExamples, setShowExamples] = useState(false);
@@ -156,7 +157,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
         >
           ＋ SRS
         </button>
-        <PronunciationButton korean={item.korean} romanization={item.romanization} size="sm" />
+        <PronunciationButton korean={item.korean} romanization={item.romanization} size="sm" hintKey={showPronunciationHint ? 'vocab' : undefined} />
       </div>
 
       {/* Examples Modal */}
