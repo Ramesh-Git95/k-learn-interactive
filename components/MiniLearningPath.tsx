@@ -54,19 +54,15 @@ const STEPS: Step[] = [
   { id: 'honorifics',   title: 'Honorifics',  icon: '🙇', shortTitle: 'O', group: 'Tools'      },
 ];
 
-// Quiz uses real item-completion tracking; all other sections use visit counts.
-// VISITS_NEEDED = number of visits to a section to count as "done" (≥ 60% threshold).
-const QUIZ_SECTION: Section = 'quiz';
+// All sections use visit-based completion. VISITS_NEEDED visits = "done".
 const CORE: Section[] = ['hangul', 'vocabulary', 'grammar', 'phrases', 'culture', 'quiz'];
-const VISITS_NEEDED = 3; // 3 visits → 100% → "completed"
+const VISITS_NEEDED = 3;
 
 const GROUPS = ['Foundation', 'Practice', 'Immersive', 'Tools'];
 
 const MiniLearningPath: React.FC<MiniLearningPathProps> = ({
   currentSection,
   setActiveSection,
-  getSectionTotalItems,
-  getSectionCompletedItems,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [visits, setVisits] = useState<Record<string, number>>(loadVisits);
@@ -76,32 +72,22 @@ const MiniLearningPath: React.FC<MiniLearningPathProps> = ({
     setVisits(recordVisit(currentSection));
   }, [currentSection]);
 
+  const isDone = (id: Section) => (visits[id] || 0) >= VISITS_NEEDED;
+
   const getStatus = (id: Section): 'current' | 'completed' | 'available' => {
     if (id === currentSection) return 'current';
-    if (id === QUIZ_SECTION) {
-      const total     = getSectionTotalItems(id);
-      const completed = getSectionCompletedItems(id);
-      if (total > 0 && completed / total >= 0.6) return 'completed';
-    } else {
-      if ((visits[id] || 0) >= VISITS_NEEDED) return 'completed';
-    }
+    if (isDone(id)) return 'completed';
     return 'available';
   };
 
-  // % shown under the icon in the expanded view.
+  // % shown under the icon in the expanded view (core sections only).
   const getSectionPct = (id: Section): number | null => {
-    if (id === QUIZ_SECTION) {
-      const total     = getSectionTotalItems(id);
-      const completed = getSectionCompletedItems(id);
-      return total > 0 ? Math.round((completed / total) * 100) : 0;
-    }
-    if (CORE.includes(id)) {
-      return Math.min(100, Math.round(((visits[id] || 0) / VISITS_NEEDED) * 100));
-    }
-    return null; // non-core sections show no %
+    if (!CORE.includes(id)) return null;
+    return Math.min(100, Math.round(((visits[id] || 0) / VISITS_NEEDED) * 100));
   };
 
-  const completedCore = CORE.filter(id => getStatus(id) === 'completed').length;
+  // Count current section as done too (so 6/6 is reachable while on a section).
+  const completedCore = CORE.filter(id => isDone(id)).length;
   const corePct = (completedCore / CORE.length) * 100;
   const coreSteps = STEPS.filter(s => CORE.includes(s.id));
 
