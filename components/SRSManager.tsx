@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import useSRS from '../hooks/useSRS';
+import { useSRSContext } from '../contexts/SRSContext';
 import Tooltip from './Tooltip';
 import { vocabulary, commonPhrases } from '../data/koreanData';
 
@@ -132,7 +132,7 @@ function DeckCard({ deck, dueCount, deckStats, onStartStudy, onAddCard, onEditDe
 const VOCAB_CATEGORIES = vocabulary.map(c => c.name);
 
 export default function SRSManager({ onStartStudy }: SRSManagerProps) {
-  const { decks, stats, actions } = useSRS();
+  const { decks, stats, actions } = useSRSContext();
   const [showCreateDeck, setShowCreateDeck] = useState(false);
   const [newDeckName, setNewDeckName] = useState('');
   const [newDeckDescription, setNewDeckDescription] = useState('');

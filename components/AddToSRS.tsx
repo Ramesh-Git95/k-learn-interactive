@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import useSRS from '../hooks/useSRS';
+import { useSRSContext } from '../contexts/SRSContext';
 import Icon from './Icon';
 import { useToastContext } from '../contexts/ToastContext';
 
@@ -16,7 +16,7 @@ interface AddToSRSProps {
 }
 
 export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps) {
-  const { decks, actions } = useSRS();
+  const { decks, actions } = useSRSContext();
   const { showToast } = useToastContext();
   const [selectedDeckId, setSelectedDeckId] = useState<string>('');
   const [showCreateDeck, setShowCreateDeck] = useState(false);

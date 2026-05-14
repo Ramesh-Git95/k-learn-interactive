@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SRSCard, SpacedRepetitionSystem } from '../services/spacedRepetition';
-import useSRS from '../hooks/useSRS';
+import { useSRSContext } from '../contexts/SRSContext';
 import Tooltip from './Tooltip';
 
 export type ReviewResult = 'again' | 'hard' | 'good' | 'easy';
@@ -38,7 +38,7 @@ function CenteredCard({ children }: { children: React.ReactNode }) {
 }
 
 export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudySessionProps) {
-  const { decks, studySession, actions } = useSRS();
+  const { decks, studySession, actions } = useSRSContext();
   const deck = decks.find(d => d.id === deckId);
   const [showAnswer, setShowAnswer] = useState(false);
   const [sessionStats, setSessionStats] = useState({ reviewed: 0, correct: 0, total: 0 });

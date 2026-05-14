@@ -1,5 +1,5 @@
 import React from 'react';
-import useSRS from '../hooks/useSRS';
+import { useSRSContext } from '../contexts/SRSContext';
 
 interface SRSDashboardProps {
   onStartStudy: (deckId: string) => void;
@@ -7,7 +7,7 @@ interface SRSDashboardProps {
 }
 
 export default function SRSDashboard({ onStartStudy, onManageDecks }: SRSDashboardProps) {
-  const { decks, stats } = useSRS();
+  const { decks, stats } = useSRSContext();
 
   const decksWithDueCards = decks.map(deck => {
     const now = new Date();

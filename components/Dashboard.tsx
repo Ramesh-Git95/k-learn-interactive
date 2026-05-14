@@ -5,7 +5,7 @@ import { useProgress } from '../contexts/ProgressContext';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
 import { useXPStreak } from '../hooks/useXPStreak';
-import useSRS from '../hooks/useSRS';
+import { useSRSContext } from '../contexts/SRSContext';
 import SRSDashboard from './SRSDashboard';
 import LearningPath from './LearningPath';
 import OnboardingWizard from './OnboardingWizard';
@@ -70,7 +70,7 @@ export default function Dashboard({
   const { syncLocalData, isSyncing } = useProgress();
   const { subscriptionTier }         = useFeatureAccess();
   const { openUpgradeModal }         = useUpgradeModal();
-  const { stats: srsStats }          = useSRS();
+  const { stats: srsStats }          = useSRSContext();
   const xp                           = useXPStreak();
 
   const [showBookmarkFC, setShowBookmarkFC]   = useState(false);

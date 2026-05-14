@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { vocabulary, commonPhrases } from '../data/koreanData';
-import useSRS from '../hooks/useSRS';
+import { useSRSContext } from '../contexts/SRSContext';
 
 interface OnboardingWizardProps {
   onComplete: () => void;
@@ -44,7 +44,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
   const [goal, setGoal]         = useState('');
   const [level, setLevel]       = useState('');
   const [creating, setCreating] = useState(false);
-  const { actions } = useSRS();
+  const { actions } = useSRSContext();
 
   const handleFinish = async () => {
     setCreating(true);

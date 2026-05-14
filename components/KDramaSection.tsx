@@ -4,7 +4,7 @@ import type { Drama, DramaWord } from '../data/kdramaData';
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthModal } from '../contexts/AuthModalContext';
 import { useToastContext } from '../contexts/ToastContext';
-import useSRS from '../hooks/useSRS';
+import { useSRSContext } from '../contexts/SRSContext';
 import PronunciationButton from './PronunciationButton';
 
 const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
@@ -22,7 +22,7 @@ const KDramaSection: React.FC = () => {
   const { hasPremiumAccess, isAuthenticated } = useAuth();
   const { openRegister } = useAuthModal();
   const { showToast } = useToastContext();
-  const { decks, actions: srsActions } = useSRS();
+  const { decks, actions: srsActions } = useSRSContext();
   const isPremium = hasPremiumAccess();
 
   const [selectedDrama, setSelectedDrama] = useState<Drama | null>(null);

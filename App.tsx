@@ -29,7 +29,7 @@ import OnboardingWizard from './components/OnboardingWizard';
 import Footer from './components/Footer';
 import CookieConsent from './components/CookieConsent';
 import useLocalStorage from './hooks/useLocalStorage';
-import useSRS from './hooks/useSRS';
+import { SRSProvider, useSRSContext } from './contexts/SRSContext';
 import { LS_THEME_KEY } from './constants';
 import { UpgradeModalProvider } from './contexts/UpgradeModalContext';
 import { vocabulary, grammarPatterns, commonPhrases, cultureTips, hangulCharacters, koreanRegions, dailyLifeTopics, modernKoreaTopics } from './data/koreanData';
@@ -54,7 +54,7 @@ import KDramaSection from './components/KDramaSection';
 const AppContent: React.FC = () => {
   const { user, isLoading: authLoading, hasPremiumAccess, isAuthenticated, refreshUser } = useAuth();
   const { showToast } = useToastContext();
-  const { actions: srsActions } = useSRS();
+  const { actions: srsActions } = useSRSContext();
   const [theme, setTheme] = useLocalStorage<'dark' | 'light'>(LS_THEME_KEY, 'light');
   const [showOnboarding, setShowOnboarding] = useState(false);
   // Initialize activeSection as null for landing page, dashboard for authenticated users
@@ -635,7 +635,9 @@ const App: React.FC = () => {
     <AuthProvider>
       <AuthModalProvider>
         <ProgressProvider>
-          <AppContent />
+          <SRSProvider>
+            <AppContent />
+          </SRSProvider>
         </ProgressProvider>
       </AuthModalProvider>
     </AuthProvider>
