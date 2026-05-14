@@ -61,9 +61,10 @@ interface WordChipProps {
 
 const WordChip: React.FC<WordChipProps> = ({ token, isSelected, hasDefinition, onClick }) => {
   const punct = token !== cleanToken(token);
+  const handleClick = (e: React.MouseEvent) => { e.stopPropagation(); onClick(); };
   return (
     <span
-      onClick={onClick}
+      onClick={handleClick}
       className={`inline cursor-pointer rounded transition-all duration-150 px-0.5
         ${hasDefinition
           ? isSelected
@@ -241,7 +242,7 @@ const PassageReader: React.FC<ReaderProps> = ({ passage, isPremium, isAuthentica
                     token={token}
                     isSelected={isSelected}
                     hasDefinition={hasDef}
-                    onClick={(e: any) => { e.stopPropagation(); handleTokenClick(token); }}
+                    onClick={() => handleTokenClick(token)}
                   />
                 );
               })}

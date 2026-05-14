@@ -616,14 +616,9 @@ const AppContent: React.FC = () => {
         {renderSection()}
       </div>
       
-      {/* Floating Progress - always visible but minimal */}
+      {/* Floating Progress - XP & streak ring */}
       {activeSection && !['dashboard', 'bookmarks'].includes(activeSection) && (
-        <FloatingProgress
-          activeSection={activeSection}
-          progress={progress}
-          getSectionTotalItems={getSectionTotalItems}
-          getSectionCompletedItems={getSectionCompletedItems}
-        />
+        <FloatingProgress activeSection={activeSection} />
       )}
     </main>
     <Footer />
