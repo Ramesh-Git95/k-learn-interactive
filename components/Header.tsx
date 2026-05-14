@@ -33,7 +33,8 @@ const megaMenuGroups = [
     label: 'CULTURE',
     items: [
       ...SECTIONS.filter(s => ['culture', 'culture-cards'].includes(s.id)),
-      { ...SECTIONS.find(s => s.id === 'kdrama')!, _isNew: true },
+      { ...SECTIONS.find(s => s.id === 'kdrama')!, _isNew: false },
+      { ...SECTIONS.find(s => s.id === 'kpop')!,   _isNew: true  },
     ],
   },
 ] as { label: string; items: (typeof SECTIONS[number] & { _isNew?: boolean })[] }[];

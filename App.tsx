@@ -42,6 +42,7 @@ import HonorificEngine from './components/HonorificEngine';
 import CultureCards from './components/CultureCards';
 import TypingDojo from './components/TypingDojo';
 import KDramaSection from './components/KDramaSection';
+import KPopSection from './components/KPopSection';
 
 // Load cookie testing utilities in development
 // Commented out temporarily - these files are optional for production
@@ -471,6 +472,8 @@ const AppContent: React.FC = () => {
         return <TypingDojo />;
       case 'kdrama':
         return <KDramaSection />;
+      case 'kpop':
+        return <KPopSection />;
       case 'bookmarks':
         return <BookmarkList bookmarks={bookmarks} toggleBookmark={toggleBookmark} />;
       case 'srs':
