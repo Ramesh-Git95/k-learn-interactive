@@ -373,8 +373,6 @@ const useSRS = (): UseSRSReturn => {
 
   // Create a new deck
   const createDeck = useCallback((name: string, description: string): string => {
-    console.log('🆕 Creating new deck:', { name, description });
-    
     const newDeck: SRSDeck = {
       id: `deck_${Date.now()}`,
       name,
@@ -398,15 +396,13 @@ const useSRS = (): UseSRSReturn => {
         accuracy: 0,
       },
     };
-    
-    console.log('🆕 New deck created:', newDeck);
-    
-    // Directly update both React state and localStorage
+
     const updatedDecks = [...decks, newDeck];
     setDecks(updatedDecks);
+    // Write synchronously so addCardToDeck can read the new deck immediately
+    localStorage.setItem('srs-decks', JSON.stringify(updatedDecks));
     updateRawDecks(updatedDecks);
-    
-    console.log('✅ Deck creation completed');
+
     return newDeck.id;
   }, [decks, updateRawDecks]);
 
@@ -417,31 +413,22 @@ const useSRS = (): UseSRSReturn => {
 
   // Add card to deck
   const addCardToDeck = useCallback((deckId: string, content: SRSCard['content']) => {
-    console.log('🔧 addCardToDeck called:', { deckId, content });
-    console.log('📚 Current decks before addition:', decks.map(d => ({ id: d.id, name: d.name, cardCount: d.cards.length })));
-    
-    const cardId = `card_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const cardId = `card_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     const newCard = srs.createCard(cardId, content);
-    
-    console.log('🃏 New card created:', newCard);
-    
-    // Directly update both React state and localStorage
-    const updatedDecks = decks.map(deck => 
-      deck.id === deckId 
+
+    // Read fresh from localStorage so this works even when called immediately
+    // after createDeck (before React has re-rendered with the new deck in state)
+    const freshDecks = sanitizeSRSData(JSON.parse(localStorage.getItem('srs-decks') || '[]'));
+    const updatedDecks = freshDecks.map(deck =>
+      deck.id === deckId
         ? { ...deck, cards: [...deck.cards, newCard] }
         : deck
     );
-    
-    console.log('📚 Updated decks after addition:', updatedDecks.map(d => ({ id: d.id, name: d.name, cardCount: d.cards.length })));
-    
-    // Update React state
+
     setDecks(updatedDecks);
-    
-    // Update localStorage directly
+    localStorage.setItem('srs-decks', JSON.stringify(updatedDecks));
     updateRawDecks(updatedDecks);
-    
-    console.log('✅ addCardToDeck operation completed');
-  }, [srs, decks, updateRawDecks]);
+  }, [srs, updateRawDecks]);
 
   // Start study session
   const startStudySession = useCallback((deckId: string, maxCards: number = 20) => {
