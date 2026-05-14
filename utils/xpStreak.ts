@@ -16,7 +16,8 @@ export interface StreakData {
 }
 
 // Level thresholds — XP needed to START each level
-const THRESHOLDS = [0, 100, 250, 500, 1000, 2000, 4000, 8000];
+// At ~80-100 XP/day of regular study: Lv2 ≈3 days, Lv5 ≈1 month, Lv8 ≈6 months, Lv10 ≈18 months
+const THRESHOLDS = [0, 250, 600, 1200, 2500, 5000, 10000, 18000, 30000, 50000];
 
 export function todayISO(): string {
   const d = new Date();

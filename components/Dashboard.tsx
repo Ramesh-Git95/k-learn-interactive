@@ -54,7 +54,7 @@ const MOTIVATIONAL = [
   { ko: '포기하지 마요!',  en: "Don't give up!" },
 ];
 
-const LEVEL_NAMES = ['', 'Beginner', 'Elementary', 'Intermediate', 'Upper-Int.', 'Advanced', 'Proficient', 'Master'];
+const LEVEL_NAMES = ['', 'Beginner', 'Elementary', 'Pre-Intermediate', 'Intermediate', 'Upper-Int.', 'Advanced', 'Proficient', 'Expert', 'Master', 'Legend'];
 
 const getDailyWord = () => {
   const all = vocabulary.flatMap(cat => cat.items.map(item => ({ ...item, category: cat.name })));

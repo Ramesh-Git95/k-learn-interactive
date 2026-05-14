@@ -3,6 +3,7 @@ import ScriptedConversation from './ScriptedConversation';
 import ConversationBot from './ConversationBot';
 import { useAuth } from '../contexts/AuthContext';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
+import { earnXP, markStudyToday } from '../utils/xpStreak';
 
 const GUMROAD_URL = 'https://gumroad.com/l/klearn-lifetime';
 
@@ -35,6 +36,8 @@ const ConversationSection: React.FC = () => {
 
   const handleMessageSent = useCallback(() => {
     setUsedToday(incrementUsage());
+    earnXP(2);
+    markStudyToday();
   }, []);
 
   const remaining = Math.max(0, dailyLimit - usedToday);

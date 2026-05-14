@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { progressService } from '../services/progressService';
 import { useToastContext } from './ToastContext';
-import { earnXP, markStudyToday } from '../utils/xpStreak';
+import { markStudyToday } from '../utils/xpStreak';
 
 interface ProgressContextType {
   progress: { [key: string]: boolean };
@@ -129,9 +129,8 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const updateProgress = async (key: string, value: boolean) => {
     console.log(`🎯 Frontend: Updating ${key} = ${value}`);
 
-    // Award XP and update streak on first completion of any item
+    // Mark streak only — XP is awarded by each section directly with appropriate amounts
     if (value) {
-      earnXP(10);
       markStudyToday();
     }
 

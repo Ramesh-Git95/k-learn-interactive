@@ -6,6 +6,7 @@ import { useAuthModal } from '../contexts/AuthModalContext';
 import { useSRSContext } from '../contexts/SRSContext';
 import { useToastContext } from '../contexts/ToastContext';
 import PronunciationButton from './PronunciationButton';
+import { earnXP, markStudyToday } from '../utils/xpStreak';
 
 const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
 
@@ -213,6 +214,8 @@ function SongView({ song, artist, isPremium, isAuthenticated, onBack }: {
     });
     setAddedWords(prev => new Set(prev).add(word.korean));
     showToast(`Added "${word.korean}" to K-Pop Vocabulary!`, 'success');
+    earnXP(3);
+    markStudyToday();
   };
 
   return (

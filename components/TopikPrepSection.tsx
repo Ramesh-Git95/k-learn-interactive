@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { PremiumLockBanner } from './PremiumLock';
+import { earnXP, markStudyToday } from '../utils/xpStreak';
 
 // Free users get 3 sample questions: TOPIK I vocab[0], TOPIK I grammar[0], TOPIK II vocab[0]
 const FREE_QUESTION_LIMIT = 3;
@@ -321,6 +322,8 @@ const TopikPrepSection: React.FC = () => {
     setChosen(idx);
     setScore(s => ({ correct: s.correct + (idx === q.answer ? 1 : 0), total: s.total + 1 }));
     setTotalAnswered(n => n + 1);
+    if (idx === q.answer) earnXP(5);
+    markStudyToday();
   };
 
   const advance = () => {

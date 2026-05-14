@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useAuthModal } from '../contexts/AuthModalContext';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { PremiumLockBanner } from './PremiumLock';
+import { earnXP, markStudyToday } from '../utils/xpStreak';
 
 const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
 const OPTION_LABELS = ['①', '②', '③', '④'];
@@ -270,6 +271,10 @@ const TopikAssessment: React.FC = () => {
   const advance = () => {
     setChosen(null);
     if (qIdx + 1 >= totalQs) {
+      // Award XP on completion: 4 per correct answer, capped at 60 (premium) / 30 (free)
+      const correct = activeQs.filter((q, i) => answers[i] === q.answer).length;
+      earnXP(Math.min(correct * 4, isPremium ? 60 : 30));
+      markStudyToday();
       setScreen('results');
     } else {
       setQIdx(i => i + 1);

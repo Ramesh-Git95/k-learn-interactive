@@ -6,6 +6,7 @@ import { useAuthModal } from '../contexts/AuthModalContext';
 import { useToastContext } from '../contexts/ToastContext';
 import { useSRSContext } from '../contexts/SRSContext';
 import PronunciationButton from './PronunciationButton';
+import { earnXP, markStudyToday } from '../utils/xpStreak';
 
 const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
 
@@ -53,6 +54,8 @@ const KDramaSection: React.FC = () => {
 
     setAddedCards(prev => new Set(prev).add(cardKey));
     showToast(`Added "${word.korean}" to SRS`, 'success');
+    earnXP(3);
+    markStudyToday();
   };
 
   // Not logged in

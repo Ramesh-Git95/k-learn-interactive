@@ -8,6 +8,7 @@ import { useDailyActivity } from '../hooks/useDailyActivity';
 const GUMROAD_URL = 'https://gumroad.com/l/klearn-lifetime';
 import { useAuth } from '../contexts/AuthContext';
 import { useProgress } from '../contexts/ProgressContext';
+import { earnXP, markStudyToday } from '../utils/xpStreak';
 
 type QuizMode = 'korean_to_english' | 'english_to_korean' | 'romanization_to_korean' | 'mixed';
 
@@ -274,6 +275,10 @@ const QuizComponent: React.FC = () => {
     const isPerfect = score === questions.length;
 
     if (subscriptionTier === 'free') trackActivity('quiz', 1);
+
+    // +5 XP per correct answer, capped at 30 per session so spamming doesn't inflate level
+    earnXP(Math.min(score * 5, 30));
+    markStudyToday();
 
     setQuizStats(prev => ({
       totalQuizzes: prev.totalQuizzes + 1,
