@@ -600,9 +600,9 @@ const AppContent: React.FC = () => {
             {/* Email Verification Banner */}
             <EmailVerificationBanner />
             
-            {/* Mini Learning Path - show on main sections (much more compact) */}
-            {['hangul', 'vocabulary', 'grammar', 'phrases', 'culture', 'quiz'].includes(activeSection) && (
-              <MiniLearningPath 
+            {/* Mini Learning Path - show on all content sections */}
+            {!['dashboard', 'bookmarks', 'profile', 'cookie-demo'].includes(activeSection) && (
+              <MiniLearningPath
                 currentSection={activeSection}
                 setActiveSection={setActiveSection}
                 progress={progress}
