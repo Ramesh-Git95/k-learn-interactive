@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useSpeechRecognition, hasAttemptsRemaining, attemptsLeft } from '../hooks/useSpeechRecognition';
+import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useAuth } from '../contexts/AuthContext';
 
 interface PronunciationButtonProps {
@@ -40,8 +40,6 @@ const WaveBar: React.FC<{ delay: string }> = ({ delay }) => (
   />
 );
 
-const FREE_LIMIT = 10;
-
 // ── Main component ────────────────────────────────────────────────────────────
 const PronunciationButton: React.FC<PronunciationButtonProps> = ({
   korean,
@@ -49,7 +47,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
   size = 'sm',
   hintKey,
 }) => {
-  const { hasPremiumAccess, isAuthenticated } = useAuth();
+  const { hasPremiumAccess } = useAuth();
   const isPremium = hasPremiumAccess();
   const { state, result, isSupported, start, reset } = useSpeechRecognition();
 
@@ -110,21 +108,31 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
 
   if (!isSupported) return null;
 
-  const canTry      = !isAuthenticated || hasAttemptsRemaining(isPremium);
-  const remaining   = attemptsLeft(isPremium);
+  const isSm = size === 'sm';
+
+  if (!isPremium) {
+    return (
+      <div className="flex flex-col items-center gap-1" onClick={e => e.stopPropagation()}>
+        <button
+          onClick={e => { e.stopPropagation(); window.open('https://gumroad.com/l/klearn-lifetime', '_blank'); }}
+          title="Premium feature — upgrade to practice pronunciation"
+          className={`flex items-center gap-1.5 rounded-xl font-semibold transition-all duration-200 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:text-pink-400 ${isSm ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm'}`}
+        >
+          <span>🔒</span>
+          <span>Pronounce</span>
+        </button>
+      </div>
+    );
+  }
+
   const isListening = state === 'listening';
   const isDone      = state === 'done';
-  const isSm        = size === 'sm';
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (state === 'done')      { reset(); return; }
     if (state === 'listening') { reset(); return; }
-    if (!canTry) {
-      window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' }));
-      return;
-    }
-    markHintUsed();   // ← user actually used it, stop hinting on this page
+    markHintUsed();
     start(korean, romanization);
   };
 
@@ -206,10 +214,9 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
           <button
             onClick={handleClick}
             title={
-              !canTry      ? `Daily limit reached (${FREE_LIMIT} attempts). Upgrade for unlimited.`
-              : isListening ? 'Tap to stop'
-              : isDone      ? 'Tap to try again'
-              :               'Practice pronunciation'
+              isListening ? 'Tap to stop'
+              : isDone    ? 'Tap to try again'
+              :             'Practice pronunciation'
             }
             className={`flex items-center gap-1.5 rounded-xl font-semibold transition-all duration-200 ${
               isSm ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm'
@@ -218,8 +225,6 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
                 ? 'bg-rose-500 text-white shadow-lg shadow-rose-200 dark:shadow-rose-900/30 scale-105'
                 : isDone && result
                 ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
-                : !canTry
-                ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
                 : showHint
                 ? 'bg-rose-500 text-white shadow-lg shadow-rose-200 dark:shadow-rose-900/40'
                 : 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:scale-105'
@@ -249,12 +254,6 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
           </div>
         )}
 
-        {/* Daily limit badge for free users */}
-        {isAuthenticated && !isPremium && !isDone && remaining !== Infinity && remaining <= 5 && (
-          <span className="text-[10px] text-gray-400 dark:text-gray-600">
-            {remaining} left today
-          </span>
-        )}
       </div>
     </>
   );

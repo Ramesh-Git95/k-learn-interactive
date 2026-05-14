@@ -5,6 +5,7 @@ import Tooltip from './Tooltip';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { useDailyActivity } from '../hooks/useDailyActivity';
 import { LockedRowBanner } from './PremiumLock';
+import PronunciationButton from './PronunciationButton';
 
 interface EnhancedPhrasesSectionProps {
   bookmarks: Bookmark[];
@@ -155,6 +156,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
                               🔊
                             </button>
                           </Tooltip>
+                          <PronunciationButton korean={phrase.korean} romanization={phrase.romanization} size="sm" />
                           <Tooltip content={isBookmarked(phrase) ? 'Remove bookmark' : 'Bookmark this phrase'} position="top" maxWidth="max-w-xs">
                             <button onClick={() => toggleBookmark(phrase)} className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors text-base ${isBookmarked(phrase) ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-400 hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'}`}>
                               {isBookmarked(phrase) ? '❤️' : '🤍'}
