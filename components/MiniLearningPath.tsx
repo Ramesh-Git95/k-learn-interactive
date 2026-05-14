@@ -1,6 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Section } from '../types';
 import Icon from './Icon';
+
+const VISITS_KEY = 'k-learn-section-visits';
+
+function loadVisits(): Record<string, number> {
+  try { return JSON.parse(localStorage.getItem(VISITS_KEY) || '{}'); }
+  catch { return {}; }
+}
+
+function recordVisit(section: Section): Record<string, number> {
+  const v = loadVisits();
+  v[section] = (v[section] || 0) + 1;
+  localStorage.setItem(VISITS_KEY, JSON.stringify(v));
+  return v;
+}
 
 interface MiniLearningPathProps {
   currentSection: Section;
@@ -40,10 +54,11 @@ const STEPS: Step[] = [
   { id: 'honorifics',   title: 'Honorifics',  icon: '🙇', shortTitle: 'O', group: 'Tools'      },
 ];
 
-// Sections with actual item-completion tracking — 60% = done
-const TRACKABLE: Section[] = ['hangul', 'vocabulary', 'grammar', 'phrases', 'culture', 'quiz'];
+// Quiz uses real item-completion tracking; all other sections use visit counts.
+// VISITS_NEEDED = number of visits to a section to count as "done" (≥ 60% threshold).
+const QUIZ_SECTION: Section = 'quiz';
 const CORE: Section[] = ['hangul', 'vocabulary', 'grammar', 'phrases', 'culture', 'quiz'];
-const COMPLETION_THRESHOLD = 0.6;
+const VISITS_NEEDED = 3; // 3 visits → 100% → "completed"
 
 const GROUPS = ['Foundation', 'Practice', 'Immersive', 'Tools'];
 
@@ -54,15 +69,36 @@ const MiniLearningPath: React.FC<MiniLearningPathProps> = ({
   getSectionCompletedItems,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [visits, setVisits] = useState<Record<string, number>>(loadVisits);
+
+  // Record a visit each time the active section changes.
+  useEffect(() => {
+    setVisits(recordVisit(currentSection));
+  }, [currentSection]);
 
   const getStatus = (id: Section): 'current' | 'completed' | 'available' => {
     if (id === currentSection) return 'current';
-    if (TRACKABLE.includes(id)) {
+    if (id === QUIZ_SECTION) {
       const total     = getSectionTotalItems(id);
       const completed = getSectionCompletedItems(id);
-      if (total > 0 && completed / total >= COMPLETION_THRESHOLD) return 'completed';
+      if (total > 0 && completed / total >= 0.6) return 'completed';
+    } else {
+      if ((visits[id] || 0) >= VISITS_NEEDED) return 'completed';
     }
     return 'available';
+  };
+
+  // % shown under the icon in the expanded view.
+  const getSectionPct = (id: Section): number | null => {
+    if (id === QUIZ_SECTION) {
+      const total     = getSectionTotalItems(id);
+      const completed = getSectionCompletedItems(id);
+      return total > 0 ? Math.round((completed / total) * 100) : 0;
+    }
+    if (CORE.includes(id)) {
+      return Math.min(100, Math.round(((visits[id] || 0) / VISITS_NEEDED) * 100));
+    }
+    return null; // non-core sections show no %
   };
 
   const completedCore = CORE.filter(id => getStatus(id) === 'completed').length;
@@ -150,14 +186,8 @@ const MiniLearningPath: React.FC<MiniLearningPathProps> = ({
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
                 {groupSteps.map(step => {
-                  const status  = getStatus(step.id);
-                  const pct     = TRACKABLE.includes(step.id)
-                    ? (() => {
-                        const t = getSectionTotalItems(step.id);
-                        const c = getSectionCompletedItems(step.id);
-                        return t > 0 ? Math.round((c / t) * 100) : null;
-                      })()
-                    : null;
+                  const status = getStatus(step.id);
+                  const pct    = getSectionPct(step.id);
 
                   return (
                     <button
