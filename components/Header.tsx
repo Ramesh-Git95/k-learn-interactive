@@ -476,7 +476,8 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
 
         {/* ── Mobile Menu ──────────────────────────────────── */}
         {isMenuOpen && (
-          <div className="mobile-menu-enter md:hidden border-t border-gray-100 dark:border-gray-800 bg-white/98 dark:bg-gray-950/98 backdrop-blur-xl">
+          <div className="mobile-menu-enter md:hidden border-t border-gray-100 dark:border-gray-800 bg-white/98 dark:bg-gray-950/98 backdrop-blur-xl overflow-y-auto"
+            style={{ maxHeight: 'calc(100dvh - 66px)' }}>
             <div className="max-w-7xl mx-auto px-4 py-4 space-y-1">
               {/* Primary sections */}
               {primarySections.map(({ id, title, icon }) => (
