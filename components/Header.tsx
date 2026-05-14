@@ -23,7 +23,10 @@ const primarySections = SECTIONS.filter(s => ['dashboard', 'hangul', 'vocabulary
 const megaMenuGroups = [
   {
     label: 'LEARN',
-    items: SECTIONS.filter(s => ['grammar', 'phrases', 'topik', 'honorifics'].includes(s.id)),
+    items: [
+      ...SECTIONS.filter(s => ['grammar', 'phrases', 'topik', 'honorifics'].includes(s.id)),
+      { ...SECTIONS.find(s => s.id === 'topik-test')!, _isNew: true },
+    ],
   },
   {
     label: 'PRACTICE',

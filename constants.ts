@@ -14,6 +14,7 @@ export const SECTIONS: { id: Section; title: string; icon: string }[] = [
   { id: 'bookmarks', title: 'Bookmarks', icon: '⭐' },
   { id: 'profile', title: 'Profile', icon: '👤' },
   { id: 'topik', title: 'TOPIK Prep', icon: '📋' },
+  { id: 'topik-test', title: 'Level Assessment', icon: '🎓' },
   { id: 'honorifics', title: 'Honorifics', icon: '🎭' },
   { id: 'culture-cards', title: 'Culture Cards', icon: '🌸' },
   { id: 'typing', title: 'Typing Dojo', icon: '⌨️' },

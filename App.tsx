@@ -43,6 +43,7 @@ import CultureCards from './components/CultureCards';
 import TypingDojo from './components/TypingDojo';
 import KDramaSection from './components/KDramaSection';
 import KPopSection from './components/KPopSection';
+import TopikAssessment from './components/TopikAssessment';
 
 // Load cookie testing utilities in development
 // Commented out temporarily - these files are optional for production
@@ -464,6 +465,8 @@ const AppContent: React.FC = () => {
         return <ConversationSection />;
       case 'topik':
         return <TopikPrepSection />;
+      case 'topik-test':
+        return <TopikAssessment />;
       case 'honorifics':
         return <HonorificEngine />;
       case 'culture-cards':
