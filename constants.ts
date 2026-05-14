@@ -20,6 +20,7 @@ export const SECTIONS: { id: Section; title: string; icon: string }[] = [
   { id: 'typing', title: 'Typing Dojo', icon: '⌨️' },
   { id: 'kdrama', title: 'K-Drama', icon: '🎬' },
   { id: 'kpop',   title: 'K-Pop Lyrics', icon: '🎵' },
+  { id: 'reading', title: 'Reading', icon: '📖' },
 ];
 
 export const LS_THEME_KEY = 'k-learn-theme';

@@ -30,7 +30,10 @@ const megaMenuGroups = [
   },
   {
     label: 'PRACTICE',
-    items: SECTIONS.filter(s => ['quiz', 'typing', 'srs', 'bookmarks'].includes(s.id)),
+    items: [
+      ...SECTIONS.filter(s => ['quiz', 'typing', 'srs', 'bookmarks'].includes(s.id)),
+      { ...SECTIONS.find(s => s.id === 'reading')!, _isNew: true },
+    ],
   },
   {
     label: 'CULTURE',
