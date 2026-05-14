@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useSRSContext } from '../contexts/SRSContext';
 import Tooltip from './Tooltip';
 import { vocabulary, commonPhrases } from '../data/koreanData';
+import SRSCardPicker from './SRSCardPicker';
+import type { PickerItem } from './SRSCardPicker';
 
 interface SRSManagerProps {
   onStartStudy: (deckId: string) => void;
@@ -141,7 +143,6 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
   const [editingCard, setEditingCard] = useState<{ deckId: string; cardId: string; content: any } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ type: 'deck' | 'card'; deckId: string; cardId?: string; name: string } | null>(null);
   const [confirmReset, setConfirmReset] = useState<{ deckId: string; cardId: string; name: string } | null>(null);
-  const [newCard, setNewCard] = useState({ korean: '', english: '', romanization: '', type: 'vocabulary' as const, category: '' });
 
   // Quick Import state
   const [showQuickImport, setShowQuickImport] = useState(false);
@@ -181,12 +182,9 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
     }
   };
 
-  const handleAddCard = (deckId: string) => {
-    if (newCard.korean.trim() && newCard.english.trim()) {
-      actions.addCardToDeck(deckId, { korean: newCard.korean.trim(), english: newCard.english.trim(), romanization: newCard.romanization.trim() || undefined, type: newCard.type, category: newCard.category.trim() || undefined });
-      setNewCard({ korean: '', english: '', romanization: '', type: 'vocabulary', category: '' });
-      setShowAddCard(null);
-    }
+  const handlePickerAdd = (deckId: string, items: PickerItem[]) => {
+    items.forEach(item => actions.addCardToDeck(deckId, item));
+    setShowAddCard(null);
   };
 
   const handleSaveEditDeck = () => {
@@ -378,18 +376,20 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
         </Modal>
       )}
 
-      {/* Add Card Modal */}
-      {showAddCard && (
-        <Modal title="Add New Card" onClose={() => setShowAddCard(null)}>
-          <div className="space-y-4">
-            {cardFormFields(newCard, (f, v) => setNewCard(p => ({ ...p, [f]: v })))}
-            <div className="flex gap-3 pt-1">
-              <button onClick={() => setShowAddCard(null)} className="flex-1 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-semibold text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-              <GradBtn onClick={() => handleAddCard(showAddCard)} disabled={!newCard.korean.trim() || !newCard.english.trim()} className="flex-1 py-2.5 text-sm">Add Card</GradBtn>
-            </div>
-          </div>
-        </Modal>
-      )}
+      {/* Add Card Picker */}
+      {showAddCard && (() => {
+        const deck = decks.find(d => d.id === showAddCard);
+        if (!deck) return null;
+        const existingKorean = new Set(deck.cards.map(c => c.content.korean));
+        return (
+          <SRSCardPicker
+            deckName={deck.name}
+            existingKorean={existingKorean}
+            onAdd={items => handlePickerAdd(showAddCard, items)}
+            onClose={() => setShowAddCard(null)}
+          />
+        );
+      })()}
 
       {/* Edit Deck Modal */}
       {editingDeck && (
