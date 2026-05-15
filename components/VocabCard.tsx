@@ -32,8 +32,8 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
 
   useEffect(() => {
     if (!showFlipHint || hasSeenFlipHint()) return;
-    const t1 = setTimeout(() => setShowFlipBubble(true), 1500);
-    const t2 = setTimeout(() => setShowFlipBubble(false), 8500);
+    const t1 = setTimeout(() => setShowFlipBubble(true), 5000);
+    const t2 = setTimeout(() => setShowFlipBubble(false), 13000);
     flipHintTimers.current = [t1, t2];
     const onDismiss = () => setShowFlipBubble(false);
     window.addEventListener('klearn-flip-seen', onDismiss);
@@ -109,12 +109,12 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
 
       {/* One-time flip hint bubble */}
       {showFlipBubble && (
-        <div className="absolute left-0 right-0 z-30 flex flex-col items-center pointer-events-none" style={{ bottom: 'calc(100% + 8px)' }}>
+        <div className="absolute left-1/2 z-30 flex flex-col items-center pointer-events-none" style={{ bottom: 'calc(100% + 8px)', transform: 'translateX(-50%)', maxWidth: 'min(200px, 90vw)' }}>
           <div
-            className="px-3 py-1.5 rounded-xl shadow-xl text-white text-xs font-bold flex items-center gap-1.5 whitespace-nowrap"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', animation: 'flipHintIn 0.35s ease' }}
+            className="px-3 py-1.5 rounded-xl shadow-xl text-white text-xs font-bold flex items-center gap-1.5 text-center"
+            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', animation: 'flipHintIn 0.35s ease', whiteSpace: 'nowrap' }}
           >
-            <span style={{ display: 'inline-block', animation: 'flipHintTap 0.5s ease-in-out infinite alternate' }}>👆</span>
+            <span style={{ display: 'inline-block', animation: 'flipHintTap 0.5s ease-in-out infinite alternate' }}>👇</span>
             <span>Tap to see the meaning!</span>
           </div>
           <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '7px solid #8B5CF6' }} />

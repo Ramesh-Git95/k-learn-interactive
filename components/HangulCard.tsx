@@ -20,8 +20,8 @@ const HangulCard: React.FC<HangulCardProps> = ({ char, onStudy, isStudied = fals
 
   useEffect(() => {
     if (!showHint || hasSeenHangulHint()) return;
-    const t1 = setTimeout(() => setShowHintBubble(true), 2000);
-    const t2 = setTimeout(() => setShowHintBubble(false), 8000);
+    const t1 = setTimeout(() => setShowHintBubble(true), 5000);
+    const t2 = setTimeout(() => setShowHintBubble(false), 13000);
     const onDismiss = () => setShowHintBubble(false);
     window.addEventListener('klearn-hangul-seen', onDismiss);
     return () => {

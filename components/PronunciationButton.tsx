@@ -11,7 +11,7 @@ interface PronunciationButtonProps {
 }
 
 // ── Hint system constants ─────────────────────────────────────────────────────
-const INITIAL_DELAY_MS  = 3_000;          // show hint 3 s after page load
+const INITIAL_DELAY_MS  = 15_000;         // show hint 15 s after page load (after flip hint has cleared)
 const RESHOW_DELAY_MS   = 3.5 * 60_000;  // re-show every 3.5 min if not used
 const AUTO_HIDE_MS      = 7_000;          // auto-hide after 7 s
 
