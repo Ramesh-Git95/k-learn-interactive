@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { VocabItem, Bookmark } from '../types';
 import AddToSRS from './AddToSRS';
 import PronunciationButton from './PronunciationButton';
 import { useAuth } from '../contexts/AuthContext';
+
+const FLIP_HINT_KEY = 'k-learn-flip-seen';
+const hasSeenFlipHint = () => { try { return !!localStorage.getItem(FLIP_HINT_KEY); } catch { return false; } };
+const dismissFlipHint = () => {
+  try { localStorage.setItem(FLIP_HINT_KEY, '1'); } catch {}
+  window.dispatchEvent(new Event('klearn-flip-seen'));
+};
 
 interface VocabCardProps {
   item: VocabItem;
@@ -12,13 +19,29 @@ interface VocabCardProps {
   isStudied?: boolean;
   disabled?: boolean;
   showPronunciationHint?: boolean;
+  showFlipHint?: boolean;
 }
 
-const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmark, onStudy, isStudied = false, disabled = false, showPronunciationHint = false }) => {
+const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmark, onStudy, isStudied = false, disabled = false, showPronunciationHint = false, showFlipHint = false }) => {
   const { isAuthenticated } = useAuth();
   const [isFlipped, setIsFlipped] = useState(false);
   const [showExamples, setShowExamples] = useState(false);
   const [showAddToSRS, setShowAddToSRS] = useState(false);
+  const [showFlipBubble, setShowFlipBubble] = useState(false);
+  const flipHintTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(() => {
+    if (!showFlipHint || hasSeenFlipHint()) return;
+    const t1 = setTimeout(() => setShowFlipBubble(true), 1500);
+    const t2 = setTimeout(() => setShowFlipBubble(false), 8500);
+    flipHintTimers.current = [t1, t2];
+    const onDismiss = () => setShowFlipBubble(false);
+    window.addEventListener('klearn-flip-seen', onDismiss);
+    return () => {
+      flipHintTimers.current.forEach(clearTimeout);
+      window.removeEventListener('klearn-flip-seen', onDismiss);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const requireAuth = (e: React.MouseEvent, action: () => void) => {
     e.stopPropagation();
@@ -58,6 +81,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
   const handleFlip = (e: React.MouseEvent) => {
     if (disabled) return;
     e.preventDefault(); e.stopPropagation();
+    dismissFlipHint();
     if (!isFlipped && onStudy && !isStudied) {
       const result = onStudy();
       if (result === false) return;
@@ -78,6 +102,25 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
 
   return (
     <div className="relative">
+      <style>{`
+        @keyframes flipHintIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes flipHintTap { from { transform: scale(1); } to { transform: scale(1.3); } }
+      `}</style>
+
+      {/* One-time flip hint bubble */}
+      {showFlipBubble && (
+        <div className="absolute left-0 right-0 z-30 flex flex-col items-center pointer-events-none" style={{ bottom: 'calc(100% + 8px)' }}>
+          <div
+            className="px-3 py-1.5 rounded-xl shadow-xl text-white text-xs font-bold flex items-center gap-1.5 whitespace-nowrap"
+            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', animation: 'flipHintIn 0.35s ease' }}
+          >
+            <span style={{ display: 'inline-block', animation: 'flipHintTap 0.5s ease-in-out infinite alternate' }}>👆</span>
+            <span>Tap to see the meaning!</span>
+          </div>
+          <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '7px solid #8B5CF6' }} />
+        </div>
+      )}
+
       {/* 3D Flip Card */}
       <div
         className={`perspective w-full h-44 sm:h-48 ${disabled ? 'pointer-events-none' : ''}`}
@@ -96,6 +139,8 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
               ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-60 border-gray-200 dark:border-gray-700'
               : isStudied
               ? 'bg-white dark:bg-gray-900 border-green-300 dark:border-green-700 cursor-pointer hover:shadow-lg'
+              : showFlipBubble
+              ? 'bg-white dark:bg-gray-900 border-pink-400 dark:border-pink-500 cursor-pointer hover:shadow-lg ring-2 ring-pink-300 dark:ring-pink-600'
               : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 cursor-pointer hover:shadow-lg hover:border-pink-200 dark:hover:border-pink-800'
           }`}>
             {isStudied && (

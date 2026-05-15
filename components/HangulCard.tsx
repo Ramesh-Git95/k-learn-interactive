@@ -1,14 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import type { HangulCharacter } from '../types';
+
+const HANGUL_HINT_KEY = 'k-learn-hangul-seen';
+const hasSeenHangulHint = () => { try { return !!localStorage.getItem(HANGUL_HINT_KEY); } catch { return false; } };
+const dismissHangulHint = () => {
+  try { localStorage.setItem(HANGUL_HINT_KEY, '1'); } catch {}
+  window.dispatchEvent(new Event('klearn-hangul-seen'));
+};
 
 interface HangulCardProps {
   char: HangulCharacter;
   onStudy?: () => void;
   isStudied?: boolean;
+  showHint?: boolean;
 }
 
-const HangulCard: React.FC<HangulCardProps> = ({ char, onStudy, isStudied = false }) => {
+const HangulCard: React.FC<HangulCardProps> = ({ char, onStudy, isStudied = false, showHint = false }) => {
+  const [showHintBubble, setShowHintBubble] = useState(false);
+
+  useEffect(() => {
+    if (!showHint || hasSeenHangulHint()) return;
+    const t1 = setTimeout(() => setShowHintBubble(true), 2000);
+    const t2 = setTimeout(() => setShowHintBubble(false), 8000);
+    const onDismiss = () => setShowHintBubble(false);
+    window.addEventListener('klearn-hangul-seen', onDismiss);
+    return () => {
+      clearTimeout(t1); clearTimeout(t2);
+      window.removeEventListener('klearn-hangul-seen', onDismiss);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const speak = () => {
+    dismissHangulHint();
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(char.char);
       utterance.lang = 'ko-KR';
@@ -19,6 +42,20 @@ const HangulCard: React.FC<HangulCardProps> = ({ char, onStudy, isStudied = fals
   };
 
   return (
+    <div className="relative">
+    <style>{`@keyframes flipHintIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+    {showHintBubble && (
+      <div className="absolute left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none" style={{ bottom: 'calc(100% + 6px)' }}>
+        <div
+          className="px-2.5 py-1 rounded-lg shadow-xl text-white text-[11px] font-bold flex items-center gap-1 whitespace-nowrap"
+          style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', animation: 'flipHintIn 0.35s ease' }}
+        >
+          <span>🔊</span>
+          <span>Tap to hear!</span>
+        </div>
+        <div style={{ width: 0, height: 0, borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '6px solid #8B5CF6' }} />
+      </div>
+    )}
     <div
       onClick={speak}
       title={`${char.char} - ${char.romanization}. Click to hear pronunciation.`}
@@ -67,6 +104,7 @@ const HangulCard: React.FC<HangulCardProps> = ({ char, onStudy, isStudied = fals
           🔊 tap
         </span>
       )}
+    </div>
     </div>
   );
 };

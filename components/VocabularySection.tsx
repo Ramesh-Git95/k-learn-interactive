@@ -243,6 +243,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
                             isStudied={!!progress[`vocab_item_${item.korean}`]}
                             disabled={limitReached}
                             showPronunciationHint={idx === 0}
+                            showFlipHint={isFirstCategory && idx === 0}
                           />
                         ))}
                       </div>

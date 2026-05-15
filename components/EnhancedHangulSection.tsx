@@ -28,11 +28,12 @@ const HangulSection: React.FC<HangulSectionProps> = ({ progress = {}, toggleProg
   const totalChars = consonantProgress.total + vowelProgress.total;
   const overallPct = totalChars > 0 ? Math.round((totalStudied / totalChars) * 100) : 0;
 
-  function SectionGrid({ title, subtitle, chars, progressData }: {
+  function SectionGrid({ title, subtitle, chars, progressData, showFirstHint = false }: {
     title: string;
     subtitle: string;
     chars: HangulCharacter[];
     progressData: { studied: number; total: number; percentage: number };
+    showFirstHint?: boolean;
   }) {
     return (
       <div className="mb-10">
@@ -62,12 +63,13 @@ const HangulSection: React.FC<HangulSectionProps> = ({ progress = {}, toggleProg
           </div>
         </div>
         <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 gap-2.5 sm:gap-3">
-          {chars.map(char => (
+          {chars.map((char, idx) => (
             <HangulCard
               key={char.char}
               char={char}
               onStudy={() => markCharacterAsStudied(char)}
               isStudied={!!progress[`hangul_char_${char.char}`]}
+              showHint={showFirstHint && idx === 0}
             />
           ))}
         </div>
@@ -164,6 +166,7 @@ const HangulSection: React.FC<HangulSectionProps> = ({ progress = {}, toggleProg
         subtitle={`${consonants.length} basic consonants — the building blocks of Korean`}
         chars={consonants}
         progressData={consonantProgress}
+        showFirstHint
       />
       <SectionGrid
         title="Vowels (모음)"
