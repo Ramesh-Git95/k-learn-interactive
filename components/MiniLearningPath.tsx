@@ -50,7 +50,7 @@ const STEPS: Step[] = [
   // Tools
   { id: 'srs',          title: 'Spaced Rep.',  icon: '🔄', shortTitle: 'S', group: 'Tools'      },
   { id: 'conversation', title: 'AI Chat',     icon: '🤖', shortTitle: 'A', group: 'Tools'      },
-  { id: 'typing',       title: 'Typing',      icon: '⌨️', shortTitle: 'T', group: 'Tools'      },
+  { id: 'typing',       title: 'Typing',      icon: '⌨️', shortTitle: 'W', group: 'Tools'      },
   { id: 'honorifics',   title: 'Honorifics',  icon: '🙇', shortTitle: 'O', group: 'Tools'      },
 ];
 
@@ -235,7 +235,7 @@ const MiniLearningPath: React.FC<MiniLearningPathProps> = ({
           />
         </div>
         <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
-          60% completion per section counts as done
+          Visit a section 3 times to mark it done
         </p>
       </div>
     </div>

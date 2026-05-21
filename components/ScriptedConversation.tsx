@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { LockedCard } from './PremiumLock';
+import { GUMROAD_URL } from '../constants';
 
 const FREE_SCENARIO_IDS = ['introductions', 'cafe'];
 
@@ -427,7 +428,7 @@ const ScriptedConversation: React.FC = () => {
         </div>
         {isFree && (
           <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
-            2 of {SCENARIOS.length} scenarios unlocked · <button onClick={() => window.open('https://gumroad.com/l/klearn-lifetime', '_blank')} className="text-violet-500 font-black hover:underline">Upgrade for all {SCENARIOS.length} →</button>
+            2 of {SCENARIOS.length} scenarios unlocked · <button onClick={() => window.open(GUMROAD_URL, '_blank')} className="text-violet-500 font-black hover:underline">Upgrade for all {SCENARIOS.length} →</button>
           </p>
         )}
       </div>

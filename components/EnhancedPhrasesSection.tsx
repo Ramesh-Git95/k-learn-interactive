@@ -6,6 +6,7 @@ import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { useDailyActivity } from '../hooks/useDailyActivity';
 import { LockedRowBanner } from './PremiumLock';
 import PronunciationButton from './PronunciationButton';
+import { GUMROAD_URL } from '../constants';
 
 interface EnhancedPhrasesSectionProps {
   bookmarks: Bookmark[];
@@ -201,7 +202,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
               <div
                 key={phrase.korean}
                 className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 cursor-pointer hover:border-violet-300 dark:hover:border-violet-700 transition-colors"
-                onClick={() => window.open('https://gumroad.com/l/klearn-lifetime', '_blank')}
+                onClick={() => window.open(GUMROAD_URL, '_blank')}
               >
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-gray-400 dark:text-gray-500 truncate">{phrase.korean}</p>

@@ -4,8 +4,8 @@ import ConversationBot from './ConversationBot';
 import { useAuth } from '../contexts/AuthContext';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
+import { GUMROAD_URL } from '../constants';
 
-const GUMROAD_URL = 'https://gumroad.com/l/klearn-lifetime';
 
 // ── Daily usage tracking (localStorage, resets at midnight) ──────────────────
 const getTodayKey = () => `klearn_ai_chat_${new Date().toISOString().slice(0, 10)}`;
@@ -131,7 +131,7 @@ const ConversationSection: React.FC = () => {
                 className="px-8 py-3 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all mb-3 block w-full"
                 style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
               >
-                ⭐ Get Premium — 30 AI chats/day
+                ⭐ Get Premium — {getLimit('aiConversationsPerDay') as number} AI chats/day
               </button>
             )}
             <button

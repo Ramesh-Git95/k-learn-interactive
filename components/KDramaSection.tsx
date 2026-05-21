@@ -7,8 +7,8 @@ import { useToastContext } from '../contexts/ToastContext';
 import { useSRSContext } from '../contexts/SRSContext';
 import PronunciationButton from './PronunciationButton';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
+import { GUMROAD_URL } from '../constants';
 
-const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
 
 const difficultyStyle: Record<string, string> = {
   beginner: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',

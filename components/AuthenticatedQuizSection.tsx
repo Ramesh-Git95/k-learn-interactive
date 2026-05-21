@@ -5,10 +5,10 @@ import useLocalStorage from '../hooks/useLocalStorage';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { PremiumLockBanner } from './PremiumLock';
 import { useDailyActivity } from '../hooks/useDailyActivity';
-const GUMROAD_URL = 'https://gumroad.com/l/klearn-lifetime';
 import { useAuth } from '../contexts/AuthContext';
 import { useProgress } from '../contexts/ProgressContext';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
+import { GUMROAD_URL } from '../constants';
 
 type QuizMode = 'korean_to_english' | 'english_to_korean' | 'romanization_to_korean' | 'mixed';
 

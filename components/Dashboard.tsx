@@ -11,8 +11,8 @@ import LearningPath from './LearningPath';
 import OnboardingWizard from './OnboardingWizard';
 import BookmarkFlashcards from './BookmarkFlashcards';
 import { vocabulary } from '../data/koreanData';
+import { GUMROAD_URL } from '../constants';
 
-const GUMROAD_URL = 'https://gumroad.com/l/klearn-lifetime';
 
 interface DashboardProps {
   setActiveSection: (section: Section) => void;

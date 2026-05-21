@@ -4,6 +4,8 @@ import useLocalStorage from './useLocalStorage';
 import { useAuth } from '../contexts/AuthContext';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
 // Utility function to safely parse dates
 const parseDate = (dateValue: any): Date | undefined => {
   if (!dateValue) return undefined;
@@ -180,7 +182,7 @@ const useSRS = (): UseSRSReturn => {
       
       console.log('📤 Serialized data size:', JSON.stringify(syncData).length, 'characters');
       
-      const response = await fetch('http://localhost:5001/api/srs/sync', {
+      const response = await fetch(`${API_BASE_URL}/srs/sync`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -210,7 +212,7 @@ const useSRS = (): UseSRSReturn => {
 
     try {
       console.log('📥 Loading SRS data from database...');
-      const response = await fetch('http://localhost:5001/api/srs/decks', {
+      const response = await fetch(`${API_BASE_URL}/srs/decks`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

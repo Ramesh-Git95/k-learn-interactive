@@ -1,6 +1,6 @@
 import React from 'react';
+import { GUMROAD_URL } from '../constants';
 
-const GUMROAD_URL = 'https://gumroad.com/l/klearn-lifetime';
 
 interface UpgradeModalProps {
   isOpen: boolean;

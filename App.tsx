@@ -97,15 +97,23 @@ const AppContent: React.FC = () => {
     }
   }, []);
 
-  // After returning from Gumroad, refresh user to pick up premium upgrade from ping
+  // After returning from Gumroad, poll refreshUser until premium is confirmed (up to 10 × 2s)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('purchase') === 'success' && isAuthenticated) {
       window.history.replaceState({}, '', window.location.pathname);
-      setTimeout(() => {
-        refreshUser();
-        showToast('🎉 Welcome to Premium! Your account has been upgraded.', 'success');
-      }, 3000);
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts++;
+        await refreshUser();
+        if (hasPremiumAccess() || attempts >= 10) {
+          clearInterval(poll);
+          if (hasPremiumAccess()) {
+            showToast('🎉 Welcome to Premium! Your account has been upgraded.', 'success');
+          }
+        }
+      }, 2000);
+      return () => clearInterval(poll);
     }
   }, [isAuthenticated]);
 
@@ -154,36 +162,6 @@ const AppContent: React.FC = () => {
   const [studyDeckId, setStudyDeckId] = useState<string | null>(null);
   const [isStudying, setIsStudying] = useState(false);
 
-  // Check for special routes
-  const currentPath = window.location.pathname;
-  const isVerifyEmailPage = currentPath.startsWith('/verify-email');
-
-  if (isVerifyEmailPage) {
-    return (
-      <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}>
-        <EmailVerification />
-      </div>
-    );
-  }
-
-  if (currentPath === '/terms') {
-    return (
-      <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}>
-        <TermsOfService />
-      </div>
-    );
-  }
-
-  if (currentPath === '/privacy') {
-    return (
-      <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}>
-        <PrivacyPolicy />
-      </div>
-    );
-  }
-
-
-
   // Listen for footer navigation events
   useEffect(() => {
     const handleFooterNavigation = (event: CustomEvent) => {
@@ -201,7 +179,7 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
-      if (hash && ['dashboard', 'hangul', 'vocabulary', 'grammar', 'phrases', 'culture', 'quiz', 'conversation', 'bookmarks', 'srs', 'profile', 'cookie-demo', 'topik', 'honorifics', 'culture-cards', 'typing', 'kdrama'].includes(hash as Section)) {
+      if (hash && ['dashboard', 'hangul', 'vocabulary', 'grammar', 'phrases', 'culture', 'quiz', 'conversation', 'bookmarks', 'srs', 'profile', 'cookie-demo', 'topik', 'topik-test', 'honorifics', 'culture-cards', 'typing', 'kdrama', 'kpop', 'reading'].includes(hash as Section)) {
         setActiveSection(hash as Section);
       }
     };
@@ -240,11 +218,22 @@ const AppContent: React.FC = () => {
     return () => clearTimeout(timer);
   }, [theme]);
 
-  // Enhanced loading with accessibility
+  // Enhanced loading — resolve as soon as auth + progress are ready
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!authLoading && !progressLoading) setIsLoading(false);
+  }, [authLoading, progressLoading]);
+
+  // Special routes — placed after all hooks to satisfy Rules of Hooks
+  const currentPath = window.location.pathname;
+  if (currentPath.startsWith('/verify-email')) {
+    return <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}><EmailVerification /></div>;
+  }
+  if (currentPath === '/terms') {
+    return <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}><TermsOfService /></div>;
+  }
+  if (currentPath === '/privacy') {
+    return <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}><PrivacyPolicy /></div>;
+  }
 
   const toggleTheme = () => {
     // Add haptic feedback on supported devices
@@ -561,11 +550,10 @@ const AppContent: React.FC = () => {
   const isUserAuthenticated = !!user;
 
   return (
-    <div 
+    <div
       className={`min-h-screen font-sans bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white transition-all duration-300 ease-in-out ${
         isThemeTransitioning ? 'theme-transitioning' : ''
       }`}
-      role="main"
       aria-label="Korean Learning Application"
     >
     {/* Skip to main content link for screen readers */}

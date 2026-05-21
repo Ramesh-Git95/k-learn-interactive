@@ -287,8 +287,7 @@ const PassageReader: React.FC<ReaderProps> = ({ passage, isPremium, isAuthentica
 const ReadingSection: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { openRegister } = useAuthModal();
-  const { subscriptionTier } = useFeatureAccess();
-  const isPremium = subscriptionTier === 'premium';
+  const { isPremium } = useFeatureAccess();
 
   const [selectedPassage, setSelectedPassage] = useState<ReadingPassage | null>(null);
   const [filter, setFilter] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');

@@ -4,8 +4,8 @@ import { useAuthModal } from '../contexts/AuthModalContext';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { PremiumLockBanner } from './PremiumLock';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
+import { GUMROAD_URL } from '../constants';
 
-const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
 const OPTION_LABELS = ['①', '②', '③', '④'];
 
 interface Question {

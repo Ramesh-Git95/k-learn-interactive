@@ -23,6 +23,8 @@ export const SECTIONS: { id: Section; title: string; icon: string }[] = [
   { id: 'reading', title: 'Reading', icon: '📖' },
 ];
 
+export const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
+
 export const LS_THEME_KEY = 'k-learn-theme';
 export const LS_BOOKMARKS_KEY = 'k-learn-bookmarks';
 export const LS_PROGRESS_KEY = 'k-learn-progress';

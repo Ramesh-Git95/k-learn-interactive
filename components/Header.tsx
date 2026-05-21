@@ -8,8 +8,8 @@ import { useProgress } from '../contexts/ProgressContext';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import SpotlightSearch from './SpotlightSearch';
 import DeleteAccountModal from './DeleteAccountModal';
+import { GUMROAD_URL } from '../constants';
 
-const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
 
 interface HeaderProps {
   activeSection: Section | null;
@@ -151,12 +151,9 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
     const onAuthModal = (e: CustomEvent) => {
       e.detail === 'register' ? openRegister() : openLogin();
     };
-    const onNavReq = (e: CustomEvent) => handleNav(e.detail as Section);
     window.addEventListener('open-auth-modal', onAuthModal as EventListener);
-    window.addEventListener('navigate-to-section', onNavReq as EventListener);
     return () => {
       window.removeEventListener('open-auth-modal', onAuthModal as EventListener);
-      window.removeEventListener('navigate-to-section', onNavReq as EventListener);
     };
   }, [openRegister, openLogin]);
 

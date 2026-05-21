@@ -7,8 +7,8 @@ import { useSRSContext } from '../contexts/SRSContext';
 import { useToastContext } from '../contexts/ToastContext';
 import PronunciationButton from './PronunciationButton';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
+import { GUMROAD_URL } from '../constants';
 
-const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
 
 // ── Word popover ──────────────────────────────────────────────────────────────
 

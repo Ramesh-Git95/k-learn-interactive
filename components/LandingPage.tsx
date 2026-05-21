@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthModal } from '../contexts/AuthModalContext';
 import { hangulCharacters } from '../data/koreanData';
+import { GUMROAD_URL } from '../constants';
 
 interface LandingPageProps {
   onGetStarted: () => void;
 }
 
-const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 

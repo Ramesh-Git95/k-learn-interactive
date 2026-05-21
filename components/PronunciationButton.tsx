@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useAuth } from '../contexts/AuthContext';
+import { GUMROAD_URL } from '../constants';
 
 interface PronunciationButtonProps {
   korean: string;
@@ -114,7 +115,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     return (
       <div className="flex flex-col items-center gap-1" onClick={e => e.stopPropagation()}>
         <button
-          onClick={e => { e.stopPropagation(); window.open('https://gumroad.com/l/klearn-lifetime', '_blank'); }}
+          onClick={e => { e.stopPropagation(); window.open(GUMROAD_URL, '_blank'); }}
           title="Premium feature — upgrade to practice pronunciation"
           className={`flex items-center gap-1.5 rounded-xl font-semibold transition-all duration-200 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:text-pink-400 ${isSm ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm'}`}
         >

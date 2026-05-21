@@ -93,7 +93,7 @@ function authReducer(state: AuthState, action: any): AuthState {
     case AUTH_ACTIONS.UPDATE_USER:
       return {
         ...state,
-        user: { ...state.user, ...action.payload }
+        user: state.user ? { ...state.user, ...action.payload } : action.payload
       };
 
     case AUTH_ACTIONS.CLEAR_ERROR:

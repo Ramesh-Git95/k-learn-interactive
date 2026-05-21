@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToastContext } from '../contexts/ToastContext';
+import { GUMROAD_URL } from '../constants';
 
-const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5001/api';
 
 const UserProfile: React.FC = () => {

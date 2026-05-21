@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { PremiumLockBanner } from './PremiumLock';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
+import { GUMROAD_URL } from '../constants';
 
 // Free users get 3 sample questions: TOPIK I vocab[0], TOPIK I grammar[0], TOPIK II vocab[0]
 const FREE_QUESTION_LIMIT = 3;
@@ -528,7 +529,7 @@ const TopikPrepSection: React.FC = () => {
       )}
       {isFree && (
         <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
-          {FREE_QUESTION_LIMIT - Math.min(totalAnswered, FREE_QUESTION_LIMIT)} sample question{FREE_QUESTION_LIMIT - Math.min(totalAnswered, FREE_QUESTION_LIMIT) !== 1 ? 's' : ''} remaining · <button onClick={() => window.open('https://gumroad.com/l/klearn-lifetime', '_blank')} className="text-violet-500 font-black hover:underline">Unlock all 35 →</button>
+          {FREE_QUESTION_LIMIT - Math.min(totalAnswered, FREE_QUESTION_LIMIT)} sample question{FREE_QUESTION_LIMIT - Math.min(totalAnswered, FREE_QUESTION_LIMIT) !== 1 ? 's' : ''} remaining · <button onClick={() => window.open(GUMROAD_URL, '_blank')} className="text-violet-500 font-black hover:underline">Unlock all 35 →</button>
         </p>
       )}
     </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { GUMROAD_URL } from '../constants';
 const GUMROAD_URL = 'https://gumroad.com/l/klearn-lifetime';
 
 // Feature limits for different subscription tiers
