@@ -6,7 +6,7 @@ import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { useDailyActivity } from '../hooks/useDailyActivity';
 import { LockedRowBanner } from './PremiumLock';
 import PronunciationButton from './PronunciationButton';
-import { GUMROAD_URL } from '../constants';
+import { useUpgradeModal } from '../contexts/UpgradeModalContext';
 
 interface EnhancedPhrasesSectionProps {
   bookmarks: Bookmark[];
@@ -24,12 +24,14 @@ const CONTEXT_COLORS: Record<string, string> = {
 const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmarks, toggleBookmark, progress, toggleProgress }) => {
   const { hasReachedLimit, getLimit, subscriptionTier } = useFeatureAccess();
   const { dailyActivity, trackActivity } = useDailyActivity();
+  const { openUpgradeModal } = useUpgradeModal();
 
   const isBookmarked = (item: PhraseItem) => bookmarks.some(b => 'korean' in b && b.korean === item.korean);
   const isPhraseStudied = (i: number) => !!progress[`phrase_${i}`];
 
   const handlePhraseStudied = (i: number) => {
-    if (subscriptionTier === 'free') {
+    const alreadyStudied = isPhraseStudied(i);
+    if (subscriptionTier === 'free' && !alreadyStudied) {
       if (hasReachedLimit('phrasesStudyPerDay', dailyActivity.phrasesStudied)) return false;
       trackActivity('phrases', 1);
     }
@@ -39,6 +41,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
 
   const speak = (korean: string) => {
     if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(korean);
       u.lang = 'ko-KR'; u.rate = 0.8;
       window.speechSynthesis.speak(u);
@@ -202,7 +205,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
               <div
                 key={phrase.korean}
                 className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 cursor-pointer hover:border-violet-300 dark:hover:border-violet-700 transition-colors"
-                onClick={() => window.open(GUMROAD_URL, '_blank')}
+                onClick={openUpgradeModal}
               >
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-gray-400 dark:text-gray-500 truncate">{phrase.korean}</p>
