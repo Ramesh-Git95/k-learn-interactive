@@ -131,12 +131,6 @@ export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
             </p>
           )}
 
-          <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-800 text-center">
-            <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5">Demo credentials</p>
-            <p className="text-[11px] font-mono text-gray-500 dark:text-gray-400">
-              demo@koreanlearning.com / demo123
-            </p>
-          </div>
         </div>
       </div>
     </div>

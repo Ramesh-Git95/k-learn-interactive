@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { GUMROAD_URL } from '../constants';
-const GUMROAD_URL = 'https://gumroad.com/l/klearn-lifetime';
 
 // Feature limits for different subscription tiers
 export const FEATURE_LIMITS = {
@@ -205,14 +204,14 @@ export const PremiumPrompt: React.FC<{
       <p className="text-blue-700 dark:text-blue-300 mb-4">
         {description}
       </p>
-      <button 
+      <button
         onClick={handleUpgradeClick}
         className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       >
-        Upgrade to Premium - $9.99/month
+        Get Lifetime Access — $39 one-time
       </button>
       <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
-        Unlock all features and support our development! 🚀
+        Pay once, own everything forever. No monthly fees. 🚀
       </p>
     </div>
   );

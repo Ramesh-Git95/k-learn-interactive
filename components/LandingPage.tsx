@@ -47,7 +47,7 @@ const TESTIMONIALS = [
 const COMPARISON_ROWS = [
   { feature: 'Hangul Alphabet',          free: 'Full access',             premium: 'Full access' },
   { feature: 'Vocabulary',               free: '3 categories (39 words)', premium: 'All 94 words' },
-  { feature: 'Grammar Patterns',         free: '4 of 7 patterns',         premium: 'All 7 + advanced' },
+  { feature: 'Grammar Patterns',         free: '5 of 7 patterns (basic)',  premium: 'All 7 + advanced' },
   { feature: 'Common Phrases',           free: '15 of 16 phrases',        premium: 'All phrases' },
   { feature: 'Cultural Insights',        free: '5 of 12 tips',            premium: 'All 12 + 3 subsections' },
   { feature: 'Honorific Engine',         free: '2 of 6 categories',       premium: 'All 6 categories' },
@@ -68,7 +68,7 @@ const PREMIUM_BULLETS = ['Everything in Free', 'All 94 vocabulary words', 'All 7
 
 const FAQ = [
   { q: 'Is this really a one-time payment?',             a: 'Yes — $39 once, lifetime access. No monthly fees ever. Every new feature we ship is included at no extra cost.' },
-  { q: 'Can I try before I buy?',                        a: 'Absolutely. The free tier is generous — Hangul, 3 vocabulary words, basic grammar, 5 AI chats per day, and full SRS. No credit card required to start.' },
+  { q: 'Can I try before I buy?',                        a: 'Absolutely. The free tier is generous — Hangul, 3 vocabulary categories (39 words), 5 basic grammar patterns, 5 AI chats per day, and full SRS. No credit card required to start.' },
   { q: 'Do I need any prior Korean knowledge?',          a: 'None at all. The Hangul module teaches the entire alphabet from scratch. Most learners can read Korean in under a week.' },
   { q: 'How long until I can have a real conversation?', a: 'With daily 20-minute sessions, most learners can handle basic conversations in 2–3 months. The AI tutor accelerates this significantly.' },
   { q: 'Is the payment secure?',                         a: 'Payment is processed entirely by Gumroad — a trusted platform used by 90,000+ creators. You get an instant download link and a 30-day money-back guarantee.' },
