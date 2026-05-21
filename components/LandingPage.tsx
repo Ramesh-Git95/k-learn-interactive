@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthModal } from '../contexts/AuthModalContext';
 import { hangulCharacters } from '../data/koreanData';
-import { GUMROAD_URL } from '../constants';
+
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -374,18 +374,16 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             <button onClick={handleStart} className="btn-primary text-white font-bold text-lg px-10 py-4 rounded-2xl">
               Start for Free →
             </button>
-            <a href={GUMROAD_URL} target="_blank" rel="noopener noreferrer" className="gumroad-btn text-white font-bold text-lg px-10 py-4 rounded-2xl inline-block">
-              Get Lifetime Access — $39
+            <a
+              href="#pricing"
+              className="btn-outline text-gray-700 dark:text-gray-200 font-bold text-lg px-10 py-4 rounded-2xl inline-block"
+            >
+              See Plans ↓
             </a>
           </div>
 
-          <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">
-            No subscription · pay once · 30-day money-back guarantee
-          </p>
-
-          {/* Purchase flow hint */}
-          <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
-            After purchasing, create a free account with the <strong>same email</strong> you used on Gumroad — premium activates instantly.{' '}
+          <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
+            No subscription · pay once · 30-day money-back guarantee ·{' '}
             <button
               onClick={() => openLogin ? openLogin() : window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
               className="text-pink-400 hover:underline font-semibold"
@@ -613,7 +611,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* ── PRICING ──────────────────────────────────────────────── */}
-      <section id="pricing" className="py-20 px-4 bg-white dark:bg-gray-950">
+      <section id="pricing" className="py-20 px-4 bg-white dark:bg-gray-950" style={{ scrollMarginTop: '80px' }}>
         <div className="max-w-5xl mx-auto">
           <FadeIn>
             <div className="text-center mb-12">
@@ -672,14 +670,21 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                   </li>
                 ))}
               </ul>
-              <a href={GUMROAD_URL} target="_blank" rel="noopener noreferrer" className="gumroad-btn block w-full py-3.5 rounded-2xl font-bold text-white text-sm text-center">
-                Get Lifetime Access — $39
-              </a>
-              <p className="text-center text-xs text-gray-500 mt-3">Secure payment via Gumroad · Instant access</p>
+              <button
+                onClick={handleStart}
+                className="btn-primary block w-full py-3.5 rounded-2xl font-bold text-white text-sm text-center"
+              >
+                Create Free Account → Upgrade Inside
+              </button>
+              <p className="text-center text-xs text-gray-500 mt-3">
+                Sign up free · upgrade to Premium from your profile · payment via Gumroad
+              </p>
               <p className="text-center text-xs text-gray-600 mt-1">
-                Use the <strong className="text-gray-400">same email</strong> for your K-Learn account to activate premium automatically.{' '}
-                <button onClick={() => openLogin ? openLogin() : window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))} className="text-pink-400 hover:underline">
-                  Already bought? Sign in →
+                <button
+                  onClick={() => openLogin ? openLogin() : window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
+                  className="text-pink-400 hover:underline"
+                >
+                  Already purchased? Sign in to activate →
                 </button>
               </p>
             </div>
@@ -758,14 +763,25 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             Join thousands of K-culture fans, drama addicts, and aspiring expats who are learning the real way — starting today, for free.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-4">
             <button onClick={handleStart} className="btn-primary text-white font-bold text-lg px-10 py-4 rounded-2xl">
               Start for Free →
             </button>
-            <a href={GUMROAD_URL} target="_blank" rel="noopener noreferrer" className="gumroad-btn inline-block text-white font-bold text-lg px-10 py-4 rounded-2xl text-center">
-              Get Lifetime Access — $39
+            <a
+              href="#pricing"
+              className="inline-block text-white/70 border-2 border-white/20 hover:border-white/50 font-bold text-lg px-10 py-4 rounded-2xl text-center transition-colors"
+            >
+              View Plans ↓
             </a>
           </div>
+          <p className="text-gray-500 text-sm mb-4">
+            <button
+              onClick={() => openLogin ? openLogin() : window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
+              className="text-pink-400 hover:underline"
+            >
+              Already purchased? Sign in to activate premium →
+            </button>
+          </p>
 
           {/* Mini feature grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto mb-8">
