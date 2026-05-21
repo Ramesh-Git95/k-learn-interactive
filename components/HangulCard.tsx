@@ -33,6 +33,7 @@ const HangulCard: React.FC<HangulCardProps> = ({ char, onStudy, isStudied = fals
   const speak = () => {
     dismissHangulHint();
     if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(char.char);
       utterance.lang = 'ko-KR';
       utterance.rate = 0.8;
