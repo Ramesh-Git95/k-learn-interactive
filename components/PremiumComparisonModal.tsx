@@ -1,5 +1,6 @@
 import React from 'react';
 import { GUMROAD_URL } from '../constants';
+import { useAuth } from '../contexts/AuthContext';
 
 
 const ROWS = [
@@ -26,6 +27,7 @@ interface Props {
 }
 
 const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
+  const { isAuthenticated } = useAuth();
   if (!isOpen) return null;
 
   return (
@@ -112,16 +114,33 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
         {/* Footer CTA */}
         <div className="p-5 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 flex-shrink-0 space-y-2">
-          <button
-            onClick={() => window.open(GUMROAD_URL, '_blank')}
-            className="w-full py-3.5 rounded-2xl text-white font-black text-base shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-95"
-            style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
-          >
-            Get Lifetime Access — $39 →
-          </button>
-          <p className="text-center text-xs text-gray-400 dark:text-gray-500">
-            Secure payment via Gumroad · 30-day money-back guarantee
-          </p>
+          {isAuthenticated ? (
+            <>
+              <button
+                onClick={() => window.open(GUMROAD_URL, '_blank')}
+                className="w-full py-3.5 rounded-2xl text-white font-black text-base shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
+              >
+                Get Lifetime Access — $39 →
+              </button>
+              <p className="text-center text-xs text-gray-400 dark:text-gray-500">
+                Secure payment via Gumroad · 30-day money-back guarantee
+              </p>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' })); }}
+                className="w-full py-3.5 rounded-2xl text-white font-black text-base shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-95"
+                style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
+              >
+                Create Free Account to Get Started →
+              </button>
+              <p className="text-center text-xs text-gray-400 dark:text-gray-500">
+                Free forever · Upgrade to Premium inside the app
+              </p>
+            </>
+          )}
           <button
             onClick={onClose}
             className="w-full py-1.5 text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
