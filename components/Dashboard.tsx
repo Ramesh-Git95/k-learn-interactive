@@ -290,8 +290,9 @@ export default function Dashboard({
 
           {/* Bookmarks — clickable to start flashcard session */}
           <button
-            onClick={() => setShowBookmarkFC(true)}
-            className="stat-card bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm text-left group hover:border-yellow-200 dark:hover:border-yellow-800 transition-colors"
+            onClick={() => bookmarks.length > 0 && setShowBookmarkFC(true)}
+            disabled={bookmarks.length === 0}
+            className="stat-card bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm text-left group hover:border-yellow-200 dark:hover:border-yellow-800 transition-colors disabled:cursor-default disabled:hover:border-gray-100 dark:disabled:hover:border-gray-800"
           >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-400 flex items-center justify-center text-lg mb-3 shadow">⭐</div>
             <div className="text-2xl font-black text-gray-900 dark:text-white">{bookmarks.length}</div>

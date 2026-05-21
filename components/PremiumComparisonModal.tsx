@@ -5,7 +5,7 @@ import { GUMROAD_URL } from '../constants';
 const ROWS = [
   { feature: 'Hangul Alphabet',         free: 'Full access',          premium: 'Full access ✓',              both: true  },
   { feature: 'Vocabulary',              free: '3 categories (39 words)', premium: 'All 94 words',            both: false },
-  { feature: 'Grammar Patterns',        free: '4 of 7 patterns',      premium: 'All 7 + advanced',           both: false },
+  { feature: 'Grammar Patterns',        free: '5 of 7 patterns (basic)', premium: 'All 7 + advanced',         both: false },
   { feature: 'Common Phrases',          free: '15 phrases',           premium: 'All 16 phrases',             both: false },
   { feature: 'Cultural Insights',       free: '5 of 12 tips',         premium: 'All 12 + 3 subsections',    both: false },
   { feature: 'Honorific Engine',        free: '2 of 6 categories',    premium: 'All 6 categories',           both: false },
