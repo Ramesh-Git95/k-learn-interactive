@@ -253,9 +253,11 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
   const [showAllFeatures, setShowAllFeatures] = useState(false);
 
   let openRegister: (() => void) | null = null;
+  let openLogin: (() => void) | null = null;
   try {
     const ctx = useAuthModal();
     openRegister = ctx.openRegister;
+    openLogin = ctx.openLogin;
   } catch { /* context not mounted */ }
 
   useEffect(() => { setLoaded(true); }, []);
@@ -377,8 +379,19 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             </a>
           </div>
 
-          <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
+          <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">
             No subscription · pay once · 30-day money-back guarantee
+          </p>
+
+          {/* Purchase flow hint */}
+          <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
+            After purchasing, create a free account with the <strong>same email</strong> you used on Gumroad — premium activates instantly.{' '}
+            <button
+              onClick={() => openLogin ? openLogin() : window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
+              className="text-pink-400 hover:underline font-semibold"
+            >
+              Already purchased? Sign in →
+            </button>
           </p>
 
           {/* vs Duolingo pill */}
@@ -663,6 +676,12 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                 Get Lifetime Access — $39
               </a>
               <p className="text-center text-xs text-gray-500 mt-3">Secure payment via Gumroad · Instant access</p>
+              <p className="text-center text-xs text-gray-600 mt-1">
+                Use the <strong className="text-gray-400">same email</strong> for your K-Learn account to activate premium automatically.{' '}
+                <button onClick={() => openLogin ? openLogin() : window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))} className="text-pink-400 hover:underline">
+                  Already bought? Sign in →
+                </button>
+              </p>
             </div>
             </FadeIn>
           </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) {
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
+  const { clearError } = useAuth();
 
   useEffect(() => { setMode(initialMode); }, [initialMode]);
 
@@ -21,7 +23,7 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
 
   if (!isOpen) return null;
 
-  const toggleMode = () => setMode(m => m === 'login' ? 'register' : 'login');
+  const toggleMode = () => { clearError(); setMode(m => m === 'login' ? 'register' : 'login'); };
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] overflow-y-auto">
