@@ -202,6 +202,14 @@ router.post('/claim-purchase', authenticateToken, async (req, res) => {
       ClaimCode.deleteOne({ email: normalised }),
     ]);
 
+    // Burn the license key on Gumroad's side so it can't be redeemed
+    // again via the /verify-license route (uses_count would then be 2).
+    if (pending.licenseKey) {
+      verifyWithGumroad(pending.licenseKey).catch(err =>
+        console.error('Failed to burn license key on Gumroad after claim:', err)
+      );
+    }
+
     console.log(`✅ ${user.email} claimed purchase from ${purchaseEmail} (code verified)`);
 
     res.json({
