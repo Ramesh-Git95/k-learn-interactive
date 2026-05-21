@@ -1,5 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const { authenticateToken, rateLimit } = require('../middleware/auth');
 const emailService = require('../services/emailService');
@@ -83,6 +84,26 @@ router.post('/register', authRateLimit, async (req, res) => {
     const verificationToken = user.generateEmailVerificationToken();
     
     await user.save();
+
+    // Auto-upgrade if they bought on Gumroad before creating this account
+    try {
+      const PendingUpgrade = mongoose.models.PendingUpgrade;
+      if (PendingUpgrade) {
+        const pending = await PendingUpgrade.findOne({ email: email.toLowerCase().trim() });
+        if (pending) {
+          user.subscription.type = 'premium';
+          user.subscription.status = 'active';
+          user.subscription.currentPeriodEnd = null;
+          user.subscription.cancelAtPeriodEnd = false;
+          user.subscription.stripeSubscriptionId = pending.saleId || pending.licenseKey || 'gumroad-lifetime';
+          await user.save();
+          await PendingUpgrade.deleteOne({ _id: pending._id });
+          console.log(`✅ Auto-upgraded new registration ${email} from PendingUpgrade`);
+        }
+      }
+    } catch (upgradeErr) {
+      console.error('PendingUpgrade check failed on register:', upgradeErr);
+    }
 
     const token = generateToken(user._id);
 

@@ -45,7 +45,7 @@ function verifyWithGumroad(licenseKey) {
     const postData = querystring.stringify({
       product_permalink: GUMROAD_PRODUCT_PERMALINK,
       license_key: licenseKey,
-      increment_uses_count: 'false',
+      increment_uses_count: 'true',
     });
     const options = {
       hostname: 'api.gumroad.com',
@@ -81,6 +81,11 @@ router.post('/ping', async (req, res) => {
     console.log(`🛒 Gumroad ping — email: ${email}, product: ${product_permalink}`);
 
     if (!email || !product_permalink) return;
+
+    if (product_permalink !== GUMROAD_PRODUCT_PERMALINK) {
+      console.log(`⚠️  Ignoring ping for unknown product: ${product_permalink}`);
+      return;
+    }
 
     const user = await User.findOne({ email: email.toLowerCase().trim() });
 
@@ -229,7 +234,13 @@ router.post('/verify-license', authenticateToken, async (req, res) => {
     const result = await verifyWithGumroad(licenseKey.trim());
 
     if (!result.success) {
-      return res.status(400).json({ message: 'Invalid or already used license key', error: 'INVALID_LICENSE' });
+      return res.status(400).json({ message: 'Invalid license key', error: 'INVALID_LICENSE' });
+    }
+
+    // uses_count is incremented on every verify call (increment_uses_count: 'true').
+    // A count > 1 means the key was already redeemed by someone else.
+    if ((result.purchase?.uses_count ?? 0) > 1) {
+      return res.status(400).json({ message: 'This license key has already been redeemed on another account.', error: 'KEY_ALREADY_USED' });
     }
 
     const saleId = result.purchase?.sale_id || result.purchase?.id;
