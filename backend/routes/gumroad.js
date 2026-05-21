@@ -254,6 +254,13 @@ router.post('/verify-license', authenticateToken, async (req, res) => {
     const saleId = result.purchase?.sale_id || result.purchase?.id;
     await upgradeToPremium(user, licenseKey.trim(), saleId);
 
+    // Remove any PendingUpgrade tied to this purchase's email so no one
+    // can claim the same purchase again via the OTP claim flow.
+    const purchaseEmail = result.purchase?.email;
+    if (purchaseEmail) {
+      await PendingUpgrade.deleteOne({ email: purchaseEmail.toLowerCase().trim() });
+    }
+
     console.log(`✅ ${user.email} redeemed Gumroad license key`);
 
     res.json({
