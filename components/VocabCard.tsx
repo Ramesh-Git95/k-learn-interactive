@@ -55,6 +55,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
   const speak = (e: React.MouseEvent) => {
     e.stopPropagation();
     if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(item.korean);
       u.lang = 'ko-KR'; u.rate = 0.8;
       window.speechSynthesis.speak(u);

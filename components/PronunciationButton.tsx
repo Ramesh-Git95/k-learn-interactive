@@ -48,7 +48,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
   size = 'sm',
   hintKey,
 }) => {
-  const { hasPremiumAccess } = useAuth();
+  const { hasPremiumAccess, isAuthenticated } = useAuth();
   const isPremium = hasPremiumAccess();
   const { state, result, isSupported, start, reset } = useSpeechRecognition();
 
@@ -112,11 +112,19 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
   const isSm = size === 'sm';
 
   if (!isPremium) {
+    const handleLockedClick = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (!isAuthenticated) {
+        window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' }));
+      } else {
+        window.open(GUMROAD_URL, '_blank');
+      }
+    };
     return (
       <div className="flex flex-col items-center gap-1" onClick={e => e.stopPropagation()}>
         <button
-          onClick={e => { e.stopPropagation(); window.open(GUMROAD_URL, '_blank'); }}
-          title="Premium feature — upgrade to practice pronunciation"
+          onClick={handleLockedClick}
+          title={isAuthenticated ? 'Premium feature — upgrade to practice pronunciation' : 'Sign up free to unlock pronunciation practice'}
           className={`flex items-center gap-1.5 rounded-xl font-semibold transition-all duration-200 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:text-pink-400 ${isSm ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm'}`}
         >
           <span>🔒</span>
