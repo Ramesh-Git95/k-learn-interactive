@@ -75,6 +75,17 @@ function verifyWithGumroad(licenseKey) {
 // ─────────────────────────────────────────────────────────────────────────────
 router.post('/ping', async (req, res) => {
   try {
+    // Reject pings that don't carry the shared secret configured in Gumroad
+    // product settings → Advanced → Ping URL secret.
+    const PING_SECRET = process.env.GUMROAD_PING_SECRET;
+    if (PING_SECRET) {
+      const incoming = req.headers['x-gumroad-secret'] || req.body.secret;
+      if (incoming !== PING_SECRET) {
+        console.warn('⛔ Gumroad ping rejected — bad secret');
+        return res.sendStatus(200); // still 200 so Gumroad doesn't retry
+      }
+    }
+
     res.sendStatus(200); // respond fast — Gumroad retries on timeout
 
     const { product_permalink, email, sale_id, license_key } = req.body;
