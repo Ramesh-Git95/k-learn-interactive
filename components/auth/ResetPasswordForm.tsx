@@ -1,6 +1,5 @@
 import { useState, FormEvent } from 'react';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { apiClient } from '../../services/apiClient';
 
 interface Props {
   token: string;
@@ -30,14 +29,9 @@ export function ResetPasswordForm({ token, onSuccess }: Props) {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/reset-password/${token}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || 'Reset failed. The link may have expired.');
+      const result = await apiClient.resetPassword(token, password);
+      if (!result.success) {
+        setError((result as any).error || 'Reset failed. The link may have expired.');
       } else {
         setDone(true);
       }

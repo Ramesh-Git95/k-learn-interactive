@@ -23,6 +23,11 @@ const userSchema = new mongoose.Schema({
     maxlength: [50, 'Name cannot be more than 50 characters']
   },
   
+  // Terms acceptance
+  acceptedTermsAt: {
+    type: Date
+  },
+
   // Account status
   isActive: {
     type: Boolean,

@@ -1,6 +1,5 @@
 import { useState, FormEvent } from 'react';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { apiClient } from '../../services/apiClient';
 
 interface Props {
   onBack: () => void;
@@ -17,14 +16,9 @@ export function ForgotPasswordForm({ onBack }: Props) {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || 'Something went wrong. Please try again.');
+      const result = await apiClient.forgotPassword(email);
+      if (!result.success) {
+        setError((result as any).error || 'Something went wrong. Please try again.');
       } else {
         setSent(true);
       }

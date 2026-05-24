@@ -43,7 +43,7 @@ class ApiClient {
         if (response.status === 401 && data.error === 'TOKEN_EXPIRED') {
           localStorage.removeItem('token');
           this.token = null;
-          window.location.href = '/login';
+          window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }));
         }
         
         return {
@@ -83,7 +83,7 @@ class ApiClient {
   async register(name: string, email: string, password: string) {
     return this.request<{ token: string; user: any }>('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, acceptedTerms: true }),
     });
   }
 
@@ -108,6 +108,20 @@ class ApiClient {
   async logout() {
     return this.request<{ message: string }>('/auth/logout', {
       method: 'POST',
+    });
+  }
+
+  async forgotPassword(email: string) {
+    return this.request<{ message: string }>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async resetPassword(token: string, password: string) {
+    return this.request<{ message: string }>(`/auth/reset-password/${token}`, {
+      method: 'POST',
+      body: JSON.stringify({ password }),
     });
   }
 

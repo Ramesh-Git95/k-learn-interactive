@@ -17,6 +17,7 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
   useEffect(() => { setMode(initialMode); }, [initialMode]);
 
   useEffect(() => {
+    if (isOpen) clearError();
     document.body.style.overflow = isOpen ? 'hidden' : 'unset';
     return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
@@ -54,15 +55,3 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
   );
 }
 
-export function useAuthModal() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [mode, setMode] = useState<'login' | 'register'>('login');
-
-  return {
-    isOpen,
-    mode,
-    openLogin:    () => { setMode('login');    setIsOpen(true); },
-    openRegister: () => { setMode('register'); setIsOpen(true); },
-    close:        () => setIsOpen(false),
-  };
-}

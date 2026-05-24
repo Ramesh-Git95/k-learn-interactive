@@ -24,9 +24,9 @@ export function RegisterForm({ onToggleMode, onSuccess }: RegisterFormProps) {
   const passwordsMatch = password === confirmPassword;
   const isFormValid = isNameValid && isEmailValid && isPasswordValid && passwordsMatch && acceptTerms;
 
-  const pwStrength = password.length >= 8 ? 'strong' : password.length >= 6 ? 'good' : 'weak';
+  const pwStrength = password.length >= 12 ? 'strong' : password.length >= 8 ? 'good' : password.length >= 6 ? 'weak' : 'short';
   const pwColor = pwStrength === 'strong' ? '#22C55E' : pwStrength === 'good' ? '#F59E0B' : '#EF4444';
-  const pwLabel = pwStrength === 'strong' ? 'Strong' : pwStrength === 'good' ? 'Good' : 'Too short';
+  const pwLabel = pwStrength === 'strong' ? 'Strong' : pwStrength === 'good' ? 'Good' : pwStrength === 'weak' ? 'Weak' : 'Too short';
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

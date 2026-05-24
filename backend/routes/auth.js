@@ -44,13 +44,20 @@ const authRateLimit = rateLimit(15 * 60 * 1000, 10); // 10 requests per 15 minut
 // @access  Public
 router.post('/register', authRateLimit, async (req, res) => {
   try {
-    const { email, password, name } = req.body;
-    
+    const { email, password, name, acceptedTerms } = req.body;
+
     // Validation
     if (!email || !password || !name) {
       return res.status(400).json({
         message: 'All fields are required',
         error: 'MISSING_FIELDS'
+      });
+    }
+
+    if (!acceptedTerms) {
+      return res.status(400).json({
+        message: 'You must accept the Terms of Service and Privacy Policy',
+        error: 'TERMS_NOT_ACCEPTED'
       });
     }
     
@@ -75,6 +82,7 @@ router.post('/register', authRateLimit, async (req, res) => {
       email,
       password,
       name: name.trim(),
+      acceptedTermsAt: new Date(),
       progress: {
         lastActiveDate: new Date()
       }
