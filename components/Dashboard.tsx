@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Section, Bookmark } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useProgress } from '../contexts/ProgressContext';
+import { useToastContext } from '../contexts/ToastContext';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
 import { useXPStreak } from '../hooks/useXPStreak';
@@ -47,11 +48,13 @@ const PRACTICE_TOOLS: { id: Section; label: string; icon: string; sub: string; f
 ];
 
 const MOTIVATIONAL = [
-  { ko: '할 수 있어요!',    en: 'You can do it!' },
-  { ko: '화이팅!',          en: 'Fighting!' },
-  { ko: '열심히 해요!',    en: 'Work hard!' },
-  { ko: '잘 하고 있어요!', en: "You're doing great!" },
-  { ko: '포기하지 마요!',  en: "Don't give up!" },
+  { ko: '할 수 있어요!',       en: 'You can do it!' },
+  { ko: '화이팅!',             en: 'Fighting!' },
+  { ko: '열심히 해요!',       en: 'Work hard!' },
+  { ko: '잘 하고 있어요!',    en: "You're doing great!" },
+  { ko: '포기하지 마요!',     en: "Don't give up!" },
+  { ko: '오늘도 화이팅!',     en: 'Keep going today!' },
+  { ko: '조금씩 나아가요!',   en: 'Progress step by step!' },
 ];
 
 const LEVEL_NAMES = ['', 'Beginner', 'Elementary', 'Pre-Intermediate', 'Intermediate', 'Upper-Int.', 'Advanced', 'Proficient', 'Expert', 'Master', 'Legend'];
@@ -68,6 +71,7 @@ export default function Dashboard({
 }: DashboardProps) {
   const { user, isAuthenticated }   = useAuth();
   const { syncLocalData, isSyncing } = useProgress();
+  const { showToast } = useToastContext();
   const { subscriptionTier }         = useFeatureAccess();
   const { openUpgradeModal }         = useUpgradeModal();
   const { stats: srsStats }          = useSRSContext();
@@ -217,7 +221,14 @@ export default function Dashboard({
             <div className="relative z-10 mt-4 flex items-center justify-between">
               <span className="text-gray-500 text-xs">Progress is auto-synced to the cloud</span>
               <button
-                onClick={async () => { try { await syncLocalData(); } catch { /* ignore */ } }}
+                onClick={async () => {
+                  try {
+                    await syncLocalData();
+                    showToast('Progress synced!', 'success');
+                  } catch {
+                    showToast('Sync failed. Check your connection.', 'error');
+                  }
+                }}
                 disabled={isSyncing}
                 className="flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-semibold text-white border border-white/20 hover:border-pink-400/50 transition-colors disabled:opacity-40"
               >
@@ -279,14 +290,20 @@ export default function Dashboard({
           </div>
 
           {/* SRS Due Now */}
-          <div className={`stat-card bg-white dark:bg-gray-900 rounded-2xl p-5 border shadow-sm ${
-            srsStats.totalDue > 0 ? 'border-pink-200 dark:border-pink-800 ring-1 ring-pink-200 dark:ring-pink-800' : 'border-gray-100 dark:border-gray-800'
-          }`}>
+          <button
+            onClick={() => setActiveSection('srs')}
+            className={`stat-card bg-white dark:bg-gray-900 rounded-2xl p-5 border shadow-sm text-left group ${
+              srsStats.totalDue > 0 ? 'border-pink-200 dark:border-pink-800 ring-1 ring-pink-200 dark:ring-pink-800 hover:border-pink-400 dark:hover:border-pink-600' : 'border-gray-100 dark:border-gray-800 hover:border-violet-200 dark:hover:border-violet-800'
+            } transition-colors`}
+          >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-lg mb-3 shadow">🧠</div>
             <div className="text-2xl font-black text-gray-900 dark:text-white">{srsStats.totalDue}</div>
             <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">cards to review</div>
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300 mt-1">SRS Due Now</div>
-          </div>
+            <div className="mt-2 text-[11px] font-bold text-violet-500 dark:text-violet-400 group-hover:underline">
+              {srsStats.totalDue > 0 ? 'Review now →' : 'Open SRS →'}
+            </div>
+          </button>
 
           {/* Bookmarks — clickable to start flashcard session */}
           <button
@@ -298,11 +315,9 @@ export default function Dashboard({
             <div className="text-2xl font-black text-gray-900 dark:text-white">{bookmarks.length}</div>
             <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">saved words</div>
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300 mt-1">Bookmarks</div>
-            {bookmarks.length > 0 && (
-              <div className="mt-2 text-[11px] font-bold text-yellow-500 dark:text-yellow-400 group-hover:underline">
-                Study flashcards →
-              </div>
-            )}
+            <div className="mt-2 text-[11px] font-bold text-yellow-500 dark:text-yellow-400 group-hover:underline">
+              {bookmarks.length > 0 ? 'Study flashcards →' : 'Bookmark words while studying'}
+            </div>
           </button>
         </div>
 
@@ -321,7 +336,7 @@ export default function Dashboard({
               <span className="text-sm text-gray-400 dark:text-gray-500 italic">{dailyWord.romanization}</span>
               <span className="text-base font-semibold text-gray-700 dark:text-gray-300">— {dailyWord.english}</span>
             </div>
-            <span className="inline-block mt-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400">{(dailyWord as any).category}</span>
+            <span className="inline-block mt-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400">{dailyWord.category}</span>
           </div>
           <button
             onClick={() => setActiveSection('vocabulary')}
@@ -491,7 +506,10 @@ export default function Dashboard({
 
         {/* ── Learning Path ────────────────────────────── */}
         <LearningPath
-          currentSection="dashboard"
+          currentSection={
+            (['hangul', 'vocabulary', 'phrases', 'grammar', 'culture', 'quiz'] as Section[])
+              .find(id => !progress[`section_${id}`]) ?? 'quiz'
+          }
           setActiveSection={setActiveSection}
           progress={progress}
         />

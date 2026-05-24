@@ -84,7 +84,7 @@ const LearningPath: React.FC<LearningPathProps> = ({ currentSection, setActiveSe
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 mb-8">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
         <span className="mr-2">🗺️</span>
         Your Learning Path
