@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { vocabulary } from '../data/koreanData';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
-import { GUMROAD_URL } from '../constants';
+import { useUpgradeModal } from '../contexts/UpgradeModalContext';
 
 interface Word {
   korean: string;
@@ -60,6 +60,7 @@ interface RoundResult {
 const TypingDojo: React.FC = () => {
   const { subscriptionTier } = useFeatureAccess();
   const isFree = subscriptionTier === 'free';
+  const { openUpgradeModal } = useUpgradeModal();
   const TOTAL_SECONDS = isFree ? DEMO_SECONDS : FULL_SECONDS;
   const [state, setState] = useState<GameState>('idle');
   const [queue, setQueue] = useState<Word[]>([]);
@@ -239,7 +240,7 @@ const TypingDojo: React.FC = () => {
             <p className="text-sm font-black text-gray-900 dark:text-white mb-1">You got {correct} right in 15 seconds!</p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Imagine what you could do in 60 seconds. The full challenge is waiting.</p>
             <button
-              onClick={() => window.open(GUMROAD_URL, '_blank')}
+              onClick={openUpgradeModal}
               className="px-7 py-2.5 text-white text-sm font-black rounded-xl hover:scale-[1.02] transition-transform"
               style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
             >

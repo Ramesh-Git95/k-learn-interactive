@@ -7,8 +7,7 @@ import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { useSRSContext } from '../contexts/SRSContext';
 import { useToastContext } from '../contexts/ToastContext';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
-
-const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
+import { GUMROAD_URL } from '../constants';
 
 const TYPE_LABEL: Record<WordType, string> = {
   noun:        'Noun',

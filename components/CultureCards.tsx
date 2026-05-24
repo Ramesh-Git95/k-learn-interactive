@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { LockedRowBanner } from './PremiumLock';
-import { GUMROAD_URL } from '../constants';
+import { useUpgradeModal } from '../contexts/UpgradeModalContext';
 
 const FREE_CATEGORY = 'Social';
 
@@ -229,6 +229,7 @@ const CATEGORIES = ['All', 'Social', 'Food', 'Language', 'Society', 'Modern Kore
 const CultureCards: React.FC = () => {
   const { subscriptionTier } = useFeatureAccess();
   const isFree = subscriptionTier === 'free';
+  const { openUpgradeModal } = useUpgradeModal();
   const [activeCategory, setActiveCategory] = useState(isFree ? FREE_CATEGORY : 'All');
   const [flipped, setFlipped] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -409,7 +410,7 @@ const CultureCards: React.FC = () => {
               <div
                 key={card.id}
                 className="flex flex-col items-center justify-center text-center p-4 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 cursor-pointer hover:border-pink-300 dark:hover:border-pink-700 transition-colors group"
-                onClick={() => window.open(GUMROAD_URL, '_blank')}
+                onClick={openUpgradeModal}
               >
                 <p className="text-xl font-black text-gray-300 dark:text-gray-600 group-hover:text-pink-400 dark:group-hover:text-pink-500 transition-colors mb-1">{card.korean}</p>
                 <p className="text-[10px] text-gray-300 dark:text-gray-600">{card.category}</p>
