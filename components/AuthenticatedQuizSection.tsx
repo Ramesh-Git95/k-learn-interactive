@@ -197,7 +197,7 @@ const QuizComponent: React.FC = () => {
 
   const generateQuestions = useCallback(() => {
     const shuffledVocab = [...allVocab].sort(() => 0.5 - Math.random());
-    const questionCount = Math.min(maxQuestions, 10);
+    const questionCount = maxQuestions;
     const quizItems = shuffledVocab.slice(0, questionCount);
 
     const newQuestions: QuizQuestion[] = quizItems.map((item) => {
