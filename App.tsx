@@ -628,7 +628,9 @@ const App: React.FC = () => {
       <AuthModalProvider>
         <ProgressProvider>
           <SRSProvider>
-            <AppContent />
+            <UpgradeModalProvider>
+              <AppContent />
+            </UpgradeModalProvider>
           </SRSProvider>
         </ProgressProvider>
       </AuthModalProvider>
@@ -640,10 +642,8 @@ const App: React.FC = () => {
 const AppWithToast: React.FC = () => {
   return (
     <ToastProvider>
-      <UpgradeModalProvider>
-        <App />
-        <ToastContainerWrapper />
-      </UpgradeModalProvider>
+      <App />
+      <ToastContainerWrapper />
     </ToastProvider>
   );
 };
