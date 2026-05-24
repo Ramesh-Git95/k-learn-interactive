@@ -63,7 +63,7 @@ const COMPARISON_ROWS = [
   { feature: 'Future features',          free: '✕',                        premium: 'All included' },
 ];
 
-const FREE_BULLETS    = ['Hangul alphabet & pronunciation', '3 vocab categories (39 words)', '4 grammar patterns (60%)', '5 AI chats per day', 'Full spaced repetition (SRS)', 'Progress tracking'];
+const FREE_BULLETS    = ['Hangul alphabet & pronunciation', '3 vocab categories (39 words)', '5 of 7 grammar patterns (basic)', '5 AI chats per day', 'Full spaced repetition (SRS)', 'Progress tracking'];
 const PREMIUM_BULLETS = ['Everything in Free', 'All 94 vocabulary words', 'All 7 grammar patterns + advanced', '50 AI chats per day', 'All 6 Honorific categories', 'All 24 Culture Cards', 'Full 60-sec Typing Dojo', 'Unlimited TOPIK questions', 'All 6 scripted conversation scenarios', 'Unlimited bookmarks + cloud sync', 'Every new feature, forever'];
 
 const FAQ = [
@@ -112,6 +112,7 @@ const HangulDemo: React.FC = () => {
 
   const speak = (char: string) => {
     if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(char);
       u.lang = 'ko-KR'; u.rate = 0.75;
       window.speechSynthesis.speak(u);
@@ -476,7 +477,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
           </FadeIn>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { section: 'vocabulary' as const, emoji: '📖', title: 'Vocabulary', desc: '1,000+ Korean words with native pronunciation audio', gradient: 'from-pink-500 to-rose-500' },
+              { section: 'vocabulary' as const, emoji: '📖', title: 'Vocabulary', desc: '39 free words across 3 categories · 1,000+ with Premium. Click to hear native pronunciation.', gradient: 'from-pink-500 to-rose-500' },
               { section: 'grammar'    as const, emoji: '✏️', title: 'Grammar',    desc: 'Sentence patterns from particles to verb endings',    gradient: 'from-violet-500 to-purple-600' },
               { section: 'culture'   as const, emoji: '🎌', title: 'Culture',    desc: 'K-pop, K-drama, regions, customs & daily Korean life', gradient: 'from-orange-400 to-pink-500' },
             ].map((item, i) => (
@@ -674,10 +675,10 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                 onClick={handleStart}
                 className="btn-primary block w-full py-3.5 rounded-2xl font-bold text-white text-sm text-center"
               >
-                Create Free Account → Upgrade Inside
+                Start Free · Upgrade to Premium Inside →
               </button>
               <p className="text-center text-xs text-gray-500 mt-3">
-                Sign up free · upgrade to Premium from your profile · payment via Gumroad
+                Create free account · upgrade to Lifetime from your profile · payment via Gumroad
               </p>
               <p className="text-center text-xs text-gray-600 mt-1">
                 <button

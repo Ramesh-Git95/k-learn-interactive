@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import FooterPageModal, { type FooterPage } from './FooterPageModal';
+import { useAuth } from '../contexts/AuthContext';
+
+const PUBLIC_SECTIONS = ['vocabulary', 'grammar', 'culture'];
 
 const Footer: React.FC = () => {
   const year = new Date().getFullYear();
   const [activePage, setActivePage] = useState<FooterPage | null>(null);
+  const { isAuthenticated } = useAuth();
 
   // CookieConsent can open footer pages via this event
   React.useEffect(() => {
@@ -35,6 +39,10 @@ const Footer: React.FC = () => {
   ];
 
   const handleSection = (section: string) => {
+    if (!isAuthenticated && !PUBLIC_SECTIONS.includes(section)) {
+      window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' }));
+      return;
+    }
     window.dispatchEvent(new CustomEvent('navigate-to-section', { detail: section }));
   };
 
