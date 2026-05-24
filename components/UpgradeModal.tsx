@@ -1,6 +1,6 @@
 import React from 'react';
 import { GUMROAD_URL } from '../constants';
-
+import { useAuth } from '../contexts/AuthContext';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -11,6 +11,7 @@ interface UpgradeModalProps {
 }
 
 const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, description, benefits }) => {
+  const { isAuthenticated } = useAuth();
   if (!isOpen) return null;
 
   return (
@@ -61,11 +62,18 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
           {/* CTA */}
           <div className="flex flex-col gap-2">
             <button
-              onClick={() => window.open(GUMROAD_URL, '_blank')}
+              onClick={() => {
+                if (isAuthenticated) {
+                  window.open(GUMROAD_URL, '_blank');
+                } else {
+                  onClose();
+                  window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' }));
+                }
+              }}
               className="w-full py-3 rounded-xl text-white font-bold text-sm shadow-md transition-transform hover:scale-[1.02] active:scale-95"
               style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
             >
-              Get Lifetime Access — $39
+              {isAuthenticated ? 'Get Lifetime Access — $39' : 'Create Free Account to Get Started →'}
             </button>
             <button
               onClick={onClose}
