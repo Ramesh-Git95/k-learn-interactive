@@ -27,14 +27,17 @@ const UPGRADE_CONTENT: Record<string, { feature: string; description: string; be
   modern:    { feature: 'Modern Korea Trends',  description: 'Explore K-pop, tech innovations, gaming, and beauty trends!', benefits: ['K-pop industry deep-dive', 'Korean gaming & esports', 'Beauty & skincare trends', 'Technology & social movements'] },
 };
 
+const FREE_TIP_LIMIT = 5;
+
 const EnhancedCultureHub: React.FC<EnhancedCultureHubProps> = ({ progress, toggleProgress }) => {
   const { subscriptionTier } = useFeatureAccess();
   const [active, setActive] = useState<Subsection>('insights');
   const [upgradeModal, setUpgradeModal] = useState<{ open: boolean; key: string }>({ open: false, key: '' });
 
   const isTipRead = (i: number) => !!progress[`culture_tip_${i}`];
-  const readCount = cultureTips.filter((_, i) => isTipRead(i)).length;
-  const overallPct = cultureTips.length > 0 ? Math.round((readCount / cultureTips.length) * 100) : 0;
+  const visibleTips = subscriptionTier === 'free' ? cultureTips.slice(0, FREE_TIP_LIMIT) : cultureTips;
+  const readCount = visibleTips.filter((_, i) => isTipRead(i)).length;
+  const overallPct = visibleTips.length > 0 ? Math.round((readCount / visibleTips.length) * 100) : 0;
 
   const handleTabClick = (id: Subsection, isPremium?: boolean) => {
     if (isPremium && subscriptionTier === 'free') {
@@ -61,7 +64,7 @@ const EnhancedCultureHub: React.FC<EnhancedCultureHubProps> = ({ progress, toggl
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <span className="text-4xl">🇰🇷</span>
+              <span className="text-4xl">🎭</span>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-white">Korean Culture Hub</h1>
                 <p className="text-yellow-100 text-sm">한국 문화 · {cultureTips.length} cultural insights</p>
@@ -73,7 +76,7 @@ const EnhancedCultureHub: React.FC<EnhancedCultureHubProps> = ({ progress, toggl
           </div>
           {active === 'insights' && (
             <div className="flex-shrink-0 bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center min-w-[110px]">
-              <div className="text-3xl font-black text-white">{readCount}/{cultureTips.length}</div>
+              <div className="text-3xl font-black text-white">{readCount}/{visibleTips.length}</div>
               <div className="text-xs text-white/70 mb-2">tips read</div>
               <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
                 <div className="h-full bg-white rounded-full transition-all duration-700" style={{ width: `${overallPct}%` }} />
@@ -117,8 +120,6 @@ const EnhancedCultureHub: React.FC<EnhancedCultureHubProps> = ({ progress, toggl
       {/* Content area */}
       <div>
         {active === 'insights' && (() => {
-          const FREE_TIP_LIMIT = 5;
-          const visibleTips = subscriptionTier === 'free' ? cultureTips.slice(0, FREE_TIP_LIMIT) : cultureTips;
           const lockedCount = cultureTips.length - visibleTips.length;
           return (
             <div>

@@ -42,11 +42,11 @@ const LearningPath: React.FC<LearningPathProps> = ({ currentSection, setActiveSe
       difficulty: 'Intermediate',
       estimatedTime: '2-3 hours'
     },
-    { 
-      id: 'culture' as Section, 
-      title: 'Cultural Context', 
+    {
+      id: 'culture' as Section,
+      title: 'Cultural Context',
       description: 'Learn about Korean culture',
-      icon: '🏛️',
+      icon: '🎭',
       difficulty: 'All levels',
       estimatedTime: '30 minutes'
     },

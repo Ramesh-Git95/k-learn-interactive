@@ -29,7 +29,7 @@ const SECTION_META: { id: Section; name: string; icon: string; gradient: string;
   { id: 'vocabulary', name: 'Vocabulary', icon: '📖', gradient: 'from-violet-500 to-purple-600',  bar: '#7C3AED' },
   { id: 'grammar',    name: 'Grammar',    icon: '📝', gradient: 'from-orange-400 to-pink-500',    bar: '#F97316' },
   { id: 'phrases',    name: 'Phrases',    icon: '💬', gradient: 'from-teal-400 to-emerald-500',   bar: '#14B8A6' },
-  { id: 'culture',    name: 'Culture',    icon: '🎌', gradient: 'from-yellow-400 to-orange-500',  bar: '#EAB308' },
+  { id: 'culture',    name: 'Culture',    icon: '🎭', gradient: 'from-yellow-400 to-orange-500',  bar: '#EAB308' },
   { id: 'quiz',       name: 'Quiz',       icon: '🧠', gradient: 'from-blue-500 to-indigo-600',    bar: '#3B82F6' },
 ];
 
