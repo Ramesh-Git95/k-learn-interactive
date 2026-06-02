@@ -58,11 +58,14 @@ export const LockedCard: React.FC<LockedCardProps> = ({ label, sublabel, emoji =
 interface LockedRowBannerProps {
   count: number;
   label?: string;
+  /** Used when count === 1; defaults to stripping a trailing 's' from label */
+  singularLabel?: string;
 }
 
 /** Inline "N more items locked" strip — used at the bottom of partially-shown lists */
-export const LockedRowBanner: React.FC<LockedRowBannerProps> = ({ count, label = 'items' }) => {
+export const LockedRowBanner: React.FC<LockedRowBannerProps> = ({ count, label = 'items', singularLabel }) => {
   const { openUpgradeModal } = useUpgradeModal();
+  const noun = count === 1 ? (singularLabel ?? label.replace(/s$/, '')) : label;
   return (
     <div
       className="flex items-center justify-between rounded-2xl border border-dashed border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/10 px-5 py-4 cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-900/20 transition-colors"
@@ -72,7 +75,7 @@ export const LockedRowBanner: React.FC<LockedRowBannerProps> = ({ count, label =
         <span className="text-xl">🔒</span>
         <div>
           <p className="text-sm font-black text-gray-900 dark:text-white">
-            {count} more {label} with Premium
+            {count} more {noun} with Premium
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">Click to see what's included</p>
         </div>

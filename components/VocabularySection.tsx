@@ -284,7 +284,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
               </div>
               <LockedRowBanner
                 count={vocabulary.slice(FREE_CATEGORY_COUNT).reduce((a, c) => a + c.items.length, 0)}
-                label="more words"
+                label="words"
               />
             </div>
           )}

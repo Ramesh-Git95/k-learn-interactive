@@ -7,6 +7,7 @@ import { useDailyActivity } from '../hooks/useDailyActivity';
 import { LockedRowBanner } from './PremiumLock';
 import PronunciationButton from './PronunciationButton';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
+import { FREE_PHRASES_COUNT } from '../constants';
 
 interface EnhancedPhrasesSectionProps {
   bookmarks: Bookmark[];
@@ -16,9 +17,15 @@ interface EnhancedPhrasesSectionProps {
 }
 
 const CONTEXT_COLORS: Record<string, string> = {
-  'Greeting': '#EC4899', 'Farewell': '#8B5CF6', 'Polite': '#06B6D4',
-  'Casual': '#F59E0B', 'Business': '#3B82F6', 'Emergency': '#EF4444',
-  'Shopping': '#10B981', 'Restaurant': '#F97316', 'Travel': '#6366F1',
+  'Shopping':       '#10B981',
+  'Restaurant':     '#F97316',
+  'Directions':     '#6366F1',
+  'Introductions':  '#EC4899',
+  'General':        '#8B5CF6',
+  'Communication':  '#06B6D4',
+  'Feelings':       '#F59E0B',
+  'Health':         '#3B82F6',
+  'Emergency':      '#EF4444',
 };
 
 const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmarks, toggleBookmark, progress, toggleProgress }) => {
@@ -49,7 +56,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
   };
 
   const filteredPhrases = useMemo(() =>
-    subscriptionTier === 'free' ? commonPhrases.slice(0, 15) : commonPhrases,
+    subscriptionTier === 'free' ? commonPhrases.slice(0, FREE_PHRASES_COUNT) : commonPhrases,
     [subscriptionTier]);
 
   const studiedCount = filteredPhrases.filter((_, i) => {
@@ -197,30 +204,35 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
       </div>
 
       {/* Locked premium phrases */}
-      {subscriptionTier === 'free' && commonPhrases.length > filteredPhrases.length && (
-        <div className="mt-6 space-y-3">
-          {/* 3 peek phrases to trigger curiosity */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {commonPhrases.slice(filteredPhrases.length, filteredPhrases.length + 3).map(phrase => (
-              <div
-                key={phrase.korean}
-                className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 cursor-pointer hover:border-violet-300 dark:hover:border-violet-700 transition-colors"
-                onClick={openUpgradeModal}
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-bold text-gray-400 dark:text-gray-500 truncate">{phrase.korean}</p>
-                  <p className="text-xs text-gray-300 dark:text-gray-600 truncate">{phrase.english}</p>
+      {subscriptionTier === 'free' && commonPhrases.length > filteredPhrases.length && (() => {
+        const peek = commonPhrases.slice(filteredPhrases.length, filteredPhrases.length + 3);
+        const gridCols = peek.length === 1 ? 'grid-cols-1' : peek.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-3';
+        return (
+          <div className="mt-6 space-y-3">
+            {/* Up to 3 peek phrases to trigger curiosity */}
+            <div className={`grid ${gridCols} gap-3`}>
+              {peek.map(phrase => (
+                <div
+                  key={phrase.korean}
+                  className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 cursor-pointer hover:border-violet-300 dark:hover:border-violet-700 transition-colors"
+                  onClick={openUpgradeModal}
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-gray-400 dark:text-gray-500 truncate">{phrase.korean}</p>
+                    <p className="text-xs text-gray-300 dark:text-gray-600 truncate">{phrase.english}</p>
+                  </div>
+                  <span className="text-sm ml-2 flex-shrink-0">🔒</span>
                 </div>
-                <span className="text-sm ml-2 flex-shrink-0">🔒</span>
-              </div>
-            ))}
+              ))}
+            </div>
+            <LockedRowBanner
+              count={commonPhrases.length - filteredPhrases.length}
+              label="phrases"
+              singularLabel="phrase"
+            />
           </div>
-          <LockedRowBanner
-            count={commonPhrases.length - filteredPhrases.length}
-            label="phrases"
-          />
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };

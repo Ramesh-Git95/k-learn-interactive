@@ -30,7 +30,7 @@ import Footer from './components/Footer';
 import CookieConsent from './components/CookieConsent';
 import useLocalStorage from './hooks/useLocalStorage';
 import { SRSProvider, useSRSContext } from './contexts/SRSContext';
-import { LS_THEME_KEY } from './constants';
+import { LS_THEME_KEY, FREE_PHRASES_COUNT } from './constants';
 import { UpgradeModalProvider } from './contexts/UpgradeModalContext';
 import { useFeatureAccess } from './hooks/useFeatureAccess';
 import { vocabulary, grammarPatterns, commonPhrases, cultureTips, hangulCharacters, koreanRegions, dailyLifeTopics, modernKoreaTopics } from './data/koreanData';
@@ -314,7 +314,7 @@ const AppContent: React.FC = () => {
         return grammarPatterns.length;
       }
       case 'phrases': {
-        if (!premium) return 15;
+        if (!premium) return Math.min(FREE_PHRASES_COUNT, commonPhrases.length);
         return commonPhrases.length;
       }
       case 'culture': {
