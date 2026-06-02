@@ -7,8 +7,8 @@ import { PremiumLockBanner } from './PremiumLock';
 import { useDailyActivity } from '../hooks/useDailyActivity';
 import { useAuth } from '../contexts/AuthContext';
 import { useProgress } from '../contexts/ProgressContext';
+import { useUpgradeModal } from '../contexts/UpgradeModalContext';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
-import { GUMROAD_URL } from '../constants';
 
 type QuizMode = 'korean_to_english' | 'english_to_korean' | 'romanization_to_korean' | 'mixed';
 
@@ -21,129 +21,42 @@ interface QuizStats {
 }
 
 const AuthenticationRequired: React.FC = () => {
-  const { login, register } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password || (!isLogin && !name)) {
-      setError(isLogin ? 'Please enter both email and password' : 'Please fill in all fields');
-      return;
-    }
-    setIsSubmitting(true);
-    setError('');
-    try {
-      const result = isLogin
-        ? await login(email, password)
-        : await register(name, email, password);
-      if (!result.success) {
-        setError(result.error || `${isLogin ? 'Login' : 'Registration'} failed`);
-      }
-    } catch {
-      setError(`${isLogin ? 'Login' : 'Registration'} failed. Please try again.`);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const toggleMode = () => {
-    setIsLogin(!isLogin);
-    setError('');
-    setName('');
-    setEmail('');
-    setPassword('');
+  const openAuth = (mode: 'login' | 'register') => {
+    window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: mode }));
   };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-md mx-auto">
       {/* Hero */}
       <div
-        className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8 text-center"
+        className="relative rounded-3xl overflow-hidden mb-6 p-6 sm:p-8 text-center"
         style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%)' }}
       >
-        <div className="text-5xl mb-3">🎯</div>
-        <h1 className="text-2xl sm:text-3xl font-black text-white mb-1">
-          {isLogin ? 'Welcome Back!' : 'Join K-Learn'}
-        </h1>
+        <div className="text-5xl mb-3">🧠</div>
+        <h1 className="text-2xl sm:text-3xl font-black text-white mb-1">Sign in to take the quiz</h1>
         <p className="text-white/80 text-sm">
-          {isLogin ? 'Log in to track your quiz progress' : 'Create an account to save your progress'}
+          Quiz scores and stats are saved to your account
         </p>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <div>
-              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-pink-400 focus:border-transparent dark:bg-gray-800 dark:text-white text-sm"
-                placeholder="Your name"
-                disabled={isSubmitting}
-              />
-            </div>
-          )}
-          <div>
-            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-pink-400 focus:border-transparent dark:bg-gray-800 dark:text-white text-sm"
-              placeholder="you@email.com"
-              disabled={isSubmitting}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-pink-400 focus:border-transparent dark:bg-gray-800 dark:text-white text-sm"
-              placeholder="••••••••"
-              disabled={isSubmitting}
-            />
-          </div>
-          {error && (
-            <div className="text-red-600 dark:text-red-400 text-sm text-center bg-red-50 dark:bg-red-900/20 p-2.5 rounded-xl">
-              {error}
-            </div>
-          )}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full py-3 text-white font-black rounded-xl shadow-sm hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
-          >
-            {isSubmitting ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                {isLogin ? 'Logging in…' : 'Creating account…'}
-              </span>
-            ) : (
-              isLogin ? '🎯 Log In & Start Quiz' : '🚀 Create Account & Start'
-            )}
-          </button>
-        </form>
-
-        <p className="mt-4 text-sm text-center text-gray-500 dark:text-gray-400">
-          {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
-          <button onClick={toggleMode} className="font-bold text-pink-500 dark:text-pink-400 hover:underline">
-            {isLogin ? 'Sign up here' : 'Log in here'}
-          </button>
-        </p>
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 space-y-3">
+        <button
+          onClick={() => openAuth('register')}
+          className="w-full py-3 text-white font-black rounded-xl shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-sm"
+          style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+        >
+          🚀 Create a free account
+        </button>
+        <button
+          onClick={() => openAuth('login')}
+          className="w-full py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-sm"
+        >
+          Log in
+        </button>
       </div>
 
       <div className="mt-5 p-4 rounded-2xl bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800/40">
-        <p className="text-xs font-black text-violet-700 dark:text-violet-300 mb-2 uppercase tracking-wider">Why log in?</p>
+        <p className="text-xs font-black text-violet-700 dark:text-violet-300 mb-2 uppercase tracking-wider">Why sign up?</p>
         <ul className="text-xs text-violet-600 dark:text-violet-400 space-y-1">
           {['Save quiz scores & progress', 'Track your learning streaks', 'Sync across devices', 'Access detailed statistics'].map(b => (
             <li key={b}>✅ {b}</li>
@@ -174,6 +87,7 @@ const QuizComponent: React.FC = () => {
   const { updateProgress } = useProgress();
   const { canAccess, hasReachedLimit, getLimit, subscriptionTier } = useFeatureAccess();
   const { dailyActivity, trackActivity } = useDailyActivity();
+  const { openUpgradeModal } = useUpgradeModal();
   const allVocab = useMemo(() => vocabulary.flatMap(cat => cat.items), []);
 
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -203,8 +117,11 @@ const QuizComponent: React.FC = () => {
     const newQuestions: QuizQuestion[] = quizItems.map((item) => {
       let questionType: QuizQuestion['type'];
       if (quizMode === 'mixed') {
-        const types: QuizQuestion['type'][] = ['korean_to_english', 'english_to_korean', 'romanization_to_korean'];
-        questionType = types[Math.floor(Math.random() * types.length)];
+        // Free users only get the unlocked question types even in Mixed mode
+        const mixedTypes: QuizQuestion['type'][] = canAccess('advancedQuizModes')
+          ? ['korean_to_english', 'english_to_korean', 'romanization_to_korean']
+          : ['korean_to_english'];
+        questionType = mixedTypes[Math.floor(Math.random() * mixedTypes.length)];
       } else {
         questionType = quizMode;
       }
@@ -248,7 +165,7 @@ const QuizComponent: React.FC = () => {
     setTimeLeft(isTimedMode ? 30 : null);
     setShowExplanation(false);
     setQuizCompleted(false);
-  }, [allVocab, quizMode, isTimedMode, maxQuestions]);
+  }, [allVocab, quizMode, isTimedMode, maxQuestions, canAccess]);
 
   const handleAnswer = useCallback((option: string) => {
     if (selectedAnswer || timeLeft === 0) return;
@@ -353,7 +270,8 @@ const QuizComponent: React.FC = () => {
     const resultColor = percentage === 100 ? '#22C55E' : percentage >= 80 ? '#3B82F6' : percentage >= 60 ? '#F59E0B' : '#F97316';
     const resultMsg = percentage === 100 ? 'Perfect score!' : percentage >= 80 ? 'Excellent work!' : percentage >= 60 ? 'Good job! Keep going!' : 'Keep studying!';
 
-    const newAvg = ((quizStats.averageScore * quizStats.totalQuizzes + percentage) / (quizStats.totalQuizzes + 1));
+    // quizStats.averageScore is stored as a 0-1 fraction; convert to 0-100 to combine with percentage
+    const newAvg = ((quizStats.averageScore * 100 * quizStats.totalQuizzes + percentage) / (quizStats.totalQuizzes + 1));
     const newStreak = percentage === 100 ? quizStats.streak + 1 : 0;
 
     const stats = [
@@ -438,7 +356,7 @@ const QuizComponent: React.FC = () => {
         <div className="relative z-10 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-3xl">🎯</span>
+              <span className="text-3xl">🧠</span>
               <h1 className="text-xl sm:text-2xl font-black text-white">Vocabulary Quiz</h1>
             </div>
             <p className="text-white/80 text-xs">
@@ -614,7 +532,7 @@ const QuizComponent: React.FC = () => {
                 <div className="mt-2 p-2.5 bg-violet-50 dark:bg-violet-900/20 rounded-xl text-xs">
                   <p className="text-violet-700 dark:text-violet-300">
                     🔒 Detailed explanations available with{' '}
-                    <button onClick={() => window.open(GUMROAD_URL, '_blank')} className="font-black underline">Lifetime Access</button>
+                    <button onClick={openUpgradeModal} className="font-black underline">Lifetime Access</button>
                   </p>
                 </div>
               )}
