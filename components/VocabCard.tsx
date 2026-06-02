@@ -103,11 +103,6 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
 
   return (
     <div className="relative">
-      <style>{`
-        @keyframes flipHintIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes flipHintTap { from { transform: scale(1); } to { transform: scale(1.3); } }
-      `}</style>
-
       {/* One-time flip hint bubble */}
       {showFlipBubble && (
         <div className="absolute left-1/2 z-30 flex flex-col items-center pointer-events-none" style={{ bottom: 'calc(100% + 8px)', transform: 'translateX(-50%)', maxWidth: 'min(200px, 90vw)' }}>
@@ -190,18 +185,20 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
         {examples.length > 0 && (
           <button
             onClick={e => requireAuth(e, () => setShowExamples(true))}
+            title={isAuthenticated ? 'See example sentences' : 'Sign in to see examples'}
             className="text-xs font-semibold px-3 py-1.5 rounded-xl transition-all hover:scale-105"
             style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.1), rgba(139,92,246,0.1))', color: '#EC4899' }}
           >
-            💡 Examples
+            {isAuthenticated ? '💡 Examples' : '🔒 Examples'}
           </button>
         )}
         <button
           onClick={e => requireAuth(e, () => setShowAddToSRS(true))}
+          title={isAuthenticated ? 'Add this word to a spaced repetition deck' : 'Sign in to add to SRS'}
           className="text-xs font-semibold px-3 py-1.5 rounded-xl transition-all hover:scale-105"
           style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(6,182,212,0.1))', color: '#8B5CF6' }}
         >
-          ＋ SRS
+          {isAuthenticated ? '＋ SRS' : '🔒 SRS'}
         </button>
         <PronunciationButton korean={item.korean} romanization={item.romanization} size="sm" hintKey={showPronunciationHint ? 'vocab' : undefined} />
       </div>

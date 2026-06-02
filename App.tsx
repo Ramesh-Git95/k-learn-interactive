@@ -32,6 +32,7 @@ import useLocalStorage from './hooks/useLocalStorage';
 import { SRSProvider, useSRSContext } from './contexts/SRSContext';
 import { LS_THEME_KEY } from './constants';
 import { UpgradeModalProvider } from './contexts/UpgradeModalContext';
+import { useFeatureAccess } from './hooks/useFeatureAccess';
 import { vocabulary, grammarPatterns, commonPhrases, cultureTips, hangulCharacters, koreanRegions, dailyLifeTopics, modernKoreaTopics } from './data/koreanData';
 import { useProgress } from './contexts/ProgressContext';
 import LearningPath from './components/LearningPath';
@@ -57,6 +58,7 @@ import ReadingSection from './components/ReadingSection';
 const AppContent: React.FC = () => {
   const { user, isLoading: authLoading, hasPremiumAccess, isAuthenticated, refreshUser } = useAuth();
   const { showToast } = useToastContext();
+  const { getLimit } = useFeatureAccess();
   const { actions: srsActions } = useSRSContext();
   const [theme, setTheme] = useLocalStorage<'dark' | 'light'>(LS_THEME_KEY, 'light');
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -249,13 +251,19 @@ const AppContent: React.FC = () => {
 
   const toggleBookmark = useCallback(async (itemToToggle: Bookmark) => {
     const isBookmarked = bookmarks.some(b => b.korean === itemToToggle.korean);
-    
+
     if (isBookmarked) {
       await removeBookmark(itemToToggle.korean);
-    } else {
-      await addBookmark(itemToToggle);
+      return;
     }
-  }, [bookmarks, addBookmark, removeBookmark, isAuthenticated]);
+
+    const limit = getLimit('bookmarksLimit') as number;
+    if (limit !== Infinity && bookmarks.length >= limit) {
+      showToast(`Free plan allows ${limit} bookmarks. Upgrade to save unlimited.`, 'warning');
+      return;
+    }
+    await addBookmark(itemToToggle);
+  }, [bookmarks, addBookmark, removeBookmark, isAuthenticated, getLimit, showToast]);
 
   const toggleProgress = useCallback(async (key: string) => {
     const currentValue = progress[key] || false;

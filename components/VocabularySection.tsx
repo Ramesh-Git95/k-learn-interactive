@@ -40,22 +40,22 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
     if (!progress[key]) toggleProgress(key);
   };
 
-  useEffect(() => {
-    vocabulary.forEach(category => {
-      const key = `vocab_${category.name}`;
-      const studiedCount = category.items.filter(i => progress[`vocab_item_${i.korean}`]).length;
-      if (studiedCount === category.items.length && category.items.length > 0 && !progress[key]) {
-        toggleProgress(key);
-      }
-    });
-  }, [progress, toggleProgress]);
-
   const FREE_CATEGORY_COUNT = 3;
 
   const displayVocabulary = useMemo((): VocabCategory[] => {
     if (subscriptionTier === 'free') return vocabulary.slice(0, FREE_CATEGORY_COUNT);
     return vocabulary;
   }, [subscriptionTier]);
+
+  useEffect(() => {
+    displayVocabulary.forEach(category => {
+      const key = `vocab_${category.name}`;
+      const studiedCount = category.items.filter(i => progress[`vocab_item_${i.korean}`]).length;
+      if (studiedCount === category.items.length && category.items.length > 0 && !progress[key]) {
+        toggleProgress(key);
+      }
+    });
+  }, [progress, toggleProgress, displayVocabulary]);
 
   // Re-trigger gate once when guest has studied all free visible cards
   const GUEST_LIMIT_TOP = 5;
@@ -82,8 +82,11 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
 
   const markItemWithLimit = (item: VocabItem) => {
     if (subscriptionTier === 'free' && hasReachedLimit('vocabularyStudyPerDay', currentVocabCount)) return false;
-    if (!isAuthenticated) setGuestFlipCount(c => c + 1);
-    trackActivity('vocabulary', 1);
+    if (!isAuthenticated) {
+      setGuestFlipCount(c => c + 1);
+    } else {
+      trackActivity('vocabulary', 1);
+    }
     markItemAsStudied(item);
     return true;
   };
@@ -109,7 +112,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
               <span className="text-4xl">📖</span>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-white">Essential Vocabulary</h1>
-                <p className="text-purple-100 text-sm">필수 어휘 · {totalWords}+ words</p>
+                <p className="text-purple-100 text-sm">필수 어휘 · {totalWords} words</p>
               </div>
             </div>
             <p className="text-white/80 text-sm max-w-lg">
@@ -208,18 +211,18 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
                       </div>
                     </div>
                   </div>
-                  <button
-                    onClick={() => toggleProgress(`vocab_${category.name}`)}
-                    className={`flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl transition-all duration-200 ${
+                  <div
+                    className={`flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl ${
                       isCompleted
                         ? 'bg-green-500 text-white'
-                        : catProgress.percentage === 100
-                        ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-500 hover:text-white border border-green-200 dark:border-green-700'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
                     }`}
+                    title={isCompleted ? 'All words in this category studied' : `Study all ${catProgress.total} words to complete`}
                   >
-                    {isCompleted ? '✓ Completed' : 'Mark Complete'}
-                  </button>
+                    {isCompleted
+                      ? '✓ Completed'
+                      : `${catProgress.total - catProgress.studied} left`}
+                  </div>
                 </div>
 
                 {/* Cards grid */}
@@ -233,19 +236,22 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
                   return (
                     <>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                        {visibleItems.map((item, idx) => (
-                          <VocabCard
-                            key={item.korean}
-                            item={item}
-                            isBookmarked={isBookmarked(item)}
-                            toggleBookmark={toggleBookmark}
-                            onStudy={() => markItemWithLimit(item)}
-                            isStudied={!!progress[`vocab_item_${item.korean}`]}
-                            disabled={limitReached}
-                            showPronunciationHint={idx === 0}
-                            showFlipHint={isFirstCategory && idx === 0}
-                          />
-                        ))}
+                        {visibleItems.map((item, idx) => {
+                          const studied = !!progress[`vocab_item_${item.korean}`];
+                          return (
+                            <VocabCard
+                              key={item.korean}
+                              item={item}
+                              isBookmarked={isBookmarked(item)}
+                              toggleBookmark={toggleBookmark}
+                              onStudy={() => markItemWithLimit(item)}
+                              isStudied={studied}
+                              disabled={limitReached && !studied}
+                              showPronunciationHint={idx === 0}
+                              showFlipHint={isFirstCategory && idx === 0}
+                            />
+                          );
+                        })}
                       </div>
                       {showGate && (
                         <GuestSignUpGate
