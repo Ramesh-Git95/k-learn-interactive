@@ -310,7 +310,7 @@ const AppContent: React.FC = () => {
         return vocabulary.reduce((t: number, c: any) => t + c.items.length, 0);
       }
       case 'grammar': {
-        if (!premium) return Math.floor(grammarPatterns.length * 0.6);
+        if (!premium) return Math.ceil(grammarPatterns.length * 0.6);
         return grammarPatterns.length;
       }
       case 'phrases': {
