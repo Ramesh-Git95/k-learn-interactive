@@ -440,18 +440,10 @@ const TopikPrepSection: React.FC = () => {
         </span>
       </div>
 
-      {/* Free limit wall */}
-      {freeLimitHit && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden mb-4">
-          <PremiumLockBanner
-            title="TOPIK Prep — Premium"
-            description={`You've tried all ${FREE_QUESTION_LIMIT} sample questions! Upgrade to unlock all 35 official-style questions across TOPIK I and TOPIK II.`}
-          />
-        </div>
-      )}
-
-      {/* Question card */}
-      {!freeLimitHit && (
+      {/* Question card — stays visible (with feedback) even once the free limit
+          is hit, so the last answered question's explanation is readable. The
+          upgrade wall is shown below instead of abruptly replacing the card. */}
+      {(!freeLimitHit || chosen !== null) && (
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden mb-4">
         {/* Question header */}
         <div className="px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
@@ -528,9 +520,19 @@ const TopikPrepSection: React.FC = () => {
           {qIdx + 1 >= questions.length ? '🏁 See Results' : 'Next Question →'}
         </button>
       )}
+
+      {/* Free limit wall — shown after the last answered question's feedback */}
+      {freeLimitHit && (
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden mb-4">
+          <PremiumLockBanner
+            title="TOPIK Prep — Premium"
+            description={`You've tried all ${FREE_QUESTION_LIMIT} sample questions! Upgrade to unlock all 36 official-style questions across TOPIK I and TOPIK II.`}
+          />
+        </div>
+      )}
       {isFree && (
         <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
-          {FREE_QUESTION_LIMIT - Math.min(totalAnswered, FREE_QUESTION_LIMIT)} sample question{FREE_QUESTION_LIMIT - Math.min(totalAnswered, FREE_QUESTION_LIMIT) !== 1 ? 's' : ''} remaining · <button onClick={openUpgradeModal} className="text-violet-500 font-black hover:underline">Unlock all 35 →</button>
+          {FREE_QUESTION_LIMIT - Math.min(totalAnswered, FREE_QUESTION_LIMIT)} sample question{FREE_QUESTION_LIMIT - Math.min(totalAnswered, FREE_QUESTION_LIMIT) !== 1 ? 's' : ''} remaining · <button onClick={openUpgradeModal} className="text-violet-500 font-black hover:underline">Unlock all 36 →</button>
         </p>
       )}
     </div>
