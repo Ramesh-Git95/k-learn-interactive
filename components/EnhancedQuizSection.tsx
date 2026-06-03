@@ -176,13 +176,12 @@ const EnhancedQuizSection: React.FC<EnhancedQuizSectionProps> = ({ progress, tog
       <div className="flex flex-wrap justify-center gap-2 mb-8">
         {modes.map(mode => (
           <Tooltip
+            key={mode.id}
             content={mode.tooltip}
             position="top"
             maxWidth="max-w-xs"
-            trigger="hover"
           >
             <button
-              key={mode.id}
               onClick={() => setQuizMode(mode.id)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                 quizMode === mode.id

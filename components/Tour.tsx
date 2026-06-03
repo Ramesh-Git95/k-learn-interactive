@@ -220,7 +220,7 @@ const Tour: React.FC<TourProps> = ({ steps, isOpen, onComplete, onSkip, tourId }
     localStorage.setItem(`tour_skipped_${tourId}`, 'true');
   };
 
-  const getTooltipPosition = () => {
+  const getTooltipPosition = (): React.CSSProperties => {
     if (!targetPosition || !tooltipRef.current) {
       // Fallback to center of visible viewport if positioning fails
       return {
