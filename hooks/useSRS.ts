@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { SpacedRepetitionSystem, SRSCard, SRSDeck, SRSReview } from '../services/spacedRepetition';
 import useLocalStorage from './useLocalStorage';
 import { useAuth } from '../contexts/AuthContext';
@@ -101,7 +101,10 @@ export interface UseSRSReturn {
 }
 
 const useSRS = (): UseSRSReturn => {
-  const srs = new SpacedRepetitionSystem();
+  // Stateless engine — memoize so it isn't recreated every render, which would
+  // make every action callback (startStudySession, submitReview, …) a new
+  // reference each render and defeat their useCallback memoization.
+  const srs = useMemo(() => new SpacedRepetitionSystem(), []);
   const { user, token } = useAuth();
   
   // Load and sanitize data from localStorage
@@ -121,12 +124,6 @@ const useSRS = (): UseSRSReturn => {
     
     // Only update if the actual data structure changed
     if (currentDecksCount !== newDecksCount || currentCardCount !== newCardCount) {
-      console.log('🔄 Updating decks from rawDecks:', { 
-        decks: newDecksCount, 
-        cards: newCardCount,
-        oldDecks: currentDecksCount,
-        oldCards: currentCardCount
-      });
       setDecks(sanitizedDecks);
     }
   }, [rawDecks]);
@@ -144,7 +141,6 @@ const useSRS = (): UseSRSReturn => {
           const newCardCount = sanitizedDecks.reduce((sum, deck) => sum + deck.cards.length, 0);
           
           if (decks.length !== sanitizedDecks.length || currentCardCount !== newCardCount) {
-            console.log('📡 Storage event received, updating decks:', sanitizedDecks.length);
             setDecks(sanitizedDecks);
           }
         } catch (error) {
@@ -159,18 +155,9 @@ const useSRS = (): UseSRSReturn => {
   
   // Database sync functions
   const syncToDatabase = useCallback(async (decksToSync: SRSDeck[]) => {
-    if (!user || !token) {
-      console.log('🔒 User not authenticated, skipping database sync');
-      return;
-    }
+    if (!user || !token) return;
 
     try {
-      console.log('🔄 Syncing SRS data to database...');
-      console.log('🔑 Token exists:', !!token);
-      console.log('👤 User ID:', user.id);
-      console.log('📊 Decks to sync:', decksToSync.length);
-      console.log('📋 First deck sample:', decksToSync[0] ? JSON.stringify(decksToSync[0], null, 2) : 'No decks');
-      
       // Prepare data for sync with proper date handling
       const syncData = {
         decks: decksToSync.map(deck => ({
@@ -188,8 +175,6 @@ const useSRS = (): UseSRSReturn => {
         }))
       };
       
-      console.log('📤 Serialized data size:', JSON.stringify(syncData).length, 'characters');
-      
       const response = await fetch(`${API_BASE_URL}/srs/sync`, {
         method: 'POST',
         headers: {
@@ -199,13 +184,9 @@ const useSRS = (): UseSRSReturn => {
         body: JSON.stringify(syncData)
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('✅ SRS data synced to database:', data.syncedDecks, 'decks');
-      } else {
-        console.error('❌ Failed to sync SRS data to database:', response.status);
+      if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Error response:', errorText);
+        console.error('❌ Failed to sync SRS data to database:', response.status, errorText);
       }
     } catch (error) {
       console.error('❌ Error syncing SRS data to database:', error);
@@ -213,13 +194,9 @@ const useSRS = (): UseSRSReturn => {
   }, [user, token]);
 
   const loadFromDatabase = useCallback(async () => {
-    if (!user || !token) {
-      console.log('🔒 User not authenticated, skipping database load');
-      return;
-    }
+    if (!user || !token) return;
 
     try {
-      console.log('📥 Loading SRS data from database...');
       const response = await fetch(`${API_BASE_URL}/srs/decks`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -228,12 +205,9 @@ const useSRS = (): UseSRSReturn => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Loaded SRS data from database:', data.decks.length, 'decks');
-        
         if (data.decks && data.decks.length > 0) {
           // Only update if we have data from the database
           setRawDecks(data.decks);
-          console.log('🔄 Updated local storage with database data');
         }
       } else {
         console.error('❌ Failed to load SRS data from database:', response.status);
@@ -250,15 +224,45 @@ const useSRS = (): UseSRSReturn => {
     }
   }, [user, token, loadFromDatabase]);
 
-  // Enhanced updateRawDecks function that also syncs to database
+  // Debounced DB sync — a bulk import fires many updateRawDecks calls in quick
+  // succession; without debouncing each one POSTs the whole collection and the
+  // backend runs deleteMany + insertMany per card. Collapse rapid updates into
+  // a single sync after activity settles. A ref holds the latest sync fn so the
+  // unmount flush doesn't need to re-subscribe on every token change.
+  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingDecksRef = useRef<SRSDeck[] | null>(null);
+  const syncFnRef = useRef(syncToDatabase);
+  useEffect(() => { syncFnRef.current = syncToDatabase; }, [syncToDatabase]);
+
+  const scheduleSync = useCallback((decksToSync: SRSDeck[]) => {
+    if (!user || !token) return;
+    pendingDecksRef.current = decksToSync;
+    if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
+    syncTimerRef.current = setTimeout(() => {
+      syncTimerRef.current = null;
+      const pending = pendingDecksRef.current;
+      pendingDecksRef.current = null;
+      if (pending) syncFnRef.current(pending);
+    }, 800);
+  }, [user, token]);
+
+  // Flush any pending sync on unmount so in-flight changes aren't lost.
+  useEffect(() => () => {
+    if (syncTimerRef.current) {
+      clearTimeout(syncTimerRef.current);
+      if (pendingDecksRef.current) syncFnRef.current(pendingDecksRef.current);
+    }
+  }, []);
+
+  // Enhanced updateRawDecks function that also syncs to database (debounced)
   const updateRawDecks = useCallback((newDecks: SRSDeck[]) => {
     setRawDecks(newDecks);
-    
+
     // Sync to database if user is authenticated
     if (user && token) {
-      syncToDatabase(newDecks);
+      scheduleSync(newDecks);
     }
-  }, [setRawDecks, syncToDatabase, user, token]);
+  }, [setRawDecks, scheduleSync, user, token]);
   
   // Session state
   const [studySession, setStudySession] = useState<{
@@ -442,9 +446,6 @@ const useSRS = (): UseSRSReturn => {
 
   // Start study session
   const startStudySession = useCallback((deckId: string, maxCards: number = 20) => {
-    // First, ensure any previous session is finished
-    console.log('🎓 Starting fresh study session for deck:', deckId);
-    
     // Clear any previous session state immediately
     setStudySession({
       cards: [],
@@ -470,8 +471,6 @@ const useSRS = (): UseSRSReturn => {
       return;
     }
 
-    console.log('🎓 Found deck for study session:', rawDeck.name, 'with', rawDeck.cards?.length || 0, 'cards');
-    
     // Sanitize deck with proper date parsing
     const sanitizedDeck = {
       ...rawDeck,
@@ -535,26 +534,15 @@ const useSRS = (): UseSRSReturn => {
           modifiedAt: card.modifiedAt ? new Date(card.modifiedAt) : new Date(),
         };
         
-        console.log('🔄 Sanitized card:', card.id, 'nextReview:', nextReviewDate, 'due:', nextReviewDate <= new Date());
         return sanitizedCard;
       })
     };
-    
-    console.log('🔄 Sanitized deck cards:', sanitizedDeck.cards.length);
-    
+
     try {
       const session = srs.getStudySession(sanitizedDeck, maxCards);
       const allCards = [...session.dueCards, ...session.newCards];
-      
-      console.log('📚 Study session result:', {
-        dueCards: session.dueCards.length,
-        newCards: session.newCards.length,
-        totalCards: allCards.length,
-        deckCards: sanitizedDeck.cards.length
-      });
-      
+
       if (allCards.length === 0) {
-        console.log('✅ No cards to study - session complete immediately');
         setStudySession({
           cards: [],
           currentCardIndex: 0,
@@ -566,7 +554,6 @@ const useSRS = (): UseSRSReturn => {
       }
 
       // Start fresh session with proper state - no timeout needed
-      console.log('🚀 Starting session with', allCards.length, 'cards');
       setStudySession({
         cards: allCards,
         currentCardIndex: 0,
@@ -576,8 +563,7 @@ const useSRS = (): UseSRSReturn => {
       });
       
       setCurrentDeckId(deckId);
-      console.log('✅ Study session started successfully');
-      
+
     } catch (error) {
       console.error('❌ Error creating study session:', error);
       setStudySession({
@@ -630,9 +616,7 @@ const useSRS = (): UseSRSReturn => {
     // Force immediate state update for stats calculation
     setDecks(updatedDecks);
     updateRawDecks(updatedDecks);
-    
-    console.log('✅ Card review submitted - updated card next review date:', updatedCard.srs.nextReviewDate);
-  }, [studySession.currentCard, currentDeck, srs, updateRawDecks]); // Add updateRawDecks to dependencies
+  }, [studySession.currentCard, currentDeck, srs, updateRawDecks]);
 
   // Move to next card
   const nextCard = useCallback(() => {
@@ -658,7 +642,6 @@ const useSRS = (): UseSRSReturn => {
 
   // Finish study session and reset state completely
   const finishSession = useCallback(() => {
-    console.log('🏁 Finishing study session and resetting all state');
     setStudySession({
       cards: [],
       currentCardIndex: 0,
@@ -816,10 +799,7 @@ const useSRS = (): UseSRSReturn => {
   }, [decks, updateRawDecks]);
 
   // Memoize stats calculation to prevent infinite loops, but recalculate when decks change
-  const stats = useMemo(() => {
-    console.log('📊 Calculating SRS stats for', decks.length, 'decks');
-    return calculateStats();
-  }, [decks, calculateStats]);
+  const stats = useMemo(() => calculateStats(), [decks, calculateStats]);
 
   return {
     decks,
