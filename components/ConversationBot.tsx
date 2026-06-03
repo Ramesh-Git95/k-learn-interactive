@@ -90,6 +90,10 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  // recognition.onresult is bound once at mount; without a ref it would call a
+  // stale sendVoiceMessage that ignores the selected topic/difficulty and checks
+  // the daily limit against the mount-time usedToday (letting voice bypass it).
+  const sendVoiceMessageRef = useRef<(text: string) => void>(() => {});
 
   const L = (en: string, ko: string) => uiLang === 'en' ? en : ko;
 
@@ -109,7 +113,7 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
         const transcript = event.results[0][0].transcript;
         setInputText(transcript);
         setIsListening(false);
-        setTimeout(() => { if (transcript.trim()) sendVoiceMessage(transcript); }, 500);
+        setTimeout(() => { if (transcript.trim()) sendVoiceMessageRef.current(transcript); }, 500);
       };
       recognition.onerror = () => setIsListening(false);
       recognition.onend = () => setIsListening(false);
@@ -147,6 +151,9 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
       setIsLoading(false);
     }
   };
+  // Keep the ref current so the mount-bound onresult handler always calls the
+  // latest closure (current topic/difficulty/usedToday/voiceMode).
+  sendVoiceMessageRef.current = sendVoiceMessage;
 
   const startListening = useCallback(() => {
     if (recognitionRef.current && !isListening) { setIsListening(true); recognitionRef.current.start(); }
