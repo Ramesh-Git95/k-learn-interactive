@@ -237,12 +237,15 @@ const CultureCards: React.FC = () => {
   const freeCards = CARDS.filter(c => c.category === FREE_CATEGORY);
   const lockedCards = CARDS.filter(c => c.category !== FREE_CATEGORY);
 
-  const visibleCards = isFree ? freeCards : CARDS.filter(c => {
-    const matchCat = activeCategory === 'All' || c.category === activeCategory;
-    const q = search.toLowerCase();
-    const matchSearch = !q || c.korean.includes(q) || c.english.toLowerCase().includes(q) || c.romanization.toLowerCase().includes(q) || c.summary.toLowerCase().includes(q);
-    return matchCat && matchSearch;
-  });
+  const q = search.toLowerCase();
+  const matchesSearch = (c: CultureCard) =>
+    !q || c.korean.includes(q) || c.english.toLowerCase().includes(q) || c.romanization.toLowerCase().includes(q) || c.summary.toLowerCase().includes(q);
+
+  // Free users only browse the Social category, but the search box is still
+  // shown to them — so it must filter their cards too, not be ignored.
+  const visibleCards = isFree
+    ? freeCards.filter(matchesSearch)
+    : CARDS.filter(c => (activeCategory === 'All' || c.category === activeCategory) && matchesSearch(c));
 
   const filtered = visibleCards;
 

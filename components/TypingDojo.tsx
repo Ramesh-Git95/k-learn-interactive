@@ -347,7 +347,7 @@ const TypingDojo: React.FC = () => {
             onClick={() => setShowRomanization(true)}
             className="text-xs text-gray-400 dark:text-gray-500 hover:text-violet-500 dark:hover:text-violet-400 transition-colors"
           >
-            Show romanization (−2 pts)
+            Show romanization (hint)
           </button>
         )}
         <div className="mt-3 text-xs text-gray-400 dark:text-gray-500">
