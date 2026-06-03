@@ -108,6 +108,9 @@ const QuizComponent: React.FC = () => {
   const dailyLimit = getLimit('quizzesPerDay') as number;
   const hasReachedDailyLimit = hasReachedLimit('quizzesPerDay', currentDailyCount);
   const maxQuestions = getLimit('quizQuestionsPerSession') as number;
+  // Derive a stable boolean — canAccess is a new function reference on every
+  // render, so referencing it directly in deps causes an infinite render loop.
+  const hasAdvancedQuizModes = canAccess('advancedQuizModes');
 
   const generateQuestions = useCallback(() => {
     const shuffledVocab = [...allVocab].sort(() => 0.5 - Math.random());
@@ -118,7 +121,7 @@ const QuizComponent: React.FC = () => {
       let questionType: QuizQuestion['type'];
       if (quizMode === 'mixed') {
         // Free users only get the unlocked question types even in Mixed mode
-        const mixedTypes: QuizQuestion['type'][] = canAccess('advancedQuizModes')
+        const mixedTypes: QuizQuestion['type'][] = hasAdvancedQuizModes
           ? ['korean_to_english', 'english_to_korean', 'romanization_to_korean']
           : ['korean_to_english'];
         questionType = mixedTypes[Math.floor(Math.random() * mixedTypes.length)];
@@ -165,7 +168,7 @@ const QuizComponent: React.FC = () => {
     setTimeLeft(isTimedMode ? 30 : null);
     setShowExplanation(false);
     setQuizCompleted(false);
-  }, [allVocab, quizMode, isTimedMode, maxQuestions, canAccess]);
+  }, [allVocab, quizMode, isTimedMode, maxQuestions, hasAdvancedQuizModes]);
 
   const handleAnswer = useCallback((option: string) => {
     if (selectedAnswer || timeLeft === 0) return;
@@ -337,8 +340,8 @@ const QuizComponent: React.FC = () => {
   const QUIZ_MODES: { id: QuizMode; label: string; emoji: string; isPremium?: boolean }[] = [
     { id: 'mixed', label: 'Mixed', emoji: '🔀' },
     { id: 'korean_to_english', label: 'KO → EN', emoji: '🇰🇷' },
-    { id: 'english_to_korean', label: 'EN → KO', emoji: '🔤', isPremium: !canAccess('advancedQuizModes') },
-    { id: 'romanization_to_korean', label: 'Rom → KO', emoji: '🔡', isPremium: !canAccess('advancedQuizModes') },
+    { id: 'english_to_korean', label: 'EN → KO', emoji: '🔤', isPremium: !hasAdvancedQuizModes },
+    { id: 'romanization_to_korean', label: 'Rom → KO', emoji: '🔡', isPremium: !hasAdvancedQuizModes },
   ];
 
   return (
