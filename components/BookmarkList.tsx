@@ -9,6 +9,7 @@ interface BookmarkListProps {
 const BookmarkList: React.FC<BookmarkListProps> = ({ bookmarks, toggleBookmark }) => {
   const speak = (korean: string) => {
     if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); // avoid queueing overlapping audio on rapid clicks
       const u = new SpeechSynthesisUtterance(korean);
       u.lang = 'ko-KR'; u.rate = 0.8;
       window.speechSynthesis.speak(u);

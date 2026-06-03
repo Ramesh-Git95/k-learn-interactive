@@ -18,9 +18,17 @@ const UserProfile: React.FC = () => {
   const [isPolling, setIsPolling] = useState(false);
   const isPremiumRef = React.useRef(false);
   const pollCountRef = React.useRef(0);
+  // refreshUser/showToast are rebuilt every render (unmemoized context values).
+  // Hold them in refs so the polling effect can depend only on [isPolling] —
+  // otherwise each poll's re-render restarts the interval and resets the count,
+  // defeating the 5-minute cap and polling forever.
+  const refreshUserRef = React.useRef(refreshUser);
+  const showToastRef = React.useRef(showToast);
 
-  // Keep ref in sync so the polling interval always reads the latest value
+  // Keep refs in sync so the polling interval always reads the latest values
   isPremiumRef.current = hasPremiumAccess();
+  refreshUserRef.current = refreshUser;
+  showToastRef.current = showToast;
 
   // Poll every 5 s (max 5 min) after user clicks the Gumroad button
   React.useEffect(() => {
@@ -28,11 +36,11 @@ const UserProfile: React.FC = () => {
     pollCountRef.current = 0;
     const interval = setInterval(async () => {
       pollCountRef.current += 1;
-      await refreshUser();
+      await refreshUserRef.current();
       if (isPremiumRef.current) {
         clearInterval(interval);
         setIsPolling(false);
-        showToast('🎉 Your account has been upgraded to Premium!', 'success');
+        showToastRef.current('🎉 Your account has been upgraded to Premium!', 'success');
         return;
       }
       if (pollCountRef.current >= 60) {   // 60 × 5 s = 5 min
@@ -41,7 +49,7 @@ const UserProfile: React.FC = () => {
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [isPolling, refreshUser, showToast]);
+  }, [isPolling]);
 
   if (!isAuthenticated || !user) {
     return (

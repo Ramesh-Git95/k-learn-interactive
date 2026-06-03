@@ -34,15 +34,12 @@ const KDramaSection: React.FC = () => {
     const cardKey = `${drama.id}-${word.korean}`;
     if (addedCards.has(cardKey)) return;
 
-    let deckId: string;
+    // Always use (or create) the dedicated K-Drama deck — never fall back to an
+    // arbitrary existing deck, which would dump K-drama words into an unrelated one.
     const kdramaDeck = decks.find(d => d.name === 'K-Drama Vocabulary');
-    if (kdramaDeck) {
-      deckId = kdramaDeck.id;
-    } else if (decks.length > 0) {
-      deckId = decks[0].id;
-    } else {
-      deckId = srsActions.createDeck('K-Drama Vocabulary', 'Words from your favourite K-dramas');
-    }
+    const deckId = kdramaDeck
+      ? kdramaDeck.id
+      : srsActions.createDeck('K-Drama Vocabulary', 'Words from your favourite K-dramas');
 
     srsActions.addCardToDeck(deckId, {
       korean: word.korean,
