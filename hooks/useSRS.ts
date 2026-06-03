@@ -29,7 +29,10 @@ const sanitizeSRSData = (decks: any[]): SRSDeck[] => {
       cards: Array.isArray(deck.cards) ? deck.cards.map((card: any) => {
         if (!card || typeof card !== 'object') return null;
         
-        // Ensure all required properties exist with safe defaults
+        // Ensure all required properties exist with safe defaults.
+        // NOTE: every field the SM-2 engine and stats read must be preserved
+        // here — omitting any (e.g. totalReviews, successRate) silently resets
+        // each card's review history to 0 on every reload / DB round-trip.
         const sanitizedCard = {
           ...card,
           srs: {
@@ -40,12 +43,17 @@ const sanitizeSRSData = (decks: any[]): SRSDeck[] => {
             lastReviewDate: parseDate(card.srs?.lastReviewDate) || null,
             quality: card.srs?.quality || 0,
             streak: card.srs?.streak || 0,
+            totalReviews: card.srs?.totalReviews || 0,
+            correctStreak: card.srs?.correctStreak || 0,
           },
           performance: {
             totalReviews: card.performance?.totalReviews || 0,
             correctReviews: card.performance?.correctReviews || 0,
             averageTime: card.performance?.averageTime || 0,
             lastReviewTime: card.performance?.lastReviewTime || 0,
+            averageResponseTime: card.performance?.averageResponseTime || 0,
+            successRate: card.performance?.successRate || 0,
+            difficultyRating: card.performance?.difficultyRating || 3,
           },
           createdAt: parseDate(card.createdAt) || new Date(),
           modifiedAt: parseDate(card.modifiedAt) || new Date(),

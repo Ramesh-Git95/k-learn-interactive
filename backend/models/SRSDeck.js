@@ -7,14 +7,19 @@ const SRSDataSchema = new mongoose.Schema({
   nextReviewDate: { type: Date, default: Date.now },
   lastReviewDate: { type: Date, default: null },
   quality: { type: Number, default: 0 },
-  streak: { type: Number, default: 0 }
+  streak: { type: Number, default: 0 },
+  totalReviews: { type: Number, default: 0 },
+  correctStreak: { type: Number, default: 0 }
 });
 
 const PerformanceSchema = new mongoose.Schema({
   totalReviews: { type: Number, default: 0 },
   correctReviews: { type: Number, default: 0 },
   averageTime: { type: Number, default: 0 },
-  lastReviewTime: { type: Number, default: 0 }
+  lastReviewTime: { type: Number, default: 0 },
+  averageResponseTime: { type: Number, default: 0 },
+  successRate: { type: Number, default: 0 },
+  difficultyRating: { type: Number, default: 3 }
 });
 
 const CardContentSchema = new mongoose.Schema({
