@@ -16,6 +16,7 @@ const UserProfile: React.FC = () => {
   const [claimStep, setClaimStep] = useState<'email' | 'code'>('email');
   const [claimLoading, setClaimLoading] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
+  const [stripeLoading, setStripeLoading] = useState(false);
   const isPremiumRef = React.useRef(false);
   const pollCountRef = React.useRef(0);
   // refreshUser/showToast are rebuilt every render (unmemoized context values).
@@ -61,6 +62,9 @@ const UserProfile: React.FC = () => {
   }
 
   const isPremium = hasPremiumAccess();
+  // The Stripe test button is hidden unless the URL has ?stripetest=1, so it can
+  // ship to production safely while we verify Stripe — real users never see it.
+  const showStripeTest = new URLSearchParams(window.location.search).has('stripetest');
   const subscriptionType = user.subscription?.type || 'free';
   const subscriptionStatus = user.subscription?.status || 'active';
 
@@ -70,6 +74,32 @@ const UserProfile: React.FC = () => {
     { label: 'Lessons Done',  value: user.progress?.completedLessons?.length || 0,      color: '#8B5CF6' },
     { label: 'Cards Learned', value: user.progress?.srsData?.totalCards || 0,           color: '#F59E0B' },
   ];
+
+  // STRIPE (Step 1) — create a checkout session and redirect to Stripe's hosted page.
+  // Additive/test button; the Gumroad flow above is untouched.
+  const startStripeCheckout = async () => {
+    setStripeLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      console.log('💳 [STRIPE] requesting checkout session…');
+      const res = await fetch(`${API_BASE}/stripe/create-checkout-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      console.log('💳 [STRIPE] response:', res.status, data);
+      if (res.ok && data.url) {
+        window.location.href = data.url; // redirect to Stripe hosted checkout
+      } else {
+        showToast(data.message || 'Could not start Stripe checkout.', 'error');
+        setStripeLoading(false);
+      }
+    } catch (e) {
+      console.error('💳 [STRIPE] checkout error:', e);
+      showToast('Network error starting checkout.', 'error');
+      setStripeLoading(false);
+    }
+  };
 
   const redeemLicense = async () => {
     if (!licenseKey.trim()) return;
@@ -272,6 +302,17 @@ const UserProfile: React.FC = () => {
               >
                 Get Lifetime Access
               </button>
+
+              {/* TEMP — Stripe test button, hidden behind ?stripetest=1 (remove once Stripe is the default) */}
+              {showStripeTest && (
+                <button
+                  onClick={startStripeCheckout}
+                  disabled={stripeLoading}
+                  className="w-full mt-2 py-2 text-xs font-black rounded-xl border-2 border-dashed border-indigo-400 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-40"
+                >
+                  {stripeLoading ? 'Starting Stripe…' : '🧪 Test Stripe Checkout'}
+                </button>
+              )}
 
               {isPolling && (
                 <div className="flex items-center gap-2 mt-2 px-3 py-2 rounded-xl bg-violet-50 dark:bg-violet-900/20">
