@@ -109,6 +109,63 @@ async function activateSubscription(userId, session, stripe) {
   console.log(`✅ [STRIPE webhook] ${user.email} → premium until ${periodEnd ? periodEnd.toISOString() : '(no end)'}`);
 }
 
+// Find the K-Learn user that owns a given Stripe subscription.
+async function findUserBySubscription(sub) {
+  let user = await User.findOne({ 'subscription.stripeSubscriptionId': sub.id });
+  if (!user && sub.customer) {
+    user = await User.findOne({ 'subscription.stripeCustomerId': sub.customer });
+  }
+  return user;
+}
+
+// customer.subscription.updated — renewals, scheduled cancels, past_due, etc.
+// Keep access while the subscription is alive (active/trialing, and past_due as a
+// grace window); revert to free if Stripe reports it as ended.
+async function syncUserFromSubscription(sub) {
+  const user = await findUserBySubscription(sub);
+  if (!user) {
+    console.error(`❌ [STRIPE webhook] no user for subscription ${sub.id} / customer ${sub.customer}`);
+    return;
+  }
+
+  const ENDED = ['canceled', 'unpaid', 'incomplete_expired'];
+  if (ENDED.includes(sub.status)) {
+    user.subscription.type = 'free';
+    user.subscription.status = 'canceled';
+    user.subscription.cancelAtPeriodEnd = false;
+    await user.save();
+    console.log(`⬇️  [STRIPE webhook] ${user.email} subscription ${sub.status} → reverted to free`);
+    return;
+  }
+
+  // Alive: active / trialing / past_due. Keep status 'active' so access is retained
+  // during payment retries (grace); a final cancellation arrives as a separate event.
+  const item = sub.items && sub.items.data && sub.items.data[0];
+  const rawEnd = (item && item.current_period_end) || sub.current_period_end;
+  user.subscription.type = 'premium';
+  user.subscription.status = 'active';
+  user.subscription.cancelAtPeriodEnd = !!sub.cancel_at_period_end;
+  if (rawEnd) user.subscription.currentPeriodEnd = new Date(rawEnd * 1000);
+  await user.save();
+
+  const note = sub.cancel_at_period_end ? ' (cancels at period end)' : (sub.status === 'past_due' ? ' (past_due — grace)' : '');
+  console.log(`🔄 [STRIPE webhook] ${user.email} subscription synced: ${sub.status}${note}, until ${user.subscription.currentPeriodEnd ? user.subscription.currentPeriodEnd.toISOString() : '?'}`);
+}
+
+// customer.subscription.deleted — the subscription has fully ended. Revert to free.
+async function revertUserToFree(sub) {
+  const user = await findUserBySubscription(sub);
+  if (!user) {
+    console.error(`❌ [STRIPE webhook] no user for deleted subscription ${sub.id} / customer ${sub.customer}`);
+    return;
+  }
+  user.subscription.type = 'free';
+  user.subscription.status = 'canceled';
+  user.subscription.cancelAtPeriodEnd = false;
+  await user.save();
+  console.log(`⬇️  [STRIPE webhook] ${user.email} subscription deleted → reverted to free`);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/stripe/webhook  — Stripe calls this when a payment completes.
 // Requires the raw body (configured in server.js) for signature verification.
@@ -151,6 +208,10 @@ router.post('/webhook', async (req, res) => {
         return;
       }
       await activateSubscription(session.client_reference_id, session, stripe);
+    } else if (event.type === 'customer.subscription.updated') {
+      await syncUserFromSubscription(event.data.object);
+    } else if (event.type === 'customer.subscription.deleted') {
+      await revertUserToFree(event.data.object);
     } else {
       console.log(`ℹ️  [STRIPE webhook] ignoring event type: ${event.type}`);
     }
