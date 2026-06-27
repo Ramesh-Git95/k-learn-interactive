@@ -85,8 +85,14 @@ async function activateSubscription(userId, session, stripe) {
       const sub = await stripe.subscriptions.retrieve(session.subscription);
       status = sub.status === 'trialing' ? 'trialing' : 'active';
       cancelAtPeriodEnd = !!sub.cancel_at_period_end;
-      if (sub.current_period_start) periodStart = new Date(sub.current_period_start * 1000);
-      if (sub.current_period_end) periodEnd = new Date(sub.current_period_end * 1000);
+      // Newer Stripe API versions moved the billing period onto the subscription
+      // ITEM rather than the subscription itself — read the item first, then fall
+      // back to the top-level field for older API versions.
+      const item = sub.items && sub.items.data && sub.items.data[0];
+      const rawStart = (item && item.current_period_start) || sub.current_period_start;
+      const rawEnd = (item && item.current_period_end) || sub.current_period_end;
+      if (rawStart) periodStart = new Date(rawStart * 1000);
+      if (rawEnd) periodEnd = new Date(rawEnd * 1000);
     } catch (e) {
       console.error('❌ [STRIPE webhook] could not retrieve subscription:', e.message);
     }
