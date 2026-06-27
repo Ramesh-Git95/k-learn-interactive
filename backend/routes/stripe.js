@@ -67,6 +67,41 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/stripe/create-portal-session
+// Returns a Stripe Customer Portal URL where the user can cancel / update their
+// card / view invoices. The frontend redirects the browser there.
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/create-portal-session', authenticateToken, async (req, res) => {
+  console.log('🧾 [STRIPE] create-portal-session called');
+  try {
+    const stripe = getStripe();
+    if (!stripe) {
+      console.error('❌ [STRIPE] STRIPE_SECRET_KEY is not set');
+      return res.status(500).json({ message: 'Payment system not configured', error: 'NO_STRIPE_KEY' });
+    }
+
+    const user = req.user;
+    const customerId = user.subscription?.stripeCustomerId;
+    if (!customerId) {
+      console.error(`❌ [STRIPE] no stripeCustomerId for ${user.email} — nothing to manage`);
+      return res.status(400).json({ message: 'No subscription to manage on this account.', error: 'NO_CUSTOMER' });
+    }
+
+    const frontendUrl = process.env.FRONTEND_URL || process.env.CORS_ORIGIN || 'http://localhost:5173';
+    const portal = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${frontendUrl}/#profile`,
+    });
+
+    console.log(`✅ [STRIPE] portal session for ${user.email}: ${portal.url}`);
+    res.json({ url: portal.url });
+  } catch (err) {
+    console.error('❌ [STRIPE] Failed to create portal session:', err.message);
+    res.status(500).json({ message: 'Could not open the billing portal. Please try again.', error: 'PORTAL_ERROR' });
+  }
+});
+
 // Activate (or re-sync) a user's subscription from a completed Checkout session.
 // Re-writing the same premium state is harmless, so duplicate webhook deliveries
 // never cause a "double grant" — and the actual money is one Stripe subscription,

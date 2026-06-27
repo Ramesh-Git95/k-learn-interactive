@@ -101,6 +101,31 @@ const UserProfile: React.FC = () => {
     }
   };
 
+  // STRIPE (3c) — open the Customer Portal to manage / cancel the subscription.
+  const openBillingPortal = async () => {
+    setStripeLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      console.log('🧾 [STRIPE] requesting billing portal…');
+      const res = await fetch(`${API_BASE}/stripe/create-portal-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      console.log('🧾 [STRIPE] portal response:', res.status, data);
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+      } else {
+        showToast(data.message || 'Could not open billing portal.', 'error');
+        setStripeLoading(false);
+      }
+    } catch (e) {
+      console.error('🧾 [STRIPE] portal error:', e);
+      showToast('Network error opening billing portal.', 'error');
+      setStripeLoading(false);
+    }
+  };
+
   const redeemLicense = async () => {
     if (!licenseKey.trim()) return;
     setLicenseLoading(true);
@@ -280,6 +305,16 @@ const UserProfile: React.FC = () => {
                   <li key={b}>• {b}</li>
                 ))}
               </ul>
+              {/* TEMP — Manage subscription (Stripe Customer Portal), hidden behind ?stripetest=1 */}
+              {showStripeTest && (
+                <button
+                  onClick={openBillingPortal}
+                  disabled={stripeLoading}
+                  className="w-full mt-3 py-2 text-xs font-black rounded-xl border-2 border-dashed border-indigo-400 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-40"
+                >
+                  {stripeLoading ? 'Opening…' : '🧾 Manage / Cancel subscription'}
+                </button>
+              )}
             </div>
           ) : (
             <div
