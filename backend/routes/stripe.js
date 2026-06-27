@@ -46,7 +46,7 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     console.log(`💳 [STRIPE] frontend redirect base: ${frontendUrl}`);
 
     const session = await stripe.checkout.sessions.create({
-      mode: 'payment', // one-time payment (lifetime), not a subscription
+      mode: 'subscription', // recurring monthly subscription
       line_items: [{ price: priceId, quantity: 1 }],
       // client_reference_id ties the payment to THIS account — the webhook reads
       // it to know who to upgrade. No email-matching/claim dance needed.
@@ -67,26 +67,40 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
   }
 });
 
-// Idempotent upgrade: setting an already-premium user to premium is a no-op, so
-// re-delivered webhook events never cause a "double grant".
-async function upgradeUserToPremium(userId, session) {
+// Activate (or re-sync) a user's subscription from a completed Checkout session.
+// Re-writing the same premium state is harmless, so duplicate webhook deliveries
+// never cause a "double grant" — and the actual money is one Stripe subscription,
+// not a second charge.
+async function activateSubscription(userId, session, stripe) {
   const user = await User.findById(userId);
   if (!user) {
     console.error(`❌ [STRIPE webhook] no user found for id ${userId}`);
     return;
   }
-  if (user.subscription?.type !== 'free') {
-    console.log(`ℹ️  [STRIPE webhook] ${user.email} already premium — skipping (idempotent)`);
-    return;
+
+  // Pull the live subscription details (period end, status, cancel flag) from Stripe.
+  let periodStart = null, periodEnd = null, cancelAtPeriodEnd = false, status = 'active';
+  if (session.subscription) {
+    try {
+      const sub = await stripe.subscriptions.retrieve(session.subscription);
+      status = sub.status === 'trialing' ? 'trialing' : 'active';
+      cancelAtPeriodEnd = !!sub.cancel_at_period_end;
+      if (sub.current_period_start) periodStart = new Date(sub.current_period_start * 1000);
+      if (sub.current_period_end) periodEnd = new Date(sub.current_period_end * 1000);
+    } catch (e) {
+      console.error('❌ [STRIPE webhook] could not retrieve subscription:', e.message);
+    }
   }
+
   user.subscription.type = 'premium';
-  user.subscription.status = 'active';
-  user.subscription.currentPeriodEnd = null; // one-time lifetime — never expires
-  user.subscription.cancelAtPeriodEnd = false;
+  user.subscription.status = status;
+  user.subscription.currentPeriodStart = periodStart;
+  user.subscription.currentPeriodEnd = periodEnd;
+  user.subscription.cancelAtPeriodEnd = cancelAtPeriodEnd;
   user.subscription.stripeCustomerId = session.customer || user.subscription.stripeCustomerId;
-  user.subscription.stripeSubscriptionId = session.payment_intent || session.id;
+  user.subscription.stripeSubscriptionId = session.subscription || user.subscription.stripeSubscriptionId;
   await user.save();
-  console.log(`✅ [STRIPE webhook] upgraded ${user.email} to premium`);
+  console.log(`✅ [STRIPE webhook] ${user.email} → premium until ${periodEnd ? periodEnd.toISOString() : '(no end)'}`);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -130,7 +144,7 @@ router.post('/webhook', async (req, res) => {
         console.error('❌ [STRIPE webhook] no client_reference_id on session — cannot map to a user');
         return;
       }
-      await upgradeUserToPremium(session.client_reference_id, session);
+      await activateSubscription(session.client_reference_id, session, stripe);
     } else {
       console.log(`ℹ️  [STRIPE webhook] ignoring event type: ${event.type}`);
     }

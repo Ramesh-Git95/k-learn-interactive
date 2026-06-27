@@ -1,10 +1,10 @@
-// One-time setup script: creates the K-Learn Lifetime product + price in Stripe.
+// One-time setup script: creates the K-Learn Premium MONTHLY product + price.
 // Run ONCE, locally, after putting STRIPE_SECRET_KEY in backend/.env:
 //
 //   cd backend && node create-price.js
 //
-// It prints a price ID (price_...) — copy that into backend/.env as STRIPE_PRICE_ID.
-// Safe to share the printed price ID with anyone; it is NOT secret.
+// It prints a NEW price ID (price_...) — copy it into backend/.env as STRIPE_PRICE_ID,
+// and also update STRIPE_PRICE_ID in Railway. Safe to share; the price ID is NOT secret.
 
 require('dotenv').config();
 
@@ -18,23 +18,23 @@ console.log(`🔑 Using Stripe key: ${key.slice(0, 8)}…  (mode: ${key.startsWi
 // Extra retries + a longer timeout help on flaky connections (e.g. a dongle).
 const stripe = require('stripe')(key, { maxNetworkRetries: 3, timeout: 30000 });
 
-const PRICE_USD_CENTS = 3900; // $39.00 one-time — matches the current Gumroad lifetime price
+const PRICE_USD_CENTS = 400; // $4.00 / month recurring subscription
 
 async function run() {
   try {
-    console.log('🛠  Creating product "K-Learn Lifetime Access"…');
+    console.log('🛠  Creating product "K-Learn Premium"…');
     const product = await stripe.products.create({
-      name: 'K-Learn Lifetime Access',
-      description: 'One-time payment — unlocks all premium features forever.',
+      name: 'K-Learn Premium',
+      description: 'Monthly subscription — unlocks all premium features.',
     });
     console.log(`✅ Product created: ${product.id}`);
 
-    console.log(`🛠  Creating one-time price ($${(PRICE_USD_CENTS / 100).toFixed(2)} USD)…`);
+    console.log(`🛠  Creating recurring price ($${(PRICE_USD_CENTS / 100).toFixed(2)}/month)…`);
     const price = await stripe.prices.create({
       product: product.id,
       unit_amount: PRICE_USD_CENTS,
       currency: 'usd',
-      // No `recurring` block => one-time payment.
+      recurring: { interval: 'month' }, // => monthly subscription
     });
 
     console.log('\n──────────────────────────────────────────────');
