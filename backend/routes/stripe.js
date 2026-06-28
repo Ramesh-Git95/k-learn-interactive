@@ -101,7 +101,7 @@ router.post('/create-portal-session', authenticateToken, async (req, res) => {
     if (subId && subId.startsWith('sub_')) {
       params.flow_data = {
         type: 'subscription_cancel',
-        subscription: subId,
+        subscription_cancel: { subscription: subId },
         after_completion: {
           type: 'redirect',
           redirect: { return_url: `${frontendUrl}/?cancelled=1#profile` },
