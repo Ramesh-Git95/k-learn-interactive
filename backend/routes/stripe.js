@@ -89,10 +89,27 @@ router.post('/create-portal-session', authenticateToken, async (req, res) => {
     }
 
     const frontendUrl = process.env.FRONTEND_URL || process.env.CORS_ORIGIN || 'http://localhost:5173';
-    const portal = await stripe.billingPortal.sessions.create({
+    const subId = user.subscription && user.subscription.stripeSubscriptionId;
+
+    const params = {
       customer: customerId,
       return_url: `${frontendUrl}/#profile`,
-    });
+    };
+    // Launch straight into the cancellation flow and auto-redirect back to the app
+    // once the user confirms — no "Return to …" click needed. Only for a real
+    // Stripe subscription; otherwise fall back to the general portal.
+    if (subId && subId.startsWith('sub_')) {
+      params.flow_data = {
+        type: 'subscription_cancel',
+        subscription: subId,
+        after_completion: {
+          type: 'redirect',
+          redirect: { return_url: `${frontendUrl}/?cancelled=1#profile` },
+        },
+      };
+    }
+
+    const portal = await stripe.billingPortal.sessions.create(params);
 
     console.log(`✅ [STRIPE] portal session for ${user.email}: ${portal.url}`);
     res.json({ url: portal.url });

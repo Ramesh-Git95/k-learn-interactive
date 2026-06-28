@@ -312,7 +312,7 @@ const UserProfile: React.FC = () => {
                   disabled={stripeLoading}
                   className="w-full mt-3 py-2 text-xs font-black rounded-xl border-2 border-dashed border-indigo-400 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-40"
                 >
-                  {stripeLoading ? 'Opening…' : '🧾 Manage / Cancel subscription'}
+                  {stripeLoading ? 'Opening…' : '🧾 Cancel subscription'}
                 </button>
               )}
             </div>
