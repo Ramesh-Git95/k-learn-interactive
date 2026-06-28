@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const User = require('../models/User');
+const SRSDeck = require('../models/SRSDeck');
 const { authenticateToken, rateLimit } = require('../middleware/auth');
 const emailService = require('../services/emailService');
 
@@ -397,6 +398,26 @@ router.post('/logout', authenticateToken, (req, res) => {
 router.delete('/account', authenticateToken, async (req, res) => {
   try {
     const user = req.user;
+
+    // Cancel any active Stripe subscription first — otherwise a deleted account
+    // keeps getting billed every month. Only attempt it for a real Stripe
+    // subscription id (sub_...), not a Gumroad lifetime placeholder, and never
+    // let a Stripe hiccup block the account deletion.
+    const subId = user.subscription && user.subscription.stripeSubscriptionId;
+    if (subId && subId.startsWith('sub_') && process.env.STRIPE_SECRET_KEY) {
+      try {
+        const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, { maxNetworkRetries: 3 });
+        await stripe.subscriptions.cancel(subId);
+        console.log(`🧾 Cancelled Stripe subscription ${subId} for ${user.email}`);
+      } catch (e) {
+        console.error('⚠️  Failed to cancel Stripe subscription on account delete:', e.message);
+      }
+    }
+
+    // Cascade-delete the user's owned data that lives in its own collection.
+    // (Bookmarks and progress are embedded in the user doc, so they go with it.)
+    await SRSDeck.deleteMany({ userId: user._id });
+
     await User.findByIdAndDelete(user._id);
     console.log(`🗑️ Account deleted: ${user.email}`);
     res.json({ message: 'Account deleted successfully' });
