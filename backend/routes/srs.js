@@ -37,12 +37,22 @@ router.post('/sync', authenticateToken, async (req, res) => {
     await SRSDeck.deleteMany({ userId: req.user._id });
     console.log('✅ Cleared existing SRS decks');
     
-    // Add user ID to each deck and save
-    const decksWithUserId = decks.map(deck => ({
-      ...deck,
-      userId: req.user._id,
-      modifiedAt: new Date()
-    }));
+    // Add user ID to each deck and save. Strip any client-supplied _id/__v so
+    // Mongo assigns fresh ones — otherwise a stale _id from the browser (e.g. a
+    // deck synced under a previous/deleted account) collides with an existing
+    // document and throws E11000 duplicate key. The app identifies decks by their
+    // own `id` field, not Mongo's _id, so dropping _id is safe.
+    const decksWithUserId = decks.map(deck => {
+      const { _id, __v, cards, ...rest } = deck;
+      return {
+        ...rest,
+        userId: req.user._id,
+        modifiedAt: new Date(),
+        cards: Array.isArray(cards)
+          ? cards.map(({ _id, __v, ...card }) => card)
+          : cards,
+      };
+    });
     
     console.log('💾 Saving decks to database:', decksWithUserId.length);
     
