@@ -109,7 +109,21 @@ router.post('/create-portal-session', authenticateToken, async (req, res) => {
       };
     }
 
-    const portal = await stripe.billingPortal.sessions.create(params);
+    let portal;
+    try {
+      portal = await stripe.billingPortal.sessions.create(params);
+    } catch (flowErr) {
+      // If the cancel flow can't open (e.g. the subscription is already scheduled
+      // to cancel), fall back to the general portal so the button still works and
+      // the user can view status / renew.
+      if (params.flow_data) {
+        console.warn(`⚠️  [STRIPE] cancel flow unavailable (${flowErr.message}) — opening general portal`);
+        delete params.flow_data;
+        portal = await stripe.billingPortal.sessions.create(params);
+      } else {
+        throw flowErr;
+      }
+    }
 
     console.log(`✅ [STRIPE] portal session for ${user.email}: ${portal.url}`);
     res.json({ url: portal.url });
