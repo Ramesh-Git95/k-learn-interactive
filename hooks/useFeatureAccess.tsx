@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { GUMROAD_URL } from '../constants';
+import { useUpgrade } from './useUpgrade';
 
 // Feature limits for different subscription tiers
 export const FEATURE_LIMITS = {
@@ -191,9 +191,7 @@ export const PremiumPrompt: React.FC<{
   description: string;
   className?: string;
 }> = ({ feature, description, className = '' }) => {
-  const handleUpgradeClick = () => {
-    window.open(GUMROAD_URL, '_blank');
-  };
+  const { startUpgrade } = useUpgrade();
 
   return (
     <div className={`bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center ${className}`}>
@@ -205,13 +203,13 @@ export const PremiumPrompt: React.FC<{
         {description}
       </p>
       <button
-        onClick={handleUpgradeClick}
+        onClick={startUpgrade}
         className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       >
-        Get Lifetime Access — $39 one-time
+        Get Premium — $4/month
       </button>
       <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
-        Pay once, own everything forever. No monthly fees. 🚀
+        Cancel anytime, no commitment. 🚀
       </p>
     </div>
   );

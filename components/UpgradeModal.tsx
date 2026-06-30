@@ -1,6 +1,6 @@
 import React from 'react';
-import { GUMROAD_URL } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
+import { useUpgrade } from '../hooks/useUpgrade';
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -12,6 +12,7 @@ interface UpgradeModalProps {
 
 const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, description, benefits }) => {
   const { isAuthenticated } = useAuth();
+  const { startUpgrade } = useUpgrade();
   if (!isOpen) return null;
 
   return (
@@ -30,7 +31,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
             ✕
           </button>
           <div className="text-4xl mb-2">⭐</div>
-          <h2 className="text-xl font-black text-white">Lifetime Access</h2>
+          <h2 className="text-xl font-black text-white">K-Learn Premium</h2>
           <h3 className="text-sm font-semibold text-pink-100 mt-1">{feature}</h3>
         </div>
 
@@ -54,9 +55,9 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
             style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.08), rgba(139,92,246,0.08))' }}
           >
             <div className="text-3xl font-black" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              $39
+              $4<span className="text-lg">/mo</span>
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">one-time · lifetime access · no subscription</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">per month · cancel anytime</div>
           </div>
 
           {/* CTA */}
@@ -64,7 +65,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
             <button
               onClick={() => {
                 if (isAuthenticated) {
-                  window.open(GUMROAD_URL, '_blank');
+                  startUpgrade();
                 } else {
                   onClose();
                   window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' }));
@@ -73,7 +74,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
               className="w-full py-3 rounded-xl text-white font-bold text-sm shadow-md transition-transform hover:scale-[1.02] active:scale-95"
               style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
             >
-              {isAuthenticated ? 'Get Lifetime Access — $39' : 'Create Free Account to Get Started →'}
+              {isAuthenticated ? 'Get Premium — $4/month' : 'Create Free Account to Get Started →'}
             </button>
             <button
               onClick={onClose}

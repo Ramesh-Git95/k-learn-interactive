@@ -4,7 +4,7 @@ import ConversationBot from './ConversationBot';
 import { useAuth } from '../contexts/AuthContext';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
-import { GUMROAD_URL } from '../constants';
+import { useUpgrade } from '../hooks/useUpgrade';
 
 
 // ── Daily usage tracking (localStorage, resets at midnight) ──────────────────
@@ -29,6 +29,7 @@ const ConversationSection: React.FC = () => {
 
   const { isAuthenticated } = useAuth();
   const { isPremium, getLimit } = useFeatureAccess();
+  const { startUpgrade } = useUpgrade();
 
   const dailyLimit = isAuthenticated
     ? (getLimit('aiConversationsPerDay') as number)
@@ -127,7 +128,7 @@ const ConversationSection: React.FC = () => {
             </p>
             {!isPremium && (
               <button
-                onClick={() => window.open(GUMROAD_URL, '_blank')}
+                onClick={startUpgrade}
                 className="px-8 py-3 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all mb-3 block w-full"
                 style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
               >
@@ -167,7 +168,7 @@ const ConversationSection: React.FC = () => {
         </div>
         {!isPremium && (
           <button
-            onClick={() => window.open(GUMROAD_URL, '_blank')}
+            onClick={startUpgrade}
             className="text-xs font-black text-pink-500 hover:underline"
           >
             Upgrade for 50/day →

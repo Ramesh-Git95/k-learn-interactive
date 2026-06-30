@@ -1,6 +1,6 @@
 import React from 'react';
-import { GUMROAD_URL } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
+import { useUpgrade } from '../hooks/useUpgrade';
 
 
 const ROWS = [
@@ -28,6 +28,7 @@ interface Props {
 
 const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const { isAuthenticated } = useAuth();
+  const { startUpgrade } = useUpgrade();
   if (!isOpen) return null;
 
   return (
@@ -50,12 +51,11 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
           <div className="text-4xl mb-2">⭐</div>
           <h2 className="text-2xl font-black text-white tracking-tight">K-Learn Premium</h2>
-          <p className="text-pink-100/80 text-sm mt-1">One payment · Lifetime access · No subscription ever</p>
+          <p className="text-pink-100/80 text-sm mt-1">Cancel anytime · No long-term commitment</p>
 
           <div className="inline-flex items-baseline gap-2 mt-4 bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-2.5 border border-white/20">
-            <span className="text-4xl font-black text-white">$39</span>
-            <span className="text-white/50 text-sm line-through">$99</span>
-            <span className="text-emerald-300 text-xs font-black px-2 py-0.5 bg-emerald-400/20 rounded-full">60% OFF</span>
+            <span className="text-4xl font-black text-white">$4</span>
+            <span className="text-white/80 text-sm">/month</span>
           </div>
         </div>
 
@@ -108,7 +108,7 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
             <p className="text-sm text-gray-600 dark:text-gray-400 italic leading-relaxed">
               "The SRS + culture content combo is incredible — this is the most complete Korean learning app I've used."
             </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">— Verified buyer via Gumroad</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">— Premium subscriber</p>
           </div>
         </div>
 
@@ -117,14 +117,14 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
           {isAuthenticated ? (
             <>
               <button
-                onClick={() => window.open(GUMROAD_URL, '_blank')}
+                onClick={startUpgrade}
                 className="w-full py-3.5 rounded-2xl text-white font-black text-base shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-95"
                 style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
               >
-                Get Lifetime Access — $39 →
+                Subscribe — $4/month →
               </button>
               <p className="text-center text-xs text-gray-400 dark:text-gray-500">
-                Secure payment via Gumroad · 30-day money-back guarantee
+                Secure payment via Stripe · Cancel anytime
               </p>
             </>
           ) : (

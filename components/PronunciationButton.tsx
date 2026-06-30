@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useAuth } from '../contexts/AuthContext';
-import { GUMROAD_URL } from '../constants';
+import { useUpgrade } from '../hooks/useUpgrade';
 
 interface PronunciationButtonProps {
   korean: string;
@@ -50,6 +50,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
 }) => {
   const { hasPremiumAccess, isAuthenticated } = useAuth();
   const isPremium = hasPremiumAccess();
+  const { startUpgrade } = useUpgrade();
   const { state, result, isSupported, start, reset } = useSpeechRecognition();
 
   const [showHint, setShowHint] = useState(false);
@@ -117,7 +118,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
       if (!isAuthenticated) {
         window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' }));
       } else {
-        window.open(GUMROAD_URL, '_blank');
+        startUpgrade();
       }
     };
     return (
