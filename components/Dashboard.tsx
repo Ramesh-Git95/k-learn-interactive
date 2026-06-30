@@ -12,7 +12,7 @@ import LearningPath from './LearningPath';
 import OnboardingWizard from './OnboardingWizard';
 import BookmarkFlashcards from './BookmarkFlashcards';
 import { vocabulary } from '../data/koreanData';
-import { GUMROAD_URL } from '../constants';
+import { useUpgrade } from '../hooks/useUpgrade';
 
 
 interface DashboardProps {
@@ -74,6 +74,7 @@ export default function Dashboard({
   const { showToast } = useToastContext();
   const { subscriptionTier }         = useFeatureAccess();
   const { openUpgradeModal }         = useUpgradeModal();
+  const { startUpgrade }             = useUpgrade();
   const { stats: srsStats }          = useSRSContext();
   const xp                           = useXPStreak();
 
@@ -470,8 +471,8 @@ export default function Dashboard({
               </div>
               <div className="flex flex-col items-start sm:items-end gap-2 flex-shrink-0">
                 <div className="flex items-end gap-2">
-                  <span className="text-3xl font-black text-white">$39</span>
-                  <span className="text-gray-500 text-sm line-through mb-1">$99</span>
+                  <span className="text-3xl font-black text-white">$4</span>
+                  <span className="text-gray-400 text-sm mb-1">/month</span>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -480,17 +481,15 @@ export default function Dashboard({
                   >
                     See What's Included
                   </button>
-                  <a
-                    href={GUMROAD_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={startUpgrade}
                     className="px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl whitespace-nowrap"
                     style={{ background: 'linear-gradient(135deg, #FF90E8, #FF3366)' }}
                   >
-                    Get Access →
-                  </a>
+                    Get Premium →
+                  </button>
                 </div>
-                <span className="text-gray-500 text-xs">via Gumroad · 30-day guarantee</span>
+                <span className="text-gray-500 text-xs">Less than a coffee ☕ · cancel anytime</span>
               </div>
             </div>
           </div>

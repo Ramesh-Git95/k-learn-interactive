@@ -4,7 +4,7 @@ import { useAuthModal } from '../contexts/AuthModalContext';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { PremiumLockBanner } from './PremiumLock';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
-import { GUMROAD_URL } from '../constants';
+import { useUpgrade } from '../hooks/useUpgrade';
 
 const OPTION_LABELS = ['①', '②', '③', '④'];
 
@@ -247,6 +247,7 @@ const TopikAssessment: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const { openRegister } = useAuthModal();
   const { subscriptionTier } = useFeatureAccess();
+  const { startUpgrade } = useUpgrade();
   const isPremium = subscriptionTier === 'premium';
 
   const [screen, setScreen] = useState<Screen>('intro');
@@ -381,11 +382,11 @@ const TopikAssessment: React.FC = () => {
             </div>
           </div>
           {!isPremium && (
-            <a href={GUMROAD_URL} target="_blank" rel="noopener noreferrer"
+            <button onClick={startUpgrade}
               className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 text-white text-xs font-black rounded-xl hover:opacity-90 transition-opacity"
               style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
-              ⭐ Get Lifetime Access — $39 one-time →
-            </a>
+              ⭐ Get Premium — $4/month →
+            </button>
           )}
         </div>
 
@@ -554,8 +555,8 @@ const TopikAssessment: React.FC = () => {
             <div className="flex items-center gap-2 text-xs text-gray-400">
               <span>🔒</span>
               <span>Levels 4–6 hidden</span>
-              <a href={GUMROAD_URL} target="_blank" rel="noopener noreferrer"
-                className="font-black text-violet-500 hover:underline">Get Premium →</a>
+              <button onClick={startUpgrade}
+                className="font-black text-violet-500 hover:underline">Get Premium →</button>
             </div>
           </div>
         )}

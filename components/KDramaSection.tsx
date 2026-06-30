@@ -7,7 +7,7 @@ import { useToastContext } from '../contexts/ToastContext';
 import { useSRSContext } from '../contexts/SRSContext';
 import PronunciationButton from './PronunciationButton';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
-import { GUMROAD_URL } from '../constants';
+import { useUpgrade } from '../hooks/useUpgrade';
 
 
 const difficultyStyle: Record<string, string> = {
@@ -24,6 +24,7 @@ const KDramaSection: React.FC = () => {
   const { openRegister } = useAuthModal();
   const { showToast } = useToastContext();
   const { decks, actions: srsActions } = useSRSContext();
+  const { startUpgrade } = useUpgrade();
   const isPremium = hasPremiumAccess();
 
   const [selectedDrama, setSelectedDrama] = useState<Drama | null>(null);
@@ -122,16 +123,14 @@ const KDramaSection: React.FC = () => {
               <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
                 Unlock K-Drama Vocabulary Packs + all premium features with a one-time payment.
               </p>
-              <p className="text-xs text-gray-400 line-through mb-4">Duolingo: $84–168/year</p>
-              <a
-                href={GUMROAD_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+              <p className="text-xs text-gray-400 line-through mb-4">Duolingo: $7+/month</p>
+              <button
+                onClick={startUpgrade}
                 className="block w-full py-3.5 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-px text-sm"
                 style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
               >
-                Get Lifetime Access — $39
-              </a>
+                Get Premium — $4/month
+              </button>
             </div>
           </div>
         </div>

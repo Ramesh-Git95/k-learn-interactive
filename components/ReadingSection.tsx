@@ -7,7 +7,7 @@ import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { useSRSContext } from '../contexts/SRSContext';
 import { useToastContext } from '../contexts/ToastContext';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
-import { GUMROAD_URL } from '../constants';
+import { useUpgrade } from '../hooks/useUpgrade';
 
 const TYPE_LABEL: Record<WordType, string> = {
   noun:        'Noun',
@@ -90,6 +90,7 @@ interface DefPanelProps {
 }
 
 const DefPanel: React.FC<DefPanelProps> = ({ word, token, isPremium, onSRS, onClose }) => {
+  const { startUpgrade } = useUpgrade();
   if (!word) return null;
   return (
     <div className="border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-5 py-4 animate-in slide-in-from-bottom-2 duration-200">
@@ -116,15 +117,13 @@ const DefPanel: React.FC<DefPanelProps> = ({ word, token, isPremium, onSRS, onCl
               + SRS
             </button>
           ) : (
-            <a
-              href={GUMROAD_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={startUpgrade}
               className="flex items-center gap-1 px-3 py-1.5 text-xs font-black text-violet-500 border border-violet-200 dark:border-violet-700 rounded-xl hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
               title="Premium: save to SRS"
             >
               🔒 SRS
-            </a>
+            </button>
           )}
           <button
             onClick={onClose}
@@ -287,6 +286,7 @@ const ReadingSection: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { openRegister } = useAuthModal();
   const { isPremium } = useFeatureAccess();
+  const { startUpgrade } = useUpgrade();
 
   const [selectedPassage, setSelectedPassage] = useState<ReadingPassage | null>(null);
   const [filter, setFilter] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
@@ -437,17 +437,16 @@ const ReadingSection: React.FC = () => {
 
               {/* Locked upgrade strip */}
               {locked && (
-                <a
-                  href={GUMROAD_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={e => e.stopPropagation()}
-                  className="flex items-center justify-between px-4 py-2.5 border-t border-gray-100 dark:border-gray-800 transition-opacity hover:opacity-90"
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={e => { e.stopPropagation(); startUpgrade(); }}
+                  className="flex items-center justify-between px-4 py-2.5 border-t border-gray-100 dark:border-gray-800 transition-opacity hover:opacity-90 cursor-pointer"
                   style={{ background: 'linear-gradient(135deg, #1a1a2e, #16213e)' }}
                 >
                   <span className="text-xs text-white/70">⭐ Premium · All passages + SRS</span>
                   <span className="text-xs font-black text-white">Unlock →</span>
-                </a>
+                </div>
               )}
             </button>
           );

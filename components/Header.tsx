@@ -8,7 +8,7 @@ import { useProgress } from '../contexts/ProgressContext';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import SpotlightSearch from './SpotlightSearch';
 import DeleteAccountModal from './DeleteAccountModal';
-import { GUMROAD_URL } from '../constants';
+import { useUpgrade } from '../hooks/useUpgrade';
 
 
 interface HeaderProps {
@@ -80,6 +80,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
   const { showToast } = useToastContext();
   const { syncLocalData, isSyncing } = useProgress();
   const { subscriptionTier } = useFeatureAccess();
+  const { startUpgrade } = useUpgrade();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [isMenuOpen, setIsMenuOpen]           = useState(false);
@@ -387,23 +388,20 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
 
                       {/* Upgrade banner for free users */}
                       {subscriptionTier === 'free' && (
-                        <a
-                          href={GUMROAD_URL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-800 transition-opacity duration-200 hover:opacity-90"
+                        <button
+                          className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-800 transition-opacity duration-200 hover:opacity-90 w-full text-left"
                           style={{ background: 'linear-gradient(135deg, #1a1a2e, #16213e)' }}
-                          onClick={() => setShowUserMenu(false)}
+                          onClick={() => { setShowUserMenu(false); startUpgrade(); }}
                         >
                           <span className="text-xl">🚀</span>
                           <div>
-                            <div className="text-sm font-bold text-white">Get Lifetime Access</div>
-                            <div className="text-xs text-gray-400">$39 one-time · All features</div>
+                            <div className="text-sm font-bold text-white">Get Premium</div>
+                            <div className="text-xs text-gray-400">$4/month · cancel anytime</div>
                           </div>
                           <svg className="w-4 h-4 text-pink-400 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
-                        </a>
+                        </button>
                       )}
 
                       {/* Menu items */}

@@ -7,7 +7,7 @@ import { useSRSContext } from '../contexts/SRSContext';
 import { useToastContext } from '../contexts/ToastContext';
 import PronunciationButton from './PronunciationButton';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
-import { GUMROAD_URL } from '../constants';
+import { useUpgrade } from '../hooks/useUpgrade';
 
 
 // ── Word popover ──────────────────────────────────────────────────────────────
@@ -32,6 +32,7 @@ interface PopoverProps {
 
 function WordPopover({ word, anchorRef, onClose, onAddSRS, isAuthenticated, isPremium }: PopoverProps) {
   const popRef = useRef<HTMLDivElement>(null);
+  const { startUpgrade } = useUpgrade();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -91,10 +92,10 @@ function WordPopover({ word, anchorRef, onClose, onAddSRS, isAuthenticated, isPr
               + SRS
             </button>
           ) : isAuthenticated ? (
-            <a href={GUMROAD_URL} target="_blank" rel="noopener noreferrer"
+            <button onClick={startUpgrade}
               className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 transition-colors">
               🔒 Premium
-            </a>
+            </button>
           ) : (
             <button onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' })); }}
               className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/20 hover:bg-pink-100 transition-colors">
@@ -199,6 +200,7 @@ function SongView({ song, artist, isPremium, isAuthenticated, onBack }: {
 }) {
   const { decks, actions: srsActions } = useSRSContext();
   const { showToast } = useToastContext();
+  const { startUpgrade } = useUpgrade();
   const [addedWords, setAddedWords] = useState<Set<string>>(new Set());
 
   const handleAddSRS = (word: KPopWord) => {
@@ -269,11 +271,11 @@ function SongView({ song, artist, isPremium, isAuthenticated, onBack }: {
       {!isPremium && !song.isFree && (
         <div className="mt-4 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 text-center">
           <p className="text-sm font-bold text-amber-700 dark:text-amber-300 mb-2">Unlock all songs with Premium</p>
-          <a href={GUMROAD_URL} target="_blank" rel="noopener noreferrer"
+          <button onClick={startUpgrade}
             className="inline-block px-5 py-2 rounded-xl text-white text-sm font-bold"
             style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}>
-            Upgrade → ₩39 lifetime
-          </a>
+            Upgrade → $4/month
+          </button>
         </div>
       )}
     </div>
@@ -289,6 +291,7 @@ function ArtistSongs({ artist, isPremium, isAuthenticated, onSelectSong, onBack 
   onSelectSong: (song: KPopSong) => void;
   onBack: () => void;
 }) {
+  const { startUpgrade } = useUpgrade();
   return (
     <div>
       <button onClick={onBack} className="flex items-center gap-1.5 text-sm font-bold mb-5 transition-opacity hover:opacity-70" style={{ color: artist.accentColor }}>
@@ -342,16 +345,15 @@ function ArtistSongs({ artist, isPremium, isAuthenticated, onSelectSong, onBack 
               </div>
               {!locked && <span className="text-gray-300 dark:text-gray-600 text-lg flex-shrink-0">›</span>}
               {locked && (
-                <a
-                  href={GUMROAD_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={e => e.stopPropagation()}
-                  className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl text-white"
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={e => { e.stopPropagation(); startUpgrade(); }}
+                  className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl text-white cursor-pointer"
                   style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
                 >
                   Unlock
-                </a>
+                </span>
               )}
             </button>
           );
@@ -366,6 +368,7 @@ function ArtistSongs({ artist, isPremium, isAuthenticated, onSelectSong, onBack 
 const KPopSection: React.FC = () => {
   const { hasPremiumAccess, isAuthenticated } = useAuth();
   const { openRegister } = useAuthModal();
+  const { startUpgrade } = useUpgrade();
   const isPremium = hasPremiumAccess();
 
   const [selectedArtist, setSelectedArtist] = useState<KPopArtist | null>(null);
@@ -469,15 +472,13 @@ const KPopSection: React.FC = () => {
               <span className="font-bold">Free plan:</span> 1 song per artist, tap words to see meanings. Upgrade to unlock all songs and add words to SRS.
             </p>
           </div>
-          <a
-            href={GUMROAD_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={startUpgrade}
             className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl text-white whitespace-nowrap"
             style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
           >
             Upgrade
-          </a>
+          </button>
         </div>
       )}
 
