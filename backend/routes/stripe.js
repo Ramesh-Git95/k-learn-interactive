@@ -143,7 +143,9 @@ router.post('/sync-subscription', authenticateToken, async (req, res) => {
   try {
     const stripe = getStripe();
     const subId = req.user.subscription && req.user.subscription.stripeSubscriptionId;
+    console.log(`🔁 [STRIPE] sync-subscription for ${req.user.email} (sub: ${subId || 'none'})`);
     if (!stripe || !subId || !subId.startsWith('sub_')) {
+      console.log('🔁 [STRIPE] sync-subscription skipped (no stripe key or no sub id)');
       return res.json({ synced: false });
     }
     const sub = await stripe.subscriptions.retrieve(subId);
@@ -230,13 +232,19 @@ async function syncUserFromSubscription(sub) {
   // during payment retries (grace); a final cancellation arrives as a separate event.
   const item = sub.items && sub.items.data && sub.items.data[0];
   const rawEnd = (item && item.current_period_end) || sub.current_period_end;
+  // A scheduled cancellation shows up as EITHER cancel_at_period_end=true OR a
+  // cancel_at timestamp — the portal's cancellation flow (Option A) uses cancel_at.
+  // Check both, or the "Cancels on <date>" state is missed.
+  const willCancel = !!sub.cancel_at_period_end || !!sub.cancel_at;
+  console.log(`🔍 [STRIPE sync] ${sub.id} status=${sub.status} cancel_at_period_end=${sub.cancel_at_period_end} cancel_at=${sub.cancel_at}`);
+
   user.subscription.type = 'premium';
   user.subscription.status = 'active';
-  user.subscription.cancelAtPeriodEnd = !!sub.cancel_at_period_end;
+  user.subscription.cancelAtPeriodEnd = willCancel;
   if (rawEnd) user.subscription.currentPeriodEnd = new Date(rawEnd * 1000);
   await user.save();
 
-  const note = sub.cancel_at_period_end ? ' (cancels at period end)' : (sub.status === 'past_due' ? ' (past_due — grace)' : '');
+  const note = willCancel ? ' (cancels at period end)' : (sub.status === 'past_due' ? ' (past_due — grace)' : '');
   console.log(`🔄 [STRIPE webhook] ${user.email} subscription synced: ${sub.status}${note}, until ${user.subscription.currentPeriodEnd ? user.subscription.currentPeriodEnd.toISOString() : '?'}`);
 }
 
