@@ -305,15 +305,26 @@ const UserProfile: React.FC = () => {
                   <li key={b}>• {b}</li>
                 ))}
               </ul>
-              {/* TEMP — Manage subscription (Stripe Customer Portal), hidden behind ?stripetest=1 */}
+              {/* TEMP — Stripe subscription management, hidden behind ?stripetest=1.
+                  Once a cancellation is scheduled, show the end date instead of the button. */}
               {showStripeTest && (
-                <button
-                  onClick={openBillingPortal}
-                  disabled={stripeLoading}
-                  className="w-full mt-3 py-2 text-xs font-black rounded-xl border-2 border-dashed border-indigo-400 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-40"
-                >
-                  {stripeLoading ? 'Opening…' : '🧾 Cancel subscription'}
-                </button>
+                user.subscription?.cancelAtPeriodEnd ? (
+                  <div className="mt-3 px-3 py-2 rounded-xl bg-amber-100/60 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800">
+                    <p className="text-[11px] font-bold text-amber-700 dark:text-amber-300">
+                      ⏳ Cancels on {user.subscription.currentPeriodEnd
+                        ? new Date(user.subscription.currentPeriodEnd).toLocaleDateString()
+                        : 'period end'} — you keep Premium until then.
+                    </p>
+                  </div>
+                ) : (
+                  <button
+                    onClick={openBillingPortal}
+                    disabled={stripeLoading}
+                    className="w-full mt-3 py-2 text-xs font-black rounded-xl border-2 border-dashed border-indigo-400 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-40"
+                  >
+                    {stripeLoading ? 'Opening…' : '🧾 Cancel subscription'}
+                  </button>
+                )
               )}
             </div>
           ) : (
