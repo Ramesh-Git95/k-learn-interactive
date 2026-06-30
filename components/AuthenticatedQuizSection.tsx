@@ -535,7 +535,7 @@ const QuizComponent: React.FC = () => {
                 <div className="mt-2 p-2.5 bg-violet-50 dark:bg-violet-900/20 rounded-xl text-xs">
                   <p className="text-violet-700 dark:text-violet-300">
                     🔒 Detailed explanations available with{' '}
-                    <button onClick={openUpgradeModal} className="font-black underline">Lifetime Access</button>
+                    <button onClick={openUpgradeModal} className="font-black underline">Premium</button>
                   </p>
                 </div>
               )}

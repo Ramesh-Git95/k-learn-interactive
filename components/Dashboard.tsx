@@ -464,7 +464,7 @@ export default function Dashboard({
                   <span className="text-2xl">🚀</span>
                   <span className="text-xs font-bold uppercase tracking-widest text-pink-400">Limited Offer</span>
                 </div>
-                <h3 className="text-xl font-black text-white mb-1">Get Lifetime Access</h3>
+                <h3 className="text-xl font-black text-white mb-1">Get Premium</h3>
                 <p className="text-gray-400 text-sm max-w-sm">
                   Unlock all tools, all content, 50 AI chats/day — one payment, forever.
                 </p>

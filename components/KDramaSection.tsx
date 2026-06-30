@@ -121,7 +121,7 @@ const KDramaSection: React.FC = () => {
               </div>
               <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">Premium Only</h3>
               <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
-                Unlock K-Drama Vocabulary Packs + all premium features with a one-time payment.
+                Unlock K-Drama Vocabulary Packs + all premium features for $4/month. Cancel anytime.
               </p>
               <p className="text-xs text-gray-400 line-through mb-4">Duolingo: $7+/month</p>
               <button

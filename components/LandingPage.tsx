@@ -675,7 +675,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                 onClick={handleStart}
                 className="btn-primary block w-full py-3.5 rounded-2xl font-bold text-white text-sm text-center"
               >
-                Start Free · Upgrade to Premium Inside →
+                Start Free · Upgrade Anytime →
               </button>
               <p className="text-center text-xs text-gray-500 mt-3">
                 Create free account · upgrade to Premium from your profile · payment via Stripe
@@ -685,7 +685,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                   onClick={() => openLogin ? openLogin() : window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
                   className="text-pink-400 hover:underline"
                 >
-                  Already purchased? Sign in to activate →
+                  Already a member? Sign in →
                 </button>
               </p>
             </div>
@@ -780,7 +780,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
               onClick={() => openLogin ? openLogin() : window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
               className="text-pink-400 hover:underline"
             >
-              Already purchased? Sign in to activate premium →
+              Already a member? Sign in →
             </button>
           </p>
 

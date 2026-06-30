@@ -240,7 +240,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
             { icon: '🧠', title: 'Science-backed learning', desc: 'Our Spaced Repetition System uses the SM-2 algorithm — the same method used by millions of successful language learners worldwide.' },
             { icon: '🤖', title: 'AI-powered practice', desc: 'Powered by Google Gemini AI, our conversation practice gives you a patient, always-available tutor that responds naturally in Korean.' },
             { icon: '🎨', title: 'Culture, not just language', desc: 'Language and culture are inseparable. K-Learn includes deep cultural content — from K-pop to Korean etiquette — to give context to everything you learn.' },
-            { icon: '💳', title: 'One payment, lifetime access', desc: 'We hate subscription fatigue. Pay once, use forever. No monthly fees, no paywalls after the fact.' },
+            { icon: '💳', title: 'Affordable & flexible', desc: 'Premium is just $4/month — less than a coffee. Cancel anytime from your profile, no long-term commitment.' },
           ].map(({ icon, title, desc }) => (
             <div key={title} className="flex gap-4">
               <div className="text-2xl flex-shrink-0">{icon}</div>
