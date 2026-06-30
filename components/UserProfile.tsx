@@ -52,6 +52,11 @@ const UserProfile: React.FC = () => {
     return () => clearInterval(interval);
   }, [isPolling]);
 
+  // Pull the latest subscription state when the profile opens, so a cancellation
+  // made elsewhere (Stripe portal, another tab) is reflected here — e.g. the
+  // "Cancels on <date>" note and the hidden Cancel button.
+  React.useEffect(() => { refreshUser(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!isAuthenticated || !user) {
     return (
       <div className="p-8 text-center">
