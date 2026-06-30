@@ -67,12 +67,12 @@ const FREE_BULLETS    = ['Hangul alphabet & pronunciation', '3 vocab categories 
 const PREMIUM_BULLETS = ['Everything in Free', 'All 94 vocabulary words', 'All 7 grammar patterns + advanced', '50 AI chats per day', 'All 6 Honorific categories', 'All 24 Culture Cards', 'Full 60-sec Typing Dojo', 'Unlimited TOPIK questions', 'All 6 scripted conversation scenarios', 'Unlimited bookmarks + cloud sync', 'Every new feature, forever'];
 
 const FAQ = [
-  { q: 'Is this really a one-time payment?',             a: 'Yes — $39 once, lifetime access. No monthly fees ever. Every new feature we ship is included at no extra cost.' },
+  { q: 'How much does Premium cost?',                    a: 'Just $4/month — cancel anytime, no long-term commitment. Every new feature we ship is included at no extra cost.' },
   { q: 'Can I try before I buy?',                        a: 'Absolutely. The free tier is generous — Hangul, 3 vocabulary categories (39 words), 5 basic grammar patterns, 5 AI chats per day, and full SRS. No credit card required to start.' },
   { q: 'Do I need any prior Korean knowledge?',          a: 'None at all. The Hangul module teaches the entire alphabet from scratch. Most learners can read Korean in under a week.' },
   { q: 'How long until I can have a real conversation?', a: 'With daily 20-minute sessions, most learners can handle basic conversations in 2–3 months. The AI tutor accelerates this significantly.' },
-  { q: 'Is the payment secure?',                         a: 'Payment is processed entirely by Gumroad — a trusted platform used by 90,000+ creators. You get an instant download link and a 30-day money-back guarantee.' },
-  { q: 'Will I get future features for free?',           a: 'Yes. Lifetime means lifetime. K-Drama Shadowing, Stroke Canvas, and everything else we build is included for lifetime members at no extra charge.' },
+  { q: 'Is the payment secure?',                         a: 'Payment is processed securely by Stripe — the payments platform trusted by millions of businesses worldwide. You can cancel anytime from your profile.' },
+  { q: 'Will I get future features?',                    a: 'Yes — your Premium subscription includes everything we build. K-Drama Shadowing, Stroke Canvas, and more, at no extra charge.' },
 ];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -367,7 +367,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             AI conversations, 1,000+ words, real grammar — not tourist phrases.
           </p>
           <p className="text-sm sm:text-base font-black mb-10 max-w-lg mx-auto" style={{ color: '#8B5CF6' }}>
-            Pay once. Own it forever. No monthly fees. Ever.
+            Just $4/month. Cancel anytime. Less than a coffee ☕
           </p>
 
           {/* CTAs */}
@@ -384,18 +384,18 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
           </div>
 
           <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
-            No subscription · pay once · 30-day money-back guarantee ·{' '}
+            Just $4/month · cancel anytime ·{' '}
             <button
               onClick={() => openLogin ? openLogin() : window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
               className="text-pink-400 hover:underline font-semibold"
             >
-              Already purchased? Sign in →
+              Already a member? Sign in →
             </button>
           </p>
 
           {/* vs Duolingo pill */}
           <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/40 rounded-full px-4 py-1.5 mb-10">
-            <span className="text-xs font-black text-green-700 dark:text-green-400">💰 Duolingo costs $84–168/year. K-Learn is $39 once.</span>
+            <span className="text-xs font-black text-green-700 dark:text-green-400">💰 Duolingo costs $84–168/year. K-Learn is just $4/month.</span>
           </div>
 
           {/* Trust row */}
@@ -620,9 +620,9 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                 Simple Pricing
               </span>
               <h2 className="text-3xl sm:text-5xl font-black text-gray-900 dark:text-white mb-4">
-                No Subscriptions. <span className="gradient-text">Ever.</span>
+                Less Than a Coffee <span className="gradient-text">a Month.</span>
               </h2>
-              <p className="text-gray-500 dark:text-gray-400 text-lg">Pay once. Own everything. Every new feature included.</p>
+              <p className="text-gray-500 dark:text-gray-400 text-lg">Just $4/month. Cancel anytime. Every new feature included.</p>
             </div>
           </FadeIn>
 
@@ -648,7 +648,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
               </div>
             </FadeIn>
 
-            {/* Lifetime */}
+            {/* Premium */}
             <FadeIn delay={150}>
             <div className="card-hover relative rounded-3xl p-8 overflow-hidden" style={{ background: 'linear-gradient(135deg,#1a1a2e 0%,#16213e 100%)' }}>
               <div className="absolute -top-px left-1/2 -translate-x-1/2">
@@ -656,13 +656,13 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                   Best Value
                 </span>
               </div>
-              <div className="text-xs font-bold uppercase tracking-widest text-pink-400 mb-2 mt-3">Lifetime Access</div>
+              <div className="text-xs font-bold uppercase tracking-widest text-pink-400 mb-2 mt-3">Premium</div>
               <div className="flex items-end gap-2 mb-1">
-                <span className="text-5xl font-black text-white">$39</span>
-                <span className="text-gray-500 text-sm mb-2 line-through">$99</span>
-                <span className="mb-2 text-xs font-black px-2 py-0.5 rounded-full text-white bg-emerald-500/30 text-emerald-300">60% OFF</span>
+                <span className="text-5xl font-black text-white">$4</span>
+                <span className="text-gray-400 text-lg mb-1.5">/month</span>
+                <span className="mb-2 text-xs font-black px-2 py-0.5 rounded-full text-white bg-emerald-500/30 text-emerald-300">☕ less than a coffee</span>
               </div>
-              <div className="text-gray-400 text-sm mb-6">One-time · via Gumroad · 30-day guarantee</div>
+              <div className="text-gray-400 text-sm mb-6">Cancel anytime · secure payment via Stripe</div>
               <ul className="space-y-2.5 mb-8">
                 {PREMIUM_BULLETS.map((f, i) => (
                   <li key={i} className="flex items-center gap-3 text-sm text-gray-300">
@@ -678,7 +678,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                 Start Free · Upgrade to Premium Inside →
               </button>
               <p className="text-center text-xs text-gray-500 mt-3">
-                Create free account · upgrade to Lifetime from your profile · payment via Gumroad
+                Create free account · upgrade to Premium from your profile · payment via Stripe
               </p>
               <p className="text-center text-xs text-gray-600 mt-1">
                 <button
@@ -791,7 +791,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             ))}
           </div>
 
-          <p className="text-gray-500 text-sm">No subscription · 30-day guarantee · Built with 🤍 for Korean learners</p>
+          <p className="text-gray-500 text-sm">Just $4/month · cancel anytime · Built with 🤍 for Korean learners</p>
         </div>
         </FadeIn>
       </section>

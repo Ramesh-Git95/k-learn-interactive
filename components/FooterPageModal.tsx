@@ -30,7 +30,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
           },
           {
             q: 'How do I upgrade to Premium?',
-            a: 'Click any "Get Premium" or "⭐ Upgrade" button in the app. You\'ll be taken to our Gumroad page for a secure one-time payment of $39 for lifetime access — no subscription ever.',
+            a: 'Click any "Get Premium" or "⭐ Upgrade" button in the app. You\'ll be taken to a secure Stripe checkout to subscribe for $4/month. You can cancel anytime from your profile.',
           },
           {
             q: 'My progress isn\'t syncing — what should I do?',
@@ -41,8 +41,8 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
             a: 'On the sign-in form, click "Forgot password?" below the Password field. Enter your email and we\'ll send a reset link valid for 1 hour.',
           },
           {
-            q: 'How do I cancel or get a refund?',
-            a: 'K-Learn Premium is a one-time lifetime purchase via Gumroad. If you\'re unsatisfied within 30 days of purchase, contact us at support@k-learn.app and we\'ll issue a full refund — no questions asked.',
+            q: 'How do I cancel my subscription?',
+            a: 'Open your Profile and click "Cancel subscription" — you\'ll keep Premium access until the end of your current billing month, then your account returns to the free plan. No long-term commitment, and you can resubscribe anytime.',
           },
           {
             q: 'Which browsers are supported?',
@@ -301,7 +301,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
           },
           {
             title: '5. Data Sharing',
-            body: 'We do not sell your personal data. We share data only with essential service providers: MongoDB Atlas (database hosting, EU region), Google (Gemini AI — messages only, not account data), and Gumroad (payment processing — we receive only your email to verify purchases).',
+            body: 'We do not sell your personal data. We share data only with essential service providers: MongoDB Atlas (database hosting, EU region), Google (Gemini AI — messages only, not account data), and Stripe (payment processing — handles your card details and subscription; we never see or store your card number).',
           },
           {
             title: '6. Cookies',
@@ -357,11 +357,11 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
           },
           {
             title: '3. Free & Premium Plans',
-            body: 'K-Learn offers a free tier with limited features and a Premium tier with full access. Premium is a one-time lifetime purchase processed via Gumroad. Upon successful payment, your account will be upgraded to Premium status.',
+            body: 'K-Learn offers a free tier with limited features and a Premium tier with full access. Premium is a $4/month subscription processed securely via Stripe. Your account is upgraded as soon as payment is confirmed, and renews monthly until you cancel.',
           },
           {
-            title: '4. Refund Policy',
-            body: 'We offer a 30-day money-back guarantee on Premium purchases. To request a refund, contact us at support@k-learn.app within 30 days of purchase with your Gumroad order ID.',
+            title: '4. Cancellation',
+            body: 'You can cancel your Premium subscription at any time from your Profile. Your access continues until the end of the current billing month, after which the account returns to the free plan. For billing questions, contact us at support@k-learn.app.',
           },
           {
             title: '5. Acceptable Use',

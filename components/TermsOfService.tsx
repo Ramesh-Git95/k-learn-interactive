@@ -40,9 +40,9 @@ const TermsOfService: React.FC = () => {
           <section>
             <h2 className="text-base font-black text-gray-900 dark:text-white mb-3">4. Subscriptions and Payments</h2>
             <ul className="space-y-2 list-disc list-inside">
-              <li>K-Learn offers a free tier and a paid Lifetime Access plan.</li>
-              <li>Lifetime Access is a one-time payment processed through Gumroad.</li>
-              <li>All payments are final. Refunds are handled at our discretion within 7 days of purchase if the Service was not functioning as described.</li>
+              <li>K-Learn offers a free tier and a paid Premium plan ($4/month).</li>
+              <li>Premium is a recurring monthly subscription processed securely through Stripe, renewing each month until cancelled.</li>
+              <li>You can cancel anytime from your Profile; access continues until the end of the current billing period, after which the account returns to the free plan.</li>
               <li>Prices are listed in USD and may change with notice.</li>
             </ul>
           </section>

@@ -43,8 +43,8 @@ const PrivacyPolicy: React.FC = () => {
                 <p className="font-bold text-gray-800 dark:text-gray-200 mb-1">Payment Information</p>
                 <ul className="space-y-1 list-disc list-inside">
                   <li>We do not store payment card details</li>
-                  <li>Purchases are processed by Gumroad — their privacy policy applies</li>
-                  <li>We receive your email and purchase confirmation from Gumroad</li>
+                  <li>Subscriptions are processed securely by Stripe — their privacy policy applies</li>
+                  <li>We receive your subscription status and billing period from Stripe</li>
                 </ul>
               </div>
               <div>
@@ -76,7 +76,7 @@ const PrivacyPolicy: React.FC = () => {
               {[
                 { name: 'MongoDB Atlas', purpose: 'Database — stores your account and learning data' },
                 { name: 'Railway', purpose: 'Backend hosting — runs the application server' },
-                { name: 'Gumroad', purpose: 'Payment processing for Lifetime Access' },
+                { name: 'Stripe', purpose: 'Payment processing for Premium subscriptions' },
                 { name: 'Resend', purpose: 'Transactional emails (verification, password reset)' },
                 { name: 'Google Gemini AI', purpose: 'AI conversation practice and example generation' },
               ].map(({ name, purpose }) => (
