@@ -133,6 +133,28 @@ router.post('/create-portal-session', authenticateToken, async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/stripe/sync-subscription
+// Pull the user's live subscription straight from Stripe and write it to the DB.
+// Makes Stripe the source of truth so the profile self-heals if a webhook was
+// ever missed (e.g. a cancellation that happened before the event was subscribed).
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/sync-subscription', authenticateToken, async (req, res) => {
+  try {
+    const stripe = getStripe();
+    const subId = req.user.subscription && req.user.subscription.stripeSubscriptionId;
+    if (!stripe || !subId || !subId.startsWith('sub_')) {
+      return res.json({ synced: false });
+    }
+    const sub = await stripe.subscriptions.retrieve(subId);
+    await syncUserFromSubscription(sub); // reuses the webhook sync logic
+    res.json({ synced: true });
+  } catch (err) {
+    console.error('❌ [STRIPE] sync-subscription error:', err.message);
+    res.json({ synced: false });
+  }
+});
+
 // Activate (or re-sync) a user's subscription from a completed Checkout session.
 // Re-writing the same premium state is harmless, so duplicate webhook deliveries
 // never cause a "double grant" — and the actual money is one Stripe subscription,

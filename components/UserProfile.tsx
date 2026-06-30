@@ -52,10 +52,21 @@ const UserProfile: React.FC = () => {
     return () => clearInterval(interval);
   }, [isPolling]);
 
-  // Pull the latest subscription state when the profile opens, so a cancellation
-  // made elsewhere (Stripe portal, another tab) is reflected here — e.g. the
-  // "Cancels on <date>" note and the hidden Cancel button.
-  React.useEffect(() => { refreshUser(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // When the profile opens, pull the live subscription from Stripe into the DB
+  // (self-heals any drift, e.g. a cancellation a webhook missed), then refresh
+  // the user so the UI shows the current state — "Cancels on <date>" + hidden button.
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const token = localStorage.getItem('token');
+        await fetch(`${API_BASE}/stripe/sync-subscription`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        });
+      } catch { /* non-blocking */ }
+      refreshUser();
+    })();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!isAuthenticated || !user) {
     return (
