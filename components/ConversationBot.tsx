@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { translateText, getConversationResponse } from '../services/geminiService';
+import { useToastContext } from '../contexts/ToastContext';
 
 declare global {
   interface Window {
@@ -87,6 +88,8 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
   const [speechSupported, setSpeechSupported] = useState(false);
   const [voiceMode, setVoiceMode] = useState<'off' | 'input' | 'output' | 'both'>('off');
   const [uiLang, setUiLang] = useState<'en' | 'ko'>('en');
+  const [translatingId, setTranslatingId] = useState<string | null>(null);
+  const { showToast } = useToastContext();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -189,10 +192,15 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
   };
 
   const handleTranslate = async (id: string, text: string) => {
+    setTranslatingId(id);
     try {
       const translation = await translateText(text);
       setMessages(p => p.map(m => m.id === id ? { ...m, translation, showTranslation: true } : m));
-    } catch { /* silent */ }
+    } catch {
+      showToast(L('Translation failed. Please try again.', '번역에 실패했습니다. 다시 시도해 주세요.'), 'error');
+    } finally {
+      setTranslatingId(null);
+    }
   };
 
   const toggleTranslation = (id: string) => {
@@ -337,8 +345,8 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
                     {msg.showTranslation ? L('Hide', '숨기기') : L('Show', '보기')}
                   </button>
                 ) : (
-                  <button onClick={() => handleTranslate(msg.id, msg.text)} className="text-[10px] text-cyan-600 dark:text-cyan-400 hover:underline">
-                    {L('Translate', '번역하기')}
+                  <button onClick={() => handleTranslate(msg.id, msg.text)} disabled={translatingId === msg.id} className="text-[10px] text-cyan-600 dark:text-cyan-400 hover:underline disabled:opacity-50">
+                    {translatingId === msg.id ? L('Translating…', '번역 중…') : L('Translate', '번역하기')}
                   </button>
                 )}
               </div>

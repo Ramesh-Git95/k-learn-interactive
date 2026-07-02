@@ -93,13 +93,21 @@ router.post('/translate', authenticateToken, async (req, res) => {
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
       contents: prompt,
-      config: { temperature: 0.3, maxOutputTokens: 150 },
+      config: { temperature: 0.3, maxOutputTokens: 512 },
     });
 
-    res.json({ translation: response.text.trim() });
+    const translation = (response.text || '').trim();
+    if (!translation) {
+      console.error('AI translate: empty response, finishReason:', response.candidates?.[0]?.finishReason);
+      return res.status(502).json({ message: 'Could not translate right now. Please try again.', error: 'EMPTY_TRANSLATION' });
+    }
+    res.json({ translation });
 
   } catch (error) {
-    console.error('AI translate error:', error);
+    console.error('AI translate error:', error?.message, error);
+    if (error.message?.includes('GEMINI_API_KEY')) {
+      return res.status(503).json({ message: 'AI service is not configured', error: 'AI_NOT_CONFIGURED' });
+    }
     res.status(500).json({ message: 'AI service error', error: 'AI_ERROR' });
   }
 });
