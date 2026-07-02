@@ -9,49 +9,7 @@ const UserProfile: React.FC = () => {
   const { user, isAuthenticated, hasPremiumAccess, refreshUser } = useAuth();
   const { showToast } = useToastContext();
   const { startUpgrade } = useUpgrade();
-  const [licenseKey, setLicenseKey] = useState('');
-  const [licenseLoading, setLicenseLoading] = useState(false);
-  const [showClaimForm, setShowClaimForm] = useState(false);
-  const [claimEmail, setClaimEmail] = useState('');
-  const [claimCode, setClaimCode] = useState('');
-  const [claimStep, setClaimStep] = useState<'email' | 'code'>('email');
-  const [claimLoading, setClaimLoading] = useState(false);
-  const [isPolling, setIsPolling] = useState(false);
   const [stripeLoading, setStripeLoading] = useState(false);
-  const isPremiumRef = React.useRef(false);
-  const pollCountRef = React.useRef(0);
-  // refreshUser/showToast are rebuilt every render (unmemoized context values).
-  // Hold them in refs so the polling effect can depend only on [isPolling] —
-  // otherwise each poll's re-render restarts the interval and resets the count,
-  // defeating the 5-minute cap and polling forever.
-  const refreshUserRef = React.useRef(refreshUser);
-  const showToastRef = React.useRef(showToast);
-
-  // Keep refs in sync so the polling interval always reads the latest values
-  isPremiumRef.current = hasPremiumAccess();
-  refreshUserRef.current = refreshUser;
-  showToastRef.current = showToast;
-
-  // Poll every 5 s (max 5 min) after user clicks the Gumroad button
-  React.useEffect(() => {
-    if (!isPolling) return;
-    pollCountRef.current = 0;
-    const interval = setInterval(async () => {
-      pollCountRef.current += 1;
-      await refreshUserRef.current();
-      if (isPremiumRef.current) {
-        clearInterval(interval);
-        setIsPolling(false);
-        showToastRef.current('🎉 Your account has been upgraded to Premium!', 'success');
-        return;
-      }
-      if (pollCountRef.current >= 60) {   // 60 × 5 s = 5 min
-        clearInterval(interval);
-        setIsPolling(false);
-      }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [isPolling]);
 
   // When the profile opens, pull the live subscription from Stripe into the DB
   // (self-heals any drift, e.g. a cancellation a webhook missed), then refresh
@@ -116,87 +74,6 @@ const UserProfile: React.FC = () => {
       console.error('🧾 [STRIPE] portal error:', e);
       showToast('Network error opening billing portal.', 'error');
       setStripeLoading(false);
-    }
-  };
-
-  const redeemLicense = async () => {
-    if (!licenseKey.trim()) return;
-    setLicenseLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE}/gumroad/verify-license`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ licenseKey: licenseKey.trim() }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        await refreshUser();
-        showToast('🎉 License verified! You now have Premium access.', 'success');
-        setLicenseKey('');
-      } else {
-        showToast(data.message || 'Invalid license key. Please try again.', 'error');
-      }
-    } catch {
-      showToast('Network error. Please try again.', 'error');
-    } finally {
-      setLicenseLoading(false);
-    }
-  };
-
-  const sendClaimCode = async () => {
-    if (!claimEmail.trim()) return;
-    setClaimLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE}/gumroad/send-claim-code`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ purchaseEmail: claimEmail.trim() }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setClaimStep('code');
-        showToast(`Code sent to ${claimEmail.trim()}. Check your inbox.`, 'success');
-      } else if (data.error === 'NOT_FOUND') {
-        showToast('No purchase found for that email. Check the exact email on your Gumroad receipt.', 'error');
-      } else {
-        showToast(data.message || 'Could not send code. Please try again.', 'error');
-      }
-    } catch {
-      showToast('Network error. Please try again.', 'error');
-    } finally {
-      setClaimLoading(false);
-    }
-  };
-
-  const claimPurchase = async () => {
-    if (!claimCode.trim()) return;
-    setClaimLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE}/gumroad/claim-purchase`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ purchaseEmail: claimEmail.trim(), code: claimCode.trim() }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        await refreshUser();
-        showToast('🎉 Purchase verified! You now have Premium access.', 'success');
-        setShowClaimForm(false);
-        setClaimEmail('');
-        setClaimCode('');
-        setClaimStep('email');
-      } else if (data.error === 'INVALID_CODE') {
-        showToast('Invalid or expired code. Request a new one.', 'error');
-      } else {
-        showToast(data.message || 'Could not verify. Please try again.', 'error');
-      }
-    } catch {
-      showToast('Network error. Please try again.', 'error');
-    } finally {
-      setClaimLoading(false);
     }
   };
 
@@ -333,132 +210,33 @@ const UserProfile: React.FC = () => {
               className="rounded-xl p-4"
               style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.08), rgba(236,72,153,0.08))' }}
             >
-              <p className="text-xs font-black text-violet-700 dark:text-violet-300 mb-1">Upgrade to Premium 🚀</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                Just $4/month — unlock unlimited AI conversations, all premium content, and advanced features. Cancel anytime.
-              </p>
+              <p className="text-sm font-black text-gray-900 dark:text-white mb-1">You're on the Free plan 🆓</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Here's what Premium unlocks:</p>
+              <ul className="space-y-1.5 mb-4">
+                {([
+                  { icon: '🎬', label: 'K-Drama & K-Pop vocab packs' },
+                  { icon: '🤖', label: '50 AI chats a day', sub: 'you get 5' },
+                  { icon: '🧠', label: 'Unlimited quizzes & TOPIK prep' },
+                  { icon: '🎴', label: 'All 24 Culture Cards + Honorifics' },
+                  { icon: '♾️', label: 'Unlimited bookmarks + cloud sync' },
+                ] as { icon: string; label: string; sub?: string }[]).map(({ icon, label, sub }) => (
+                  <li key={label} className="flex items-center gap-2 text-xs">
+                    <span className="flex-shrink-0 text-gray-400 dark:text-gray-500">🔒</span>
+                    <span className="text-gray-700 dark:text-gray-300 font-semibold">{icon} {label}</span>
+                    {sub && <span className="text-[10px] text-gray-400 dark:text-gray-500">({sub})</span>}
+                  </li>
+                ))}
+              </ul>
               <button
                 onClick={startUpgrade}
-                className="w-full py-2 text-white text-xs font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                className="w-full py-2.5 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-md"
                 style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
               >
-                Get Premium — $4/month
+                Unlock all — $4/month
               </button>
-
-              {isPolling && (
-                <div className="flex items-center gap-2 mt-2 px-3 py-2 rounded-xl bg-violet-50 dark:bg-violet-900/20">
-                  <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse flex-shrink-0" />
-                  <p className="text-[11px] text-violet-600 dark:text-violet-400 font-bold">
-                    Waiting for purchase confirmation… upgrading automatically
-                  </p>
-                </div>
-              )}
-
-              {/* Already purchased section */}
-              <div className="mt-4 pt-4 border-t border-violet-200 dark:border-violet-800/30">
-                <p className="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                  Already purchased?
-                </p>
-                <button
-                  onClick={async () => { setLicenseLoading(true); await refreshUser(); setLicenseLoading(false); showToast('Subscription status refreshed.', 'info'); }}
-                  disabled={licenseLoading}
-                  className="w-full py-2 text-xs font-black rounded-xl border-2 border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-all disabled:opacity-40 mb-2"
-                >
-                  {licenseLoading ? 'Checking…' : '🔄 Check upgrade status'}
-                </button>
-                <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mb-3">
-                  Click after purchase to refresh your account status
-                </p>
-
-                {/* Different email claim */}
-                <button
-                  onClick={() => { setShowClaimForm(v => !v); setClaimStep('email'); setClaimCode(''); }}
-                  className="w-full py-1.5 text-[11px] font-black rounded-lg text-violet-600 dark:text-violet-400 hover:underline mb-2 text-left"
-                >
-                  {showClaimForm ? '▲ Hide' : '▼ Used a different email?'}
-                </button>
-                {showClaimForm && (
-                  <div className="mb-3">
-                    {claimStep === 'email' ? (
-                      <>
-                        <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-1.5">
-                          Enter the email you used on Gumroad. We'll send a verification code to confirm you own it.
-                        </p>
-                        <div className="flex gap-2">
-                          <input
-                            type="email"
-                            value={claimEmail}
-                            onChange={e => setClaimEmail(e.target.value)}
-                            placeholder="Gumroad purchase email"
-                            className="flex-1 px-3 py-2 text-xs rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-violet-400"
-                            disabled={claimLoading}
-                          />
-                          <button
-                            onClick={sendClaimCode}
-                            disabled={!claimEmail.trim() || claimLoading}
-                            className="px-3 py-2 text-white text-xs font-black rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                            style={{ background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' }}
-                          >
-                            {claimLoading ? '…' : 'Send Code'}
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-1.5">
-                          Enter the 6-digit code sent to <strong className="text-gray-700 dark:text-gray-300">{claimEmail}</strong>:
-                        </p>
-                        <div className="flex gap-2 mb-1.5">
-                          <input
-                            type="text"
-                            value={claimCode}
-                            onChange={e => setClaimCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                            placeholder="123456"
-                            className="flex-1 px-3 py-2 text-xs rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono tracking-widest focus:outline-none focus:border-violet-400"
-                            disabled={claimLoading}
-                            maxLength={6}
-                          />
-                          <button
-                            onClick={claimPurchase}
-                            disabled={claimCode.length !== 6 || claimLoading}
-                            className="px-3 py-2 text-white text-xs font-black rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                            style={{ background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' }}
-                          >
-                            {claimLoading ? '…' : 'Verify'}
-                          </button>
-                        </div>
-                        <button
-                          onClick={() => { setClaimStep('email'); setClaimCode(''); }}
-                          className="text-[10px] text-violet-500 dark:text-violet-400 hover:underline"
-                        >
-                          ← Change email / resend code
-                        </button>
-                      </>
-                    )}
-                  </div>
-                )}
-
-                {/* License key fallback */}
-                <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-1.5">Or enter your license key if you have one:</p>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={licenseKey}
-                    onChange={e => setLicenseKey(e.target.value)}
-                    placeholder="Paste license key here"
-                    className="flex-1 px-3 py-2 text-xs rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono focus:outline-none focus:border-violet-400"
-                    disabled={licenseLoading}
-                  />
-                  <button
-                    onClick={redeemLicense}
-                    disabled={!licenseKey.trim() || licenseLoading}
-                    className="px-3 py-2 text-white text-xs font-black rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                    style={{ background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)' }}
-                  >
-                    {licenseLoading ? '…' : 'Redeem'}
-                  </button>
-                </div>
-              </div>
+              <p className="text-center text-[11px] text-gray-500 dark:text-gray-400 mt-2">
+                ☕ Less than a coffee · cancel anytime
+              </p>
             </div>
           )}
         </div>
