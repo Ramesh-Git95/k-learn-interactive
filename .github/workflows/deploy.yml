@@ -27,6 +27,7 @@ jobs:
         run: npm run build
         env:
           VITE_API_URL: https://k-learn-interactive-production.up.railway.app/api
+          VITE_PAYMENT_PROVIDER: stripe
 
       - name: Deploy dist/ to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5

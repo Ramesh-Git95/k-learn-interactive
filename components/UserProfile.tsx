@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToastContext } from '../contexts/ToastContext';
-import { GUMROAD_URL } from '../constants';
+import { useUpgrade } from '../hooks/useUpgrade';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5001/api';
 
 const UserProfile: React.FC = () => {
   const { user, isAuthenticated, hasPremiumAccess, refreshUser } = useAuth();
   const { showToast } = useToastContext();
+  const { startUpgrade } = useUpgrade();
   const [licenseKey, setLicenseKey] = useState('');
   const [licenseLoading, setLicenseLoading] = useState(false);
   const [showClaimForm, setShowClaimForm] = useState(false);
@@ -78,9 +79,10 @@ const UserProfile: React.FC = () => {
   }
 
   const isPremium = hasPremiumAccess();
-  // The Stripe test button is hidden unless the URL has ?stripetest=1, so it can
-  // ship to production safely while we verify Stripe — real users never see it.
-  const showStripeTest = new URLSearchParams(window.location.search).has('stripetest');
+  // Only Stripe subscribers have a subscription to manage/cancel/resume — a
+  // Gumroad lifetime user is premium but has no Stripe sub (id starts with 'sub_').
+  const hasStripeSub = !!user.subscription?.stripeSubscriptionId
+    && user.subscription.stripeSubscriptionId.startsWith('sub_');
   const subscriptionType = user.subscription?.type || 'free';
   const subscriptionStatus = user.subscription?.status || 'active';
 
@@ -91,31 +93,6 @@ const UserProfile: React.FC = () => {
     { label: 'Cards Learned', value: user.progress?.srsData?.totalCards || 0,           color: '#F59E0B' },
   ];
 
-  // STRIPE (Step 1) — create a checkout session and redirect to Stripe's hosted page.
-  // Additive/test button; the Gumroad flow above is untouched.
-  const startStripeCheckout = async () => {
-    setStripeLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      console.log('💳 [STRIPE] requesting checkout session…');
-      const res = await fetch(`${API_BASE}/stripe/create-checkout-session`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      console.log('💳 [STRIPE] response:', res.status, data);
-      if (res.ok && data.url) {
-        window.location.href = data.url; // redirect to Stripe hosted checkout
-      } else {
-        showToast(data.message || 'Could not start Stripe checkout.', 'error');
-        setStripeLoading(false);
-      }
-    } catch (e) {
-      console.error('💳 [STRIPE] checkout error:', e);
-      showToast('Network error starting checkout.', 'error');
-      setStripeLoading(false);
-    }
-  };
 
   // STRIPE (3c) — open the Customer Portal to manage / cancel the subscription.
   const openBillingPortal = async () => {
@@ -321,22 +298,30 @@ const UserProfile: React.FC = () => {
                   <li key={b}>• {b}</li>
                 ))}
               </ul>
-              {/* TEMP — Stripe subscription management, hidden behind ?stripetest=1.
-                  Once a cancellation is scheduled, show the end date instead of the button. */}
-              {showStripeTest && (
+              {/* Stripe subscription management — only for Stripe subscribers. */}
+              {hasStripeSub && (
                 user.subscription?.cancelAtPeriodEnd ? (
-                  <div className="mt-3 px-3 py-2 rounded-xl bg-amber-100/60 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800">
-                    <p className="text-[11px] font-bold text-amber-700 dark:text-amber-300">
-                      ⏳ Cancels on {user.subscription.currentPeriodEnd
-                        ? new Date(user.subscription.currentPeriodEnd).toLocaleDateString()
-                        : 'period end'} — you keep Premium until then.
-                    </p>
+                  <div className="mt-3">
+                    <div className="px-3 py-2 rounded-xl bg-amber-100/60 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 mb-2">
+                      <p className="text-[11px] font-bold text-amber-700 dark:text-amber-300">
+                        ⏳ Cancels on {user.subscription.currentPeriodEnd
+                          ? new Date(user.subscription.currentPeriodEnd).toLocaleDateString()
+                          : 'period end'} — you keep Premium until then.
+                      </p>
+                    </div>
+                    <button
+                      onClick={openBillingPortal}
+                      disabled={stripeLoading}
+                      className="w-full py-2 text-xs font-black rounded-xl border-2 border-emerald-400 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all disabled:opacity-40"
+                    >
+                      {stripeLoading ? 'Opening…' : '↻ Resume subscription'}
+                    </button>
                   </div>
                 ) : (
                   <button
                     onClick={openBillingPortal}
                     disabled={stripeLoading}
-                    className="w-full mt-3 py-2 text-xs font-black rounded-xl border-2 border-dashed border-indigo-400 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-40"
+                    className="w-full mt-3 py-2 text-xs font-black rounded-xl border-2 border-indigo-400 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-40"
                   >
                     {stripeLoading ? 'Opening…' : '🧾 Cancel subscription'}
                   </button>
@@ -348,33 +333,17 @@ const UserProfile: React.FC = () => {
               className="rounded-xl p-4"
               style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.08), rgba(236,72,153,0.08))' }}
             >
-              <p className="text-xs font-black text-violet-700 dark:text-violet-300 mb-1">Upgrade to Lifetime Access 🚀</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                Unlock unlimited AI conversations, advanced SRS, and detailed analytics.
+              <p className="text-xs font-black text-violet-700 dark:text-violet-300 mb-1">Upgrade to Premium 🚀</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                Just $4/month — unlock unlimited AI conversations, all premium content, and advanced features. Cancel anytime.
               </p>
-              <div className="bg-violet-50 dark:bg-violet-900/20 rounded-xl p-2.5 mb-3">
-                <p className="text-[11px] text-violet-600 dark:text-violet-400 font-bold">
-                  ⚠️ Use <strong>{user.email}</strong> when purchasing — your account upgrades automatically.
-                </p>
-              </div>
               <button
-                onClick={() => { window.open(GUMROAD_URL, '_blank'); setIsPolling(true); }}
+                onClick={startUpgrade}
                 className="w-full py-2 text-white text-xs font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
                 style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
               >
-                Get Lifetime Access
+                Get Premium — $4/month
               </button>
-
-              {/* TEMP — Stripe test button, hidden behind ?stripetest=1 (remove once Stripe is the default) */}
-              {showStripeTest && (
-                <button
-                  onClick={startStripeCheckout}
-                  disabled={stripeLoading}
-                  className="w-full mt-2 py-2 text-xs font-black rounded-xl border-2 border-dashed border-indigo-400 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-40"
-                >
-                  {stripeLoading ? 'Starting Stripe…' : '🧪 Test Stripe Checkout'}
-                </button>
-              )}
 
               {isPolling && (
                 <div className="flex items-center gap-2 mt-2 px-3 py-2 rounded-xl bg-violet-50 dark:bg-violet-900/20">

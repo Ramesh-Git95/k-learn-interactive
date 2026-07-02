@@ -284,6 +284,8 @@ export interface User {
     currentPeriodStart?: Date;
     currentPeriodEnd?: Date;
     cancelAtPeriodEnd?: boolean;
+    stripeSubscriptionId?: string;
+    stripeCustomerId?: string;
   };
   progress: {
     level: 'beginner' | 'intermediate' | 'advanced';
