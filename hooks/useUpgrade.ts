@@ -1,11 +1,8 @@
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthModal } from '../contexts/AuthModalContext';
-import { GUMROAD_URL } from '../constants';
+import { useToastContext } from '../contexts/ToastContext';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5001/api';
-// Build-time switch. Defaults to 'gumroad' so the app behaves exactly as today
-// until we flip VITE_PAYMENT_PROVIDER=stripe at go-live. Safe to deploy anytime.
-const PROVIDER = (import.meta.env.VITE_PAYMENT_PROVIDER as string) || 'gumroad';
 
 // Full-screen "redirecting…" overlay so the ~2-3s gap while the backend creates
 // the Stripe Checkout session doesn't feel like a dead click. Injected into the
@@ -34,20 +31,15 @@ function hideRedirectOverlay() {
 
 /**
  * Single entry point for "Upgrade to Premium" across the whole app.
- * - gumroad (default): opens the Gumroad lifetime page (current behaviour).
- * - stripe: starts a Stripe Checkout subscription. Requires login — a logged-out
- *   visitor is prompted to register first (their choice), then upgrades.
+ * Starts a Stripe Checkout subscription. Payment is tied to the account, so a
+ * logged-out visitor is prompted to register first, then upgrades.
  */
 export function useUpgrade() {
   const { isAuthenticated } = useAuth();
   const { openRegister } = useAuthModal();
+  const { showToast } = useToastContext();
 
   const startUpgrade = async () => {
-    if (PROVIDER !== 'stripe') {
-      window.open(GUMROAD_URL, '_blank');
-      return;
-    }
-
     // Stripe ties the payment to the account, so the user must be signed in.
     if (!isAuthenticated) {
       openRegister();
@@ -67,14 +59,14 @@ export function useUpgrade() {
       } else {
         console.error('[useUpgrade] checkout failed:', res.status, data);
         hideRedirectOverlay();
-        window.open(GUMROAD_URL, '_blank'); // safety fallback
+        showToast(data.message || 'Could not start checkout. Please try again.', 'error');
       }
     } catch (e) {
       console.error('[useUpgrade] checkout error:', e);
       hideRedirectOverlay();
-      window.open(GUMROAD_URL, '_blank');
+      showToast('Network error starting checkout. Please try again.', 'error');
     }
   };
 
-  return { startUpgrade, provider: PROVIDER };
+  return { startUpgrade };
 }

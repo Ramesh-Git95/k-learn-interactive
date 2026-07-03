@@ -124,50 +124,6 @@ class EmailService {
     return { success: true };
   }
 
-  async sendClaimCode(purchaseEmail, code) {
-    if (!this.resend) throw new Error('Email service not configured');
-
-    const { error } = await this.resend.emails.send({
-      from: this.from,
-      to: purchaseEmail,
-      subject: '🔑 Your K-Learn Purchase Verification Code',
-      html: `
-        <!DOCTYPE html><html><head><meta charset="utf-8">
-        <style>
-          .container{max-width:600px;margin:0 auto;font-family:Arial,sans-serif}
-          .header{background:linear-gradient(135deg,#EC4899 0%,#8B5CF6 100%);color:white;padding:30px;text-align:center}
-          .content{padding:30px;background:#f8f9fa}
-          .code-box{background:white;border:2px dashed #8B5CF6;border-radius:12px;padding:24px;text-align:center;margin:24px 0}
-          .code{font-size:40px;font-weight:900;letter-spacing:12px;color:#8B5CF6;font-family:monospace}
-          .footer{padding:20px;text-align:center;color:#666;font-size:14px}
-        </style></head>
-        <body><div class="container">
-          <div class="header">
-            <h1>🇰🇷 K-Learn Korean</h1>
-            <p>Purchase Verification</p>
-          </div>
-          <div class="content">
-            <h2>Your verification code</h2>
-            <p>Someone is linking this Gumroad purchase to their K-Learn account. Enter this code to confirm:</p>
-            <div class="code-box">
-              <div class="code">${code}</div>
-              <p style="color:#888;font-size:13px;margin-top:12px">Expires in 15 minutes</p>
-            </div>
-            <p>If you didn't request this, you can safely ignore this email — your purchase is still safe.</p>
-          </div>
-          <div class="footer"><p>The K-Learn Korean Team 🇰🇷</p></div>
-        </div></body></html>
-      `,
-    });
-
-    if (error) {
-      console.error('Resend error:', error);
-      throw new Error(`Failed to send claim code: ${error.message}`);
-    }
-
-    return { success: true };
-  }
-
   async sendWelcomeEmail(userEmail, userName) {
     if (!this.resend) throw new Error('Email service not configured');
 

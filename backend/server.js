@@ -25,7 +25,7 @@ app.use(cors({
 // the body is parsed to JSON and the signature check fails.
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // needed for Gumroad ping (form-encoded)
+app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -59,7 +59,6 @@ const progressRoutes = require('./routes/progress');
 const aiExamplesRoutes = require('./routes/ai-examples');
 const srsRoutes = require('./routes/srs');
 const aiRoutes = require('./routes/ai');
-const gumroadRoutes = require('./routes/gumroad');
 const stripeRoutes = require('./routes/stripe');
 // const subscriptionRoutes = require('./routes/subscriptions'); // Temporarily disabled
 console.log('✅ Routes loaded successfully');
@@ -71,7 +70,6 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/ai-examples', aiExamplesRoutes);
 app.use('/api/srs', srsRoutes);
 app.use('/api/ai', aiRoutes);
-app.use('/api/gumroad', gumroadRoutes);
 app.use('/api/stripe', stripeRoutes);
 // app.use('/api/subscriptions', subscriptionRoutes); // Temporarily disabled
 

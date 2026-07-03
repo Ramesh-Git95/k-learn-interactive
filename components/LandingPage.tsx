@@ -313,12 +313,6 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         .card-hover { transition:all 0.3s cubic-bezier(0.4,0,0.2,1); }
         .card-hover:hover { transform:translateY(-5px); box-shadow:0 20px 40px rgba(0,0,0,0.1); }
         .dark .card-hover:hover { box-shadow:0 20px 40px rgba(0,0,0,0.4); }
-        .gumroad-btn {
-          background: linear-gradient(135deg,#FF90E8,#FF3366);
-          transition:all 0.25s ease;
-          box-shadow:0 4px 20px rgba(255,51,102,0.3);
-        }
-        .gumroad-btn:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(255,51,102,0.5); }
         .check-free  { background: #D1FAE5; color: #059669; }
         .dark .check-free  { background: rgba(16,185,129,0.15); color: #34D399; }
         .check-premium { background: linear-gradient(135deg,#EC4899,#8B5CF6); color: white; }

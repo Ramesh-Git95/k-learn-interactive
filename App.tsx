@@ -99,11 +99,19 @@ const AppContent: React.FC = () => {
     }
   }, []);
 
-  // After returning from Gumroad, poll refreshUser until premium is confirmed (up to 10 × 2s)
+  // After returning from Stripe Checkout (?checkout=success), poll refreshUser
+  // until the webhook has upgraded the account (up to 10 × 2s), then celebrate.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('purchase') === 'success' && isAuthenticated) {
-      window.history.replaceState({}, '', window.location.pathname);
+    const checkout = params.get('checkout');
+    if (!checkout || !isAuthenticated) return;
+    window.history.replaceState({}, '', window.location.pathname + window.location.hash);
+
+    if (checkout === 'cancel') {
+      showToast('Checkout cancelled — you can upgrade anytime from your profile.', 'info');
+      return;
+    }
+    if (checkout === 'success') {
       let attempts = 0;
       const poll = setInterval(async () => {
         attempts++;
@@ -119,7 +127,7 @@ const AppContent: React.FC = () => {
     }
   }, [isAuthenticated]);
 
-  // Global tab-return refresh — catches Gumroad ping upgrade from any page
+  // Global tab-return refresh — catches an upgrade completed in another tab/device
   useEffect(() => {
     if (!isAuthenticated) return;
     const handleVisibility = () => {

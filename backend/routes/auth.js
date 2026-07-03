@@ -1,6 +1,5 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
 const User = require('../models/User');
 const SRSDeck = require('../models/SRSDeck');
 const { authenticateToken, rateLimit } = require('../middleware/auth');
@@ -93,26 +92,6 @@ router.post('/register', authRateLimit, async (req, res) => {
     const verificationToken = user.generateEmailVerificationToken();
     
     await user.save();
-
-    // Auto-upgrade if they bought on Gumroad before creating this account
-    try {
-      const PendingUpgrade = mongoose.models.PendingUpgrade;
-      if (PendingUpgrade) {
-        const pending = await PendingUpgrade.findOne({ email: email.toLowerCase().trim() });
-        if (pending) {
-          user.subscription.type = 'premium';
-          user.subscription.status = 'active';
-          user.subscription.currentPeriodEnd = null;
-          user.subscription.cancelAtPeriodEnd = false;
-          user.subscription.stripeSubscriptionId = pending.saleId || pending.licenseKey || 'gumroad-lifetime';
-          await user.save();
-          await PendingUpgrade.deleteOne({ _id: pending._id });
-          console.log(`✅ Auto-upgraded new registration ${email} from PendingUpgrade`);
-        }
-      }
-    } catch (upgradeErr) {
-      console.error('PendingUpgrade check failed on register:', upgradeErr);
-    }
 
     const token = generateToken(user._id);
 
@@ -401,7 +380,7 @@ router.delete('/account', authenticateToken, async (req, res) => {
 
     // Cancel any active Stripe subscription first — otherwise a deleted account
     // keeps getting billed every month. Only attempt it for a real Stripe
-    // subscription id (sub_...), not a Gumroad lifetime placeholder, and never
+    // subscription id (sub_...), not a legacy lifetime placeholder, and never
     // let a Stripe hiccup block the account deletion.
     const subId = user.subscription && user.subscription.stripeSubscriptionId;
     if (subId && subId.startsWith('sub_') && process.env.STRIPE_SECRET_KEY) {

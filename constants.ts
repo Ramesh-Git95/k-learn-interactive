@@ -23,8 +23,6 @@ export const SECTIONS: { id: Section; title: string; icon: string }[] = [
   { id: 'reading', title: 'Reading', icon: '📖' },
 ];
 
-export const GUMROAD_URL = 'https://learnk.gumroad.com/l/klearn-lifetime';
-
 // Free-tier content caps shared between App.tsx (progress totals) and section components (rendering)
 export const FREE_PHRASES_COUNT = 15;
 

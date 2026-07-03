@@ -38,7 +38,7 @@ const UserProfile: React.FC = () => {
 
   const isPremium = hasPremiumAccess();
   // Only Stripe subscribers have a subscription to manage/cancel/resume — a
-  // Gumroad lifetime user is premium but has no Stripe sub (id starts with 'sub_').
+  // legacy lifetime user is premium but has no Stripe sub (id starts with 'sub_').
   const hasStripeSub = !!user.subscription?.stripeSubscriptionId
     && user.subscription.stripeSubscriptionId.startsWith('sub_');
   const subscriptionType = user.subscription?.type || 'free';
