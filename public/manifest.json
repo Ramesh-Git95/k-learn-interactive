@@ -19,30 +19,16 @@
       "purpose": "any"
     },
     {
-      "src": "/favicon.svg",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/favicon.svg",
+      "src": "/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/desktop.png",
-      "sizes": "1280x720",
       "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "/screenshots/mobile.png", 
-      "sizes": "375x812",
-      "type": "image/png",
-      "form_factor": "narrow"
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
@@ -50,22 +36,19 @@
       "name": "Vocabulary",
       "short_name": "Vocab",
       "description": "Study Korean vocabulary",
-      "url": "/?section=vocabulary",
-      "icons": [{ "src": "/icons/vocab-96x96.png", "sizes": "96x96" }]
+      "url": "/#vocabulary"
     },
     {
       "name": "Quiz",
       "short_name": "Quiz",
       "description": "Take a Korean quiz",
-      "url": "/?section=quiz",
-      "icons": [{ "src": "/icons/quiz-96x96.png", "sizes": "96x96" }]
+      "url": "/#quiz"
     },
     {
       "name": "Culture",
       "short_name": "Culture",
       "description": "Explore Korean culture",
-      "url": "/?section=culture",
-      "icons": [{ "src": "/icons/culture-96x96.png", "sizes": "96x96" }]
+      "url": "/#culture"
     }
   ],
   "related_applications": [],
