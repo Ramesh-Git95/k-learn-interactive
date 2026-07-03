@@ -95,10 +95,12 @@ router.post('/create-portal-session', authenticateToken, async (req, res) => {
       customer: customerId,
       return_url: `${frontendUrl}/#profile`,
     };
-    // Launch straight into the cancellation flow and auto-redirect back to the app
-    // once the user confirms — no "Return to …" click needed. Only for a real
-    // Stripe subscription; otherwise fall back to the general portal.
-    if (subId && subId.startsWith('sub_')) {
+    // flow: 'cancel' launches straight into the cancellation flow (auto-redirects
+    // back to the app after confirming); anything else opens the general portal
+    // where the user can update their card, view invoices, or resume a
+    // scheduled cancellation.
+    const wantCancelFlow = req.body && req.body.flow === 'cancel';
+    if (wantCancelFlow && subId && subId.startsWith('sub_')) {
       params.flow_data = {
         type: 'subscription_cancel',
         subscription_cancel: { subscription: subId },

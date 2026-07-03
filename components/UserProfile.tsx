@@ -52,15 +52,18 @@ const UserProfile: React.FC = () => {
   ];
 
 
-  // STRIPE (3c) — open the Customer Portal to manage / cancel the subscription.
-  const openBillingPortal = async () => {
+  // Open the Stripe Customer Portal — 'cancel' jumps straight into the
+  // cancellation flow; 'manage' opens the general portal (update card,
+  // invoices, resume a scheduled cancellation).
+  const openBillingPortal = async (flow: 'cancel' | 'manage' = 'manage') => {
     setStripeLoading(true);
     try {
       const token = localStorage.getItem('token');
-      console.log('🧾 [STRIPE] requesting billing portal…');
+      console.log('🧾 [STRIPE] requesting billing portal…', flow);
       const res = await fetch(`${API_BASE}/stripe/create-portal-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ flow }),
       });
       const data = await res.json();
       console.log('🧾 [STRIPE] portal response:', res.status, data);
@@ -155,9 +158,11 @@ const UserProfile: React.FC = () => {
             </span>
           </div>
 
-          {user.subscription?.currentPeriodEnd && (
+          {isPremium && user.subscription?.currentPeriodEnd && (
             <div className="flex justify-between text-xs mb-4">
-              <span className="text-gray-500 dark:text-gray-400">Renewal Date:</span>
+              <span className="text-gray-500 dark:text-gray-400">
+                {user.subscription?.cancelAtPeriodEnd ? 'Access until:' : 'Renewal Date:'}
+              </span>
               <span className="font-bold text-gray-900 dark:text-white">
                 {new Date(user.subscription.currentPeriodEnd).toLocaleDateString()}
               </span>
@@ -187,7 +192,7 @@ const UserProfile: React.FC = () => {
                       </p>
                     </div>
                     <button
-                      onClick={openBillingPortal}
+                      onClick={() => openBillingPortal('manage')}
                       disabled={stripeLoading}
                       className="w-full py-2 text-xs font-black rounded-xl border-2 border-emerald-400 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all disabled:opacity-40"
                     >
@@ -195,13 +200,22 @@ const UserProfile: React.FC = () => {
                     </button>
                   </div>
                 ) : (
-                  <button
-                    onClick={openBillingPortal}
-                    disabled={stripeLoading}
-                    className="w-full mt-3 py-2 text-xs font-black rounded-xl border-2 border-indigo-400 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-40"
-                  >
-                    {stripeLoading ? 'Opening…' : '🧾 Cancel subscription'}
-                  </button>
+                  <div className="mt-3">
+                    <button
+                      onClick={() => openBillingPortal('manage')}
+                      disabled={stripeLoading}
+                      className="w-full py-2 text-xs font-black rounded-xl border-2 border-indigo-400 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-40"
+                    >
+                      {stripeLoading ? 'Opening…' : '💳 Manage billing / update card'}
+                    </button>
+                    <button
+                      onClick={() => openBillingPortal('cancel')}
+                      disabled={stripeLoading}
+                      className="w-full mt-1.5 py-1.5 text-[11px] font-bold text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-40"
+                    >
+                      Cancel subscription
+                    </button>
+                  </div>
                 )
               )}
             </div>
