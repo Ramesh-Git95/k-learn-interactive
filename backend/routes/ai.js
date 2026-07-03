@@ -55,9 +55,10 @@ router.post('/chat', authenticateToken, async (req, res) => {
 5. 답변은 2-3문장 정도로 적당한 길이로 해주세요`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
-      config: { temperature: 0.8, maxOutputTokens: 200 },
+      // thinkingBudget 0 disables reasoning tokens so the output budget goes to the reply
+      config: { temperature: 0.8, maxOutputTokens: 300, thinkingConfig: { thinkingBudget: 0 } },
     });
 
     res.json({ reply: response.text });
@@ -91,9 +92,9 @@ router.post('/translate', authenticateToken, async (req, res) => {
 텍스트: "${text.trim()}"`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
-      config: { temperature: 0.3, maxOutputTokens: 512 },
+      config: { temperature: 0.3, maxOutputTokens: 512, thinkingConfig: { thinkingBudget: 0 } },
     });
 
     const translation = (response.text || '').trim();
