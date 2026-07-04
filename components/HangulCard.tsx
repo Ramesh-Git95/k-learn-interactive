@@ -51,7 +51,7 @@ const HangulCard: React.FC<HangulCardProps> = ({ char, onStudy, isStudied = fals
       <div className="absolute left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none" style={{ bottom: 'calc(100% + 6px)' }}>
         <div
           className="px-2.5 py-1 rounded-lg shadow-xl text-white text-[11px] font-bold flex items-center gap-1 whitespace-nowrap"
-          style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', animation: 'flipHintIn 0.35s ease' }}
+          style={{ background: 'var(--brand-gradient)', animation: 'flipHintIn 0.35s ease' }}
         >
           <span>🔊</span>
           <span>Tap to hear!</span>
@@ -84,7 +84,7 @@ const HangulCard: React.FC<HangulCardProps> = ({ char, onStudy, isStudied = fals
         style={{
           background: isStudied
             ? 'linear-gradient(135deg, #22C55E, #059669)'
-            : 'linear-gradient(135deg, #EC4899, #8B5CF6)',
+            : 'var(--brand-gradient)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',

@@ -2,6 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Brand design tokens ─────────────────────────────────────────────────────
+   Single source of truth for the K-Learn brand gradients. All components
+   reference these via var(...) — change the brand here, everywhere updates. */
+:root {
+  --brand-pink: #EC4899;
+  --brand-violet: #8B5CF6;
+  --brand-cyan: #06B6D4;
+  /* Primary CTA / badge gradient */
+  --brand-gradient: linear-gradient(135deg, #EC4899, #8B5CF6);
+  /* Horizontal variant for progress bars */
+  --brand-gradient-h: linear-gradient(90deg, #EC4899, #8B5CF6);
+  /* Section hero gradient (pink → violet → cyan) */
+  --brand-gradient-hero: linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%);
+  /* Reversed hero (cyan-first) */
+  --brand-gradient-hero-rev: linear-gradient(135deg, #06B6D4 0%, #8B5CF6 50%, #EC4899 100%);
+}
+
+/* Utility classes for JSX use (preferred over inline styles going forward) */
+.bg-brand-gradient { background-image: var(--brand-gradient); }
+.bg-brand-gradient-hero { background-image: var(--brand-gradient-hero); }
+.text-brand-gradient {
+  background-image: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
 /* Custom styles */
 html {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;

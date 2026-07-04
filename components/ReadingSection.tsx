@@ -112,7 +112,7 @@ const DefPanel: React.FC<DefPanelProps> = ({ word, token, isPremium, onSRS, onCl
             <button
               onClick={onSRS}
               className="flex items-center gap-1 px-3 py-1.5 text-xs font-black text-white rounded-xl hover:scale-105 transition-transform"
-              style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+              style={{ background: 'var(--brand-gradient)' }}
             >
               + SRS
             </button>
@@ -460,7 +460,7 @@ const ReadingSection: React.FC = () => {
           <button
             onClick={openRegister}
             className="px-6 py-2 text-sm font-black text-white rounded-xl hover:opacity-90 transition-opacity"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+            style={{ background: 'var(--brand-gradient)' }}
           >
             Get Started Free →
           </button>

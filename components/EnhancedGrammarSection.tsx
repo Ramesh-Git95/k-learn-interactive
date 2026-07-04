@@ -105,7 +105,7 @@ const EnhancedGrammarSection: React.FC<EnhancedGrammarSectionProps> = ({ progres
       {/* Hero */}
       <div
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
-        style={{ background: 'linear-gradient(135deg, #06B6D4 0%, #8B5CF6 50%, #EC4899 100%)' }}
+        style={{ background: 'var(--brand-gradient-hero-rev)' }}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['은/는','이/가','을/를','에서','으로','하다'].map((w, i) => (

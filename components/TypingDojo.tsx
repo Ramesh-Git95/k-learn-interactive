@@ -152,7 +152,7 @@ const TypingDojo: React.FC = () => {
       <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
         <div
           className="rounded-2xl p-6 sm:p-8 mb-8 text-white relative overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%)' }}
+          style={{ background: 'var(--brand-gradient-hero)' }}
         >
           {['타자', '연습', '속도', '도장'].map((w, i) => (
             <span key={i} className="absolute text-white/10 font-black select-none pointer-events-none"
@@ -216,7 +216,7 @@ const TypingDojo: React.FC = () => {
         {/* Score header */}
         <div
           className="rounded-2xl p-6 text-center text-white mb-6"
-          style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+          style={{ background: 'var(--brand-gradient)' }}
         >
           <div className="text-5xl mb-2">{grade.emoji}</div>
           <h2 className="text-2xl font-black mb-1">{grade.label}</h2>
@@ -242,7 +242,7 @@ const TypingDojo: React.FC = () => {
             <button
               onClick={openUpgradeModal}
               className="px-7 py-2.5 text-white text-sm font-black rounded-xl hover:scale-[1.02] transition-transform"
-              style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+              style={{ background: 'var(--brand-gradient)' }}
             >
               ⭐ Unlock Full 60-Second Challenge →
             </button>
@@ -253,7 +253,7 @@ const TypingDojo: React.FC = () => {
           <button
             onClick={startGame}
             className="flex-1 py-3 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-transform"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+            style={{ background: 'var(--brand-gradient)' }}
           >
             {isFree ? 'Try Demo Again →' : 'Play Again →'}
           </button>

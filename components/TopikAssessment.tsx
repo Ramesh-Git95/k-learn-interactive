@@ -371,7 +371,7 @@ const TopikAssessment: React.FC = () => {
               </ul>
             </div>
             <div>
-              <p className="font-black text-xs uppercase tracking-wider mb-2" style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>⭐ Premium</p>
+              <p className="font-black text-xs uppercase tracking-wider mb-2" style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>⭐ Premium</p>
               <ul className="space-y-1 text-gray-600 dark:text-gray-400">
                 <li>✓ 20 questions</li>
                 <li>✓ Full TOPIK I & II (1–6)</li>
@@ -384,7 +384,7 @@ const TopikAssessment: React.FC = () => {
           {!isPremium && (
             <button onClick={startUpgrade}
               className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 text-white text-xs font-black rounded-xl hover:opacity-90 transition-opacity"
-              style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
+              style={{ background: 'var(--brand-gradient)' }}>
               ⭐ Get Premium — $4/month →
             </button>
           )}
@@ -620,7 +620,7 @@ const TopikAssessment: React.FC = () => {
 
           <button onClick={handlePrint}
             className="w-full py-3 text-white text-sm font-black rounded-xl mb-3 hover:scale-[1.02] active:scale-[0.98] transition-all"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
+            style={{ background: 'var(--brand-gradient)' }}>
             🖨 Print / Save as PDF
           </button>
         </>

@@ -73,7 +73,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
       {/* Hero */}
       <div
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
-        style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%)' }}
+        style={{ background: 'var(--brand-gradient-hero)' }}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['안녕','감사합니다','실례합니다','괜찮아요'].map((w, i) => (
@@ -116,7 +116,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
                 className="h-full rounded-full transition-all duration-500"
                 style={{
                   width: `${Math.min((currentCount / phrasesLimit) * 100, 100)}%`,
-                  background: limitReached ? 'linear-gradient(90deg,#EF4444,#DC2626)' : 'linear-gradient(90deg,#EC4899,#8B5CF6)',
+                  background: limitReached ? 'linear-gradient(90deg,#EF4444,#DC2626)' : 'var(--brand-gradient-h)',
                 }}
               />
             </div>

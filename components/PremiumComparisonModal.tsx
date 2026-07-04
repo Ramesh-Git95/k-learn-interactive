@@ -41,7 +41,7 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
         {/* Gradient header */}
         <div
           className="relative px-6 py-7 text-center flex-shrink-0"
-          style={{ background: 'linear-gradient(135deg,#EC4899 0%,#8B5CF6 55%,#06B6D4 100%)' }}
+          style={{ background: 'var(--brand-gradient-hero)' }}
         >
           <button
             onClick={onClose}
@@ -67,7 +67,7 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 <th className="text-left px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 w-[48%]">Feature</th>
                 <th className="px-3 py-3 text-center text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 w-[26%]">Free</th>
                 <th className="px-3 py-3 text-center text-[11px] font-black uppercase tracking-wider w-[26%]">
-                  <span style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                  <span style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                     Premium
                   </span>
                 </th>
@@ -92,7 +92,7 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
                   <td className="px-3 py-3 text-center">
                     <span
                       className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full text-white leading-tight"
-                      style={{ background: row.both ? 'linear-gradient(135deg,#22C55E,#059669)' : 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
+                      style={{ background: row.both ? 'linear-gradient(135deg,#22C55E,#059669)' : 'var(--brand-gradient)' }}
                     >
                       {row.premium}
                     </span>
@@ -119,7 +119,7 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
               <button
                 onClick={startUpgrade}
                 className="w-full py-3.5 rounded-2xl text-white font-black text-base shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-95"
-                style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
+                style={{ background: 'var(--brand-gradient)' }}
               >
                 Subscribe — $4/month →
               </button>
@@ -132,7 +132,7 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
               <button
                 onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' })); }}
                 className="w-full py-3.5 rounded-2xl text-white font-black text-base shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-95"
-                style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
+                style={{ background: 'var(--brand-gradient)' }}
               >
                 Create Free Account to Get Started →
               </button>

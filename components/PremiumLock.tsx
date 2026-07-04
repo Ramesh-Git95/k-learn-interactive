@@ -22,7 +22,7 @@ export const PremiumLockBanner: React.FC<PremiumLockProps> = ({
       <button
         onClick={openUpgradeModal}
         className="px-7 py-2.5 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-transform"
-        style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+        style={{ background: 'var(--brand-gradient)' }}
       >
         See What's in Premium →
       </button>
@@ -82,7 +82,7 @@ export const LockedRowBanner: React.FC<LockedRowBannerProps> = ({ count, label =
       </div>
       <button
         className="flex-shrink-0 px-4 py-2 text-white text-xs font-black rounded-xl hover:scale-[1.02] transition-transform"
-        style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+        style={{ background: 'var(--brand-gradient)' }}
       >
         See Premium →
       </button>

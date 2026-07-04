@@ -14,7 +14,7 @@ const GradBtn = ({ onClick, disabled, className = '', children }: { onClick?: ()
     onClick={onClick}
     disabled={disabled}
     className={`text-white font-bold rounded-xl transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 ${className}`}
-    style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+    style={{ background: 'var(--brand-gradient)' }}
   >
     {children}
   </button>
@@ -50,7 +50,7 @@ function DeckCard({ deck, dueCount, deckStats, onStartStudy, onAddCard, onEditDe
           </div>
           {dueCount > 0 && (
             <Tooltip content="Cards scheduled for review today by the SM-2 algorithm." position="top" maxWidth="max-w-xs">
-              <span className="flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-full text-white" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
+              <span className="flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-full text-white" style={{ background: 'var(--brand-gradient)' }}>
                 {dueCount} due
               </span>
             </Tooltip>
@@ -92,7 +92,7 @@ function DeckCard({ deck, dueCount, deckStats, onStartStudy, onAddCard, onEditDe
         <div className="border-t border-gray-100 dark:border-gray-800 p-4 bg-gray-50 dark:bg-gray-950/50 rounded-b-2xl">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200">Cards ({deck.cards.length})</h4>
-            <button onClick={() => onAddCard(deck.id)} className="text-xs font-semibold" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>+ Add Card</button>
+            <button onClick={() => onAddCard(deck.id)} className="text-xs font-semibold" style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>+ Add Card</button>
           </div>
           <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
             {deck.cards.length === 0 ? (
@@ -105,7 +105,7 @@ function DeckCard({ deck, dueCount, deckStats, onStartStudy, onAddCard, onEditDe
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm text-gray-900 dark:text-white">{card.content.korean}</span>
                         {card.srs?.nextReviewDate && new Date(card.srs.nextReviewDate) <= new Date() && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>Due</span>
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: 'var(--brand-gradient)' }}>Due</span>
                         )}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">{card.content.english}</div>
@@ -312,7 +312,7 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
                           ? 'text-white shadow-sm'
                           : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
                       }`}
-                      style={qiSource === src ? { background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' } : {}}
+                      style={qiSource === src ? { background: 'var(--brand-gradient)' } : {}}
                     >
                       {src === 'vocabulary' ? '📖 Vocabulary' : '💬 Phrases'}
                     </button>
@@ -347,7 +347,7 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
                           ? 'text-white shadow-sm'
                           : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
                       }`}
-                      style={qiCount === n ? { background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' } : {}}
+                      style={qiCount === n ? { background: 'var(--brand-gradient)' } : {}}
                     >
                       {n === 0 ? 'All' : n}
                     </button>

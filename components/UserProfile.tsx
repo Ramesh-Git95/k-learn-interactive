@@ -85,7 +85,7 @@ const UserProfile: React.FC = () => {
       {/* Hero */}
       <div
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
-        style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%)' }}
+        style={{ background: 'var(--brand-gradient-hero)' }}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['프로필','학습','진행','한국어'].map((w, i) => (
@@ -244,7 +244,7 @@ const UserProfile: React.FC = () => {
               <button
                 onClick={startUpgrade}
                 className="w-full py-2.5 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-md"
-                style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                style={{ background: 'var(--brand-gradient)' }}
               >
                 Unlock all — $4/month
               </button>

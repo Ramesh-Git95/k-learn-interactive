@@ -215,7 +215,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
     content: (
       <div className="space-y-8">
         <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-black text-2xl mx-auto mb-4" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>K</div>
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-black text-2xl mx-auto mb-4" style={{ background: 'var(--brand-gradient)' }}>K</div>
           <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">Making Korean Accessible</h3>
           <p className="text-gray-600 dark:text-gray-400 leading-relaxed max-w-lg mx-auto">
             K-Learn was built out of a genuine love for the Korean language and frustration with expensive, subscription-heavy language apps. We believe effective language learning tools should be affordable and accessible.
@@ -438,7 +438,7 @@ const FooterPageModal: React.FC<Props> = ({ page, onClose }) => {
         {/* Header */}
         <div
           className="px-6 py-5 flex items-center justify-between flex-shrink-0"
-          style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%)' }}
+          style={{ background: 'var(--brand-gradient-hero)' }}
         >
           <div className="flex items-center gap-3">
             <span className="text-2xl">{emoji}</span>

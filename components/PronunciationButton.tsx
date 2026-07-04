@@ -182,7 +182,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
           >
             <div
               className="relative flex items-center gap-2 px-3 py-2 rounded-xl shadow-xl text-white text-xs font-bold"
-              style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+              style={{ background: 'var(--brand-gradient)' }}
             >
               <span style={{ display: 'inline-block', animation: 'hintBounce 1s ease-in-out infinite' }}>
                 🎤

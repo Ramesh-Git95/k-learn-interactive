@@ -56,13 +56,13 @@ const NavItem: React.FC<NavItemProps> = ({ title, icon, isActive, onClick }) => 
         ? 'text-white shadow-md'
         : 'text-gray-600 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-pink-50 dark:hover:bg-gray-800'
     }`}
-    style={isActive ? { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' } : {}}
+    style={isActive ? { background: 'var(--brand-gradient)' } : {}}
     aria-current={isActive ? 'page' : undefined}
   >
     <span
       className="text-base leading-none font-black"
       style={!isActive && isKoreanChar(icon) ? {
-        background: 'linear-gradient(135deg, #EC4899, #8B5CF6)',
+        background: 'var(--brand-gradient)',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
         backgroundClip: 'text',
@@ -193,9 +193,9 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
           transition: opacity 0.3s;
         }
         .header-gradient-border.scrolled::after { opacity: 1; }
-        .nav-more-btn.active { background: linear-gradient(135deg, #EC4899, #8B5CF6); color: white; }
+        .nav-more-btn.active { background: var(--brand-gradient); color: white; }
         .user-avatar {
-          background: linear-gradient(135deg, #EC4899, #8B5CF6);
+          background: var(--brand-gradient);
         }
         .dropdown-enter {
           animation: dropIn 0.18s cubic-bezier(0.4,0,0.2,1) forwards;
@@ -229,10 +229,10 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
               className="flex items-center gap-2.5 group flex-shrink-0"
               aria-label="K-Learn home"
             >
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-base shadow-md group-hover:scale-105 transition-transform duration-200" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', fontFamily: 'Noto Sans KR, sans-serif' }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-base shadow-md group-hover:scale-105 transition-transform duration-200" style={{ background: 'var(--brand-gradient)', fontFamily: 'Noto Sans KR, sans-serif' }}>
                 한
               </div>
-              <span className="text-xl font-black tracking-tight" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              <span className="text-xl font-black tracking-tight" style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                 K-Learn
               </span>
             </button>
@@ -282,7 +282,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                               <span className="text-base w-5 text-center">{item.icon}</span>
                               <span className="flex-1">{item.title}</span>
                               {item._isNew && (
-                                <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full text-white leading-none" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
+                                <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full text-white leading-none" style={{ background: 'var(--brand-gradient)' }}>
                                   NEW
                                 </span>
                               )}
@@ -344,7 +344,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                   <button
                     onClick={openRegister}
                     className="px-4 py-2 text-sm font-bold text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-px"
-                    style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                    style={{ background: 'var(--brand-gradient)' }}
                   >
                     Get Started
                   </button>
@@ -487,7 +487,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                       ? 'text-white shadow-md'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                   }`}
-                  style={activeSection === id ? { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' } : {}}
+                  style={activeSection === id ? { background: 'var(--brand-gradient)' } : {}}
                 >
                   <span className="text-lg">{icon}</span>
                   <span>{title}</span>
@@ -510,12 +510,12 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                           ? 'text-white shadow-md'
                           : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                       }`}
-                      style={activeSection === item.id ? { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' } : {}}
+                      style={activeSection === item.id ? { background: 'var(--brand-gradient)' } : {}}
                     >
                       <span className="text-lg">{item.icon}</span>
                       <span className="flex-1">{item.title}</span>
                       {item._isNew && activeSection !== item.id && (
-                        <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full text-white leading-none" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
+                        <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full text-white leading-none" style={{ background: 'var(--brand-gradient)' }}>
                           NEW
                         </span>
                       )}
@@ -537,7 +537,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                   <button
                     onClick={() => { openRegister(); setIsMenuOpen(false); }}
                     className="flex-1 py-3 text-sm font-bold text-white rounded-xl shadow-md"
-                    style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                    style={{ background: 'var(--brand-gradient)' }}
                   >
                     Get Started
                   </button>

@@ -85,7 +85,7 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
         <div className="text-4xl mb-4">⚠️</div>
         <h2 className="text-xl font-bold text-red-500 mb-2">Deck Not Found</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">The requested study deck could not be found.</p>
-        <button onClick={onExit} className="w-full py-3 rounded-xl text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>Return to Dashboard</button>
+        <button onClick={onExit} className="w-full py-3 rounded-xl text-white font-bold text-sm" style={{ background: 'var(--brand-gradient)' }}>Return to Dashboard</button>
       </CenteredCard>
     );
   }
@@ -111,7 +111,7 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
             </div>
           ))}
         </div>
-        <button onClick={onExit} className="w-full py-3 rounded-xl text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>Return to Dashboard</button>
+        <button onClick={onExit} className="w-full py-3 rounded-xl text-white font-bold text-sm" style={{ background: 'var(--brand-gradient)' }}>Return to Dashboard</button>
       </CenteredCard>
     );
   }
@@ -202,7 +202,7 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
           </div>
           <div className="text-right">
             <div className="text-xs text-gray-400 dark:text-gray-500">Progress</div>
-            <div className="text-lg font-black" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            <div className="text-lg font-black" style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
               {Math.round(progress)}%
             </div>
           </div>
@@ -210,7 +210,7 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
         {/* Progress bar */}
         <div className="max-w-2xl mx-auto mt-2.5">
           <div className="w-full h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #EC4899, #8B5CF6)' }} />
+            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progress}%`, background: 'var(--brand-gradient-h)' }} />
           </div>
         </div>
       </div>
@@ -232,7 +232,7 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
 
             {showAnswer && (
               <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
-                <div className="text-2xl font-bold mb-2" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                <div className="text-2xl font-bold mb-2" style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                   {currentCard.content.english}
                 </div>
                 {currentCard.content.category && (
@@ -248,7 +248,7 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
               <button
                 onClick={() => setShowAnswer(true)}
                 className="w-full py-3.5 rounded-xl text-white font-bold text-base transition-transform hover:scale-[1.02] active:scale-95 shadow-md"
-                style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                style={{ background: 'var(--brand-gradient)' }}
               >
                 Reveal Answer
               </button>

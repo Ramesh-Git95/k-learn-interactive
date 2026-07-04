@@ -94,7 +94,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
         <div className="mx-5 mb-4 p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.08), rgba(139,92,246,0.08))' }}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-black flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', color: 'white' }}>
+              style={{ background: 'var(--brand-gradient)', color: 'white' }}>
               {content.korean.charAt(0)}
             </div>
             <div className="min-w-0">
@@ -124,7 +124,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
                 <button
                   onClick={handleQuickAdd}
                   className="w-full py-3 rounded-xl text-white font-bold text-sm transition-transform hover:scale-[1.02] active:scale-95"
-                  style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                  style={{ background: 'var(--brand-gradient)' }}
                 >
                   ✨ Quick Add → Create "{suggestedName}"
                 </button>
@@ -157,7 +157,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
                     onClick={handleCustomCreate}
                     disabled={!customName.trim()}
                     className="flex-1 py-2.5 rounded-xl text-white font-bold text-sm transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                    style={{ background: 'var(--brand-gradient)' }}
                   >
                     Create & Add
                   </button>
@@ -170,7 +170,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
           <div className="px-5 pb-5 space-y-3">
             <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-pink-300 dark:border-pink-700">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', color: 'white' }}>
+                style={{ background: 'var(--brand-gradient)', color: 'white' }}>
                 🧠
               </div>
               <div className="flex-1 min-w-0">
@@ -182,7 +182,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
             <button
               onClick={handleAddToSelected}
               className="w-full py-3 rounded-xl text-white font-bold text-sm transition-transform hover:scale-[1.02] active:scale-95"
-              style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+              style={{ background: 'var(--brand-gradient)' }}
             >
               Add to "{decks[0].name}"
             </button>
@@ -209,7 +209,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
                     onClick={handleCustomCreate}
                     disabled={!customName.trim()}
                     className="flex-1 py-2 rounded-xl text-white font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                    style={{ background: 'var(--brand-gradient)' }}
                   >Create & Add</button>
                 </div>
               </div>
@@ -231,7 +231,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
                   }`}
                 >
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
-                    style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', color: 'white' }}>
+                    style={{ background: 'var(--brand-gradient)', color: 'white' }}>
                     🧠
                   </div>
                   <div className="flex-1 min-w-0">
@@ -255,7 +255,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
                   onClick={handleAddToSelected}
                   disabled={!selectedDeckId}
                   className="flex-1 py-2.5 rounded-xl text-white font-bold text-sm transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
-                  style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                  style={{ background: 'var(--brand-gradient)' }}
                 >
                   Add to Selected
                 </button>
@@ -277,7 +277,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
                     onClick={handleCustomCreate}
                     disabled={!customName.trim()}
                     className="flex-1 py-2 rounded-xl text-white font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                    style={{ background: 'var(--brand-gradient)' }}
                   >Create & Add</button>
                 </div>
               </div>

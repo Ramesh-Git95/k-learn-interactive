@@ -136,7 +136,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
           <div className="flex-1">
             <h3 className="font-bold text-pink-800 dark:text-pink-200 mb-0.5">Welcome, Korean learner!</h3>
             <p className="text-sm text-pink-600 dark:text-pink-300 mb-2">You're exploring as a guest. Flip any card and start learning — sign up to save progress!</p>
-            <button onClick={openRegister} className="text-sm font-bold text-white px-4 py-1.5 rounded-xl transition-transform hover:scale-105" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
+            <button onClick={openRegister} className="text-sm font-bold text-white px-4 py-1.5 rounded-xl transition-transform hover:scale-105" style={{ background: 'var(--brand-gradient)' }}>
               Sign up free 🚀
             </button>
           </div>
@@ -158,7 +158,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
                   width: `${Math.min((currentVocabCount / vocabLimit) * 100, 100)}%`,
                   background: currentVocabCount >= vocabLimit
                     ? 'linear-gradient(90deg, #EF4444, #DC2626)'
-                    : 'linear-gradient(90deg, #EC4899, #8B5CF6)',
+                    : 'var(--brand-gradient-h)',
                 }}
               />
             </div>
@@ -201,7 +201,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
                               width: `${catProgress.percentage}%`,
                               background: isCompleted
                                 ? 'linear-gradient(90deg, #22C55E, #059669)'
-                                : 'linear-gradient(90deg, #EC4899, #8B5CF6)',
+                                : 'var(--brand-gradient-h)',
                             }}
                           />
                         </div>

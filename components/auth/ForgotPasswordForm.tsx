@@ -34,7 +34,7 @@ export function ForgotPasswordForm({ onBack }: Props) {
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
         <div
           className="px-6 py-6 text-center"
-          style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%)' }}
+          style={{ background: 'var(--brand-gradient-hero)' }}
         >
           <div className="text-4xl mb-2">{sent ? '📬' : '🔐'}</div>
           <h2 className="text-2xl font-black text-white">
@@ -57,7 +57,7 @@ export function ForgotPasswordForm({ onBack }: Props) {
               <button
                 onClick={onBack}
                 className="w-full py-3 text-white font-black rounded-xl text-sm hover:scale-[1.02] active:scale-[0.98] transition-all"
-                style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                style={{ background: 'var(--brand-gradient)' }}
               >
                 Back to Sign In
               </button>
@@ -90,7 +90,7 @@ export function ForgotPasswordForm({ onBack }: Props) {
                 type="submit"
                 disabled={loading || !email}
                 className="w-full py-3 text-white font-black rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] transition-all text-sm"
-                style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                style={{ background: 'var(--brand-gradient)' }}
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">

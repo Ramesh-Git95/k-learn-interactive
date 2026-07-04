@@ -57,7 +57,7 @@ const ConversationSection: React.FC = () => {
           className={`flex-1 py-2.5 text-sm font-black transition-all flex items-center justify-center gap-2 ${
             tab === id ? 'text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
           }`}
-          style={tab === id ? { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' } : {}}
+          style={tab === id ? { background: 'var(--brand-gradient)' } : {}}
         >
           {em} {label}
           {id === 'ai' && isAuthenticated && dailyLimit !== Infinity && (
@@ -101,7 +101,7 @@ const ConversationSection: React.FC = () => {
             <button
               onClick={() => window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
               className="px-8 py-3 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-              style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+              style={{ background: 'var(--brand-gradient)' }}
             >
               Sign In Free →
             </button>
@@ -130,7 +130,7 @@ const ConversationSection: React.FC = () => {
               <button
                 onClick={startUpgrade}
                 className="px-8 py-3 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all mb-3 block w-full"
-                style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                style={{ background: 'var(--brand-gradient)' }}
               >
                 ⭐ Get Premium — 50 AI chats/day
               </button>
@@ -180,7 +180,7 @@ const ConversationSection: React.FC = () => {
       {!showBot ? (
         <div
           className="rounded-2xl overflow-hidden p-8 text-center cursor-pointer hover:opacity-95 transition-opacity"
-          style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+          style={{ background: 'var(--brand-gradient)' }}
           onClick={() => setShowBot(true)}
         >
           <div className="text-5xl mb-4">🤖</div>

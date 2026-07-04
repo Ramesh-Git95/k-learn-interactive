@@ -377,7 +377,7 @@ const ScriptedConversation: React.FC = () => {
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
         <div className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
-          style={{ background: 'linear-gradient(135deg, #06B6D4 0%, #8B5CF6 50%, #EC4899 100%)' }}>
+          style={{ background: 'var(--brand-gradient-hero-rev)' }}>
           <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
             {['안녕','대화','연습','한국어','카페'].map((w, i) => (
               <span key={i} className="absolute text-white/10 font-black"
@@ -420,7 +420,7 @@ const ScriptedConversation: React.FC = () => {
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 flex-1 leading-relaxed">{s.description}</p>
                 <button onClick={() => start(s)}
                   className="w-full py-2 text-white text-xs font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-                  style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
+                  style={{ background: 'var(--brand-gradient)' }}>
                   Start Practice →
                 </button>
               </div>
@@ -444,7 +444,7 @@ const ScriptedConversation: React.FC = () => {
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
         <div className="relative rounded-3xl overflow-hidden mb-6 p-6 text-center"
-          style={{ background: 'linear-gradient(135deg, #06B6D4 0%, #8B5CF6 50%, #EC4899 100%)' }}>
+          style={{ background: 'var(--brand-gradient-hero-rev)' }}>
           <div className="text-5xl mb-2">{resultEmoji}</div>
           <h2 className="text-2xl font-black text-white mb-1">{resultMsg}</h2>
           <p className="text-white/80 text-sm">{scenario.emoji} {scenario.title}</p>
@@ -461,7 +461,7 @@ const ScriptedConversation: React.FC = () => {
               <div key={i} className={`flex ${line.speaker === 'you' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl ${
                   line.speaker === 'native' ? 'bg-gray-100 dark:bg-gray-800 rounded-tl-sm' : 'rounded-tr-sm'
-                }`} style={line.speaker === 'you' ? { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' } : {}}>
+                }`} style={line.speaker === 'you' ? { background: 'var(--brand-gradient)' } : {}}>
                   {line.speaker === 'native' && line.role && (
                     <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 mb-0.5">{line.role}</p>
                   )}
@@ -483,7 +483,7 @@ const ScriptedConversation: React.FC = () => {
         <div className="flex gap-3">
           <button onClick={() => start(scenario)}
             className="flex-1 py-3 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
+            style={{ background: 'var(--brand-gradient)' }}>
             🔄 Try Again
           </button>
           <button onClick={() => setScenario(null)}
@@ -521,7 +521,7 @@ const ScriptedConversation: React.FC = () => {
           </div>
           <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
             <div className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #EC4899, #8B5CF6)' }} />
+              style={{ width: `${progress}%`, background: 'var(--brand-gradient-h)' }} />
           </div>
         </div>
       </div>
@@ -532,7 +532,7 @@ const ScriptedConversation: React.FC = () => {
           <div key={i} className={`flex ${line.speaker === 'you' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl ${
               line.speaker === 'native' ? 'bg-gray-100 dark:bg-gray-800 rounded-tl-sm' : 'rounded-tr-sm'
-            }`} style={line.speaker === 'you' ? { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' } : {}}>
+            }`} style={line.speaker === 'you' ? { background: 'var(--brand-gradient)' } : {}}>
               {line.speaker === 'native' && line.role && (
                 <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 mb-0.5">{line.role}</p>
               )}
@@ -617,7 +617,7 @@ const ScriptedConversation: React.FC = () => {
       {(currentLine.speaker === 'native' || chosen !== null) && (
         <button onClick={advance}
           className="w-full py-3 text-white text-sm font-black rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-          style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
+          style={{ background: 'var(--brand-gradient)' }}>
           {lineIdx + 1 >= scenario.lines.length ? '🏁 See Results' : 'Continue →'}
         </button>
       )}

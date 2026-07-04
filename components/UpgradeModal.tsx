@@ -22,7 +22,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
     >
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
         {/* Gradient header */}
-        <div className="relative p-6 pb-4 text-center" style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)' }}>
+        <div className="relative p-6 pb-4 text-center" style={{ background: 'var(--brand-gradient)' }}>
           <button
             onClick={onClose}
             className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors"
@@ -54,7 +54,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
             className="rounded-xl p-4 mb-5 text-center"
             style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.08), rgba(139,92,246,0.08))' }}
           >
-            <div className="text-3xl font-black" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            <div className="text-3xl font-black" style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
               $4<span className="text-lg">/mo</span>
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">per month · cancel anytime</div>
@@ -72,7 +72,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
                 }
               }}
               className="w-full py-3 rounded-xl text-white font-bold text-sm shadow-md transition-transform hover:scale-[1.02] active:scale-95"
-              style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+              style={{ background: 'var(--brand-gradient)' }}
             >
               {isAuthenticated ? 'Get Premium — $4/month' : 'Create Free Account to Get Started →'}
             </button>

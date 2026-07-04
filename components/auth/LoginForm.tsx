@@ -37,7 +37,7 @@ export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
         {/* Gradient header */}
         <div
           className="px-6 py-6 text-center"
-          style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%)' }}
+          style={{ background: 'var(--brand-gradient-hero)' }}
         >
           <div className="text-4xl mb-2">👋</div>
           <h2 className="text-2xl font-black text-white">Welcome Back!</h2>
@@ -107,7 +107,7 @@ export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
               type="submit"
               disabled={isLoading || !email || !password}
               className="w-full py-3 text-white font-black rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-sm"
-              style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+              style={{ background: 'var(--brand-gradient)' }}
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">

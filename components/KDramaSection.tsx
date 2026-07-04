@@ -68,7 +68,7 @@ const KDramaSection: React.FC = () => {
         <button
           onClick={openRegister}
           className="px-8 py-4 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-px"
-          style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+          style={{ background: 'var(--brand-gradient)' }}
         >
           Get Started Free
         </button>
@@ -115,7 +115,7 @@ const KDramaSection: React.FC = () => {
             <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 text-center w-full max-w-sm">
               <div
                 className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 shadow-md"
-                style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                style={{ background: 'var(--brand-gradient)' }}
               >
                 🔒
               </div>
@@ -127,7 +127,7 @@ const KDramaSection: React.FC = () => {
               <button
                 onClick={startUpgrade}
                 className="block w-full py-3.5 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-px text-sm"
-                style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                style={{ background: 'var(--brand-gradient)' }}
               >
                 Get Premium — $4/month
               </button>
@@ -185,7 +185,7 @@ const KDramaSection: React.FC = () => {
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-md flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+            style={{ background: 'var(--brand-gradient)' }}
           >
             🎬
           </div>
@@ -257,7 +257,7 @@ const KDramaSection: React.FC = () => {
                     ? 'text-white shadow-sm'
                     : 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
-                style={difficultyFilter === d ? { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' } : {}}
+                style={difficultyFilter === d ? { background: 'var(--brand-gradient)' } : {}}
               >
                 {d === 'all'
                   ? `All (${selectedDrama.words.length})`
@@ -324,7 +324,7 @@ const KDramaSection: React.FC = () => {
                           ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 cursor-default'
                           : 'text-white hover:shadow-md hover:-translate-y-px'
                       }`}
-                      style={!isAdded ? { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' } : {}}
+                      style={!isAdded ? { background: 'var(--brand-gradient)' } : {}}
                       title={isAdded ? 'Already added to SRS' : 'Add to Spaced Repetition'}
                     >
                       {isAdded ? (

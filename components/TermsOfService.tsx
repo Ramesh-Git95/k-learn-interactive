@@ -7,7 +7,7 @@ const TermsOfService: React.FC = () => {
         {/* Header */}
         <div
           className="rounded-3xl p-8 mb-8 text-center"
-          style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%)' }}
+          style={{ background: 'var(--brand-gradient-hero)' }}
         >
           <div className="text-4xl mb-3">📋</div>
           <h1 className="text-3xl font-black text-white">Terms of Service</h1>

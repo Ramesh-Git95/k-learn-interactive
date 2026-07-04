@@ -51,7 +51,7 @@ export default function BookmarkFlashcards({ bookmarks, onClose }: BookmarkFlash
           <div className="text-5xl mb-4">📚</div>
           <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2">No bookmarks yet</h2>
           <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Bookmark vocabulary words while studying to review them here.</p>
-          <button onClick={onClose} className="w-full py-3 rounded-2xl font-bold text-white text-sm" style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}>
+          <button onClick={onClose} className="w-full py-3 rounded-2xl font-bold text-white text-sm" style={{ background: 'var(--brand-gradient)' }}>
             Got it
           </button>
         </div>
@@ -101,7 +101,7 @@ export default function BookmarkFlashcards({ bookmarks, onClose }: BookmarkFlash
           </div>
 
           <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">+{knew * 5} XP earned this session</p>
-          <button onClick={onClose} className="w-full py-3.5 rounded-2xl font-bold text-white text-sm" style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}>
+          <button onClick={onClose} className="w-full py-3.5 rounded-2xl font-bold text-white text-sm" style={{ background: 'var(--brand-gradient)' }}>
             Done
           </button>
         </div>
@@ -127,7 +127,7 @@ export default function BookmarkFlashcards({ bookmarks, onClose }: BookmarkFlash
 
         {/* Progress bar */}
         <div className="w-full h-1.5 bg-white/20 rounded-full mb-6 overflow-hidden">
-          <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progress}%`, background: 'linear-gradient(90deg,#EC4899,#8B5CF6)' }} />
+          <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progress}%`, background: 'var(--brand-gradient-h)' }} />
         </div>
 
         {/* Card */}

@@ -36,7 +36,7 @@ export default function SRSDashboard({ onStartStudy, onManageDecks }: SRSDashboa
         <button
           onClick={onManageDecks}
           className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
-          style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+          style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
         >
           Manage Decks →
         </button>
@@ -77,7 +77,7 @@ export default function SRSDashboard({ onStartStudy, onManageDecks }: SRSDashboa
                 <button
                   onClick={() => onStartStudy(deck.id)}
                   className="text-white text-xs font-bold px-4 py-1.5 rounded-lg shadow-sm transition-transform hover:scale-105 active:scale-95"
-                  style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                  style={{ background: 'var(--brand-gradient)' }}
                 >
                   Study
                 </button>
@@ -88,7 +88,7 @@ export default function SRSDashboard({ onStartStudy, onManageDecks }: SRSDashboa
                 <button
                   onClick={onManageDecks}
                   className="text-xs font-semibold"
-                  style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+                  style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
                 >
                   +{decksWithDueCards.length - 3} more decks
                 </button>
@@ -108,7 +108,7 @@ export default function SRSDashboard({ onStartStudy, onManageDecks }: SRSDashboa
               <button
                 onClick={onManageDecks}
                 className="text-white text-sm font-bold px-5 py-2 rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95"
-                style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                style={{ background: 'var(--brand-gradient)' }}
               >
                 Get Started
               </button>

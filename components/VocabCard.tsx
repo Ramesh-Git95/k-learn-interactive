@@ -108,7 +108,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
         <div className="absolute left-1/2 z-30 flex flex-col items-center pointer-events-none" style={{ bottom: 'calc(100% + 8px)', transform: 'translateX(-50%)', maxWidth: 'min(200px, 90vw)' }}>
           <div
             className="px-3 py-1.5 rounded-xl shadow-xl text-white text-xs font-bold flex items-center gap-1.5 text-center"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', animation: 'flipHintIn 0.35s ease', whiteSpace: 'nowrap' }}
+            style={{ background: 'var(--brand-gradient)', animation: 'flipHintIn 0.35s ease', whiteSpace: 'nowrap' }}
           >
             <span style={{ display: 'inline-block', animation: 'flipHintTap 0.5s ease-in-out infinite alternate' }}>👇</span>
             <span>Tap to see the meaning!</span>
@@ -153,7 +153,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
               </button>
             </div>
             <p className="text-2xl sm:text-3xl font-black text-center leading-tight" style={{
-              background: 'linear-gradient(135deg, #EC4899, #8B5CF6)',
+              background: 'var(--brand-gradient)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
             }}>
               {item.korean}
@@ -167,7 +167,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
           {/* Back */}
           <div
             className="absolute w-full h-full backface-hidden rotate-y-180 rounded-2xl flex flex-col justify-center items-center p-3 sm:p-4 cursor-pointer shadow-lg"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+            style={{ background: 'var(--brand-gradient)' }}
           >
             <p className="text-xl sm:text-2xl font-bold text-white text-center px-2 leading-tight">{item.english}</p>
             <div className="absolute top-2 right-2">
@@ -210,7 +210,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-base font-black text-gray-900 dark:text-white">
                 Examples ·{' '}
-                <span style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                <span style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                   {item.korean}
                 </span>
               </h3>

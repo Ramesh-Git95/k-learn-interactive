@@ -256,7 +256,7 @@ const CultureCards: React.FC = () => {
       {/* Hero */}
       <div
         className="rounded-2xl p-6 sm:p-8 mb-8 text-white relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%)' }}
+        style={{ background: 'var(--brand-gradient-hero)' }}
       >
         {['눈치', '정', '한', '체면', '대박', '한류'].map((w, i) => (
           <span
@@ -310,7 +310,7 @@ const CultureCards: React.FC = () => {
                   ? 'text-white shadow'
                   : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-pink-300'
               }`}
-              style={activeCategory === cat ? { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' } : {}}
+              style={activeCategory === cat ? { background: 'var(--brand-gradient)' } : {}}
             >
               {cat}
             </button>

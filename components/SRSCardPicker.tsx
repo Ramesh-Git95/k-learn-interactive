@@ -112,7 +112,7 @@ function ItemRow({
         {inDeck
           ? <span className="text-xs text-gray-400">✓ added</span>
           : selected
-          ? <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs text-white" style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}>✓</span>
+          ? <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs text-white" style={{ background: 'var(--brand-gradient)' }}>✓</span>
           : <span className="w-5 h-5 rounded-full border-2 border-gray-200 dark:border-gray-700" />
         }
       </div>
@@ -184,7 +184,7 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
                   ? 'text-white shadow-sm'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
-              style={tab === t.id ? { background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' } : {}}
+              style={tab === t.id ? { background: 'var(--brand-gradient)' } : {}}
             >
               <span>{t.emoji}</span> {t.label}
             </button>
@@ -366,7 +366,7 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
               <button
                 onClick={handleAdd}
                 className="px-5 py-2 rounded-xl text-white text-sm font-black transition-transform hover:scale-[1.03] active:scale-95 shadow-sm"
-                style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
+                style={{ background: 'var(--brand-gradient)' }}
               >
                 Add {selected.size} card{selected.size !== 1 ? 's' : ''} →
               </button>

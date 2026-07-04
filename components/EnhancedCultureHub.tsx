@@ -15,7 +15,7 @@ interface EnhancedCultureHubProps {
 type Subsection = 'insights' | 'regional' | 'lifestyle' | 'modern';
 
 const SUBSECTIONS: { id: Subsection; title: string; icon: string; description: string; isPremium?: boolean; gradient: string }[] = [
-  { id: 'insights',  title: 'Cultural Insights', icon: '🎭', description: 'Essential Korean customs & social norms',        gradient: 'linear-gradient(135deg, #EC4899, #8B5CF6)' },
+  { id: 'insights',  title: 'Cultural Insights', icon: '🎭', description: 'Essential Korean customs & social norms',        gradient: 'var(--brand-gradient)' },
   { id: 'regional',  title: 'Regional Explorer', icon: '🗺️', description: 'Discover Korea\'s diverse regions',              gradient: 'linear-gradient(135deg, #06B6D4, #3B82F6)', isPremium: true },
   { id: 'lifestyle', title: 'Daily Life',         icon: '🏠', description: 'How Koreans live, work & socialize',             gradient: 'linear-gradient(135deg, #10B981, #06B6D4)', isPremium: true },
   { id: 'modern',    title: 'Modern Korea',       icon: '🌆', description: 'K-pop, tech & contemporary trends',              gradient: 'linear-gradient(135deg, #F59E0B, #EC4899)', isPremium: true },
@@ -151,7 +151,7 @@ const EnhancedCultureHub: React.FC<EnhancedCultureHubProps> = ({ progress, toggl
                         className={`text-xs font-bold px-4 py-2 rounded-xl transition-all hover:scale-105 active:scale-95 ${
                           read ? 'bg-green-500 text-white' : 'text-white'
                         }`}
-                        style={!read ? { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' } : {}}
+                        style={!read ? { background: 'var(--brand-gradient)' } : {}}
                       >
                         {read ? '✓ Read' : '📌 Mark as Read'}
                       </button>

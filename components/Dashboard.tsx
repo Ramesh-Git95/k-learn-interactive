@@ -165,7 +165,7 @@ export default function Dashboard({
             <div>
               <p className="text-gray-400 text-sm mb-1">{today}</p>
               <h1 className="text-3xl md:text-4xl font-black text-white mb-2">
-                안녕하세요, <span style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{firstName}!</span> 👋
+                안녕하세요, <span style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{firstName}!</span> 👋
               </h1>
               <p className="text-gray-400 text-sm">
                 <span className="text-pink-400 font-semibold" style={{ fontFamily: 'Noto Sans KR, sans-serif' }}>{motivation.ko}</span>
@@ -200,7 +200,7 @@ export default function Dashboard({
           <div className="relative z-10 mt-5 pt-5 border-t border-white/10">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-black px-2.5 py-1 rounded-full text-white" style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}>
+                <span className="text-xs font-black px-2.5 py-1 rounded-full text-white" style={{ background: 'var(--brand-gradient)' }}>
                   Lv.{xp.level} {levelName}
                 </span>
                 <span className="text-gray-400 text-xs">{xp.totalXP} XP total</span>
@@ -212,7 +212,7 @@ export default function Dashboard({
                 className="h-full rounded-full transition-all duration-700"
                 style={{
                   width:      `${Math.min(100, (xp.xpInLevel / xp.xpForLevel) * 100)}%`,
-                  background: 'linear-gradient(90deg,#EC4899,#8B5CF6)',
+                  background: 'var(--brand-gradient-h)',
                 }}
               />
             </div>
@@ -272,7 +272,7 @@ export default function Dashboard({
                         ? 'opacity-30'
                         : 'bg-gray-100 dark:bg-gray-800'
                     }`}
-                    style={day.studied ? { background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' } : {}}
+                    style={day.studied ? { background: 'var(--brand-gradient)' } : {}}
                   />
                   <span className="text-[9px] text-gray-400 dark:text-gray-600 leading-none">
                     {day.label === 'Today' ? '▼' : day.label.slice(0, 1)}
@@ -376,7 +376,7 @@ export default function Dashboard({
               <button
                 onClick={openUpgradeModal}
                 className="text-xs font-black px-3 py-1.5 rounded-lg text-white"
-                style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
+                style={{ background: 'var(--brand-gradient)' }}
               >
                 ⭐ Unlock All
               </button>

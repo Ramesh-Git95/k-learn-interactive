@@ -85,7 +85,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
               className="h-2 rounded-full transition-all duration-300"
               style={{
                 width:      step === n ? '2rem' : '0.5rem',
-                background: step >= n ? 'linear-gradient(90deg,#EC4899,#8B5CF6)' : '#E5E7EB',
+                background: step >= n ? 'var(--brand-gradient-h)' : '#E5E7EB',
               }}
             />
           ))}
@@ -118,7 +118,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
                       <div className="text-gray-400 text-xs">{g.sub}</div>
                     </div>
                     {goal === g.id && (
-                      <span className="ml-auto w-5 h-5 rounded-full flex items-center justify-center text-white text-xs" style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}>✓</span>
+                      <span className="ml-auto w-5 h-5 rounded-full flex items-center justify-center text-white text-xs" style={{ background: 'var(--brand-gradient)' }}>✓</span>
                     )}
                   </button>
                 ))}
@@ -127,7 +127,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
                 onClick={() => setStep(2)}
                 disabled={!goal}
                 className="w-full py-3.5 rounded-2xl text-white font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
-                style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
+                style={{ background: 'var(--brand-gradient)' }}
               >
                 Next →
               </button>
@@ -220,7 +220,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
                   onClick={handleFinish}
                   disabled={creating}
                   className="flex-1 py-3.5 rounded-2xl text-white font-bold text-sm transition-all disabled:opacity-70"
-                  style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
+                  style={{ background: 'var(--brand-gradient)' }}
                 >
                   {creating ? '✨ Creating your deck…' : 'Start Learning 시작해요! →'}
                 </button>

@@ -30,7 +30,7 @@ const AuthenticationRequired: React.FC = () => {
       {/* Hero */}
       <div
         className="relative rounded-3xl overflow-hidden mb-6 p-6 sm:p-8 text-center"
-        style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%)' }}
+        style={{ background: 'var(--brand-gradient-hero)' }}
       >
         <div className="text-5xl mb-3">🧠</div>
         <h1 className="text-2xl sm:text-3xl font-black text-white mb-1">Sign in to take the quiz</h1>
@@ -43,7 +43,7 @@ const AuthenticationRequired: React.FC = () => {
         <button
           onClick={() => openAuth('register')}
           className="w-full py-3 text-white font-black rounded-xl shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-sm"
-          style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+          style={{ background: 'var(--brand-gradient)' }}
         >
           🚀 Create a free account
         </button>
@@ -239,7 +239,7 @@ const QuizComponent: React.FC = () => {
       <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
         <div
           className="rounded-3xl overflow-hidden mb-6 p-6 text-center"
-          style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%)' }}
+          style={{ background: 'var(--brand-gradient-hero)' }}
         >
           <div className="text-4xl mb-2">⏰</div>
           <h2 className="text-xl font-black text-white mb-1">Daily Limit Reached</h2>
@@ -291,7 +291,7 @@ const QuizComponent: React.FC = () => {
         {/* Result hero */}
         <div
           className="relative rounded-3xl overflow-hidden mb-8 p-8 text-center"
-          style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%)' }}
+          style={{ background: 'var(--brand-gradient-hero)' }}
         >
           <div className="text-6xl mb-3">{resultEmoji}</div>
           <h1 className="text-3xl font-black text-white mb-1">Quiz Complete!</h1>
@@ -317,7 +317,7 @@ const QuizComponent: React.FC = () => {
           <button
             onClick={restartQuiz}
             className="flex-1 py-3 text-white font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+            style={{ background: 'var(--brand-gradient)' }}
           >
             🔄 Play Again
           </button>
@@ -349,7 +349,7 @@ const QuizComponent: React.FC = () => {
       {/* Hero */}
       <div
         className="relative rounded-3xl overflow-hidden mb-6 p-5 sm:p-6"
-        style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%)' }}
+        style={{ background: 'var(--brand-gradient-hero)' }}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['퀴즈','한국어','점수','연습'].map((w, i) => (
@@ -392,7 +392,7 @@ const QuizComponent: React.FC = () => {
                   ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed opacity-60'
                   : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:scale-105'
               }`}
-              style={active ? { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' } : {}}
+              style={active ? { background: 'var(--brand-gradient)' } : {}}
             >
               {emoji} {label} {locked && '🔒'}
             </button>
@@ -419,7 +419,7 @@ const QuizComponent: React.FC = () => {
         <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, #EC4899, #8B5CF6)' }}
+            style={{ width: `${progressPct}%`, background: 'var(--brand-gradient-h)' }}
           />
         </div>
       </div>
@@ -449,7 +449,7 @@ const QuizComponent: React.FC = () => {
         <div className="px-5 pt-4 pb-2 border-b border-gray-50 dark:border-gray-800 flex items-center gap-2">
           <span
             className="text-[10px] font-black px-2.5 py-0.5 rounded-full text-white"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+            style={{ background: 'var(--brand-gradient)' }}
           >
             {currentQuestion.type === 'korean_to_english' ? '🇰🇷 Korean → English'
               : currentQuestion.type === 'english_to_korean' ? '🔤 English → Korean'
@@ -549,7 +549,7 @@ const QuizComponent: React.FC = () => {
         <button
           onClick={handleNext}
           className="w-full py-3.5 text-white font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-sm"
-          style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+          style={{ background: 'var(--brand-gradient)' }}
         >
           {currentQuestionIndex + 1 >= questions.length ? '🏁 See Results' : 'Next Question →'}
         </button>

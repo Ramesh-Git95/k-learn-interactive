@@ -50,7 +50,7 @@ const HangulSection: React.FC<HangulSectionProps> = ({ progress = {}, toggleProg
                   width: `${progressData.percentage}%`,
                   background: progressData.percentage === 100
                     ? 'linear-gradient(90deg, #22C55E, #059669)'
-                    : 'linear-gradient(90deg, #EC4899, #8B5CF6)',
+                    : 'var(--brand-gradient-h)',
                 }}
               />
             </div>
@@ -80,7 +80,7 @@ const HangulSection: React.FC<HangulSectionProps> = ({ progress = {}, toggleProg
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
       {/* Hero Header */}
-      <div className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8" style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 50%, #06B6D4 100%)' }}>
+      <div className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8" style={{ background: 'var(--brand-gradient-hero)' }}>
         {/* decorative floaters */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['ㄱ','ㄴ','ㄷ','아','이','오','가','나','한'].map((c, i) => (
@@ -141,7 +141,7 @@ const HangulSection: React.FC<HangulSectionProps> = ({ progress = {}, toggleProg
         </p>
         <div className="space-y-3">
           <div className="flex items-start gap-3 p-3 rounded-xl bg-pink-50 dark:bg-pink-900/10 border border-pink-100 dark:border-pink-900/30">
-            <span className="text-2xl font-black" style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>가</span>
+            <span className="text-2xl font-black" style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>가</span>
             <div>
               <p className="text-sm font-bold text-gray-800 dark:text-gray-200">Consonant + Vowel</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">ㄱ + ㅏ = 가 (ga) — the simplest block</p>

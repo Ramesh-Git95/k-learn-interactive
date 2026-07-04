@@ -315,7 +315,7 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
                     ? 'text-white rounded-br-sm'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-sm'
                 }`}
-                style={msg.isUser ? { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' } : {}}
+                style={msg.isUser ? { background: 'var(--brand-gradient)' } : {}}
               >
                 {msg.isVoiceMessage && <span className="text-[10px] opacity-70 mr-1">🎙️</span>}
                 <span className="whitespace-pre-wrap">{msg.text}</span>
@@ -414,7 +414,7 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
             onClick={handleSendMessage}
             disabled={!inputText.trim() || isLoading || usedToday >= dailyLimit}
             className="w-9 h-9 flex items-center justify-center rounded-xl text-white disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0 transition-all hover:scale-105 active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+            style={{ background: 'var(--brand-gradient)' }}
             title={L('Send', '전송')}
           >
             ➤

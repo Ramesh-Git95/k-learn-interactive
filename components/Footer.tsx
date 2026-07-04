@@ -63,7 +63,7 @@ const Footer: React.FC = () => {
               <div className="flex items-center gap-2 mb-3">
                 <div
                   className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-black text-sm"
-                  style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                  style={{ background: 'var(--brand-gradient)' }}
                 >K</div>
                 <span className="text-lg font-black text-gray-900 dark:text-white">K-Learn</span>
               </div>

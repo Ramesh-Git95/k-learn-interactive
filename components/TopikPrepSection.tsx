@@ -342,7 +342,7 @@ const TopikPrepSection: React.FC = () => {
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
         <div className="relative rounded-3xl overflow-hidden mb-6 p-6 text-center"
-          style={{ background: 'linear-gradient(135deg, #06B6D4 0%, #8B5CF6 50%, #EC4899 100%)' }}>
+          style={{ background: 'var(--brand-gradient-hero-rev)' }}>
           <div className="text-5xl mb-2">{emoji}</div>
           <h2 className="text-2xl font-black text-white mb-1">{msg}</h2>
           <p className="text-white/80 text-sm">TOPIK {level} · {category === 'vocabulary' ? 'Vocabulary 어휘' : 'Grammar 문법'}</p>
@@ -371,7 +371,7 @@ const TopikPrepSection: React.FC = () => {
         <div className="grid grid-cols-2 gap-3">
           <button onClick={() => resetQuiz()}
             className="py-3 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
+            style={{ background: 'var(--brand-gradient)' }}>
             🔄 Try Again
           </button>
           <button onClick={() => resetQuiz(level, category === 'vocabulary' ? 'grammar' : 'vocabulary')}
@@ -388,7 +388,7 @@ const TopikPrepSection: React.FC = () => {
     <div className="p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto">
       {/* Hero */}
       <div className="relative rounded-3xl overflow-hidden mb-6 p-5 sm:p-6"
-        style={{ background: 'linear-gradient(135deg, #06B6D4 0%, #8B5CF6 50%, #EC4899 100%)' }}>
+        style={{ background: 'var(--brand-gradient-hero-rev)' }}>
         <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['읽기','어휘','문법','TOPIK','시험'].map((w, i) => (
             <span key={i} className="absolute text-white/10 font-black"
@@ -409,7 +409,7 @@ const TopikPrepSection: React.FC = () => {
           {(['I', 'II'] as Level[]).map(l => (
             <button key={l} onClick={() => resetQuiz(l, category)}
               className={`flex-1 py-2.5 text-sm font-black transition-all ${level === l ? 'text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
-              style={level === l ? { background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' } : {}}>
+              style={level === l ? { background: 'var(--brand-gradient)' } : {}}>
               TOPIK {l}
               <span className={`ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${level === l ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
                 {l === 'I' ? 'Beginner' : 'Intermediate'}
@@ -433,7 +433,7 @@ const TopikPrepSection: React.FC = () => {
       <div className="flex items-center gap-3 mb-5">
         <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
           <div className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #EC4899, #8B5CF6)' }} />
+            style={{ width: `${progress}%`, background: 'var(--brand-gradient-h)' }} />
         </div>
         <span className="text-xs font-black text-gray-400 dark:text-gray-500 flex-shrink-0">
           {qIdx + 1} / {questions.length}
@@ -449,7 +449,7 @@ const TopikPrepSection: React.FC = () => {
         <div className="px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black px-2 py-0.5 rounded-full text-white"
-              style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
+              style={{ background: 'var(--brand-gradient)' }}>
               {qIdx + 1}번
             </span>
             <span className="text-xs font-bold text-gray-400 dark:text-gray-500">
@@ -488,7 +488,7 @@ const TopikPrepSection: React.FC = () => {
                   className={`w-full text-left px-4 py-3 rounded-xl transition-all text-sm ${cls}`}>
                   <div className="flex items-center gap-3">
                     <span className="font-black text-base flex-shrink-0" style={
-                      !showFeedback ? { background: 'linear-gradient(135deg,#EC4899,#8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } : {}
+                      !showFeedback ? { background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } : {}
                     }>{OPTION_LABELS[i]}</span>
                     <span className="font-semibold flex-1">{opt}</span>
                     {showFeedback && i === q.answer && <span className="text-green-500 font-black">✓</span>}
@@ -516,7 +516,7 @@ const TopikPrepSection: React.FC = () => {
       {!freeLimitHit && chosen !== null && (
         <button onClick={advance}
           className="w-full py-3 text-white text-sm font-black rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-          style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}>
+          style={{ background: 'var(--brand-gradient)' }}>
           {qIdx + 1 >= questions.length ? '🏁 See Results' : 'Next Question →'}
         </button>
       )}

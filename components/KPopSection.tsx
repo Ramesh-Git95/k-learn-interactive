@@ -87,7 +87,7 @@ function WordPopover({ word, anchorRef, onClose, onAddSRS, isAuthenticated, isPr
             <button
               onClick={() => onAddSRS(word)}
               className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-white transition-transform hover:scale-105"
-              style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
+              style={{ background: 'var(--brand-gradient)' }}
             >
               + SRS
             </button>
@@ -273,7 +273,7 @@ function SongView({ song, artist, isPremium, isAuthenticated, onBack }: {
           <p className="text-sm font-bold text-amber-700 dark:text-amber-300 mb-2">Unlock all songs with Premium</p>
           <button onClick={startUpgrade}
             className="inline-block px-5 py-2 rounded-xl text-white text-sm font-bold"
-            style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}>
+            style={{ background: 'var(--brand-gradient)' }}>
             Upgrade → $4/month
           </button>
         </div>
@@ -350,7 +350,7 @@ function ArtistSongs({ artist, isPremium, isAuthenticated, onSelectSong, onBack 
                   tabIndex={0}
                   onClick={e => { e.stopPropagation(); startUpgrade(); }}
                   className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl text-white cursor-pointer"
-                  style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
+                  style={{ background: 'var(--brand-gradient)' }}
                 >
                   Unlock
                 </span>
@@ -475,7 +475,7 @@ const KPopSection: React.FC = () => {
           <button
             onClick={startUpgrade}
             className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl text-white whitespace-nowrap"
-            style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
+            style={{ background: 'var(--brand-gradient)' }}
           >
             Upgrade
           </button>

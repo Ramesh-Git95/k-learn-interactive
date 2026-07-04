@@ -193,7 +193,7 @@ const FaqItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
         <span className="font-bold text-gray-900 dark:text-white text-sm sm:text-base pr-4">{q}</span>
         <span
           className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-white text-sm font-black transition-transform"
-          style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)', transform: open ? 'rotate(45deg)' : 'rotate(0deg)' }}
+          style={{ background: 'var(--brand-gradient)', transform: open ? 'rotate(45deg)' : 'rotate(0deg)' }}
         >
           +
         </span>
@@ -293,7 +293,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         .blob          { animation: blobPulse 8s ease-in-out infinite; }
 
         .gradient-text {
-          background: linear-gradient(135deg,#EC4899 0%,#8B5CF6 50%,#06B6D4 100%);
+          background: var(--brand-gradient-hero);
           -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
         .gradient-text-warm {
@@ -301,7 +301,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
           -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
         .btn-primary {
-          background: linear-gradient(135deg,#EC4899,#8B5CF6);
+          background: var(--brand-gradient);
           transition: all 0.25s ease;
           box-shadow: 0 4px 20px rgba(236,72,153,0.35);
         }
@@ -315,7 +315,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         .dark .card-hover:hover { box-shadow:0 20px 40px rgba(0,0,0,0.4); }
         .check-free  { background: #D1FAE5; color: #059669; }
         .dark .check-free  { background: rgba(16,185,129,0.15); color: #34D399; }
-        .check-premium { background: linear-gradient(135deg,#EC4899,#8B5CF6); color: white; }
+        .check-premium { background: var(--brand-gradient); color: white; }
       `}</style>
 
       {/* ── HERO ──────────────────────────────────────────────────── */}
@@ -403,7 +403,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
           </div>
 
           {/* ── Live Hangul Demo ── */}
-          <div className="relative rounded-3xl overflow-hidden" style={{ background: 'linear-gradient(135deg,#EC4899 0%,#8B5CF6 55%,#06B6D4 100%)' }}>
+          <div className="relative rounded-3xl overflow-hidden" style={{ background: 'var(--brand-gradient-hero)' }}>
             <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 20%, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
             <div className="relative z-10 p-6 sm:p-8">
               <div className="flex items-center justify-center gap-2 mb-5">
@@ -424,7 +424,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* ── MARQUEE ──────────────────────────────────────────────── */}
-      <div className="py-4 overflow-hidden" style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6,#06B6D4)' }}>
+      <div className="py-4 overflow-hidden" style={{ background: 'var(--brand-gradient-hero)' }}>
         <div className="flex whitespace-nowrap">
           <div className="marquee-track flex gap-8 pr-8">
             {[...marqueeWords, ...marqueeWords].map((w, i) => (
@@ -646,7 +646,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             <FadeIn delay={150}>
             <div className="card-hover relative rounded-3xl p-8 overflow-hidden" style={{ background: 'linear-gradient(135deg,#1a1a2e 0%,#16213e 100%)' }}>
               <div className="absolute -top-px left-1/2 -translate-x-1/2">
-                <span className="inline-block px-5 py-1.5 text-xs font-black uppercase tracking-widest rounded-b-full text-white" style={{ background: 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}>
+                <span className="inline-block px-5 py-1.5 text-xs font-black uppercase tracking-widest rounded-b-full text-white" style={{ background: 'var(--brand-gradient)' }}>
                   Best Value
                 </span>
               </div>
@@ -706,7 +706,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                 <div className="flex items-center justify-center">
                   <span
                     className="inline-block text-[11px] font-bold px-2 py-0.5 rounded-full text-white"
-                    style={{ background: row.premium === '✕' ? '#9CA3AF' : 'linear-gradient(135deg,#EC4899,#8B5CF6)' }}
+                    style={{ background: row.premium === '✕' ? '#9CA3AF' : 'var(--brand-gradient)' }}
                   >
                     {row.premium}
                   </span>
@@ -745,7 +745,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
 
         <FadeIn>
         <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <div className="text-6xl mb-5 font-black" style={{ fontFamily: 'Noto Sans KR,sans-serif', background: 'linear-gradient(135deg,#EC4899,#8B5CF6,#06B6D4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          <div className="text-6xl mb-5 font-black" style={{ fontFamily: 'Noto Sans KR,sans-serif', background: 'var(--brand-gradient-hero)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
             한국어
           </div>
           <h2 className="text-4xl md:text-6xl font-black text-white mb-5 leading-tight">

@@ -21,7 +21,7 @@ const BookmarkList: React.FC<BookmarkListProps> = ({ bookmarks, toggleBookmark }
       {/* Hero */}
       <div
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
-        style={{ background: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%)' }}
+        style={{ background: 'var(--brand-gradient-hero)' }}
       >
         <div className="relative z-10 flex items-center gap-4">
           <span className="text-4xl">❤️</span>
@@ -57,7 +57,7 @@ const BookmarkList: React.FC<BookmarkListProps> = ({ bookmarks, toggleBookmark }
                         {isPhrase && (
                           <span
                             className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
-                            style={{ background: 'linear-gradient(135deg, #EC4899, #8B5CF6)' }}
+                            style={{ background: 'var(--brand-gradient)' }}
                           >
                             {(item as PhraseItem).context}
                           </span>
