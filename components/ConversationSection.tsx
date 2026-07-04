@@ -55,14 +55,13 @@ const ConversationSection: React.FC = () => {
           key={id}
           onClick={() => { setTab(id); setShowBot(false); }}
           className={`flex-1 py-2.5 text-sm font-black transition-all flex items-center justify-center gap-2 ${
-            tab === id ? 'text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+            tab === id ? 'tab-brand-active' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
           }`}
-          style={tab === id ? { background: 'var(--brand-gradient)' } : {}}
         >
           {em} {label}
           {id === 'ai' && isAuthenticated && dailyLimit !== Infinity && (
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-              tab === 'ai' ? 'bg-white/20 text-white' : limitReached ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
+              tab === 'ai' ? 'badge-brand' : limitReached ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
             }`}>
               {remaining}/{dailyLimit}
             </span>

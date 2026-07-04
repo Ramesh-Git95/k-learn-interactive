@@ -118,8 +118,7 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
             <>
               <button
                 onClick={startUpgrade}
-                className="w-full py-3.5 rounded-2xl text-white font-black text-base shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-95"
-                style={{ background: 'var(--brand-gradient)' }}
+                className="w-full py-3.5 rounded-2xl font-black text-base btn-brand"
               >
                 Subscribe — $4/month →
               </button>
@@ -131,8 +130,7 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
             <>
               <button
                 onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' })); }}
-                className="w-full py-3.5 rounded-2xl text-white font-black text-base shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-95"
-                style={{ background: 'var(--brand-gradient)' }}
+                className="w-full py-3.5 rounded-2xl font-black text-base btn-brand"
               >
                 Create Free Account to Get Started →
               </button>

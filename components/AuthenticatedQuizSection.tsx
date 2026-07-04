@@ -316,8 +316,7 @@ const QuizComponent: React.FC = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={restartQuiz}
-            className="flex-1 py-3 text-white font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-            style={{ background: 'var(--brand-gradient)' }}
+            className="flex-1 py-3 font-black rounded-xl btn-brand"
           >
             🔄 Play Again
           </button>
@@ -387,12 +386,11 @@ const QuizComponent: React.FC = () => {
               disabled={!!locked}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 ${
                 active
-                  ? 'text-white shadow-sm scale-105'
+                  ? 'tab-brand-active'
                   : locked
                   ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed opacity-60'
                   : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:scale-105'
               }`}
-              style={active ? { background: 'var(--brand-gradient)' } : {}}
             >
               {emoji} {label} {locked && '🔒'}
             </button>
@@ -448,8 +446,7 @@ const QuizComponent: React.FC = () => {
         {/* Type badge */}
         <div className="px-5 pt-4 pb-2 border-b border-gray-50 dark:border-gray-800 flex items-center gap-2">
           <span
-            className="text-[10px] font-black px-2.5 py-0.5 rounded-full text-white"
-            style={{ background: 'var(--brand-gradient)' }}
+            className="text-[10px] font-black px-2.5 py-0.5 rounded-full badge-brand"
           >
             {currentQuestion.type === 'korean_to_english' ? '🇰🇷 Korean → English'
               : currentQuestion.type === 'english_to_korean' ? '🔤 English → Korean'
@@ -548,8 +545,7 @@ const QuizComponent: React.FC = () => {
       {(selectedAnswer !== null || timeLeft === 0) && (
         <button
           onClick={handleNext}
-          className="w-full py-3.5 text-white font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-sm"
-          style={{ background: 'var(--brand-gradient)' }}
+          className="w-full py-3.5 font-black rounded-xl btn-brand"
         >
           {currentQuestionIndex + 1 >= questions.length ? '🏁 See Results' : 'Next Question →'}
         </button>

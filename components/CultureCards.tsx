@@ -307,10 +307,9 @@ const CultureCards: React.FC = () => {
               onClick={() => setActiveCategory(cat)}
               className={`px-3.5 py-1.5 rounded-full text-xs font-black transition-all ${
                 activeCategory === cat
-                  ? 'text-white shadow'
+                  ? 'tab-brand-active'
                   : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-pink-300'
               }`}
-              style={activeCategory === cat ? { background: 'var(--brand-gradient)' } : {}}
             >
               {cat}
             </button>

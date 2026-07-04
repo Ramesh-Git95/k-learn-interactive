@@ -408,10 +408,9 @@ const TopikPrepSection: React.FC = () => {
         <div className="flex rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm flex-1">
           {(['I', 'II'] as Level[]).map(l => (
             <button key={l} onClick={() => resetQuiz(l, category)}
-              className={`flex-1 py-2.5 text-sm font-black transition-all ${level === l ? 'text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
-              style={level === l ? { background: 'var(--brand-gradient)' } : {}}>
+              className={`flex-1 py-2.5 text-sm font-black transition-all ${level === l ? 'tab-brand-active' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
               TOPIK {l}
-              <span className={`ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${level === l ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
+              <span className={`ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${level === l ? 'badge-brand' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
                 {l === 'I' ? 'Beginner' : 'Intermediate'}
               </span>
             </button>
@@ -421,8 +420,7 @@ const TopikPrepSection: React.FC = () => {
         <div className="flex rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm flex-1">
           {([['vocabulary', '어휘', '📖'], ['grammar', '문법', '✏️']] as [Category, string, string][]).map(([c, ko, em]) => (
             <button key={c} onClick={() => resetQuiz(level, c)}
-              className={`flex-1 py-2.5 text-sm font-black transition-all flex items-center justify-center gap-1.5 ${category === c ? 'text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
-              style={category === c ? { background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)' } : {}}>
+              className={`flex-1 py-2.5 text-sm font-black transition-all flex items-center justify-center gap-1.5 ${category === c ? 'tab-brand-active' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
               {em} {ko}
             </button>
           ))}
@@ -448,8 +446,7 @@ const TopikPrepSection: React.FC = () => {
         {/* Question header */}
         <div className="px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-black px-2 py-0.5 rounded-full text-white"
-              style={{ background: 'var(--brand-gradient)' }}>
+            <span className="text-xs font-black px-2 py-0.5 rounded-full badge-brand">
               {qIdx + 1}번
             </span>
             <span className="text-xs font-bold text-gray-400 dark:text-gray-500">
@@ -515,8 +512,7 @@ const TopikPrepSection: React.FC = () => {
       {/* Next / Finish button */}
       {!freeLimitHit && chosen !== null && (
         <button onClick={advance}
-          className="w-full py-3 text-white text-sm font-black rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-          style={{ background: 'var(--brand-gradient)' }}>
+          className="w-full py-3 text-sm font-black rounded-xl btn-brand">
           {qIdx + 1 >= questions.length ? '🏁 See Results' : 'Next Question →'}
         </button>
       )}

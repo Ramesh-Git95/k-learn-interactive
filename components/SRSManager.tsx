@@ -13,8 +13,7 @@ const GradBtn = ({ onClick, disabled, className = '', children }: { onClick?: ()
   <button
     onClick={onClick}
     disabled={disabled}
-    className={`text-white font-bold rounded-xl transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 ${className}`}
-    style={{ background: 'var(--brand-gradient)' }}
+    className={`font-bold rounded-xl btn-brand ${className}`}
   >
     {children}
   </button>
@@ -50,7 +49,7 @@ function DeckCard({ deck, dueCount, deckStats, onStartStudy, onAddCard, onEditDe
           </div>
           {dueCount > 0 && (
             <Tooltip content="Cards scheduled for review today by the SM-2 algorithm." position="top" maxWidth="max-w-xs">
-              <span className="flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-full text-white" style={{ background: 'var(--brand-gradient)' }}>
+              <span className="flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-full badge-brand">
                 {dueCount} due
               </span>
             </Tooltip>
@@ -105,7 +104,7 @@ function DeckCard({ deck, dueCount, deckStats, onStartStudy, onAddCard, onEditDe
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm text-gray-900 dark:text-white">{card.content.korean}</span>
                         {card.srs?.nextReviewDate && new Date(card.srs.nextReviewDate) <= new Date() && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: 'var(--brand-gradient)' }}>Due</span>
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full badge-brand">Due</span>
                         )}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">{card.content.english}</div>

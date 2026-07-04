@@ -243,8 +243,7 @@ const UserProfile: React.FC = () => {
               </ul>
               <button
                 onClick={startUpgrade}
-                className="w-full py-2.5 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-md"
-                style={{ background: 'var(--brand-gradient)' }}
+                className="w-full py-2.5 text-sm font-black rounded-xl btn-brand"
               >
                 Unlock all — $4/month
               </button>

@@ -220,7 +220,7 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden">
           {/* Front */}
           <div className="p-8 text-center min-h-[280px] flex flex-col justify-center">
-            <span className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-4 text-white" style={{ background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)' }}>
+            <span className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-4 badge-brand">
               {currentCard.content.type}
             </span>
             <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">
@@ -247,8 +247,7 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
             {!showAnswer ? (
               <button
                 onClick={() => setShowAnswer(true)}
-                className="w-full py-3.5 rounded-xl text-white font-bold text-base transition-transform hover:scale-[1.02] active:scale-95 shadow-md"
-                style={{ background: 'var(--brand-gradient)' }}
+                className="w-full py-3.5 rounded-xl font-bold text-base btn-brand"
               >
                 Reveal Answer
               </button>

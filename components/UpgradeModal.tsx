@@ -71,8 +71,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
                   window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' }));
                 }
               }}
-              className="w-full py-3 rounded-xl text-white font-bold text-sm shadow-md transition-transform hover:scale-[1.02] active:scale-95"
-              style={{ background: 'var(--brand-gradient)' }}
+              className="w-full py-3 rounded-xl font-bold text-sm btn-brand"
             >
               {isAuthenticated ? 'Get Premium — $4/month' : 'Create Free Account to Get Started →'}
             </button>

@@ -254,10 +254,9 @@ const KDramaSection: React.FC = () => {
                 onClick={() => setDifficultyFilter(d)}
                 className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 capitalize ${
                   difficultyFilter === d
-                    ? 'text-white shadow-sm'
+                    ? 'tab-brand-active'
                     : 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
-                style={difficultyFilter === d ? { background: 'var(--brand-gradient)' } : {}}
               >
                 {d === 'all'
                   ? `All (${selectedDrama.words.length})`
