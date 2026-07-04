@@ -164,34 +164,6 @@ class ApiClient {
     });
   }
 
-  // Subscription endpoints
-  async getSubscriptionPlans() {
-    return this.request<{ plans: any[] }>('/subscriptions/plans');
-  }
-
-  async createCheckoutSession(planId: string, successUrl: string, cancelUrl: string) {
-    return this.request<{ sessionId: string; checkoutUrl: string }>('/subscriptions/create-checkout-session', {
-      method: 'POST',
-      body: JSON.stringify({ planId, successUrl, cancelUrl }),
-    });
-  }
-
-  async getSubscriptionStatus() {
-    return this.request<{ subscription: any }>('/subscriptions/status');
-  }
-
-  async cancelSubscription() {
-    return this.request<{ subscription: any }>('/subscriptions/cancel', {
-      method: 'POST',
-    });
-  }
-
-  async reactivateSubscription() {
-    return this.request<{ subscription: any }>('/subscriptions/reactivate', {
-      method: 'POST',
-    });
-  }
-
   // Progress endpoints
   async getProgress() {
     return this.request<{
@@ -312,13 +284,3 @@ export interface User {
   createdAt: Date;
 }
 
-export interface SubscriptionPlan {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  currency: string;
-  interval: string;
-  features: string[];
-  stripePriceId: string;
-}

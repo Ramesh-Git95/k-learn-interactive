@@ -19,6 +19,9 @@ dist
 dist-ssr
 *.local
 
+# Local marketing assets (kept out of the repo)
+korean-learn-ad-*.png
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

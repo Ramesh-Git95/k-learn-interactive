@@ -1,488 +1,118 @@
-# 🇰🇷 K-Learn Interactive - Complete Project Documentation
-
-## 📋 Project Overview
-
-**K-Learn Interactive** is a modern, AI-powered Korean language learning platform built with React, TypeScript, and a comprehensive backend system. The application provides an immersive learning experience with spaced repetition, AI conversations, cultural exploration, and gamified progress tracking.
-
-### 🎯 **Core Vision**
-- **Mission**: Make Korean language learning accessible, engaging, and scientifically effective
-- **Target Audience**: Global learners interested in Korean language and culture (K-pop fans, business professionals, travelers)
-- **Unique Value**: Combines AI-powered conversations, scientifically-proven spaced repetition, and authentic cultural content
-
-## 🏗️ **Technical Architecture**
-
-### **Frontend Stack**
-- **Framework**: React 19.1.0 with TypeScript 5.8.2
-- **Build Tool**: Vite 6.2.0 (fast development and optimized builds)
-- **Styling**: TailwindCSS 4.1.11 (utility-first CSS framework)
-- **State Management**: React Context API + useReducer
-- **Routing**: React Router DOM 7.8.0
-- **HTTP Client**: Axios 1.6.0 + custom API client
-- **Testing**: Vitest 3.2.4 + Testing Library
-- **AI Integration**: Google Gemini AI (@google/genai)
-
-### **Backend Stack**
-- **Runtime**: Node.js with Express.js
-- **Database**: MongoDB with Mongoose ODM
-- **Authentication**: JWT-based with bcryptjs password hashing
-- **Payment Processing**: Stripe integration
-- **File Storage**: Local/cloud storage for assets
-- **API Design**: RESTful APIs with proper error handling
-
-### **Development Tools**
-- **Package Manager**: npm with package-lock.json
-- **Code Quality**: TypeScript strict mode, ESLint configuration
-- **Performance**: Lighthouse CI for monitoring
-- **PWA**: Progressive Web App capabilities with service worker
-- **Deployment**: Configured for modern hosting platforms
-
-## 🧠 **Core Features & Learning Modules**
-
-### **1. Spaced Repetition System (SRS)**
-**Location**: `services/spacedRepetition.ts`, `hooks/useSRS.ts`, `components/SRS*.tsx`
-
-- **Algorithm**: SM-2 (SuperMemo-2) scientifically-proven spaced repetition
-- **Features**:
-  - Custom deck creation and management
-  - Intelligent review scheduling based on difficulty ratings
-  - Performance analytics (success rates, streaks, review times)
-  - Card statistics and progress tracking
-- **UI Components**:
-  - `SRSManager.tsx`: Deck overview and management
-  - `SRSStudySession.tsx`: Interactive study sessions with 4-level difficulty rating
-  - `AddToSRS.tsx`: Add content from main app to SRS decks
-  - `SRSDashboard.tsx`: Integration with main dashboard
-
-### **2. AI-Powered Conversation System**
-**Location**: `services/geminiService.ts`, `components/ConversationSection.tsx`
-
-- **AI Provider**: Google Gemini AI for natural language processing
-- **Features**:
-  - Context-aware Korean conversation practice
-  - Real-time response generation
-  - Conversation history and progress tracking
-  - Free tier limitations vs premium unlimited access
-- **Premium Features**: Unlimited conversations, advanced AI models
-
-### **3. Comprehensive Learning Content**
-**Location**: `data/koreanData.ts`, various section components
-
-#### **Hangul Mastery** (`components/EnhancedHangulSection.tsx`)
-- Complete Korean alphabet with pronunciation
-- Interactive character practice
-- Romanization system with pronunciation guides
-
-#### **Vocabulary Builder** (`components/VocabularySection.tsx`)
-- 1000+ Korean words across multiple categories
-- Categories: Greetings, Numbers, Family, Food, Colors, Time, etc.
-- Interactive flashcards with pronunciation
-- Voice synthesis for pronunciation practice
-- Bookmark system for favorites
-
-#### **Grammar Patterns** (`components/EnhancedGrammarSection.tsx`)
-- Fundamental Korean grammar structures
-- Sentence patterns with real examples
-- Difficulty progression from beginner to advanced
-- Context-rich explanations
-
-#### **Phrase Library** (`components/EnhancedPhrasesSection.tsx`)
-- Common Korean phrases for daily conversation
-- Formality levels (casual, polite, formal)
-- Contextual usage explanations
-- Audio pronunciation support
-
-#### **Cultural Exploration** (`components/EnhancedCultureHub.tsx`)
-- **Regional Explorer**: Interactive map with satellite imagery
-- **Daily Life**: Korean customs, etiquette, social norms
-- **Modern Korea**: K-pop, technology, contemporary society
-- **Cultural Tips**: Authentic insights from native perspectives
-
-### **4. Advanced Quiz System**
-**Location**: `components/AuthenticatedQuizSection.tsx`
-
-- Multiple question types (multiple choice, fill-in-the-blank, matching)
-- Adaptive difficulty based on performance
-- Comprehensive progress tracking
-- Gamified scoring and achievements
-- Error analysis and weak point identification
-
-### **5. Progress Tracking & Gamification**
-**Location**: `contexts/ProgressContext.tsx`, `services/progressService.ts`
-
-- **Metrics Tracked**:
-  - Study streaks and daily goals
-  - Cards studied per session/day/week
-  - Accuracy rates by content type
-  - Time spent learning
-  - Achievements and milestones
-- **Gamification Elements**:
-  - XP points and level system
-  - Achievement badges
-  - Learning streaks
-  - Daily/weekly challenges
-
-## 🔐 **Authentication & User Management**
-
-### **Authentication System**
-**Location**: `contexts/AuthContext.tsx`, `services/apiClient.ts`
-
-- **Strategy**: JWT-based authentication with refresh tokens
-- **Features**:
-  - User registration with email verification
-  - Secure login/logout
-  - Password reset functionality
-  - Profile management
-  - Subscription tier management
-- **Security**:
-  - Password hashing with bcryptjs
-  - Token expiration handling
-  - Rate limiting on authentication endpoints
-  - CORS and security headers
-
-### **User Roles & Permissions**
-- **Free Users**: Basic content access, limited AI conversations (5/day), basic SRS features
-- **Premium Users**: Unlimited AI conversations, advanced SRS features, detailed analytics, priority support
-
-*Note: The codebase includes Pro tier infrastructure for future expansion, but currently only Free and Premium tiers are actively used.*
-
-### **Subscription System**
-**Location**: `hooks/useStripeCheckout.ts`, backend integration
-
-- **Payment Processor**: Stripe integration
-- **Tiers**: Free, Premium ($9.99/month)
-- **Features by Tier**: Graduated access to content and features
-- **Billing**: Automated recurring billing with webhook handling
-
-*Note: Pro tier ($19.99/month) is implemented in code for future expansion but not currently active.*
-
-## 🎨 **User Interface & Experience**
-
-### **Design System**
-- **Theme**: Dual theme support (light/dark mode)
-- **Typography**: Modern font stack with Korean character support
-- **Color Scheme**: Professional blue/indigo gradients with accessibility compliance
-- **Components**: Consistent design language across all sections
-
-### **Key UI Components**
-**Location**: `components/` directory
-
-#### **Navigation & Layout**
-- `Header.tsx`: Main navigation with auth integration
-- `Footer.tsx`: Site footer with links and branding
-- `Breadcrumb.tsx`: Navigation breadcrumbs
-- `LandingPage.tsx`: Marketing landing page for new users
-
-#### **Interactive Elements**
-- `VocabCard.tsx`: Vocabulary flashcards with flip animations
-- `HangulCard.tsx`: Interactive Hangul character practice
-- `Tour.tsx`: Guided user onboarding
-- `SpotlightSearch.tsx`: Global search with Cmd/Ctrl+K
-
-#### **Modal & Overlay System**
-- `AuthModalContext.tsx`: Centralized modal state management
-- `ToastContext.tsx`: Notification system
-- `CookieConsent.tsx`: GDPR-compliant cookie management
-
-#### **Progressive Web App (PWA)**
-- `public/manifest.json`: Web app manifest for installation
-- `public/sw.js`: Service worker for offline functionality
-- App icons and splash screens for native-like experience
-
-### **Responsive Design**
-- **Mobile-First**: Optimized for all screen sizes
-- **Touch-Friendly**: Large tap targets and gesture support
-- **Performance**: Optimized loading and smooth animations
-- **Accessibility**: WCAG 2.1 compliance with screen reader support
-
-## 📁 **Project Structure**
-
-```
-k-learn-interactive/
-├── 📁 components/           # React components
-│   ├── auth/               # Authentication forms
-│   ├── 📄 *.tsx            # Feature components
-├── 📁 contexts/            # React Context providers
-├── 📁 data/                # Static content and learning materials
-├── 📁 hooks/               # Custom React hooks
-├── 📁 services/            # API clients and business logic
-├── 📁 public/              # Static assets and PWA files
-├── 📁 src/                 # Additional source files
-├── 📁 utils/               # Utility functions
-├── 📁 scripts/             # Development scripts
-├── 📄 App.tsx              # Main application component
-├── 📄 index.tsx            # Application entry point
-├── 📄 types.ts             # TypeScript type definitions
-├── 📄 constants.ts         # Application constants
-├── 📄 package.json         # Dependencies and scripts
-└── 📄 vite.config.ts       # Build configuration
-```
-
-### **Key Directories Explained**
-
-#### **`/components/` - UI Components (54 files)**
-Core React components organized by feature:
-- **Authentication**: Login/register forms, user profile
-- **Learning Modules**: Vocabulary, grammar, culture sections
-- **SRS System**: Spaced repetition components
-- **Navigation**: Header, footer, breadcrumbs
-- **Modals**: Auth modals, upgrade prompts, tooltips
-
-#### **`/contexts/` - State Management (4 files)**
-React Context providers for global state:
-- `AuthContext.tsx`: User authentication state
-- `ProgressContext.tsx`: Learning progress and synchronization
-- `ToastContext.tsx`: Notification system
-- `AuthModalContext.tsx`: Modal state management
-
-#### **`/services/` - Business Logic (6 files)**
-API clients and service layers:
-- `apiClient.ts`: HTTP client with authentication
-- `geminiService.ts`: AI conversation service
-- `spacedRepetition.ts`: SRS algorithm implementation
-- `progressService.ts`: Progress tracking and sync
-- `premiumAIService.ts`: Premium AI features
-
-#### **`/hooks/` - Custom Hooks (9 files)**
-Reusable React hooks for common functionality:
-- `useSRS.ts`: Spaced repetition state management
-- `useLocalStorage.ts`: Persistent local storage
-- `useFeatureAccess.tsx`: Premium feature gating
-- `useSubscription.ts`: Subscription management
-
-## 🚀 **Recent Major Implementations**
-
-### **✅ Completed Features (2024-2025)**
-
-#### **1. Advanced SRS System**
-- **SM-2 Algorithm**: Scientifically-proven spaced repetition
-- **Smart Scheduling**: Intelligent review intervals
-- **Performance Analytics**: Success rates, response times, difficulty tracking
-- **Bug Fixes**: Date serialization, hook order, NaN accuracy calculations
-
-#### **2. Enhanced Landing Page**
-- **Marketing Focus**: Professional landing page for user acquisition
-- **Free Content Access**: Vocabulary, Grammar, Culture sections without signup
-- **Responsive Design**: Mobile-optimized with smooth animations
-- **Call-to-Action**: Strategic conversion funnels
-
-#### **3. AI Conversation Improvements**
-- **Free User Experience**: Basic AI conversations with usage limits
-- **Translation Support**: English translations for free users
-- **Context Awareness**: Better conversation flow and responses
-
-#### **4. Voice & Pronunciation Features**
-- **Text-to-Speech**: Browser TTS for vocabulary pronunciation
-- **Speaker Icons**: Click-to-hear functionality
-- **Pronunciation Guides**: Romanization with audio support
-
-#### **5. Form Validation & UX**
-- **Real-time Validation**: Email format, password strength indicators
-- **Visual Feedback**: Success/error states with color coding
-- **Accessibility**: Screen reader support and keyboard navigation
-
-#### **6. Testing Infrastructure**
-- **Vitest Setup**: Modern testing framework
-- **Component Tests**: Critical user interaction coverage
-- **Performance Monitoring**: Lighthouse CI integration
-
-#### **7. PWA Implementation**
-- **Offline Support**: Service worker for offline functionality
-- **Installation**: Native app-like installation experience
-- **Performance**: Optimized loading and caching strategies
-
-## 🔧 **Development & Deployment**
-
-### **Development Setup**
-```bash
-# Clone and install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Run tests
-npm run test
-
-# Build for production
-npm run build
-```
-
-### **Environment Configuration**
-```env
-# Frontend (.env.local)
-VITE_API_URL=http://localhost:5000/api
-GEMINI_API_KEY=your_gemini_api_key
-
-# Backend (.env)
-MONGODB_URI=mongodb://localhost:27017/korean-learning-app
-JWT_SECRET=your-super-secret-jwt-key
-STRIPE_SECRET_KEY=sk_test_your_stripe_key
-```
-
-### **Available Scripts**
-- `npm run dev`: Development server with hot reload
-- `npm run build`: Production build
-- `npm run preview`: Preview production build
-- `npm run test`: Run test suite
-- `npm run lighthouse`: Performance auditing
-
-## 💰 **Monetization Strategy**
-
-### **Revenue Streams**
-1. **Subscription Tiers**: Free, Premium ($9.99/month), Pro ($19.99/month)
-2. **Corporate Training**: B2B Korean language programs
-3. **Cultural Content**: Premium cultural insights and experiences
-4. **AI Tutoring**: Advanced AI conversation features
-
-### **Market Opportunity**
-- **Global Market**: $64.98 billion language learning market
-- **Korean Segment**: $2.8 billion and growing (K-culture influence)
-- **Digital Learning**: 70% of market, 18.7% CAGR
-
-### **Competitive Advantages**
-- **Comprehensive Korean Focus**: Unlike general language apps
-- **Cultural Integration**: Deep cultural content and context
-- **Advanced SRS**: Scientific learning optimization
-- **AI Conversations**: Natural language practice
-
-## 🔮 **Future Roadmap**
-
-### **Q1 2025 - Core Platform**
-- ✅ Complete SRS implementation
-- ✅ AI conversation system
-- ✅ User authentication & subscriptions
-- ✅ Progressive Web App features
-
-### **Q2 2025 - Enhanced Features**
-- 📅 Advanced grammar explanations with video content
-- 📅 Speech recognition for pronunciation practice
-- 📅 Community features (forums, study groups)
-- 📅 Mobile app development (React Native)
-
-### **Q3 2025 - Scale & Optimize**
-- 📅 Performance optimizations
-- 📅 Advanced analytics dashboard
-- 📅 Corporate training modules
-- 📅 International market expansion
-
-### **Q4 2025 - Advanced AI**
-- 📅 GPT-4 integration for advanced conversations
-- 📅 Personalized learning path AI
-- 📅 Voice-to-voice conversation practice
-- 📅 Cultural immersion VR experiences
-
-## 🧹 **Unnecessary Files Analysis**
-
-### **🗑️ Files That Can Be Removed**
-
-#### **Development/Testing Utilities**
-```
-❌ tooltip-completion-test.js
-❌ test-json-cleaning.js  
-❌ test-cookie-customization.js
-❌ utils/cookieTestUtils.ts
-❌ utils/tourTestUtils.ts
-❌ utils/tourDebugUtils.ts
-```
-**Reason**: These are temporary testing utilities used during development
-
-#### **Duplicate Configuration Files**
-```
-❌ postcss.config.cjs
-```
-**Reason**: Duplicate of postcss.config.js
-
-#### **Legacy/Duplicate Components**
-```
-❌ components/CultureSection.tsx
-❌ components/GrammarSection.tsx  
-❌ components/HangulSection.tsx
-❌ components/PhrasesSection.tsx
-❌ components/QuizSection.tsx
-```
-**Reason**: Replaced by Enhanced versions (EnhancedCultureHub.tsx, etc.)
-
-#### **Redundant Hooks**
-```
-❌ hooks/useToast.tsx
-```
-**Reason**: Duplicate of hooks/useToast.ts
-
-#### **Development Scripts**
-```
-❌ scripts/enhance-setup.sh
-❌ scripts/setup-backend.ps1
-```
-**Reason**: One-time setup scripts no longer needed
-
-#### **Legacy Documentation**
-```
-❌ QUIZ_CRASH_FIX.md
-❌ MODAL_FIX_COMPLETE.md
-❌ PROGRESS_TRACKING_FIX.md
-❌ TOAST_SYSTEM_COMPLETE.md
-```
-**Reason**: Historical fix documentation, not needed for production
-
-### **📁 Files to Keep**
-
-#### **Essential Documentation**
-```
-✅ README.md - Main project documentation
-✅ USER_JOURNEY.md - User experience flow
-✅ IMPLEMENTATION_STATUS.md - Current status
-✅ SRS_IMPLEMENTATION_SUMMARY.md - Key feature documentation
-✅ MONETIZATION_STRATEGY.md - Business strategy
-```
-
-#### **Configuration Files**
-```
-✅ package.json - Dependencies and scripts
-✅ vite.config.ts - Build configuration
-✅ tsconfig.json - TypeScript configuration
-✅ tailwind.config.js - Styling configuration
-✅ postcss.config.js - CSS processing
-```
-
-#### **Core Application Files**
-```
-✅ All enhanced components (Enhanced*.tsx)
-✅ All context providers
-✅ All services and hooks
-✅ Core data and types
-✅ PWA assets (manifest.json, sw.js)
-```
-
-## 📊 **Project Statistics**
-
-- **Total Components**: 54 React components
-- **Lines of Code**: ~15,000+ lines (TypeScript/TSX)
-- **Dependencies**: 12 production, 10 development
-- **Test Coverage**: Core components tested
-- **Performance Score**: 95+ Lighthouse score
-- **Mobile Responsive**: 100% mobile-optimized
-- **Accessibility**: WCAG 2.1 AA compliant
-
-## 🎯 **Key Success Metrics**
-
-### **Technical Metrics**
-- **Performance**: <3s initial load time
-- **Accessibility**: WCAG 2.1 AA compliance
-- **SEO**: Rich snippets and structured data
-- **PWA**: Installable with offline functionality
-
-### **User Engagement**
-- **Retention**: SRS system encourages daily usage
-- **Progress**: Gamified learning with clear advancement
-- **Content**: 1000+ vocabulary items, comprehensive grammar
-- **AI Integration**: Natural conversation practice
-
-### **Business Metrics**
-- **Freemium Model**: Strategic free tier for user acquisition
-- **Premium Conversion**: Advanced features drive subscriptions
-- **Market Position**: Focused Korean learning with cultural depth
-- **Scalability**: Modern architecture supports growth
-
----
-
-This documentation provides a comprehensive overview of the K-Learn Interactive project, including its technical architecture, features, recent implementations, and future roadmap. The project represents a sophisticated, production-ready Korean language learning platform with modern development practices and strong monetization potential.
+# K-Learn Interactive — Project Guide
+
+Korean language learning web app, **live in production** at https://korean-learn.com.
+React SPA (hash-routed sections) + Express/MongoDB backend + Stripe subscriptions.
+
+## Deployment model (important)
+
+- **Backend** → Railway (`https://k-learn-interactive-production.up.railway.app/api`).
+  **Auto-deploys on every push to `main`.** Backend changes go live within minutes of pushing.
+- **Frontend** → Hostinger via FTP. **Manual deploy only:** GitHub → Actions →
+  "Deploy to Hostinger" → Run workflow. Pushing to `main` does NOT update the live frontend.
+- **Workflow rule:** always `git push origin main` immediately after committing — push is part of "done".
+- Secrets live in `backend/.env` locally (gitignored) and in Railway Variables for production.
+  Never commit keys.
+
+## Stack
+
+- **Frontend:** React 19 + TypeScript, Vite, TailwindCSS (v3 build via `src/index.css`
+  **plus** the Play CDN in `index.html` — see Deferred items), React Context state, hash-based
+  section routing in `App.tsx` (no react-router pages).
+- **Backend:** Express (CommonJS) + Mongoose/MongoDB Atlas, JWT auth (`middleware/auth.js`).
+- **Payments:** Stripe subscriptions (live). **$4/month "Premium", cancel anytime.**
+- **AI:** Google Gemini (`gemini-2.5-flash`) proxied through the backend (`backend/routes/ai.js`) —
+  the API key never reaches the client.
+- **Email:** Resend (`backend/services/emailService.js`), verified domain, `EMAIL_FROM` env var.
+  Sends verification, password-reset and welcome emails.
+
+## Payments — how Premium works
+
+Single plan: **$4/month subscription** via Stripe Checkout. No lifetime/one-time tier is sold
+anymore (Gumroad was fully removed), but **legacy lifetime users still exist in the DB**:
+`subscription.type='premium'` with `currentPeriodEnd: null` and a non-`sub_` id — they keep
+access forever and must not be broken.
+
+Flow:
+1. Every upgrade button in the app calls `startUpgrade()` from `hooks/useUpgrade.ts`
+   (shows a full-screen redirect overlay). Guests are sent to the register modal first.
+2. Backend `POST /api/stripe/create-checkout-session` creates a subscription-mode Checkout
+   session with `client_reference_id = userId`. Rejects already-premium users.
+3. Stripe webhook `POST /api/stripe/webhook` (raw body mounted in `server.js` BEFORE
+   `express.json()` — do not reorder) handles:
+   - `checkout.session.completed` → activate subscription (idempotent)
+   - `customer.subscription.updated` → sync period end / scheduled cancel / past_due grace
+   - `customer.subscription.deleted` → revert user to free
+   A scheduled cancel can appear as `cancel_at_period_end` OR a `cancel_at` timestamp — both handled.
+4. `POST /api/stripe/create-portal-session` opens the Stripe Customer Portal.
+   Body `{ flow: 'cancel' }` jumps straight into the cancellation flow (auto-redirects back);
+   default opens the general portal (update card / invoices / resume).
+5. `POST /api/stripe/sync-subscription` pulls live subscription state from Stripe into the DB;
+   the profile calls it on open (self-heals missed webhooks). Stripe is the source of truth.
+6. After checkout, Stripe redirects to `/?checkout=success|cancel` — `App.tsx` polls
+   `refreshUser` and shows the welcome/cancel toast.
+
+User subscription shape (`backend/models/User.js`): `type` free|premium|pro, `status`,
+`stripeCustomerId`, `stripeSubscriptionId`, `currentPeriodStart/End`, `cancelAtPeriodEnd`.
+`hasPremiumAccess()` = non-free + active + not expired.
+
+## Free-tier gating
+
+- Limits are defined in `hooks/useFeatureAccess.tsx` (`FEATURE_LIMITS`): quizzes/day, AI chats/day
+  (5 free / 50 premium), vocab categories, bookmarks cap, etc. The `pro` tier exists in code but
+  is not sold.
+- Guests (not logged in) can browse `vocabulary`, `grammar`, `culture` only (see `App.tsx`
+  publicSections); everything else prompts sign-in. Progress/bookmarks sync to the backend for
+  logged-in users, localStorage otherwise.
+- Shared free-content constants live in `constants.ts` (e.g. `FREE_PHRASES_COUNT`) — keep
+  App.tsx totals and section components consistent.
+
+## Architecture map (real files)
+
+- `App.tsx` — provider tree (Auth → AuthModal → Progress → SRS → UpgradeModal), section
+  routing via URL hash, SRS study-session overlay, checkout-return handling.
+- `components/` — one component per section (`Enhanced*` naming is historical; the non-Enhanced
+  duplicates were deleted). Key ones: `LandingPage`, `Dashboard`, `UserProfile` (subscription
+  card + FOMO upgrade module), `AuthenticatedQuizSection` (the live quiz), `ConversationSection`/
+  `ConversationBot` (AI chat), `SRSManager`/`SRSStudySession`, `TopikPrepSection`/`TopikAssessment`,
+  `KDramaSection`/`KPopSection`/`ReadingSection`, `HonorificEngine`/`CultureCards`/`TypingDojo`.
+- `contexts/` — Auth, AuthModal, Progress, Toast, SRS (single `useSRS` instance via `SRSProvider`),
+  UpgradeModal.
+- `hooks/` — `useUpgrade` (ALL upgrade buttons route through this), `useFeatureAccess`,
+  `useSRS`, `useDailyActivity`, `useLocalStorage`, `useSpeechRecognition`.
+- `services/` — `apiClient.ts` (HTTP + auth token), `geminiService.ts` (chat/translate calls),
+  `spacedRepetition.ts` (SM-2 engine), `progressService.ts`.
+- `backend/routes/` — `auth.js` (register/login/verify/reset/delete — deletion cascades SRS decks
+  and cancels the Stripe sub), `users.js`, `progress.js`, `srs.js` (sync strips client `_id`s),
+  `ai.js`, `stripe.js`.
+
+## Environment variables
+
+Frontend build (set in `.github/workflows/deploy.yml`): `VITE_API_URL`.
+Backend (Railway + local `backend/.env`): `MONGODB_URI`, `JWT_SECRET`, `CORS_ORIGIN`,
+`FRONTEND_URL` (= https://korean-learn.com), `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` ($4/mo
+recurring price), `STRIPE_WEBHOOK_SECRET`, `GEMINI_API_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`.
+
+## Gotchas & conventions
+
+- **Stripe webhook needs the raw body** — `express.raw` for `/api/stripe/webhook` is mounted
+  before `express.json()` in `server.js`. Breaking this silently kills signature verification.
+- **Unstable context functions:** `canAccess`, `refreshUser`, `showToast` etc. are recreated
+  every render. Never put them in `useEffect`/`useCallback` dependency arrays — derive stable
+  booleans or hold them in refs (this caused real production loop bugs).
+- Speech synthesis: always `speechSynthesis.cancel()` before `speak()`.
+- SRS decks are identified by their own `id` field, not Mongo `_id`; `/srs/sync` strips
+  client-supplied `_id`s.
+- All UI copy says **"$4/month · cancel anytime"** (often with a "less than a coffee ☕" anchor).
+  No "lifetime", "one-time" or "Gumroad" anywhere.
+- Frontend typecheck must stay at **0 errors**: `npx tsc --noEmit -p tsconfig.json`.
+
+## Deferred / known limitations
+
+- **Tailwind Play CDN** is still loaded in `index.html` alongside the built Tailwind; the custom
+  theme (`han-*`, `dm-*` colors, animations, `font-korean`) exists ONLY in the CDN inline config.
+  Removing the CDN requires migrating that theme into a real `tailwind.config.js` first.
+- **Hash routing** means only the homepage is crawlable/indexable (SEO limitation; sitemap
+  contains one URL).
+- AI chat has **no conversation memory** (each message sent standalone) and the free daily chat
+  limit is **client-side localStorage** only.
+- No failed-payment banner yet (past_due users silently keep access during Stripe's retry window).
