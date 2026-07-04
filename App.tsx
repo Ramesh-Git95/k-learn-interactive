@@ -18,6 +18,7 @@ import BookmarkList from './components/BookmarkList';
 import MiniLearningPath from './components/MiniLearningPath';
 import FloatingProgress from './components/FloatingProgress';
 import Breadcrumb from './components/Breadcrumb';
+import { AppBootSkeleton } from './components/Skeleton';
 import SRSManager from './components/SRSManager';
 import SRSStudySession from './components/SRSStudySession';
 import ToastContainer from './components/ToastContainer';
@@ -551,15 +552,7 @@ const AppContent: React.FC = () => {
   }
 
   if (isLoading || progressLoading || authLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-pink-500 dark:border-pink-500 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-2xl font-korean text-pink-500 dark:text-pink-400">한글배움</p>
-          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
-        </div>
-      </div>
-    );
+    return <AppBootSkeleton />;
   }
 
   // Check if user is authenticated

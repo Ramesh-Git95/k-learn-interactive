@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useProgress } from '../contexts/ProgressContext';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
+import { QuizSkeleton } from './Skeleton';
 
 type QuizMode = 'korean_to_english' | 'english_to_korean' | 'romanization_to_korean' | 'mixed';
 
@@ -71,12 +72,7 @@ const AuthenticatedQuizSection: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="p-8 text-center">
-        <div className="w-14 h-14 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-gray-500 dark:text-gray-400">Loading…</p>
-      </div>
-    );
+    return <QuizSkeleton />;
   }
 
   if (!isAuthenticated) return <AuthenticationRequired />;
@@ -258,12 +254,7 @@ const QuizComponent: React.FC = () => {
 
   // Loading screen
   if (questions.length === 0) {
-    return (
-      <div className="p-8 text-center">
-        <div className="w-14 h-14 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-gray-500 dark:text-gray-400">Generating quiz…</p>
-      </div>
-    );
+    return <QuizSkeleton />;
   }
 
   // Completion screen

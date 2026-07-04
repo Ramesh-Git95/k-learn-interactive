@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { SRSCard, SpacedRepetitionSystem } from '../services/spacedRepetition';
 import { useSRSContext } from '../contexts/SRSContext';
 import Tooltip from './Tooltip';
+import { StudyCardSkeleton } from './Skeleton';
 
 export type ReviewResult = 'again' | 'hard' | 'good' | 'easy';
 
@@ -116,24 +117,8 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
     );
   }
 
-  if (!currentCard && !studySession.isComplete) {
-    return (
-      <CenteredCard>
-        <div className="w-12 h-12 rounded-full border-4 border-pink-200 border-t-pink-500 animate-spin mx-auto mb-4" />
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Loading Study Session…</h2>
-        <p className="text-xs text-gray-400 mb-4">Preparing your cards</p>
-        <button onClick={onExit} className="text-sm text-pink-500 hover:text-pink-600 font-semibold">Cancel</button>
-      </CenteredCard>
-    );
-  }
-
   if (!currentCard) {
-    return (
-      <CenteredCard>
-        <div className="w-12 h-12 rounded-full border-4 border-pink-200 border-t-pink-500 animate-spin mx-auto mb-4" />
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white">Loading…</h2>
-      </CenteredCard>
-    );
+    return <StudyCardSkeleton onCancel={onExit} />;
   }
 
   const handleReview = (result: ReviewResult) => {
