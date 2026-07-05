@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { translateText, getConversationResponse } from '../services/geminiService';
+import { translateText, getConversationResponse, AiError, ChatHistoryItem } from '../services/geminiService';
 import { useToastContext } from '../contexts/ToastContext';
 
 declare global {
@@ -54,7 +54,8 @@ interface ConversationBotProps {
   onClose?: () => void;
   dailyLimit?: number;
   usedToday?: number;
-  onMessageSent?: () => void;
+  /** Called after each exchange with the server-confirmed used count. */
+  onMessageSent?: (usedFromServer?: number) => void;
 }
 
 const TOPICS = [
@@ -135,21 +136,35 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
     }
   }, []);
 
+  // Recent turns sent as conversation memory (the server caps/validates again).
+  const buildHistory = (): ChatHistoryItem[] =>
+    messages.slice(-8).map(m => ({ role: m.isUser ? 'user' as const : 'model' as const, text: m.text }));
+
+  const handleAiFailure = (e: unknown) => {
+    if (e instanceof AiError && e.code === 'DAILY_LIMIT_REACHED') {
+      // Sync the parent so it switches to the daily-limit screen.
+      onMessageSent?.(e.limit ?? dailyLimit);
+      return;
+    }
+    setMessages(p => [...p, { id: (Date.now() + 1).toString(), text: '죄송합니다. 잠시 문제가 있습니다. 다시 시도해 주세요.', isUser: false, timestamp: new Date() }]);
+  };
+
   const sendVoiceMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
     if (usedToday >= dailyLimit) return;
+    const history = buildHistory();
     const userMsg: Message = { id: Date.now().toString(), text: text.trim(), isUser: true, timestamp: new Date(), isVoiceMessage: true };
     setMessages(p => [...p, userMsg]);
     setInputText('');
     setIsLoading(true);
     try {
-      const response = await getConversationResponse(text, selectedTopic, difficultyLevel);
-      const botMsg: Message = { id: (Date.now() + 1).toString(), text: response, isUser: false, timestamp: new Date() };
+      const { reply, used } = await getConversationResponse(text, selectedTopic, difficultyLevel, history);
+      const botMsg: Message = { id: (Date.now() + 1).toString(), text: reply, isUser: false, timestamp: new Date() };
       setMessages(p => [...p, botMsg]);
-      onMessageSent?.();
-      if ((voiceMode === 'output' || voiceMode === 'both') && response) setTimeout(() => speakText(response), 500);
-    } catch {
-      setMessages(p => [...p, { id: (Date.now() + 1).toString(), text: '죄송합니다. 잠시 문제가 있습니다. 다시 시도해 주세요.', isUser: false, timestamp: new Date() }]);
+      onMessageSent?.(used);
+      if ((voiceMode === 'output' || voiceMode === 'both') && reply) setTimeout(() => speakText(reply), 500);
+    } catch (e) {
+      handleAiFailure(e);
     } finally {
       setIsLoading(false);
     }
@@ -173,19 +188,20 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
   const handleSendMessage = async () => {
     if (!inputText.trim() || isLoading) return;
     if (usedToday >= dailyLimit) return;
+    const history = buildHistory();
     const text = inputText.trim();
     const userMsg: Message = { id: Date.now().toString(), text, isUser: true, timestamp: new Date() };
     setMessages(p => [...p, userMsg]);
     setInputText('');
     setIsLoading(true);
     try {
-      const response = await getConversationResponse(text, selectedTopic, difficultyLevel);
-      const botMsg: Message = { id: (Date.now() + 1).toString(), text: response, isUser: false, timestamp: new Date() };
+      const { reply, used } = await getConversationResponse(text, selectedTopic, difficultyLevel, history);
+      const botMsg: Message = { id: (Date.now() + 1).toString(), text: reply, isUser: false, timestamp: new Date() };
       setMessages(p => [...p, botMsg]);
-      onMessageSent?.();
-      if ((voiceMode === 'output' || voiceMode === 'both') && response) setTimeout(() => speakText(response), 500);
-    } catch {
-      setMessages(p => [...p, { id: (Date.now() + 1).toString(), text: '죄송합니다. 잠시 문제가 있습니다. 다시 시도해 주세요.', isUser: false, timestamp: new Date() }]);
+      onMessageSent?.(used);
+      if ((voiceMode === 'output' || voiceMode === 'both') && reply) setTimeout(() => speakText(reply), 500);
+    } catch (e) {
+      handleAiFailure(e);
     } finally {
       setIsLoading(false);
     }

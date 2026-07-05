@@ -1,24 +1,18 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import ScriptedConversation from './ScriptedConversation';
 import ConversationBot from './ConversationBot';
 import { useAuth } from '../contexts/AuthContext';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
 import { useUpgrade } from '../hooks/useUpgrade';
+import { getChatQuota } from '../services/geminiService';
 
 
-// ── Daily usage tracking (localStorage, resets at midnight) ──────────────────
+// ── Daily usage display cache (localStorage; the backend enforces the quota) ──
 const getTodayKey = () => `klearn_ai_chat_${new Date().toISOString().slice(0, 10)}`;
 
 const getUsedToday = (): number =>
   parseInt(localStorage.getItem(getTodayKey()) || '0', 10);
-
-const incrementUsage = (): number => {
-  const key = getTodayKey();
-  const next = getUsedToday() + 1;
-  localStorage.setItem(key, String(next));
-  return next;
-};
 
 type Tab = 'scenarios' | 'ai';
 
@@ -35,10 +29,28 @@ const ConversationSection: React.FC = () => {
     ? (getLimit('aiConversationsPerDay') as number)
     : 0;
 
-  const handleMessageSent = useCallback(() => {
-    setUsedToday(incrementUsage());
-    earnXP(2);
-    markStudyToday();
+  // Sync with the server's authoritative count on open (localStorage is only a
+  // cosmetic cache — the backend enforces the real quota).
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    getChatQuota().then(q => {
+      if (q) {
+        localStorage.setItem(getTodayKey(), String(q.used));
+        setUsedToday(q.used);
+      }
+    });
+  }, [isAuthenticated]);
+
+  const handleMessageSent = useCallback((usedFromServer?: number) => {
+    setUsedToday(prev => {
+      const next = typeof usedFromServer === 'number' ? usedFromServer : prev + 1;
+      localStorage.setItem(getTodayKey(), String(next));
+      if (next > prev) {
+        earnXP(2);
+        markStudyToday();
+      }
+      return next;
+    });
   }, []);
 
   const remaining = Math.max(0, dailyLimit - usedToday);

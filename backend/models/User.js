@@ -147,6 +147,14 @@ const userSchema = new mongoose.Schema({
       phrasesStudied: {
         type: Number,
         default: 0
+      },
+      aiChatsUsed: {
+        type: Number,
+        default: 0
+      },
+      aiTranslationsUsed: {
+        type: Number,
+        default: 0
       }
     },
     
@@ -382,10 +390,12 @@ userSchema.methods.trackDailyActivity = function(activityType, count = 1) {
       date: today,
       quizzesTaken: 0,
       vocabularyStudied: 0,
-      phrasesStudied: 0
+      phrasesStudied: 0,
+      aiChatsUsed: 0,
+      aiTranslationsUsed: 0
     };
   }
-  
+
   // Increment the specific activity counter
   if (activityType === 'quiz') {
     this.progress.dailyActivity.quizzesTaken += count;
@@ -394,6 +404,10 @@ userSchema.methods.trackDailyActivity = function(activityType, count = 1) {
     this.progress.dailyActivity.vocabularyStudied += count;
   } else if (activityType === 'phrases') {
     this.progress.dailyActivity.phrasesStudied += count;
+  } else if (activityType === 'aiChat') {
+    this.progress.dailyActivity.aiChatsUsed += count;
+  } else if (activityType === 'aiTranslate') {
+    this.progress.dailyActivity.aiTranslationsUsed += count;
   }
   
   return this.progress.dailyActivity;
@@ -418,14 +432,18 @@ userSchema.methods.getDailyActivity = function() {
     return {
       quizzesTaken: 0,
       vocabularyStudied: 0,
-      phrasesStudied: 0
+      phrasesStudied: 0,
+      aiChatsUsed: 0,
+      aiTranslationsUsed: 0
     };
   }
-  
+
   const result = {
     quizzesTaken: this.progress.dailyActivity.quizzesTaken || 0,
     vocabularyStudied: this.progress.dailyActivity.vocabularyStudied || 0,
-    phrasesStudied: this.progress.dailyActivity.phrasesStudied || 0
+    phrasesStudied: this.progress.dailyActivity.phrasesStudied || 0,
+    aiChatsUsed: this.progress.dailyActivity.aiChatsUsed || 0,
+    aiTranslationsUsed: this.progress.dailyActivity.aiTranslationsUsed || 0
   };
   
   console.log('📊 Returning same day activity:', result);
