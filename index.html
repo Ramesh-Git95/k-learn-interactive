@@ -465,6 +465,22 @@
   }
   .dark :focus-visible { outline-color: #A78BFA; }
 
+  /* ── Upgrade redirect overlay card (injected by useUpgrade, theme-aware) ── */
+  .kl-overlay-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    font-family: Inter, system-ui, sans-serif;
+  }
+  .dark .kl-overlay-card { background: #1f2937; }
+  .kl-overlay-text { font-weight: 800; color: #111827; font-size: 14px; }
+  .dark .kl-overlay-text { color: #f9fafb; }
+
   /* ── Skeleton loading shimmer (#21) ─────────────────────────────────── */
   .skeleton {
     background: linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.11) 50%, rgba(0,0,0,0.06) 75%);

@@ -63,8 +63,8 @@ function WordPopover({ word, anchorRef, onClose, onAddSRS, isAuthenticated, isPr
     >
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-3">
         {/* Arrow */}
-        <div className="absolute left-1/2 bottom-[-7px]" style={{ transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderTop: '7px solid #e5e7eb' }} />
-        <div className="absolute left-1/2 bottom-[-6px]" style={{ transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '6px solid white' }} />
+        <div className="absolute left-1/2 bottom-[-7px] -translate-x-1/2 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[7px] border-t-gray-200 dark:border-t-gray-800" />
+        <div className="absolute left-1/2 bottom-[-6px] -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white dark:border-t-gray-900" />
 
         <div className="flex items-start justify-between mb-2">
           <div>
