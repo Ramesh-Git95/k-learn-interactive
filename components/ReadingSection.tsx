@@ -127,6 +127,7 @@ const DefPanel: React.FC<DefPanelProps> = ({ word, token, isPremium, onSRS, onCl
           )}
           <button
             onClick={onClose}
+            aria-label="Close definition"
             className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,7 +332,7 @@ const ReadingSection: React.FC = () => {
       {/* Hero */}
       <div className="relative rounded-3xl overflow-hidden mb-6 p-5 sm:p-6"
         style={{ background: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)' }}>
-        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['읽기', '독해', '이해', '단어', '문장', '한국어'].map((w, i) => (
             <span key={i} className="absolute text-white/5 font-black"
               style={{ fontSize: `${1.2 + (i % 3) * 0.5}rem`, top: `${(i * 37) % 88}%`, left: `${(i * 43) % 82}%` }}>{w}</span>

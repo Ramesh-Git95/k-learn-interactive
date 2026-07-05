@@ -328,7 +328,7 @@ const TopikAssessment: React.FC = () => {
         {/* Hero */}
         <div className="relative rounded-3xl overflow-hidden mb-6 p-6 sm:p-8 text-center"
           style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)' }}>
-          <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+          <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
             {['읽기', '어휘', '문법', '쓰기', '듣기', 'TOPIK'].map((w, i) => (
               <span key={i} className="absolute text-white/5 font-black"
                 style={{ fontSize: `${1.4 + (i % 3) * 0.4}rem`, top: `${(i * 37) % 90}%`, left: `${(i * 43) % 85}%` }}>{w}</span>
@@ -589,7 +589,7 @@ const TopikAssessment: React.FC = () => {
           <div id="topik-cert"
             className="rounded-3xl overflow-hidden mb-4 p-6 sm:p-8 text-center relative"
             style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)', border: `3px solid ${levelInfo.color}` }}>
-            <div className="absolute inset-0 overflow-hidden pointer-events-none select-none opacity-10">
+            <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none opacity-10">
               {['한국어', '한', '국', '어', '🇰🇷', '인증'].map((w, i) => (
                 <span key={i} className="absolute font-black text-white"
                   style={{ fontSize: `${2 + (i % 3)}rem`, top: `${(i * 41) % 85}%`, left: `${(i * 53) % 80}%` }}>{w}</span>

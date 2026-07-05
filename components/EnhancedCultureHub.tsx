@@ -56,7 +56,7 @@ const EnhancedCultureHub: React.FC<EnhancedCultureHubProps> = ({ progress, toggl
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
         style={{ background: 'linear-gradient(135deg, #F59E0B 0%, #EC4899 40%, #8B5CF6 80%, #06B6D4 100%)' }}
       >
-        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['🇰🇷','한복','태권도','김치','K-pop'].map((w, i) => (
             <span key={i} className="absolute text-white/10 font-black" style={{ fontSize: `${1.5 + (i % 3) * 0.5}rem`, top: `${(i * 33) % 85}%`, left: `${(i * 47) % 80}%` }}>{w}</span>
           ))}

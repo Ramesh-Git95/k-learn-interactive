@@ -87,7 +87,7 @@ const UserProfile: React.FC = () => {
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
         style={{ background: 'var(--brand-gradient-hero)' }}
       >
-        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['프로필','학습','진행','한국어'].map((w, i) => (
             <span key={i} className="absolute text-white/10 font-black" style={{ fontSize: `${1.2 + (i % 2) * 0.5}rem`, top: `${(i * 37) % 85}%`, left: `${(i * 43) % 80}%` }}>{w}</span>
           ))}

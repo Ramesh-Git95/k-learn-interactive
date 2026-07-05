@@ -95,7 +95,7 @@ const KDramaSection: React.FC = () => {
 
         {/* Blurred teaser + lock overlay */}
         <div className="relative mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pointer-events-none select-none blur-sm opacity-60">
+          <div aria-hidden="true" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pointer-events-none select-none blur-sm opacity-60">
             {dramas.slice(0, 3).map(drama => (
               <div
                 key={drama.id}

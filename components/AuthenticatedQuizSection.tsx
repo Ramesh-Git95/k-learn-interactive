@@ -341,7 +341,7 @@ const QuizComponent: React.FC = () => {
         className="relative rounded-3xl overflow-hidden mb-6 p-5 sm:p-6"
         style={{ background: 'var(--brand-gradient-hero)' }}
       >
-        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['퀴즈','한국어','점수','연습'].map((w, i) => (
             <span key={i} className="absolute text-white/10 font-black" style={{ fontSize: `${1.2 + (i % 2) * 0.5}rem`, top: `${(i * 37) % 85}%`, left: `${(i * 43) % 80}%` }}>{w}</span>
           ))}
@@ -480,6 +480,8 @@ const QuizComponent: React.FC = () => {
                 className={`w-full p-3.5 rounded-xl text-sm font-bold transition-all duration-200 disabled:cursor-not-allowed ${bg} ${border} ${scale} ${optionsAreKorean ? 'text-base' : ''}`}
               >
                 {option}
+                {answered && isAnswerCorrect && <span className="ml-2 font-black">✓</span>}
+                {answered && isSelected && !isAnswerCorrect && <span className="ml-2 font-black">✗</span>}
               </button>
             );
           })}

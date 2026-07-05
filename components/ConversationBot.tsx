@@ -335,6 +335,7 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
                   <button
                     onClick={() => speakText(msg.text)}
                     disabled={isSpeaking}
+                    aria-label="Read message aloud"
                     className="text-[10px] text-violet-500 hover:underline disabled:opacity-40"
                   >
                     🔊

@@ -82,7 +82,7 @@ const HangulSection: React.FC<HangulSectionProps> = ({ progress = {}, toggleProg
       {/* Hero Header */}
       <div className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8" style={{ background: 'var(--brand-gradient-hero)' }}>
         {/* decorative floaters */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['ㄱ','ㄴ','ㄷ','아','이','오','가','나','한'].map((c, i) => (
             <span
               key={i}

@@ -378,7 +378,7 @@ const ScriptedConversation: React.FC = () => {
       <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
         <div className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
           style={{ background: 'var(--brand-gradient-hero-rev)' }}>
-          <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+          <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
             {['안녕','대화','연습','한국어','카페'].map((w, i) => (
               <span key={i} className="absolute text-white/10 font-black"
                 style={{ fontSize: `${1.2 + (i % 2) * 0.6}rem`, top: `${(i * 37) % 85}%`, left: `${(i * 43) % 80}%` }}>{w}</span>

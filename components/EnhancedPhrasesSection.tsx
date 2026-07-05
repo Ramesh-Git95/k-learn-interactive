@@ -75,7 +75,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
         style={{ background: 'var(--brand-gradient-hero)' }}
       >
-        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['안녕','감사합니다','실례합니다','괜찮아요'].map((w, i) => (
             <span key={i} className="absolute font-black text-white/10" style={{ fontSize: `${1.2 + (i % 2) * 0.6}rem`, top: `${(i * 37) % 85}%`, left: `${(i * 43) % 80}%` }}>{w}</span>
           ))}

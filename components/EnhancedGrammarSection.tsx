@@ -107,7 +107,7 @@ const EnhancedGrammarSection: React.FC<EnhancedGrammarSectionProps> = ({ progres
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
         style={{ background: 'var(--brand-gradient-hero-rev)' }}
       >
-        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['은/는','이/가','을/를','에서','으로','하다'].map((w, i) => (
             <span key={i} className="absolute font-black text-white/10" style={{ fontSize: `${1.2 + (i % 3)}rem`, top: `${(i * 29) % 90}%`, left: `${(i * 43) % 85}%` }}>{w}</span>
           ))}

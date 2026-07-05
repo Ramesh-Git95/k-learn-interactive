@@ -85,7 +85,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <h2 className="text-base font-black text-gray-900 dark:text-white">Add to SRS</h2>
-          <button onClick={onClose} className="w-7 h-7 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-400 transition-colors">
+          <button onClick={onClose} aria-label="Close" className="w-7 h-7 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-400 transition-colors">
             <Icon icon="close" className="w-4 h-4" />
           </button>
         </div>

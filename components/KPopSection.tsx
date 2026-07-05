@@ -72,8 +72,8 @@ function WordPopover({ word, anchorRef, onClose, onAddSRS, isAuthenticated, isPr
             <div className="text-xs text-gray-400 dark:text-gray-500 italic">{word.romanization}</div>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={speak} className="p-1 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors text-base">🔊</button>
-            <button onClick={onClose} className="p-1 rounded-lg text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 transition-colors text-sm font-black">✕</button>
+            <button onClick={speak} aria-label={`Pronounce ${word.korean}`} className="p-1 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors text-base">🔊</button>
+            <button onClick={onClose} aria-label="Close" className="p-1 rounded-lg text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 transition-colors text-sm font-black">✕</button>
           </div>
         </div>
 
@@ -417,7 +417,7 @@ const KPopSection: React.FC = () => {
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
         style={{ background: 'linear-gradient(135deg, #6D28D9 0%, #BE185D 60%, #059669 100%)' }}
       >
-        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['BTS','BLACKPINK','NewJeans','aespa','K-POP','한국어'].map((w, i) => (
             <span key={i} className="absolute font-black text-white/10" style={{ fontSize: `${1.2 + (i % 3) * 0.5}rem`, top: `${(i * 29) % 85}%`, left: `${(i * 43) % 85}%` }}>{w}</span>
           ))}

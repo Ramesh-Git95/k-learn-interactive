@@ -389,7 +389,7 @@ const TopikPrepSection: React.FC = () => {
       {/* Hero */}
       <div className="relative rounded-3xl overflow-hidden mb-6 p-5 sm:p-6"
         style={{ background: 'var(--brand-gradient-hero-rev)' }}>
-        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['읽기','어휘','문법','TOPIK','시험'].map((w, i) => (
             <span key={i} className="absolute text-white/10 font-black"
               style={{ fontSize: `${1.1 + (i % 2) * 0.5}rem`, top: `${(i * 37) % 85}%`, left: `${(i * 43) % 80}%` }}>{w}</span>

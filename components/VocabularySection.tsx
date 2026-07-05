@@ -101,7 +101,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
         style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 60%, #F59E0B 100%)' }}
       >
-        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['안녕','사랑','감사','행복','韓','가나다'].map((w, i) => (
             <span key={i} className="absolute font-black text-white/10" style={{ fontSize: `${1.5 + (i % 3)}rem`, top: `${(i * 31) % 90}%`, left: `${(i * 41) % 88}%` }}>{w}</span>
           ))}
