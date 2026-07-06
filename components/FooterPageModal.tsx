@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { X } from 'lucide-react';
 
 export type FooterPage = 'help' | 'study-guide' | 'community' | 'about' | 'privacy' | 'terms';
 
@@ -446,9 +447,11 @@ const FooterPageModal: React.FC<Props> = ({ page, onClose }) => {
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white text-sm transition-colors"
-            aria-label="Close"
-          >✕</button>
+            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors"
+            aria-label="Close modal"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Content */}

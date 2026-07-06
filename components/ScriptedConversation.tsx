@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Volume2 } from 'lucide-react';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { LockedCard } from './PremiumLock';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
@@ -564,8 +565,9 @@ const ScriptedConversation: React.FC = () => {
                   </>}
                 </div>
                 <button onClick={() => speak(currentLine.korean)}
+                  aria-label="Pronounce Korean text"
                   className="flex-shrink-0 w-7 h-7 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-400 transition-colors">
-                  🔊
+                  <Volume2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>

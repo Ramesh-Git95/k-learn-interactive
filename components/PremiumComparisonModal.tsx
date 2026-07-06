@@ -1,4 +1,5 @@
 import React from 'react';
+import { X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUpgrade } from '../hooks/useUpgrade';
 
@@ -45,9 +46,11 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
         >
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white text-sm transition-colors"
-            aria-label="Close"
-          >✕</button>
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors"
+            aria-label="Close modal"
+          >
+            <X className="w-5 h-5" />
+          </button>
 
           <div className="text-4xl mb-2">⭐</div>
           <h2 className="text-2xl font-black text-white tracking-tight">K-Learn Premium</h2>
