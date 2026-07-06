@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Lock, X } from 'lucide-react';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { useAuth } from '../contexts/AuthContext';
 import { useUpgrade } from '../hooks/useUpgrade';
@@ -128,7 +129,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
           title={isAuthenticated ? 'Premium feature — upgrade to practice pronunciation' : 'Sign up free to unlock pronunciation practice'}
           className={`flex items-center gap-1.5 rounded-xl font-semibold transition-all duration-200 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:text-pink-400 ${isSm ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm'}`}
         >
-          <span>🔒</span>
+          <Lock className={isSm ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
           <span>Pronounce</span>
         </button>
       </div>
@@ -190,9 +191,10 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
               <span>Try pronouncing!</span>
               <button
                 onClick={e => { e.stopPropagation(); dismissHint(); }}
-                className="ml-1 opacity-70 hover:opacity-100 font-black leading-none"
+                aria-label="Dismiss hint"
+                className="ml-1 opacity-70 hover:opacity-100 transition-opacity"
               >
-                ✕
+                <X className="w-3.5 h-3.5" />
               </button>
               {/* Arrow pointing down */}
               <span

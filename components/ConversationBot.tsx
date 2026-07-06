@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Volume2, X } from 'lucide-react';
 import { translateText, getConversationResponse, AiError, ChatHistoryItem } from '../services/geminiService';
 import { useToastContext } from '../contexts/ToastContext';
 
@@ -256,9 +257,10 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
           {onClose && (
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-sm font-black"
+              aria-label="Close chat"
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
             >
-              ✕
+              <X className="w-5 h-5 text-white" />
             </button>
           )}
         </div>
@@ -352,9 +354,9 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
                     onClick={() => speakText(msg.text)}
                     disabled={isSpeaking}
                     aria-label="Read message aloud"
-                    className="text-[10px] text-violet-500 hover:underline disabled:opacity-40"
+                    className="p-1 text-violet-500 hover:text-violet-600 dark:hover:text-violet-400 disabled:opacity-40 transition-colors"
                   >
-                    🔊
+                    <Volume2 className="w-3.5 h-3.5" />
                   </button>
                 )}
                 {msg.translation ? (
