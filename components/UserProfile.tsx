@@ -120,6 +120,28 @@ const UserProfile: React.FC = () => {
         </div>
       </div>
 
+      {/* Payment failed banner */}
+      {subscriptionStatus === 'past_due' && (
+        <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="text-2xl flex-shrink-0">⚠️</div>
+            <div className="flex-1">
+              <h3 className="text-sm font-black text-red-900 dark:text-red-200 mb-1">Payment Method Failed</h3>
+              <p className="text-xs text-red-700 dark:text-red-300 mb-3">
+                Your payment couldn't be processed. Please update your payment method to keep your Premium access.
+              </p>
+              <button
+                onClick={() => openBillingPortal('manage')}
+                disabled={stripeLoading}
+                className="px-4 py-2 text-xs font-black rounded-xl bg-red-600 dark:bg-red-700 text-white hover:bg-red-700 dark:hover:bg-red-600 transition-colors disabled:opacity-50"
+              >
+                {stripeLoading ? 'Opening…' : '💳 Update Payment Method'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid md:grid-cols-2 gap-6 mb-6">
         {/* Account info */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5">

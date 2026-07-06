@@ -241,7 +241,9 @@ async function syncUserFromSubscription(sub) {
   console.log(`🔍 [STRIPE sync] ${sub.id} status=${sub.status} cancel_at_period_end=${sub.cancel_at_period_end} cancel_at=${sub.cancel_at}`);
 
   user.subscription.type = 'premium';
-  user.subscription.status = 'active';
+  // Record past_due honestly so the app can show a "fix your card" banner;
+  // hasPremiumAccess() still grants access during Stripe's retry grace window.
+  user.subscription.status = (sub.status === 'past_due' || sub.status === 'trialing') ? sub.status : 'active';
   user.subscription.cancelAtPeriodEnd = willCancel;
   if (rawEnd) user.subscription.currentPeriodEnd = new Date(rawEnd * 1000);
   await user.save();
