@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { vocabulary, commonPhrases, grammarPatterns, hangulCharacters } from '../data/koreanData';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -170,7 +171,9 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
             <h2 className="text-base font-black text-gray-900 dark:text-white">Add Cards</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400">to "{deckName}"</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-400 text-lg transition-colors">✕</button>
+          <button onClick={onClose} aria-label="Close card picker" className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-400 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* ── Tabs ── */}

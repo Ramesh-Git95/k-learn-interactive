@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { X } from 'lucide-react';
 import { SRSCard, SpacedRepetitionSystem } from '../services/spacedRepetition';
 import { useSRSContext } from '../contexts/SRSContext';
 import Tooltip from './Tooltip';
@@ -179,7 +180,9 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
       <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 py-3 shadow-sm">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={onExit} className="w-9 h-9 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 text-lg transition-colors" aria-label="Exit">✕</button>
+            <button onClick={onExit} className="w-9 h-9 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 transition-colors" aria-label="Exit study session">
+              <X className="w-5 h-5" />
+            </button>
             <div>
               <h1 className="text-base font-bold text-gray-900 dark:text-white leading-tight">{deck.name}</h1>
               <p className="text-xs text-gray-500 dark:text-gray-400">Card {studySession.currentCardIndex + 1} of {studySession.cards.length}</p>

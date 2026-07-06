@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { X } from 'lucide-react';
 import type { Bookmark } from '../types';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
 
@@ -122,7 +123,9 @@ export default function BookmarkFlashcards({ bookmarks, onClose }: BookmarkFlash
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <span className="text-white/70 text-sm font-semibold">{idx + 1} / {cards.length}</span>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-sm transition-colors">✕</button>
+          <button onClick={onClose} aria-label="Close flashcards" className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Progress bar */}
