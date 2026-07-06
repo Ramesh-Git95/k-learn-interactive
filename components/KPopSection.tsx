@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Volume2, X, Lock } from 'lucide-react';
 import { kpopArtists } from '../data/kpopData';
 import type { KPopArtist, KPopSong, KPopWord } from '../data/kpopData';
 import { useAuth } from '../contexts/AuthContext';
@@ -72,8 +73,12 @@ function WordPopover({ word, anchorRef, onClose, onAddSRS, isAuthenticated, isPr
             <div className="text-xs text-gray-400 dark:text-gray-500 italic">{word.romanization}</div>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={speak} aria-label={`Pronounce ${word.korean}`} className="p-1 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors text-base">🔊</button>
-            <button onClick={onClose} aria-label="Close" className="p-1 rounded-lg text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 transition-colors text-sm font-black">✕</button>
+            <button onClick={speak} aria-label={`Pronounce ${word.korean}`} className="p-1 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+              <Volume2 className="w-4 h-4" />
+            </button>
+            <button onClick={onClose} aria-label="Close popover" className="p-1 rounded-lg text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 transition-colors">
+              <X className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
@@ -93,8 +98,9 @@ function WordPopover({ word, anchorRef, onClose, onAddSRS, isAuthenticated, isPr
             </button>
           ) : isAuthenticated ? (
             <button onClick={startUpgrade}
-              className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 transition-colors">
-              🔒 Premium
+              className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 transition-colors flex items-center gap-1">
+              <Lock className="w-3 h-3" />
+              Premium
             </button>
           ) : (
             <button onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' })); }}

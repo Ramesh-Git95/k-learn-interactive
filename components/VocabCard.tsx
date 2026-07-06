@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { X, Volume2 } from 'lucide-react';
 import type { VocabItem, Bookmark } from '../types';
 import AddToSRS from './AddToSRS';
 import PronunciationButton from './PronunciationButton';
@@ -214,7 +215,9 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
                   {item.korean}
                 </span>
               </h3>
-              <button onClick={() => setShowExamples(false)} className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-400 text-lg transition-colors">✕</button>
+              <button onClick={() => setShowExamples(false)} aria-label="Close examples" className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-400 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
             <div className="space-y-3">
@@ -222,7 +225,9 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
                 <div key={i} className="p-4 rounded-xl bg-pink-50 dark:bg-pink-900/10 border-l-4 border-l-pink-400">
                   <div className="flex items-start justify-between gap-2">
                     <p className="font-bold text-gray-900 dark:text-white flex-1 text-base">{ex.korean}</p>
-                    <button onClick={e => speakExample(ex.korean, e)} className="flex-shrink-0 w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-400 transition-colors">🔊</button>
+                    <button onClick={e => speakExample(ex.korean, e)} aria-label="Pronounce example" className="flex-shrink-0 w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-400 transition-colors">
+                      <Volume2 className="w-4 h-4" />
+                    </button>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{ex.english}</p>
                   {ex.romanization && <p className="text-xs text-gray-400 dark:text-gray-500 italic mt-1">🗣️ {ex.romanization}</p>}
