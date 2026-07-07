@@ -15,9 +15,11 @@ React SPA (hash-routed sections) + Express/MongoDB backend + Stripe subscription
 
 ## Stack
 
-- **Frontend:** React 19 + TypeScript, Vite, TailwindCSS (v3 build via `src/index.css`
-  **plus** the Play CDN in `index.html` — see Deferred items), React Context state, hash-based
-  section routing in `App.tsx` (no react-router pages).
+- **Frontend:** React 19 + TypeScript, Vite, TailwindCSS **v4** compiled at build time
+  via the `@tailwindcss/vite` plugin (config is CSS-first in `src/index.css` — `@import
+  "tailwindcss"`, `@custom-variant dark`, `@theme` for fonts/animations; no
+  `tailwind.config.js`). React Context state, hash-based section routing in `App.tsx`
+  (no react-router pages).
 - **Backend:** Express (CommonJS) + Mongoose/MongoDB Atlas, JWT auth (`middleware/auth.js`).
 - **Payments:** Stripe subscriptions (live). **$4/month "Premium", cancel anytime.**
 - **AI:** Google Gemini (`gemini-2.5-flash`) proxied through the backend (`backend/routes/ai.js`) —
@@ -106,11 +108,19 @@ recurring price), `STRIPE_WEBHOOK_SECRET`, `GEMINI_API_KEY`, `RESEND_API_KEY`, `
   No "lifetime", "one-time" or "Gumroad" anywhere.
 - Frontend typecheck must stay at **0 errors**: `npx tsc --noEmit -p tsconfig.json`.
 
+## Tailwind v4 notes (migrated off the Play CDN)
+
+- Config is **CSS-first** in `src/index.css`; there is no `tailwind.config.js`/`postcss.config.js`.
+  Dark mode = `@custom-variant dark (&:where(.dark, .dark *))` (NOT a JS `darkMode:'class'`).
+  Custom fonts/animations live in `@theme`; a base layer restores the v3 default border color.
+- **v4 breaking changes to watch when editing classes:** opacity utilities `bg-opacity-*` /
+  `ring-opacity-*` were removed — use slash syntax (`bg-black/50`). Default `border` color is now
+  `currentColor` (we pin it back to gray-200 in a base layer). `outline-none` changed meaning.
+- Avoid `*/` sequences inside CSS comments in `index.css` (e.g. writing `han-*/dm-*`) — it closes
+  the comment early and silently corrupts the following `@theme` block.
+
 ## Deferred / known limitations
 
-- **Tailwind Play CDN** is still loaded in `index.html` alongside the built Tailwind; the custom
-  theme (`han-*`, `dm-*` colors, animations, `font-korean`) exists ONLY in the CDN inline config.
-  Removing the CDN requires migrating that theme into a real `tailwind.config.js` first.
 - **Hash routing** means only the homepage is crawlable/indexable (SEO limitation; sitemap
   contains one URL).
 - AI chat has **no conversation memory** (each message sent standalone) and the free daily chat
