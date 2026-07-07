@@ -5,6 +5,19 @@
    Applies dark: utilities when .dark is on <html> or any ancestor. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Tailwind v4 changed the default border/divide color from gray-200 to
+   currentColor. Restore the v3 default so bare `border` utilities (e.g. the
+   search modal's kbd keys) stay subtle instead of inheriting the text color. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
 /* Theme tokens ported from the old CDN inline config so the Inter font stack,
    font-korean utility, and custom animations keep working. The han/dm/hc color
    tokens from the old config were unused in the codebase and dropped. */
@@ -70,6 +83,13 @@ body {
 
 .dark :focus-visible {
   outline-color: #A78BFA;
+}
+
+/* The spotlight search input auto-focuses when the modal opens; the modal is
+   the focus context, so suppress the global offset outline just on that input
+   (it looked like a heavy violet box around the field). */
+.spotlight-modal-content input:focus-visible {
+  outline: none;
 }
 
 .sr-only {
