@@ -43,6 +43,17 @@
     <meta name="display" content="standalone">
     <link rel="manifest" href="/manifest.json">
 
+    <!-- Prevent flash of wrong theme on page load -->
+    <script>
+      try {
+        const theme = JSON.parse(localStorage.getItem('k-learn-theme') || '"light"');
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        document.body.style.backgroundColor = theme === 'dark' ? '#1a202c' : '#ffffff';
+      } catch (e) {
+        document.body.style.backgroundColor = '#ffffff';
+      }
+    </script>
+
     <!-- Schema.org structured data -->
     <script type="application/ld+json">
     {

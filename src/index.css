@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  --dark-mode: class;
   --color-han-blue: #3D5A80;
   --color-han-sky: #98C1D9;
   --color-han-light: #E0FBFC;
