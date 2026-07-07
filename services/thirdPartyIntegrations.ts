@@ -18,6 +18,13 @@ export const GoogleAnalytics = {
       return;
     }
 
+    // Skip until a real measurement ID is configured (avoids injecting a
+    // broken gtag script with the placeholder value).
+    if (GoogleAnalytics.measurementId === 'GA_MEASUREMENT_ID') {
+      console.log('📊 Google Analytics not configured (placeholder ID) — skipping');
+      return;
+    }
+
     // Load Google Analytics script
     const script = document.createElement('script');
     script.async = true;
@@ -88,6 +95,13 @@ export const FacebookPixel = {
       return;
     }
 
+    // Skip until a real pixel ID is configured (avoids injecting a broken
+    // fbq script with the placeholder value).
+    if (FacebookPixel.pixelId === 'YOUR_PIXEL_ID') {
+      console.log('📢 Facebook Pixel not configured (placeholder ID) — skipping');
+      return;
+    }
+
     // Load Facebook Pixel script
     const fbScript = `
       !function(f,b,e,v,n,t,s)
@@ -137,6 +151,13 @@ export const Hotjar = {
     
     if (!cookieSettings?.analytics) {
       console.log('📊 Hotjar disabled by user preference');
+      return;
+    }
+
+    // Skip until a real site ID is configured. The placeholder was injected
+    // unquoted (hjid:YOUR_HOTJAR_ID) and threw a ReferenceError at runtime.
+    if (Hotjar.siteId === 'YOUR_HOTJAR_ID') {
+      console.log('📊 Hotjar not configured (placeholder ID) — skipping');
       return;
     }
 
