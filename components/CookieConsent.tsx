@@ -141,7 +141,7 @@ const CookieConsent: React.FC<CookieConsentProps> = ({ onAccept, onDecline }) =>
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black bg-opacity-25 z-40 pointer-events-none" />
+      <div className="fixed inset-0 bg-black bg-opacity-5 z-40 pointer-events-none" />
       
       {/* Cookie Banner */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-2xl">
