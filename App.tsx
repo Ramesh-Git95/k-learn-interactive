@@ -29,6 +29,7 @@ import EmailVerificationBanner from './components/EmailVerificationBanner';
 import OnboardingWizard from './components/OnboardingWizard';
 import Footer from './components/Footer';
 import CookieConsent from './components/CookieConsent';
+import GuestFreeBanner from './components/GuestFreeBanner';
 import useLocalStorage from './hooks/useLocalStorage';
 import { SRSProvider, useSRSContext } from './contexts/SRSContext';
 import { LS_THEME_KEY, FREE_PHRASES_COUNT } from './constants';
@@ -537,12 +538,13 @@ const AppContent: React.FC = () => {
     if (activeSection === null || !publicSections.includes(activeSection)) {
       return (
         <div className={`${theme === 'dark' ? 'dark' : ''}`}>
-          <Header 
+          <Header
             activeSection={activeSection}
             setActiveSection={handleSetActiveSection}
             theme={theme}
             toggleTheme={toggleTheme}
           />
+          <GuestFreeBanner onNavigate={handleSetActiveSection} />
           <LandingPage onGetStarted={handleGetStarted} />
           <Footer />
           <CookieConsent />

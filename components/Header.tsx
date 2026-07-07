@@ -47,8 +47,18 @@ const megaMenuGroups = [
 
 const isKoreanChar = (s: string) => s.length <= 2 && /[㄰-㆏가-힣]/.test(s);
 
-interface NavItemProps { id: Section; title: string; icon: string; isActive: boolean; onClick: () => void; }
-const NavItem: React.FC<NavItemProps> = ({ title, icon, isActive, onClick }) => (
+// Sections a logged-out guest can open without an account. Used to badge the
+// nav items with a small "Free" pill so guests see what's explorable.
+const GUEST_FREE_SECTIONS: Section[] = ['vocabulary', 'grammar', 'culture'];
+
+const FreePill = () => (
+  <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-emerald-500 text-white leading-none">
+    Free
+  </span>
+);
+
+interface NavItemProps { id: Section; title: string; icon: string; isActive: boolean; onClick: () => void; showFree?: boolean; }
+const NavItem: React.FC<NavItemProps> = ({ title, icon, isActive, onClick, showFree }) => (
   <button
     onClick={onClick}
     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
@@ -71,6 +81,7 @@ const NavItem: React.FC<NavItemProps> = ({ title, icon, isActive, onClick }) => 
       {icon}
     </span>
     <span>{title}</span>
+    {showFree && <FreePill />}
   </button>
 );
 
@@ -240,7 +251,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
             {/* ── Desktop Nav ───────────────────────────────── */}
             <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
               {primarySections.map(s => (
-                <NavItem key={s.id} id={s.id} title={s.title} icon={s.icon} isActive={activeSection === s.id} onClick={() => handleNav(s.id)} />
+                <NavItem key={s.id} id={s.id} title={s.title} icon={s.icon} isActive={activeSection === s.id} onClick={() => handleNav(s.id)} showFree={!isAuthenticated && GUEST_FREE_SECTIONS.includes(s.id)} />
               ))}
 
               {/* Mega menu */}
@@ -281,6 +292,9 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                             >
                               <span className="text-base w-5 text-center">{item.icon}</span>
                               <span className="flex-1">{item.title}</span>
+                              {!isAuthenticated && GUEST_FREE_SECTIONS.includes(item.id as Section) && (
+                                <FreePill />
+                              )}
                               {item._isNew && (
                                 <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full text-white leading-none" style={{ background: 'var(--brand-gradient)' }}>
                                   NEW
@@ -491,6 +505,9 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                 >
                   <span className="text-lg">{icon}</span>
                   <span>{title}</span>
+                  {!isAuthenticated && GUEST_FREE_SECTIONS.includes(id) && activeSection !== id && (
+                    <span className="ml-auto"><FreePill /></span>
+                  )}
                   {activeSection === id && <span className="ml-auto w-2 h-2 rounded-full bg-white/70" />}
                 </button>
               ))}
@@ -514,6 +531,9 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                     >
                       <span className="text-lg">{item.icon}</span>
                       <span className="flex-1">{item.title}</span>
+                      {!isAuthenticated && GUEST_FREE_SECTIONS.includes(item.id as Section) && activeSection !== item.id && (
+                        <FreePill />
+                      )}
                       {item._isNew && activeSection !== item.id && (
                         <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full text-white leading-none" style={{ background: 'var(--brand-gradient)' }}>
                           NEW
