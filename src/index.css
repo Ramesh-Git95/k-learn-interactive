@@ -1,23 +1,3 @@
-@import "tailwindcss";
-
-@theme {
-  --dark-mode: class;
-  --color-han-blue: #3D5A80;
-  --color-han-sky: #98C1D9;
-  --color-han-light: #E0FBFC;
-  --color-han-red: #EE6C4D;
-  --color-han-dark: #293241;
-  --color-dm-bg: #1a202c;
-  --color-dm-surface: #2d3748;
-  --color-dm-text-primary: #edf2f7;
-  --color-dm-text-secondary: #a0aec0;
-  --color-dm-accent: #98c1d9;
-  --color-dm-border: #4a5568;
-  --color-hc-bg: #000000;
-  --color-hc-surface: #ffffff;
-  --color-hc-text: #ffffff;
-  --color-hc-accent: #ffff00;
-}
 
 /* ── Base typography and font loading ───────────────────────────────────── */
 html {
