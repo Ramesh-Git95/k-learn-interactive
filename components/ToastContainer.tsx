@@ -67,7 +67,7 @@ function ToastItem({ toast, onHide }: ToastItemProps) {
       </div>
       <button
         onClick={onHide}
-        className="ml-3 p-1 hover:bg-white hover:bg-opacity-20 rounded transition-colors"
+        className="ml-3 p-1 hover:bg-white/20 rounded transition-colors"
         aria-label="Close notification"
       >
         <Icon icon="close" className="w-4 h-4" />

@@ -90,8 +90,8 @@ const RegionalExplorer: React.FC<RegionalExplorerProps> = ({ progress, togglePro
                     onClick={() => setSelectedRegion(region)}
                     className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-7 h-7 sm:w-9 sm:h-9 rounded-full border-4 border-white shadow-2xl transition-all duration-300 hover:scale-125 hover:shadow-2xl group z-10 ${
                       isRegionExplored(region.id)
-                        ? 'bg-green-500 hover:bg-green-600 ring-4 ring-green-300 ring-opacity-60'
-                        : 'hover:bg-opacity-90 hover:ring-4 hover:ring-white hover:ring-opacity-60'
+                        ? 'bg-green-500 hover:bg-green-600 ring-4 ring-green-300/60'
+                        : 'hover:ring-4 hover:ring-white/60'
                     }`}
                     style={{
                       left: `${region.coordinates.x}%`,

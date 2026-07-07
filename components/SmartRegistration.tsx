@@ -80,7 +80,7 @@ export const ProgressPrompt: React.FC<ProgressPromptProps> = ({ trigger, onDismi
   const content = getPromptContent();
 
   return (
-    <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/50">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 m-4 max-w-md w-full animate-slideUp">
         <div className="text-center">
           <div className="text-4xl mb-4">{content.icon}</div>

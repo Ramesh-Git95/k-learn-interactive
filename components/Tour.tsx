@@ -316,7 +316,7 @@ const Tour: React.FC<TourProps> = ({ steps, isOpen, onComplete, onSkip, tourId }
       {/* Overlay */}
       <div 
         ref={overlayRef}
-        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="absolute inset-0 bg-black/50 transition-opacity"
         onClick={skipTour}
       />
       

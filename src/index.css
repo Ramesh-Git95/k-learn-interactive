@@ -1,4 +1,44 @@
 
+@import "tailwindcss";
+
+/* Class-based dark mode — Tailwind v4 syntax (replaces darkMode:'class').
+   Applies dark: utilities when .dark is on <html> or any ancestor. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Theme tokens ported from the old CDN inline config so the Inter font stack,
+   font-korean utility, and custom animations keep working. The han/dm/hc color
+   tokens from the old config were unused in the codebase and dropped. */
+@theme {
+  /* Fonts */
+  --font-sans: 'Inter', 'Noto Sans KR', sans-serif;
+  --font-korean: 'Noto Sans KR', sans-serif;
+
+  /* Custom animations (utility: animate-<name>) */
+  --animate-flip-3d: flip-3d 0.6s ease-in-out;
+  --animate-flip-3d-back: flip-3d-back 0.6s ease-in-out;
+  --animate-fadeIn: fadeIn 0.5s ease-out;
+  --animate-slideIn: slideIn 0.3s ease-out;
+  --animate-slideUp: slideUp 0.4s ease-out;
+  --animate-scaleIn: scaleIn 0.3s ease-out;
+  --animate-bounce-subtle: bounce-subtle 0.6s ease-in-out;
+  --animate-pulse-gentle: pulse-gentle 2s ease-in-out infinite;
+  --animate-shake: shake 0.3s ease-in-out;
+  --animate-theme-switch: theme-switch 0.3s ease-in-out;
+  --animate-skeleton-wave: skeleton-wave 1.4s ease-in-out infinite;
+}
+
+@keyframes flip-3d { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(180deg); } }
+@keyframes flip-3d-back { 0% { transform: rotateY(180deg); } 100% { transform: rotateY(0deg); } }
+@keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes slideIn { 0% { opacity: 0; transform: translateX(-20px); } 100% { opacity: 1; transform: translateX(0); } }
+@keyframes slideUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes bounce-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@keyframes pulse-gentle { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
+@keyframes theme-switch { 0% { transform: rotate(0deg); } 100% { transform: rotate(180deg); } }
+@keyframes skeleton-wave { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
 /* ── Base typography and font loading ───────────────────────────────────── */
 html {
   scroll-behavior: smooth;
