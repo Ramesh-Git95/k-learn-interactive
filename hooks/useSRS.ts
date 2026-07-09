@@ -217,10 +217,40 @@ const useSRS = (): UseSRSReturn => {
     }
   }, [user, token, setRawDecks]);
 
-  // Load from database on authentication
+  // Delete a single deck on the server immediately. The main DB sync is
+  // debounced by 800ms, so a delete that isn't flushed before a reload/navigation
+  // would be resurrected by loadFromDatabase on the next session. Hitting the
+  // dedicated endpoint right away makes the deletion durable; a 404 just means it
+  // was never synced server-side, which is fine.
+  const deleteDeckOnServer = useCallback(async (deckId: string) => {
+    if (!user || !token) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/srs/decks/${deckId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!response.ok && response.status !== 404) {
+        console.error('❌ Failed to delete SRS deck on server:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ Error deleting SRS deck on server:', error);
+    }
+  }, [user, token]);
+
+  // Load from database once per login. `user`/`loadFromDatabase` identities can
+  // change on re-renders (documented "unstable context" gotcha), and re-running
+  // the load mid-session would overwrite local state from the DB — resurrecting a
+  // deck the user just deleted before its deletion has synced. Gate on the token
+  // so it loads once per session and resets on logout.
+  const loadedTokenRef = useRef<string | null>(null);
   useEffect(() => {
     if (user && token) {
-      loadFromDatabase();
+      if (loadedTokenRef.current !== token) {
+        loadedTokenRef.current = token;
+        loadFromDatabase();
+      }
+    } else {
+      loadedTokenRef.current = null;
     }
   }, [user, token, loadFromDatabase]);
 
@@ -712,15 +742,19 @@ const useSRS = (): UseSRSReturn => {
   // Delete entire deck
   const deleteDeck = useCallback((deckId: string) => {
     const updatedDecks = decks.filter(deck => deck.id !== deckId);
-    
+
     // If we're deleting the current deck, clear current deck
     if (currentDeckId === deckId) {
       setCurrentDeckId(null);
     }
-    
+
     updateRawDecks(updatedDecks);
     setDecks(updatedDecks);
-  }, [decks, currentDeckId, setCurrentDeckId, updateRawDecks]);
+
+    // Persist the deletion immediately so the debounced full-sync (or a reload
+    // before it fires) can't let loadFromDatabase resurrect the deck next session.
+    deleteDeckOnServer(deckId);
+  }, [decks, currentDeckId, setCurrentDeckId, updateRawDecks, deleteDeckOnServer]);
 
   // Edit card content
   const editCard = useCallback((deckId: string, cardId: string, content: SRSCard['content']) => {

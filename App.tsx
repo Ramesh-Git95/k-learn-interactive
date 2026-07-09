@@ -30,6 +30,7 @@ import OnboardingWizard from './components/OnboardingWizard';
 import Footer from './components/Footer';
 import CookieConsent from './components/CookieConsent';
 import GuestFreeBanner from './components/GuestFreeBanner';
+import { apiClient } from './services/apiClient';
 import useLocalStorage from './hooks/useLocalStorage';
 import { SRSProvider, useSRSContext } from './contexts/SRSContext';
 import { LS_THEME_KEY, FREE_PHRASES_COUNT } from './constants';
@@ -74,21 +75,44 @@ const AppContent: React.FC = () => {
     }
   }, [user]);
 
-  // Show onboarding wizard for new users. Write 'pending' to localStorage
-  // immediately on trigger so re-renders never cause a second instance.
+  // Show onboarding wizard for genuinely new users only. The 'done' flag lives
+  // in localStorage, so clearing browser storage (or a new device) used to make a
+  // returning user look brand-new and re-run onboarding — minting a DUPLICATE
+  // "Starter Deck" every time. We now gate on the durable source of truth: the
+  // account's decks in the DB. Only an account with zero decks gets the wizard.
   useEffect(() => {
-    if (isAuthenticated) {
-      if (!localStorage.getItem('k-learn-onboarding')) {
-        localStorage.setItem('k-learn-onboarding', 'pending');
-        setShowOnboarding(true);
-      }
-    } else {
-      // Clear 'pending' on logout so wizard shows again on next login if not completed
+    if (!isAuthenticated) {
+      // Clear 'pending' on logout so the wizard can show again next login if it
+      // was never actually completed.
       if (localStorage.getItem('k-learn-onboarding') === 'pending') {
         localStorage.removeItem('k-learn-onboarding');
       }
       setShowOnboarding(false);
+      return;
     }
+
+    // Already decided (completed or in progress) — never re-run.
+    if (localStorage.getItem('k-learn-onboarding')) return;
+
+    let cancelled = false;
+    (async () => {
+      const res = await apiClient.getSRSDecks();
+      if (cancelled) return;
+      const hasDecks = res.success && Array.isArray(res.data?.decks) && res.data.decks.length > 0;
+      if (hasDecks) {
+        // Returning user (decks survive a storage wipe) — record completion so we
+        // don't check again, and never re-onboard.
+        localStorage.setItem('k-learn-onboarding', 'done');
+        setShowOnboarding(false);
+      } else if (res.success) {
+        // Genuinely empty account → run the starter-deck wizard.
+        localStorage.setItem('k-learn-onboarding', 'pending');
+        setShowOnboarding(true);
+      }
+      // On network error, do nothing — better to skip onboarding than risk a dup.
+    })();
+
+    return () => { cancelled = true; };
   }, [isAuthenticated]);
 
   // Auto-open login modal after a successful password reset redirect

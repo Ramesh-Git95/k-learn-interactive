@@ -164,6 +164,11 @@ class ApiClient {
     });
   }
 
+  // SRS endpoints
+  async getSRSDecks() {
+    return this.request<{ decks: any[] }>('/srs/decks');
+  }
+
   // Progress endpoints
   async getProgress() {
     return this.request<{
