@@ -26,7 +26,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_API_URL: https://k-learn-interactive-production.up.railway.app/api
+          VITE_API_URL: https://k-learn-interactive.onrender.com/api
 
       - name: Deploy dist/ to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
