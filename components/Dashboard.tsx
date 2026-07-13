@@ -9,7 +9,6 @@ import { useXPStreak } from '../hooks/useXPStreak';
 import { useSRSContext } from '../contexts/SRSContext';
 import SRSDashboard from './SRSDashboard';
 import LearningPath from './LearningPath';
-import OnboardingWizard from './OnboardingWizard';
 import BookmarkFlashcards from './BookmarkFlashcards';
 import { vocabulary } from '../data/koreanData';
 import { useUpgrade } from '../hooks/useUpgrade';
@@ -79,9 +78,6 @@ export default function Dashboard({
   const xp                           = useXPStreak();
 
   const [showBookmarkFC, setShowBookmarkFC]   = useState(false);
-  const [showOnboarding, setShowOnboarding]   = useState(
-    () => !localStorage.getItem('k-learn-onboarding')
-  );
 
   const today      = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const motivation = MOTIVATIONAL[new Date().getDay() % MOTIVATIONAL.length];
@@ -141,10 +137,9 @@ export default function Dashboard({
         .heatmap-dot { transition: all 0.2s ease; }
       `}</style>
 
-      {/* ── Onboarding Wizard ──────────────────────────── */}
-      {showOnboarding && (
-        <OnboardingWizard onComplete={() => setShowOnboarding(false)} />
-      )}
+      {/* Onboarding wizard is mounted once in App.tsx, gated on the account's
+          decks in the DB — do not mount a second localStorage-gated copy here
+          (it bypassed that check and re-created duplicate starter decks). */}
 
       {/* ── Bookmark Flashcards ────────────────────────── */}
       {showBookmarkFC && (

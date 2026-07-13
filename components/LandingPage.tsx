@@ -38,11 +38,6 @@ const STEPS = [
   { n: '03', title: 'Never Forget',          desc: 'The SM-2 spaced repetition engine reviews every card at exactly the right moment. Knowledge sticks permanently.',       color: '#2F5D8A' },
 ];
 
-const TESTIMONIALS = [
-  { text: 'I started for BTS lyrics and now I watch K-dramas without subtitles. The SRS system is genuinely the best I\'ve used.',        author: 'Priya S.',   role: 'K-Pop fan · 8 months learning',      avatar: '🎵', stars: 5 },
-  { text: 'Went from zero to TOPIK Level 2 in 8 months. The AI chat + spaced repetition combo is unbeatable. Worth every penny.',          author: 'Marcus J.',  role: 'Software engineer · Seoul-bound',     avatar: '💻', stars: 5 },
-  { text: 'Finally an app that teaches REAL Korean — honorifics, culture, drama phrases — not just tourist sentences. Amazing depth.',      author: 'Aiko T.',    role: 'Japanese expat · living in Seoul',    avatar: '🌸', stars: 5 },
-];
 
 const COMPARISON_ROWS = [
   { feature: 'Hangul Alphabet',          free: 'Full access',             premium: 'Full access' },
@@ -442,7 +437,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
 
           {/* Trust row */}
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-400 dark:text-gray-500 mb-14">
-            {['⚡ Free to start', '🔒 No credit card', '🎬 K-Drama vocab packs', '⭐ 4.9 / 5 rating'].map((t, i, arr) => (
+            {['⚡ Free to start', '🔒 No credit card', '🎬 K-Drama vocab packs', '🧠 SM-2 spaced repetition'].map((t, i, arr) => (
               <React.Fragment key={t}>
                 <span>{t}</span>
                 {i < arr.length - 1 && <span className="hidden sm:inline">·</span>}
@@ -488,10 +483,10 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       <section className="py-14 bg-gray-50 dark:bg-gray-900/60">
         <div className="max-w-4xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { n: 10000, suf: '+', label: 'Active Learners' },
-            { n: 1000,  suf: '+', label: 'Korean Words' },
-            { n: 40,    suf: '',  label: 'Hangul Characters' },
-            { n: 99,    suf: '%', label: 'Would Recommend' },
+            { n: 1000, suf: '+', label: 'Korean Words' },
+            { n: 40,   suf: '',  label: 'Hangul Characters' },
+            { n: 24,   suf: '',  label: 'Culture Cards' },
+            { n: 10,   suf: '',  label: 'Learning Tools' },
           ].map((s, i) => (
             <FadeIn key={i} delay={i * 100}>
               <div className="text-4xl md:text-5xl font-black mb-1 gradient-text">
@@ -621,35 +616,46 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ─────────────────────────────────────────── */}
+      {/* ── FOUNDER'S NOTE ───────────────────────────────────────── */}
       <section className="py-20 px-4 bg-gray-50 dark:bg-gray-900/60">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <FadeIn>
-            <div className="text-center mb-12">
+            <div className="text-center mb-10">
               <h2 className="text-3xl sm:text-5xl font-black text-gray-900 dark:text-white mb-4">
-                Real Learners, <span className="gradient-text">Real Results</span>
+                Why <span className="gradient-text">K-Learn</span> Exists
               </h2>
             </div>
           </FadeIn>
-          <div className="grid md:grid-cols-3 gap-5">
-            {TESTIMONIALS.map((t, i) => (
-              <FadeIn key={i} delay={i * 120}>
-                <div className="card-hover bg-white dark:bg-gray-900 p-7 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col h-full">
-                  <div className="flex mb-3">
-                    {Array.from({ length: t.stars }).map((_, j) => <span key={j} className="text-yellow-400">★</span>)}
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-5 italic flex-1">"{t.text}"</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl flex-shrink-0" style={{ background: 'rgba(228,87,46,0.12)' }}>{t.avatar}</div>
-                    <div>
-                      <div className="font-bold text-gray-900 dark:text-white text-sm">{t.author}</div>
-                      <div className="text-gray-400 text-xs">{t.role}</div>
-                    </div>
-                  </div>
+          <FadeIn delay={120}>
+            <div className="relative bg-white dark:bg-gray-900 p-8 sm:p-10 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
+              <div
+                className="absolute -top-5 left-8 w-11 h-11 rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-md"
+                style={{ background: 'var(--brand-gradient)', fontFamily: 'Noto Sans KR, sans-serif' }}
+              >
+                한
+              </div>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4 pt-2">
+                K-Learn started with a simple frustration: every Korean app taught sentences like{' '}
+                <em>"the bear drinks milk"</em> — but never what people actually say in dramas, in
+                cafés, or with friends. So we built the app we wished existed: real grammar,
+                honorifics, culture, and a spaced-repetition engine that makes it stick.
+              </p>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
+                K-Learn is a small independent project — no ads, no investors, no dark patterns.
+                We ship improvements every week, and every subscription goes straight into building
+                new features.
+              </p>
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <div className="font-bold text-gray-900 dark:text-white text-sm">The K-Learn Team</div>
+                  <div className="text-gray-400 text-xs">A few friends who love Korean culture</div>
                 </div>
-              </FadeIn>
-            ))}
-          </div>
+                <span className="text-xs font-bold px-3 py-1.5 rounded-full" style={{ background: 'rgba(63,133,113,0.14)', color: 'var(--kl-celadon)' }}>
+                  🌱 Independently built &amp; actively maintained
+                </span>
+              </div>
+            </div>
+          </FadeIn>
         </div>
       </section>
 
@@ -803,7 +809,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             </span>
           </h2>
           <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto">
-            Join thousands of K-culture fans, drama addicts, and aspiring expats who are learning the real way — starting today, for free.
+            Built for K-culture fans, drama addicts, and aspiring expats — learn the real way, starting today, for free.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-4">

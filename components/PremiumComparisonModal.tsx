@@ -105,13 +105,13 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
             </tbody>
           </table>
 
-          {/* Social proof */}
-          <div className="mx-4 my-4 p-4 rounded-2xl border border-pink-100 dark:border-pink-800/30" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.04), rgba(139,92,246,0.04))' }}>
-            <div className="flex gap-0.5 mb-2 text-sm">{'⭐⭐⭐⭐⭐'}</div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 italic leading-relaxed">
-              "The SRS + culture content combo is incredible — this is the most complete Korean learning app I've used."
+          {/* Indie note */}
+          <div className="mx-4 my-4 p-4 rounded-2xl border border-pink-100 dark:border-pink-800/30" style={{ background: 'linear-gradient(135deg, rgba(228,87,46,0.05), rgba(63,133,113,0.05))' }}>
+            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+              🌱 K-Learn is independently built by a small team of friends — no ads, no investors.
+              Your $4 goes straight into new features, shipped every week.
             </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">— Premium subscriber</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">— The K-Learn Team</p>
           </div>
         </div>
 
