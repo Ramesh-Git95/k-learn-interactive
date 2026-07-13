@@ -57,7 +57,7 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-pink-500 dark:text-pink-400 mb-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#E4572E] dark:text-[#F07A55] mb-2">
             🌆 Modern Korea
           </h1>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
@@ -67,13 +67,13 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
         <div className="flex items-center space-x-3 sm:space-x-4 mt-4 sm:mt-0">
           <div className="bg-white dark:bg-gray-900 rounded-lg px-3 sm:px-4 py-2 shadow-sm">
             <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Progress: </span>
-            <span className="font-semibold text-pink-500 dark:text-pink-400 text-sm sm:text-base">
+            <span className="font-semibold text-[#E4572E] dark:text-[#F07A55] text-sm sm:text-base">
               {Math.round(getTotalProgressPercentage())}%
             </span>
           </div>
           <div className="w-16 sm:w-20 lg:w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
             <div 
-              className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300" 
+              className="bg-gradient-to-r from-[#3F8571] to-[#E4572E] h-2 rounded-full transition-all duration-300" 
               style={{ width: `${getTotalProgressPercentage()}%` }}
             ></div>
           </div>
@@ -102,7 +102,7 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
                   }}
                   className={`w-full p-4 rounded-xl text-left transition-all duration-300 ${
                     selectedTopic.id === topic.id
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                      ? 'bg-gradient-to-r from-[#3F8571] to-[#E4572E] text-white shadow-lg'
                       : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white hover:shadow-md'
                   }`}
                 >
@@ -126,7 +126,7 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
                       className={`h-1.5 rounded-full transition-all duration-300 ${
                         selectedTopic.id === topic.id 
                           ? 'bg-white/60' 
-                          : 'bg-gradient-to-r from-purple-400 to-pink-400'
+                          : 'bg-gradient-to-r from-[#6BA88F] to-[#F07A55]'
                       }`}
                       style={{ width: `${(completedSections / totalSections) * 100}%` }}
                     ></div>
@@ -140,7 +140,7 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
         {/* Main Content */}
         <div className="lg:col-span-9">
           {/* Section Navigation */}
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl shadow-lg p-4 sm:p-6 mb-6 border border-purple-200 dark:border-purple-800">
+          <div className="bg-gradient-to-r from-[#EEF5F1] to-[#FDEEE6] dark:from-[#153327]/20 dark:to-[#5F2010]/20 rounded-xl shadow-lg p-4 sm:p-6 mb-6 border border-[#BFDACD] dark:border-[#1D4436]">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
               {selectedTopic.title} - {selectedTopic.titleKorean}
             </h2>
@@ -159,7 +159,7 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
                   }}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     selectedSection.id === section.id
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                      ? 'bg-gradient-to-r from-[#3F8571] to-[#E4572E] text-white'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
@@ -180,7 +180,7 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
                 onClick={() => setActiveTab('content')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   activeTab === 'content'
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                    ? 'bg-gradient-to-r from-[#3F8571] to-[#E4572E] text-white'
                     : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
@@ -191,7 +191,7 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
                   onClick={() => setActiveTab('vocabulary')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     activeTab === 'vocabulary'
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                      ? 'bg-gradient-to-r from-[#3F8571] to-[#E4572E] text-white'
                       : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -203,7 +203,7 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
                   onClick={() => setActiveTab('phrases')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     activeTab === 'phrases'
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                      ? 'bg-gradient-to-r from-[#3F8571] to-[#E4572E] text-white'
                       : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -215,7 +215,7 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
                   onClick={() => setActiveTab('examples')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     activeTab === 'examples'
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                      ? 'bg-gradient-to-r from-[#3F8571] to-[#E4572E] text-white'
                       : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -241,7 +241,7 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {selectedSection.tips.map((tip, index) => (
-                        <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800">
+                        <div key={index} className="bg-gradient-to-r from-[#EEF5F1] to-[#FDEEE6] dark:from-[#153327]/20 dark:to-[#5F2010]/20 rounded-lg p-3 border border-[#BFDACD] dark:border-[#1D4436]">
                           <p className="text-sm text-gray-900 dark:text-white">
                             {tip}
                           </p>
@@ -259,7 +259,7 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
                     </h3>
                     <div className="space-y-2">
                       {selectedSection.culturalNotes.map((note, index) => (
-                        <div key={index} className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-l-4 border-blue-400 dark:border-blue-600 p-3">
+                        <div key={index} className="bg-gradient-to-r from-blue-50 to-[#EAF1F7] dark:from-blue-900/20 dark:to-[#122840]/20 border-l-4 border-blue-400 dark:border-blue-600 p-3">
                           <p className="text-sm text-gray-900 dark:text-white">
                             {note}
                           </p>
@@ -276,7 +276,7 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
                     className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
                       isSectionCompleted(selectedTopic.id, selectedSection.id)
                         ? 'bg-green-500 text-white'
-                        : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
+                        : 'bg-gradient-to-r from-[#3F8571] to-[#E4572E] text-white hover:from-[#2E6B59] hover:to-[#C13F22]'
                     }`}
                   >
                     <Icon 
@@ -293,14 +293,14 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
             {activeTab === 'vocabulary' && selectedSection.vocabulary && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {selectedSection.vocabulary.map((vocab, index) => (
-                  <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+                  <div key={index} className="bg-gradient-to-r from-[#EEF5F1] to-[#FDEEE6] dark:from-[#153327]/20 dark:to-[#5F2010]/20 rounded-lg p-4 border border-[#BFDACD] dark:border-[#1D4436]">
                     <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                       {vocab.korean}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                       {vocab.romanization}
                     </div>
-                    <div className="text-base text-purple-600 dark:text-purple-400 font-medium">
+                    <div className="text-base text-[#2E6B59] dark:text-[#6BA88F] font-medium">
                       {vocab.english}
                     </div>
                   </div>
@@ -312,14 +312,14 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
             {activeTab === 'phrases' && selectedSection.phrases && (
               <div className="space-y-4">
                 {selectedSection.phrases.map((phrase, index) => (
-                  <div key={index} className="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-lg p-4 border border-pink-200 dark:border-pink-800">
+                  <div key={index} className="bg-gradient-to-r from-[#FDEEE6] to-[#FDEEE6] dark:from-[#5F2010]/20 dark:to-[#5F2010]/20 rounded-lg p-4 border border-[#F8C4AE] dark:border-[#7E2A15]">
                     <div className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                       {phrase.korean}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                       {phrase.romanization}
                     </div>
-                    <div className="text-base text-pink-600 dark:text-pink-400 font-medium mb-2">
+                    <div className="text-base text-[#C13F22] dark:text-[#F07A55] font-medium mb-2">
                       {phrase.english}
                     </div>
                     <div className="flex items-center justify-between">
@@ -343,8 +343,8 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
             {activeTab === 'examples' && selectedSection.examples && (
               <div className="space-y-4">
                 {selectedSection.examples.map((example, index) => (
-                  <div key={index} className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-lg p-4 border border-cyan-200 dark:border-cyan-800">
-                    <div className="text-sm font-medium text-cyan-700 dark:text-cyan-300 mb-3">
+                  <div key={index} className="bg-gradient-to-r from-[#EAF1F7] to-blue-50 dark:from-[#122840]/20 dark:to-blue-900/20 rounded-lg p-4 border border-[#B7CDE0] dark:border-[#18344D]">
+                    <div className="text-sm font-medium text-[#1F4160] dark:text-[#8CAECB] mb-3">
                       📱 {example.situation}
                     </div>
                     <div className="text-lg font-bold text-gray-900 dark:text-white mb-2">
@@ -353,7 +353,7 @@ const ModernKorea: React.FC<ModernKoreaProps> = ({ progress, toggleProgress }) =
                     <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                       {example.romanization}
                     </div>
-                    <div className="text-base text-cyan-600 dark:text-cyan-400 font-medium">
+                    <div className="text-base text-[#264D74] dark:text-[#5C85B0] font-medium">
                       {example.english}
                     </div>
                   </div>

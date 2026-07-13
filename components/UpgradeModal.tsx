@@ -32,7 +32,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
           </button>
           <div className="text-4xl mb-2">⭐</div>
           <h2 className="text-xl font-black text-white">K-Learn Premium</h2>
-          <h3 className="text-sm font-semibold text-pink-100 mt-1">{feature}</h3>
+          <h3 className="text-sm font-semibold text-[#FBDCCB] mt-1">{feature}</h3>
         </div>
 
         {/* Content */}
@@ -52,7 +52,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
           {/* Price */}
           <div
             className="rounded-xl p-4 mb-5 text-center"
-            style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.08), rgba(139,92,246,0.08))' }}
+            style={{ background: 'linear-gradient(135deg, rgba(228,87,46,0.08), rgba(63,133,113,0.08))' }}
           >
             <div className="text-3xl font-black" style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
               $4<span className="text-lg">/mo</span>

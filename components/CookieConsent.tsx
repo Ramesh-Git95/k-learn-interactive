@@ -281,8 +281,8 @@ const CookieConsent: React.FC<CookieConsentProps> = ({ onAccept, onDecline }) =>
               <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
-                      <Icon icon="star" className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <div className="w-8 h-8 bg-[#DDEBE4] dark:bg-[#153327]/30 rounded-full flex items-center justify-center">
+                      <Icon icon="star" className="w-4 h-4 text-[#2E6B59] dark:text-[#6BA88F]" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                       Marketing Cookies

@@ -127,7 +127,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
         <button
           onClick={handleLockedClick}
           title={isAuthenticated ? 'Premium feature — upgrade to practice pronunciation' : 'Sign up free to unlock pronunciation practice'}
-          className={`flex items-center gap-1.5 rounded-xl font-semibold transition-all duration-200 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:text-pink-400 ${isSm ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm'}`}
+          className={`flex items-center gap-1.5 rounded-xl font-semibold transition-all duration-200 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-[#FDEEE6] dark:hover:bg-[#5F2010]/20 hover:text-[#F07A55] ${isSm ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm'}`}
         >
           <Lock className={isSm ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
           <span>Pronounce</span>
@@ -205,7 +205,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
                   width: 0, height: 0,
                   borderLeft: '6px solid transparent',
                   borderRight: '6px solid transparent',
-                  borderTop: '7px solid #8B5CF6',
+                  borderTop: '7px solid #3F8571',
                 }}
               />
             </div>
@@ -218,7 +218,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
             <span
               className="absolute inset-0 rounded-xl pointer-events-none"
               style={{
-                border: '2px solid #EC4899',
+                border: '2px solid #E4572E',
                 animation: 'hintPulseRing 1.2s ease-out infinite',
               }}
             />
@@ -234,12 +234,12 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
               isSm ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm'
             } ${
               isListening
-                ? 'bg-rose-500 text-white shadow-lg shadow-rose-200 dark:shadow-rose-900/30 scale-105'
+                ? 'bg-[#C13F22] text-white shadow-lg shadow-[#F8C4AE] dark:shadow-[#5F2010]/30 scale-105'
                 : isDone && result
                 ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                 : showHint
-                ? 'bg-rose-500 text-white shadow-lg shadow-rose-200 dark:shadow-rose-900/40'
-                : 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:scale-105'
+                ? 'bg-[#C13F22] text-white shadow-lg shadow-[#F8C4AE] dark:shadow-[#5F2010]/40'
+                : 'bg-[#FDEEE6] dark:bg-[#5F2010]/20 text-[#A83619] dark:text-[#F07A55] hover:bg-[#FBDCCB] dark:hover:bg-[#5F2010]/30 hover:scale-105'
             }`}
           >
             {isListening ? (

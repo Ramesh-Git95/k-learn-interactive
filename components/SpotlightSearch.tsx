@@ -379,7 +379,7 @@ const SpotlightSearch: React.FC<SpotlightSearchProps> = ({ isOpen, onClose, onNa
                   key={result.id}
                   onClick={() => handleResultClick(result)}
                   className={`w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-950 transition-colors flex items-center space-x-3 ${
-                    index === selectedIndex ? 'bg-pink-50/10 dark:bg-pink-500/10 border-r-2 border-pink-500 dark:border-pink-500' : ''
+                    index === selectedIndex ? 'bg-[#FDEEE6]/10 dark:bg-[#E4572E]/10 border-r-2 border-[#E4572E] dark:border-[#E4572E]' : ''
                   }`}
                 >
                   <div className="text-xl">{result.icon}</div>
@@ -403,7 +403,7 @@ const SpotlightSearch: React.FC<SpotlightSearchProps> = ({ isOpen, onClose, onNa
                       </p>
                     )}
                     {result.category && (
-                      <p className="text-xs text-pink-500 dark:text-pink-400 truncate">
+                      <p className="text-xs text-[#E4572E] dark:text-[#F07A55] truncate">
                         {result.category}
                       </p>
                     )}

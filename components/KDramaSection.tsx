@@ -13,7 +13,7 @@ import { useUpgrade } from '../hooks/useUpgrade';
 const difficultyStyle: Record<string, string> = {
   beginner: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
   intermediate: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  advanced: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
+  advanced: 'bg-[#DDEBE4] text-[#265847] dark:bg-[#153327]/30 dark:text-[#6BA88F]',
 };
 
 
@@ -174,7 +174,7 @@ const KDramaSection: React.FC = () => {
         {selectedDrama && (
           <button
             onClick={() => { setSelectedDrama(null); setDifficultyFilter('all'); }}
-            className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors mb-4 group"
+            className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-[#E4572E] dark:hover:text-[#F07A55] transition-colors mb-4 group"
           >
             <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -290,7 +290,7 @@ const KDramaSection: React.FC = () => {
                   <div className="text-base font-bold text-gray-800 dark:text-gray-100">{word.english}</div>
 
                   {/* Context sentence */}
-                  <div className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed border-l-2 border-pink-200 dark:border-pink-800 pl-3 italic flex-1">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed border-l-2 border-[#F8C4AE] dark:border-[#7E2A15] pl-3 italic flex-1">
                     {word.context}
                   </div>
 

@@ -104,10 +104,10 @@ const LearningPath: React.FC<LearningPathProps> = ({ currentSection, setActiveSe
                 isLocked 
                   ? 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-700/20 opacity-50 cursor-not-allowed'
                   : isCurrent
-                  ? 'border-pink-500 dark:border-pink-500 bg-pink-50/10 dark:bg-pink-500/10 cursor-pointer shadow-md'
+                  ? 'border-[#E4572E] dark:border-[#E4572E] bg-[#FDEEE6]/10 dark:bg-[#E4572E]/10 cursor-pointer shadow-md'
                   : isCompleted
                   ? 'border-green-400 dark:border-green-600 bg-green-50 dark:bg-green-900/20 cursor-pointer hover:shadow-md'
-                  : 'border-gray-300 dark:border-gray-800 hover:border-pink-200 dark:hover:border-pink-500 cursor-pointer hover:shadow-md'
+                  : 'border-gray-300 dark:border-gray-800 hover:border-[#F8C4AE] dark:hover:border-[#E4572E] cursor-pointer hover:shadow-md'
               }`}
               onClick={() => !isLocked && setActiveSection(step.id)}
             >
@@ -116,7 +116,7 @@ const LearningPath: React.FC<LearningPathProps> = ({ currentSection, setActiveSe
                 isCompleted 
                   ? 'bg-green-500 text-white'
                   : isCurrent
-                  ? 'bg-pink-500 dark:bg-pink-500 text-white'
+                  ? 'bg-[#E4572E] dark:bg-[#E4572E] text-white'
                   : isLocked
                   ? 'bg-gray-300 dark:bg-gray-700 text-gray-500'
                   : 'bg-gray-200 dark:bg-gray-900 text-gray-600 dark:text-gray-400'
@@ -138,7 +138,7 @@ const LearningPath: React.FC<LearningPathProps> = ({ currentSection, setActiveSe
                       {step.difficulty}
                     </span>
                     {isCurrent && (
-                      <span className="px-2 py-1 bg-pink-500 dark:bg-pink-500 text-white text-xs rounded-full animate-pulse-gentle">
+                      <span className="px-2 py-1 bg-[#E4572E] dark:bg-[#E4572E] text-white text-xs rounded-full animate-pulse-gentle">
                         Current
                       </span>
                     )}
@@ -156,7 +156,7 @@ const LearningPath: React.FC<LearningPathProps> = ({ currentSection, setActiveSe
                     ⏱️ {step.estimatedTime}
                   </span>
                   {!isLocked && !isCurrent && (
-                    <span className="text-xs text-pink-500 dark:text-pink-400 hover:underline">
+                    <span className="text-xs text-[#E4572E] dark:text-[#F07A55] hover:underline">
                       {isCompleted ? 'Review' : 'Start'} →
                     </span>
                   )}

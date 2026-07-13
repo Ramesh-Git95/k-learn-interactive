@@ -430,7 +430,7 @@ const ScriptedConversation: React.FC = () => {
         </div>
         {isFree && (
           <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
-            2 of {SCENARIOS.length} scenarios unlocked · <button onClick={openUpgradeModal} className="text-violet-500 font-black hover:underline">Upgrade for all {SCENARIOS.length} →</button>
+            2 of {SCENARIOS.length} scenarios unlocked · <button onClick={openUpgradeModal} className="text-[#3F8571] font-black hover:underline">Upgrade for all {SCENARIOS.length} →</button>
           </p>
         )}
       </div>
@@ -583,7 +583,7 @@ const ScriptedConversation: React.FC = () => {
             {displayOpts.map((opt, i) => {
               const isChosen = chosen === i;
               const showFeedback = chosen !== null;
-              let cls = 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-pink-300 dark:hover:border-pink-700 cursor-pointer';
+              let cls = 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-[#F5A183] dark:hover:border-[#A83619] cursor-pointer';
               if (showFeedback) {
                 if (opt.isCorrect) cls = 'bg-green-50 dark:bg-green-900/20 border-2 border-green-400 text-gray-900 dark:text-white cursor-default';
                 else if (isChosen) cls = 'bg-red-50 dark:bg-red-900/20 border-2 border-red-400 text-gray-900 dark:text-white opacity-80 cursor-default';

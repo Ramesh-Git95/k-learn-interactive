@@ -27,7 +27,7 @@ const RegionalExplorer: React.FC<RegionalExplorerProps> = ({ progress, togglePro
       onClick={() => setActiveTab(tabId)}
       className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base font-medium transition-all duration-300 ${
         activeTab === tabId
-          ? 'bg-pink-500 text-white dark:bg-pink-500'
+          ? 'bg-[#E4572E] text-white dark:bg-[#E4572E]'
           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
       }`}
     >
@@ -39,19 +39,19 @@ const RegionalExplorer: React.FC<RegionalExplorerProps> = ({ progress, togglePro
   return (
     <div className="p-3 sm:p-4 md:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-pink-500 dark:text-pink-400 mb-3 sm:mb-0">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#E4572E] dark:text-[#F07A55] mb-3 sm:mb-0">
           🗺️ Korea Regional Explorer
         </h1>
         <div className="flex items-center space-x-3 sm:space-x-4">
           <div className="bg-white dark:bg-gray-900 rounded-lg px-3 sm:px-4 py-2 shadow-sm">
             <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Explored: </span>
-            <span className="font-semibold text-pink-500 dark:text-pink-400 text-sm sm:text-base">
+            <span className="font-semibold text-[#E4572E] dark:text-[#F07A55] text-sm sm:text-base">
               {exploredCount}/{koreanRegions.length}
             </span>
           </div>
           <div className="w-16 sm:w-20 lg:w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
             <div 
-              className="bg-pink-500 dark:bg-pink-500 h-2 rounded-full transition-all duration-300" 
+              className="bg-[#E4572E] dark:bg-[#E4572E] h-2 rounded-full transition-all duration-300" 
               style={{ width: `${(exploredCount / koreanRegions.length) * 100}%` }}
             ></div>
           </div>
@@ -201,7 +201,7 @@ const RegionalExplorer: React.FC<RegionalExplorerProps> = ({ progress, togglePro
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => setSelectedRegion(null)}
-              className="flex items-center space-x-2 text-pink-500 dark:text-pink-400 hover:underline"
+              className="flex items-center space-x-2 text-[#E4572E] dark:text-[#F07A55] hover:underline"
             >
               <span>←</span>
               <span>Back to Map</span>
@@ -211,7 +211,7 @@ const RegionalExplorer: React.FC<RegionalExplorerProps> = ({ progress, togglePro
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
                 isRegionExplored(selectedRegion.id)
                   ? 'bg-green-500 text-white'
-                  : 'bg-pink-500 text-white hover:bg-pink-500/80'
+                  : 'bg-[#E4572E] text-white hover:bg-[#E4572E]/80'
               }`}
             >
               <Icon icon={isRegionExplored(selectedRegion.id) ? 'check' : 'plus'} className="w-4 h-4" />
@@ -277,7 +277,7 @@ const RegionalExplorer: React.FC<RegionalExplorerProps> = ({ progress, togglePro
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {selectedRegion.keyFeatures.map((feature, index) => (
                     <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-950 rounded-lg">
-                      <div className="w-2 h-2 rounded-full bg-pink-500 dark:bg-pink-500" />
+                      <div className="w-2 h-2 rounded-full bg-[#E4572E] dark:bg-[#E4572E]" />
                       <span className="text-gray-700 dark:text-white">{feature}</span>
                     </div>
                   ))}
@@ -290,10 +290,10 @@ const RegionalExplorer: React.FC<RegionalExplorerProps> = ({ progress, togglePro
                 <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Must-Visit Attractions</h3>
                 <div className="space-y-4">
                   {selectedRegion.attractions.map((attraction, index) => (
-                    <div key={index} className="border-l-4 border-pink-500 dark:border-pink-500 pl-4 py-2">
+                    <div key={index} className="border-l-4 border-[#E4572E] dark:border-[#E4572E] pl-4 py-2">
                       <h4 className="font-semibold text-gray-900 dark:text-white">{attraction.name}</h4>
                       <p className="text-sm font-korean text-gray-600 dark:text-gray-400">{attraction.nameKorean}</p>
-                      <span className="inline-block mt-1 px-2 py-1 bg-pink-50/20 text-pink-500 dark:bg-pink-500/20 dark:text-pink-400 text-xs rounded-full">
+                      <span className="inline-block mt-1 px-2 py-1 bg-[#FDEEE6]/20 text-[#E4572E] dark:bg-[#E4572E]/20 dark:text-[#F07A55] text-xs rounded-full">
                         {attraction.type}
                       </span>
                     </div>
@@ -323,7 +323,7 @@ const RegionalExplorer: React.FC<RegionalExplorerProps> = ({ progress, togglePro
                 <div className="space-y-3">
                   {selectedRegion.culturalNotes.map((note, index) => (
                     <div key={index} className="flex items-start space-x-3">
-                      <div className="w-2 h-2 rounded-full bg-pink-500 dark:bg-pink-500 mt-2 flex-shrink-0" />
+                      <div className="w-2 h-2 rounded-full bg-[#E4572E] dark:bg-[#E4572E] mt-2 flex-shrink-0" />
                       <p className="text-gray-700 dark:text-white">{note}</p>
                     </div>
                   ))}
@@ -337,7 +337,7 @@ const RegionalExplorer: React.FC<RegionalExplorerProps> = ({ progress, togglePro
                 <div className="space-y-3">
                   {selectedRegion.languageNotes.map((note, index) => (
                     <div key={index} className="flex items-start space-x-3">
-                      <div className="w-2 h-2 rounded-full bg-pink-500 dark:bg-pink-500 mt-2 flex-shrink-0" />
+                      <div className="w-2 h-2 rounded-full bg-[#E4572E] dark:bg-[#E4572E] mt-2 flex-shrink-0" />
                       <p className="text-gray-700 dark:text-white">{note}</p>
                     </div>
                   ))}

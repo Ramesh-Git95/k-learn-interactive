@@ -305,7 +305,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchTerm, onItemClick, 
               onClick={() => setActiveCategory(category.id)}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
                 activeCategory === category.id
-                  ? 'bg-pink-500 text-white dark:bg-pink-500'
+                  ? 'bg-[#E4572E] text-white dark:bg-[#E4572E]'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
@@ -344,7 +344,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchTerm, onItemClick, 
                   {result.subtitle || result.content}
                 </p>
                 {result.category && (
-                  <span className="inline-block mt-1 text-xs text-pink-500 dark:text-pink-400">
+                  <span className="inline-block mt-1 text-xs text-[#E4572E] dark:text-[#F07A55]">
                     {result.category}
                   </span>
                 )}

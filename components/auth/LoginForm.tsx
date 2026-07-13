@@ -60,7 +60,7 @@ export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-pink-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+                className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#F07A55] focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
                 placeholder="you@email.com"
                 required
                 disabled={isLoading}
@@ -75,7 +75,7 @@ export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
                 <button
                   type="button"
                   onClick={() => setShowForgot(true)}
-                  className="text-xs text-pink-500 dark:text-pink-400 hover:underline font-semibold"
+                  className="text-xs text-[#E4572E] dark:text-[#F07A55] hover:underline font-semibold"
                   disabled={isLoading}
                 >
                   Forgot password?
@@ -86,7 +86,7 @@ export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 pr-10 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-pink-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+                  className="w-full px-4 py-2.5 pr-10 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#F07A55] focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
                   placeholder="••••••••"
                   required
                   disabled={isLoading}
@@ -123,7 +123,7 @@ export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
               Don't have an account?{' '}
               <button
                 onClick={onToggleMode}
-                className="font-black text-pink-500 dark:text-pink-400 hover:underline"
+                className="font-black text-[#E4572E] dark:text-[#F07A55] hover:underline"
                 disabled={isLoading}
               >
                 Sign up here

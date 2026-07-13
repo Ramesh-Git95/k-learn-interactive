@@ -23,17 +23,17 @@ const TYPE_LABEL: Record<WordType, string> = {
 const TYPE_COLOR: Record<WordType, string> = {
   noun:        'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
   verb:        'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  adjective:   'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
+  adjective:   'bg-[#FBDCCB] text-[#A83619] dark:bg-[#5F2010]/30 dark:text-[#F07A55]',
   adverb:      'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
   particle:    'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
-  expression:  'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
+  expression:  'bg-[#DDEBE4] text-[#265847] dark:bg-[#153327]/30 dark:text-[#6BA88F]',
   pronoun:     'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
   conjunction: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
 };
 
 const DIFF_STYLE: Record<string, { label: string; color: string; bg: string }> = {
   beginner:     { label: 'Beginner',     color: '#10B981', bg: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300' },
-  intermediate: { label: 'Intermediate', color: '#8B5CF6', bg: 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300' },
+  intermediate: { label: 'Intermediate', color: '#3F8571', bg: 'bg-[#EEF5F1] dark:bg-[#153327]/20 text-[#265847] dark:text-[#93C2AE]' },
   advanced:     { label: 'Advanced',     color: '#EF4444', bg: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300' },
 };
 
@@ -67,8 +67,8 @@ const WordChip: React.FC<WordChipProps> = ({ token, isSelected, hasDefinition, o
       className={`inline cursor-pointer rounded transition-all duration-150 px-0.5
         ${hasDefinition
           ? isSelected
-            ? 'bg-violet-200 dark:bg-violet-800 text-violet-900 dark:text-white underline decoration-dotted underline-offset-2'
-            : 'hover:bg-violet-50 dark:hover:bg-violet-900/30 hover:text-violet-700 dark:hover:text-violet-300'
+            ? 'bg-[#BFDACD] dark:bg-[#1D4436] text-[#153327] dark:text-white underline decoration-dotted underline-offset-2'
+            : 'hover:bg-[#EEF5F1] dark:hover:bg-[#153327]/30 hover:text-[#265847] dark:hover:text-[#93C2AE]'
           : 'text-gray-500 dark:text-gray-500 cursor-default'
         }
         ${isSelected ? 'font-semibold' : ''}
@@ -119,7 +119,7 @@ const DefPanel: React.FC<DefPanelProps> = ({ word, token, isPremium, onSRS, onCl
           ) : (
             <button
               onClick={startUpgrade}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs font-black text-violet-500 border border-violet-200 dark:border-violet-700 rounded-xl hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs font-black text-[#3F8571] border border-[#BFDACD] dark:border-[#265847] rounded-xl hover:bg-[#EEF5F1] dark:hover:bg-[#153327]/20 transition-colors"
               title="Premium: save to SRS"
             >
               🔒 SRS
@@ -218,7 +218,7 @@ const PassageReader: React.FC<ReaderProps> = ({ passage, isPremium, isAuthentica
         </div>
         <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
           Tap any highlighted word to see its definition.
-          <span className="ml-1 text-violet-500">{coverageCount} words defined.</span>
+          <span className="ml-1 text-[#3F8571]">{coverageCount} words defined.</span>
         </p>
       </div>
 
@@ -260,7 +260,7 @@ const PassageReader: React.FC<ReaderProps> = ({ passage, isPremium, isAuthentica
         {!isRead && (
           <button
             onClick={() => { onMarkRead(passage.id); earnXP(10); markStudyToday(); }}
-            className="mt-4 w-full py-3 text-sm font-black rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-violet-300 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+            className="mt-4 w-full py-3 text-sm font-black rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-[#93C2AE] hover:text-[#2E6B59] dark:hover:text-[#6BA88F] transition-colors"
           >
             ✓ Mark as Read (+10 XP)
           </button>
@@ -331,7 +331,7 @@ const ReadingSection: React.FC = () => {
 
       {/* Hero */}
       <div className="relative rounded-3xl overflow-hidden mb-6 p-5 sm:p-6"
-        style={{ background: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)' }}>
+        style={{ background: 'linear-gradient(135deg, #0D141F 0%, #1D4436 50%, #2E6B59 100%)' }}>
         <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['읽기', '독해', '이해', '단어', '문장', '한국어'].map((w, i) => (
             <span key={i} className="absolute text-white/5 font-black"
@@ -368,7 +368,7 @@ const ReadingSection: React.FC = () => {
             className={`flex-1 py-2.5 text-xs font-black capitalize transition-all ${
               filter === f ? 'text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
             }`}
-            style={filter === f ? { background: 'linear-gradient(135deg, #203a43, #2c5364)' } : {}}
+            style={filter === f ? { background: 'linear-gradient(135deg, #1D4436, #2E6B59)' } : {}}
           >
             {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
@@ -393,7 +393,7 @@ const ReadingSection: React.FC = () => {
                   ? 'border-gray-100 dark:border-gray-800 opacity-75'
                   : read
                     ? 'border-green-200 dark:border-green-800 hover:border-green-300 dark:hover:border-green-700'
-                    : 'border-gray-100 dark:border-gray-800 hover:border-violet-200 dark:hover:border-violet-700 hover:shadow-md'
+                    : 'border-gray-100 dark:border-gray-800 hover:border-[#BFDACD] dark:hover:border-[#265847] hover:shadow-md'
                 }
               `}
             >
@@ -443,7 +443,7 @@ const ReadingSection: React.FC = () => {
                   tabIndex={0}
                   onClick={e => { e.stopPropagation(); startUpgrade(); }}
                   className="flex items-center justify-between px-4 py-2.5 border-t border-gray-100 dark:border-gray-800 transition-opacity hover:opacity-90 cursor-pointer"
-                  style={{ background: 'linear-gradient(135deg, #1a1a2e, #16213e)' }}
+                  style={{ background: 'linear-gradient(135deg, #0D141F, #16202F)' }}
                 >
                   <span className="text-xs text-white/70">⭐ Premium · All passages + SRS</span>
                   <span className="text-xs font-black text-white">Unlock →</span>

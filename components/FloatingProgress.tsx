@@ -49,14 +49,14 @@ const FloatingProgress: React.FC<FloatingProgressProps> = ({ activeSection }) =>
           {/* Level + XP bar */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-semibold text-pink-500 dark:text-pink-400 uppercase tracking-wide">
+              <span className="text-xs font-semibold text-[#E4572E] dark:text-[#F07A55] uppercase tracking-wide">
                 Level {level} · {levelName}
               </span>
               <span className="text-xs text-gray-500 dark:text-gray-400">{totalXP.toLocaleString()} XP total</span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-1">
               <div
-                className="bg-pink-500 h-2 rounded-full transition-all duration-500"
+                className="bg-[#E4572E] h-2 rounded-full transition-all duration-500"
                 style={{ width: `${ringPct * 100}%` }}
               />
             </div>
@@ -94,9 +94,9 @@ const FloatingProgress: React.FC<FloatingProgressProps> = ({ activeSection }) =>
                 <div key={day.dateStr} className="flex-1 flex flex-col items-center gap-1">
                   <div className={`w-full aspect-square rounded-sm ${
                     day.studied
-                      ? 'bg-pink-500'
+                      ? 'bg-[#E4572E]'
                       : day.isToday
-                        ? 'bg-gray-200 dark:bg-gray-700 ring-1 ring-pink-400'
+                        ? 'bg-gray-200 dark:bg-gray-700 ring-1 ring-[#F07A55]'
                         : 'bg-gray-200 dark:bg-gray-700'
                   }`} />
                   <span className="text-[9px] text-gray-400 dark:text-gray-500">{day.label}</span>
@@ -124,7 +124,7 @@ const FloatingProgress: React.FC<FloatingProgressProps> = ({ activeSection }) =>
       {/* Floating Button */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`relative bg-pink-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 w-14 h-14 ${
+        className={`relative bg-[#E4572E] text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 w-14 h-14 ${
           isExpanded ? 'scale-110' : 'hover:scale-105'
         }`}
         aria-label="Learning progress"

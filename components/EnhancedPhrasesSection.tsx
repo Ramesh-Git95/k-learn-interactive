@@ -20,11 +20,11 @@ const CONTEXT_COLORS: Record<string, string> = {
   'Shopping':       '#10B981',
   'Restaurant':     '#F97316',
   'Directions':     '#6366F1',
-  'Introductions':  '#EC4899',
-  'General':        '#8B5CF6',
-  'Communication':  '#06B6D4',
+  'Introductions':  '#E4572E',
+  'General':        '#3F8571',
+  'Communication':  '#2F5D8A',
   'Feelings':       '#F59E0B',
-  'Health':         '#3B82F6',
+  'Health':         '#24476B',
   'Emergency':      '#EF4444',
 };
 
@@ -86,7 +86,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
               <span className="text-4xl">💬</span>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-white">Common Phrases</h1>
-                <p className="text-pink-100 text-sm">일상 표현 · {filteredPhrases.length} phrases</p>
+                <p className="text-[#FBDCCB] text-sm">일상 표현 · {filteredPhrases.length} phrases</p>
               </div>
             </div>
             <p className="text-white/80 text-sm max-w-lg">
@@ -133,7 +133,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
               const origIdx = commonPhrases.findIndex(p => p.korean === phrase.korean);
               const studied = isPhraseStudied(origIdx);
               const isBlocked = limitReached && !studied;
-              const ctxColor = CONTEXT_COLORS[phrase.context] || '#8B5CF6';
+              const ctxColor = CONTEXT_COLORS[phrase.context] || '#3F8571';
 
               return (
                 <li
@@ -163,7 +163,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
                         {/* Action buttons */}
                         <div className="flex items-center gap-1 flex-shrink-0">
                           <Tooltip content="Listen to Korean pronunciation" position="top" maxWidth="max-w-xs">
-                            <button onClick={() => speak(phrase.korean)} className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors text-base">
+                            <button onClick={() => speak(phrase.korean)} className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:text-[#E4572E] hover:bg-[#FDEEE6] dark:hover:bg-[#5F2010]/20 transition-colors text-base">
                               🔊
                             </button>
                           </Tooltip>
@@ -214,7 +214,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
               {peek.map(phrase => (
                 <div
                   key={phrase.korean}
-                  className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 cursor-pointer hover:border-violet-300 dark:hover:border-violet-700 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#93C2AE] dark:hover:border-[#265847] transition-colors"
                   onClick={openUpgradeModal}
                 >
                   <div className="min-w-0">

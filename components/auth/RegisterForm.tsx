@@ -46,7 +46,7 @@ export function RegisterForm({ onToggleMode, onSuccess }: RegisterFormProps) {
     }
   };
 
-  const inputBase = 'w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-pink-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm';
+  const inputBase = 'w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-[#F07A55] focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm';
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -153,14 +153,14 @@ export function RegisterForm({ onToggleMode, onSuccess }: RegisterFormProps) {
                 type="checkbox"
                 checked={acceptTerms}
                 onChange={e => setAcceptTerms(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded accent-pink-500"
+                className="mt-0.5 h-4 w-4 rounded accent-[#E4572E]"
                 disabled={isLoading}
               />
               <span className="text-xs text-gray-600 dark:text-gray-400">
                 I agree to the{' '}
-                <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-pink-500 hover:underline font-bold">Terms of Service</a>
+                <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#E4572E] hover:underline font-bold">Terms of Service</a>
                 {' '}and{' '}
-                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-pink-500 hover:underline font-bold">Privacy Policy</a>
+                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[#E4572E] hover:underline font-bold">Privacy Policy</a>
               </span>
             </label>
 
@@ -182,7 +182,7 @@ export function RegisterForm({ onToggleMode, onSuccess }: RegisterFormProps) {
           {onToggleMode && (
             <p className="mt-4 text-sm text-center text-gray-500 dark:text-gray-400">
               Already have an account?{' '}
-              <button onClick={onToggleMode} className="font-black text-pink-500 dark:text-pink-400 hover:underline" disabled={isLoading}>
+              <button onClick={onToggleMode} className="font-black text-[#E4572E] dark:text-[#F07A55] hover:underline" disabled={isLoading}>
                 Sign in here
               </button>
             </p>

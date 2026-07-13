@@ -199,7 +199,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
           position: absolute;
           bottom: 0; left: 0; right: 0;
           height: 1px;
-          background: linear-gradient(90deg, transparent, #EC4899 30%, #8B5CF6 70%, transparent);
+          background: linear-gradient(90deg, transparent, #E4572E 30%, #3F8571 70%, transparent);
           opacity: 0;
           transition: opacity 0.3s;
         }

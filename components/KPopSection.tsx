@@ -16,10 +16,10 @@ import { useUpgrade } from '../hooks/useUpgrade';
 const TYPE_COLOR: Record<string, string> = {
   noun:       'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400',
   verb:       'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-  adjective:  'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
+  adjective:  'bg-[#DDEBE4] text-[#265847] dark:bg-[#153327]/30 dark:text-[#6BA88F]',
   adverb:     'bg-amber-100  text-amber-700  dark:bg-amber-900/30  dark:text-amber-400',
   particle:   'bg-gray-100   text-gray-600   dark:bg-gray-800      dark:text-gray-400',
-  expression: 'bg-pink-100   text-pink-700   dark:bg-pink-900/30   dark:text-pink-400',
+  expression: 'bg-[#FBDCCB]   text-[#A83619]   dark:bg-[#5F2010]/30   dark:text-[#F07A55]',
 };
 
 interface PopoverProps {
@@ -104,7 +104,7 @@ function WordPopover({ word, anchorRef, onClose, onAddSRS, isAuthenticated, isPr
             </button>
           ) : (
             <button onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' })); }}
-              className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/20 hover:bg-pink-100 transition-colors">
+              className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-[#C13F22] dark:text-[#F07A55] bg-[#FDEEE6] dark:bg-[#5F2010]/20 hover:bg-[#FBDCCB] transition-colors">
               Sign up
             </button>
           )}
@@ -142,7 +142,7 @@ function WordChip({ word, isAuthenticated, isPremium, onAddSRS }: {
         onClick={handleClick}
         className={`px-1.5 py-0.5 rounded-lg text-base sm:text-lg font-bold transition-all ${
           open
-            ? 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 scale-110'
+            ? 'bg-[#FBDCCB] dark:bg-[#5F2010]/30 text-[#A83619] dark:text-[#F5A183] scale-110'
             : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-white hover:scale-105'
         }`}
       >
@@ -184,7 +184,7 @@ function LyricsLine({ line, isAuthenticated, isPremium, onAddSRS, showHint }: {
           />
         ))}
         {showHint && (
-          <span className="ml-2 text-[10px] font-semibold text-pink-400 dark:text-pink-500 self-center animate-pulse">
+          <span className="ml-2 text-[10px] font-semibold text-[#F07A55] dark:text-[#E4572E] self-center animate-pulse">
             ← tap a word
           </span>
         )}
@@ -327,7 +327,7 @@ function ArtistSongs({ artist, isPremium, isAuthenticated, onSelectSong, onBack 
               className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
                 locked
                   ? 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40 cursor-not-allowed'
-                  : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-pink-200 dark:hover:border-pink-800 hover:shadow-md'
+                  : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-[#F8C4AE] dark:hover:border-[#7E2A15] hover:shadow-md'
               }`}
             >
               <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style={{ background: artist.gradient }}>
@@ -421,7 +421,7 @@ const KPopSection: React.FC = () => {
       {/* Hero */}
       <div
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
-        style={{ background: 'linear-gradient(135deg, #6D28D9 0%, #BE185D 60%, #059669 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #8E3B54 0%, #C13F22 55%, #3F8571 100%)' }}
       >
         <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['BTS','BLACKPINK','NewJeans','aespa','K-POP','한국어'].map((w, i) => (
@@ -434,7 +434,7 @@ const KPopSection: React.FC = () => {
               <span className="text-4xl">🎵</span>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-white">K-Pop Lyrics Mode</h1>
-                <p className="text-purple-100 text-sm">Learn Korean through music · {totalWords}+ words</p>
+                <p className="text-[#DDEBE4] text-sm">Learn Korean through music · {totalWords}+ words</p>
               </div>
             </div>
             <p className="text-white/80 text-sm max-w-lg">
@@ -451,17 +451,17 @@ const KPopSection: React.FC = () => {
 
       {/* Guest banner */}
       {!isAuthenticated && (
-        <div className="mb-6 p-4 rounded-2xl border border-purple-200 dark:border-purple-800/40 bg-purple-50 dark:bg-purple-900/10 flex items-start gap-3">
+        <div className="mb-6 p-4 rounded-2xl border border-[#BFDACD] dark:border-[#1D4436]/40 bg-[#EEF5F1] dark:bg-[#153327]/10 flex items-start gap-3">
           <span className="text-2xl">🎵</span>
           <div className="flex-1">
-            <h3 className="font-bold text-purple-800 dark:text-purple-200 mb-0.5">Tap words to learn!</h3>
-            <p className="text-sm text-purple-600 dark:text-purple-300 mb-2">
+            <h3 className="font-bold text-[#1D4436] dark:text-[#BFDACD] mb-0.5">Tap words to learn!</h3>
+            <p className="text-sm text-[#2E6B59] dark:text-[#93C2AE] mb-2">
               Sign in to see word meanings, romanization, and add words to your SRS deck.
             </p>
             <button
               onClick={openRegister}
               className="text-sm font-bold text-white px-4 py-1.5 rounded-xl transition-transform hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #6D28D9, #BE185D)' }}
+              style={{ background: 'linear-gradient(135deg, #8E3B54, #E4572E)' }}
             >
               Sign up free 🚀
             </button>

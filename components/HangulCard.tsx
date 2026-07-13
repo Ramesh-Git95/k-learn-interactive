@@ -56,7 +56,7 @@ const HangulCard: React.FC<HangulCardProps> = ({ char, onStudy, isStudied = fals
           <span>🔊</span>
           <span>Tap to hear!</span>
         </div>
-        <div style={{ width: 0, height: 0, borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '6px solid #8B5CF6' }} />
+        <div style={{ width: 0, height: 0, borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '6px solid #3F8571' }} />
       </div>
     )}
     <button
@@ -65,10 +65,10 @@ const HangulCard: React.FC<HangulCardProps> = ({ char, onStudy, isStudied = fals
       title={`${char.char} - ${char.romanization}. Click to hear pronunciation.`}
       aria-label={ariaLabel}
       aria-pressed={isStudied}
-      className={`group relative flex flex-col items-center justify-center w-full rounded-2xl cursor-pointer aspect-square transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 ${
+      className={`group relative flex flex-col items-center justify-center w-full rounded-2xl cursor-pointer aspect-square transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F07A55] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950 ${
         isStudied
           ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-300 dark:border-green-700 shadow-md'
-          : 'bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm hover:border-pink-200 dark:hover:border-pink-800'
+          : 'bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm hover:border-[#F8C4AE] dark:hover:border-[#7E2A15]'
       }`}
     >
       {/* Studied checkmark */}

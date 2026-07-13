@@ -464,7 +464,7 @@ const TopikPrepSection: React.FC = () => {
 
           {/* Sentence */}
           {q.sentence && (
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-5 py-4 mb-5 border-l-4 border-l-violet-400">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-5 py-4 mb-5 border-l-4 border-l-[#6BA88F]">
               <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-relaxed">{q.sentence}</p>
             </div>
           )}
@@ -474,7 +474,7 @@ const TopikPrepSection: React.FC = () => {
             {q.options.map((opt, i) => {
               const isChosen = chosen === i;
               const showFeedback = chosen !== null;
-              let cls = 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-pink-300 dark:hover:border-pink-700 cursor-pointer';
+              let cls = 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-[#F5A183] dark:hover:border-[#A83619] cursor-pointer';
               if (showFeedback) {
                 if (i === q.answer) cls = 'bg-green-50 dark:bg-green-900/20 border-2 border-green-400 text-gray-900 dark:text-white cursor-default';
                 else if (isChosen) cls = 'bg-red-50 dark:bg-red-900/20 border-2 border-red-400 text-gray-900 dark:text-white opacity-80 cursor-default';
@@ -528,7 +528,7 @@ const TopikPrepSection: React.FC = () => {
       )}
       {isFree && (
         <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
-          {FREE_QUESTION_LIMIT - Math.min(totalAnswered, FREE_QUESTION_LIMIT)} sample question{FREE_QUESTION_LIMIT - Math.min(totalAnswered, FREE_QUESTION_LIMIT) !== 1 ? 's' : ''} remaining · <button onClick={openUpgradeModal} className="text-violet-500 font-black hover:underline">Unlock all 36 →</button>
+          {FREE_QUESTION_LIMIT - Math.min(totalAnswered, FREE_QUESTION_LIMIT)} sample question{FREE_QUESTION_LIMIT - Math.min(totalAnswered, FREE_QUESTION_LIMIT) !== 1 ? 's' : ''} remaining · <button onClick={openUpgradeModal} className="text-[#3F8571] font-black hover:underline">Unlock all 36 →</button>
         </p>
       )}
     </div>

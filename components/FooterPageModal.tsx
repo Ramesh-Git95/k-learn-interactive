@@ -55,9 +55,9 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{a}</p>
           </div>
         ))}
-        <div className="rounded-2xl p-5 text-center" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.06), rgba(139,92,246,0.06))' }}>
+        <div className="rounded-2xl p-5 text-center" style={{ background: 'linear-gradient(135deg, rgba(228,87,46,0.06), rgba(63,133,113,0.06))' }}>
           <p className="text-sm text-gray-600 dark:text-gray-400">Still need help?</p>
-          <a href="mailto:support@k-learn.app" className="font-black text-pink-500 hover:underline text-sm">support@k-learn.app</a>
+          <a href="mailto:support@k-learn.app" className="font-black text-[#E4572E] hover:underline text-sm">support@k-learn.app</a>
         </div>
       </div>
     ),
@@ -77,7 +77,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
           {
             step: '1',
             title: 'Master Hangul First (Week 1)',
-            color: '#EC4899',
+            color: '#E4572E',
             tips: [
               'Hangul has 14 consonants and 10 vowels — you can learn to read in 2–3 days',
               'Use the interactive Hangul section daily for 15 minutes',
@@ -88,7 +88,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
           {
             step: '2',
             title: 'Build Core Vocabulary (Weeks 2–4)',
-            color: '#8B5CF6',
+            color: '#3F8571',
             tips: [
               'Start with the Greetings and Numbers categories',
               'Aim for 5–10 new words per day — consistency beats cramming',
@@ -99,7 +99,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
           {
             step: '3',
             title: 'Learn Grammar Patterns (Month 2)',
-            color: '#06B6D4',
+            color: '#2F5D8A',
             tips: [
               'Korean grammar is SOV (Subject-Object-Verb) — opposite of English',
               'Learn one pattern per day and immediately use it in AI Chat',
@@ -201,7 +201,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
           </div>
         ))}
 
-        <div className="rounded-2xl p-5 text-center border border-pink-100 dark:border-pink-800/30" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.04), rgba(139,92,246,0.04))' }}>
+        <div className="rounded-2xl p-5 text-center border border-[#FBDCCB] dark:border-[#7E2A15]/30" style={{ background: 'linear-gradient(135deg, rgba(228,87,46,0.04), rgba(63,133,113,0.04))' }}>
           <p className="text-sm font-black text-gray-900 dark:text-white mb-1">Community Guidelines</p>
           <p className="text-xs text-gray-500 dark:text-gray-400">Be kind and respectful. Mistakes are how we learn. All levels welcome.</p>
         </div>
@@ -230,7 +230,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
             { n: '24',  label: 'Culture cards' },
           ].map(({ n, label }) => (
             <div key={label} className="border border-gray-100 dark:border-gray-800 rounded-2xl p-4">
-              <div className="text-2xl font-black text-pink-500 mb-1">{n}</div>
+              <div className="text-2xl font-black text-[#E4572E] mb-1">{n}</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">{label}</div>
             </div>
           ))}
@@ -255,7 +255,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
 
         <div className="rounded-2xl p-5 text-center border border-gray-100 dark:border-gray-800">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Questions or feedback?</p>
-          <a href="mailto:hello@k-learn.app" className="font-black text-pink-500 hover:underline text-sm">hello@k-learn.app</a>
+          <a href="mailto:hello@k-learn.app" className="font-black text-[#E4572E] hover:underline text-sm">hello@k-learn.app</a>
         </div>
       </div>
     ),

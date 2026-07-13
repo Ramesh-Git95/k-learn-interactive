@@ -98,7 +98,7 @@ const HangulSection: React.FC<HangulSectionProps> = ({ progress = {}, toggleProg
             <span className="text-4xl font-black text-white" style={{ fontFamily: 'Noto Sans KR, sans-serif' }}>한</span>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight">The Korean Alphabet</h1>
-              <p className="text-pink-100 font-semibold text-sm">한글 · Hangul</p>
+              <p className="text-[#FBDCCB] font-semibold text-sm">한글 · Hangul</p>
             </div>
           </div>
           <p className="text-white/80 text-sm sm:text-base max-w-xl leading-relaxed">
@@ -110,9 +110,9 @@ const HangulSection: React.FC<HangulSectionProps> = ({ progress = {}, toggleProg
       {/* Progress Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {[
-          { label: 'Consonants Learned', value: `${consonantProgress.studied}/${consonantProgress.total}`, pct: consonantProgress.percentage, color: '#EC4899', emoji: '🔷' },
-          { label: 'Vowels Learned', value: `${vowelProgress.studied}/${vowelProgress.total}`, pct: vowelProgress.percentage, color: '#8B5CF6', emoji: '🔶' },
-          { label: 'Overall Progress', value: `${overallPct}%`, pct: overallPct, color: '#06B6D4', emoji: '🏆' },
+          { label: 'Consonants Learned', value: `${consonantProgress.studied}/${consonantProgress.total}`, pct: consonantProgress.percentage, color: '#E4572E', emoji: '🔷' },
+          { label: 'Vowels Learned', value: `${vowelProgress.studied}/${vowelProgress.total}`, pct: vowelProgress.percentage, color: '#3F8571', emoji: '🔶' },
+          { label: 'Overall Progress', value: `${overallPct}%`, pct: overallPct, color: '#2F5D8A', emoji: '🏆' },
         ].map(({ label, value, pct, color, emoji }) => (
           <div key={label} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
@@ -133,22 +133,22 @@ const HangulSection: React.FC<HangulSectionProps> = ({ progress = {}, toggleProg
       {/* Syllable Blocks explainer */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5 sm:p-6 mb-10">
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center text-base" style={{ background: 'linear-gradient(135deg, #06B6D4, #8B5CF6)' }}>📦</div>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center text-base" style={{ background: 'linear-gradient(135deg, #2F5D8A, #3F8571)' }}>📦</div>
           <h2 className="text-lg font-black text-gray-900 dark:text-white">Syllable Blocks <span className="text-gray-400 dark:text-gray-500 font-semibold">(음절)</span></h2>
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
           Korean is written in syllable blocks. Each block has at least one consonant and one vowel stacked together.
         </p>
         <div className="space-y-3">
-          <div className="flex items-start gap-3 p-3 rounded-xl bg-pink-50 dark:bg-pink-900/10 border border-pink-100 dark:border-pink-900/30">
+          <div className="flex items-start gap-3 p-3 rounded-xl bg-[#FDEEE6] dark:bg-[#5F2010]/10 border border-[#FBDCCB] dark:border-[#5F2010]/30">
             <span className="text-2xl font-black" style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>가</span>
             <div>
               <p className="text-sm font-bold text-gray-800 dark:text-gray-200">Consonant + Vowel</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">ㄱ + ㅏ = 가 (ga) — the simplest block</p>
             </div>
           </div>
-          <div className="flex items-start gap-3 p-3 rounded-xl bg-violet-50 dark:bg-violet-900/10 border border-violet-100 dark:border-violet-900/30">
-            <span className="text-2xl font-black" style={{ background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>각</span>
+          <div className="flex items-start gap-3 p-3 rounded-xl bg-[#EEF5F1] dark:bg-[#153327]/10 border border-[#DDEBE4] dark:border-[#153327]/30">
+            <span className="text-2xl font-black" style={{ background: 'linear-gradient(135deg, #3F8571, #2F5D8A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>각</span>
             <div>
               <p className="text-sm font-bold text-gray-800 dark:text-gray-200">Consonant + Vowel + 받침 (Batchim)</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">ㄱ + ㅏ + ㄱ = 각 (gak) — a final consonant at the bottom</p>

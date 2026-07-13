@@ -75,7 +75,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
       <div className="relative w-full max-w-lg bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden">
 
         {/* Top gradient bar */}
-        <div className="h-1.5 w-full" style={{ background: 'linear-gradient(90deg,#EC4899,#8B5CF6,#06B6D4)' }} />
+        <div className="h-1.5 w-full" style={{ background: 'linear-gradient(90deg,#E4572E,#3F8571,#2F5D8A)' }} />
 
         {/* Step indicator */}
         <div className="flex items-center justify-center gap-2 pt-6 pb-2">
@@ -108,7 +108,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
                     onClick={() => setGoal(g.id)}
                     className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all ${
                       goal === g.id
-                        ? 'border-pink-400 bg-pink-50 dark:bg-pink-900/20'
+                        ? 'border-[#F07A55] bg-[#FDEEE6] dark:bg-[#5F2010]/20'
                         : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'
                     }`}
                   >
@@ -149,7 +149,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
                     onClick={() => setLevel(l.id)}
                     className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all ${
                       level === l.id
-                        ? 'border-violet-400 bg-violet-50 dark:bg-violet-900/20'
+                        ? 'border-[#6BA88F] bg-[#EEF5F1] dark:bg-[#153327]/20'
                         : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'
                     }`}
                   >
@@ -159,7 +159,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
                       <div className="text-gray-400 text-xs">{l.sub}</div>
                     </div>
                     {level === l.id && (
-                      <span className="ml-auto w-5 h-5 rounded-full flex items-center justify-center text-white text-xs" style={{ background: 'linear-gradient(135deg,#8B5CF6,#06B6D4)' }}>✓</span>
+                      <span className="ml-auto w-5 h-5 rounded-full flex items-center justify-center text-white text-xs" style={{ background: 'linear-gradient(135deg,#3F8571,#2F5D8A)' }}>✓</span>
                     )}
                   </button>
                 ))}
@@ -175,7 +175,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
                   onClick={() => setStep(3)}
                   disabled={!level}
                   className="flex-1 py-3.5 rounded-2xl text-white font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
-                  style={{ background: 'linear-gradient(135deg,#8B5CF6,#06B6D4)' }}
+                  style={{ background: 'linear-gradient(135deg,#3F8571,#2F5D8A)' }}
                 >
                   Next →
                 </button>

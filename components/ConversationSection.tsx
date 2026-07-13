@@ -148,7 +148,7 @@ const ConversationSection: React.FC = () => {
             )}
             <button
               onClick={() => setTab('scenarios')}
-              className="text-sm font-black text-violet-500 hover:underline"
+              className="text-sm font-black text-[#3F8571] hover:underline"
             >
               Practice with scripted scenarios instead →
             </button>
@@ -180,7 +180,7 @@ const ConversationSection: React.FC = () => {
         {!isPremium && (
           <button
             onClick={startUpgrade}
-            className="text-xs font-black text-pink-500 hover:underline"
+            className="text-xs font-black text-[#E4572E] hover:underline"
           >
             Upgrade for 50/day →
           </button>
@@ -199,7 +199,7 @@ const ConversationSection: React.FC = () => {
           <p className="text-white/80 text-sm mb-4">
             Chat freely in Korean. Your AI teacher will respond naturally and correct your mistakes.
           </p>
-          <span className="inline-block px-6 py-2.5 bg-white text-purple-700 text-sm font-black rounded-xl hover:scale-[1.02] transition-transform">
+          <span className="inline-block px-6 py-2.5 bg-white text-[#265847] text-sm font-black rounded-xl hover:scale-[1.02] transition-transform">
             Start Chatting →
           </span>
         </div>

@@ -77,7 +77,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
         </div>
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
           <div 
-            className="bg-pink-500 dark:bg-pink-500 h-2 rounded-full transition-all duration-500 ease-out"
+            className="bg-[#E4572E] dark:bg-[#E4572E] h-2 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${progressPercentage}%` }}
           ></div>
         </div>

@@ -20,7 +20,7 @@ const GradBtn = ({ onClick, disabled, className = '', children }: { onClick?: ()
   </button>
 );
 
-const inputCls = 'w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-pink-500 text-sm transition-colors';
+const inputCls = 'w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#F07A55] dark:focus:ring-[#E4572E] text-sm transition-colors';
 const labelCls = 'block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide';
 
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
@@ -61,8 +61,8 @@ function DeckCard({ deck, dueCount, deckStats, onStartStudy, onAddCard, onEditDe
 
         <div className="grid grid-cols-2 gap-3 mb-4">
           {[
-            { value: deckStats.totalCards, label: 'Cards', color: '#8B5CF6' },
-            { value: `${Math.round(deckStats.accuracy || 0)}%`, label: 'Accuracy', color: '#EC4899' },
+            { value: deckStats.totalCards, label: 'Cards', color: '#3F8571' },
+            { value: `${Math.round(deckStats.accuracy || 0)}%`, label: 'Accuracy', color: '#E4572E' },
           ].map(({ value, label, color }) => (
             <div key={label} className="text-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60">
               <div className="text-xl font-black" style={{ color }}>{value}</div>
@@ -250,7 +250,7 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm" style={{ background: 'linear-gradient(135deg, #8B5CF6, #EC4899)' }}>🧠</div>
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm" style={{ background: 'linear-gradient(135deg, #3F8571, #E4572E)' }}>🧠</div>
             <div>
               <h1 className="text-xl font-black text-gray-900 dark:text-white">Spaced Repetition</h1>
               <p className="text-xs text-gray-500 dark:text-gray-400">SM-2 algorithm · review before you forget</p>
@@ -259,7 +259,7 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
           <div className="flex gap-2">
             <button
               onClick={() => { setShowQuickImport(true); setQiImported(false); }}
-              className="px-4 py-2.5 text-sm font-bold rounded-xl border border-violet-200 dark:border-violet-700 text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors"
+              className="px-4 py-2.5 text-sm font-bold rounded-xl border border-[#BFDACD] dark:border-[#265847] text-[#2E6B59] dark:text-[#6BA88F] hover:bg-[#EEF5F1] dark:hover:bg-[#153327]/20 transition-colors"
             >
               ⚡ Quick Import
             </button>
@@ -269,9 +269,9 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { value: stats.todayReviews, label: "Today's Reviews", color: '#8B5CF6' },
-            { value: stats.todayNew, label: 'New Cards', color: '#06B6D4' },
-            { value: stats.totalDue, label: 'Due for Review', color: '#EC4899' },
+            { value: stats.todayReviews, label: "Today's Reviews", color: '#3F8571' },
+            { value: stats.todayNew, label: 'New Cards', color: '#2F5D8A' },
+            { value: stats.totalDue, label: 'Due for Review', color: '#E4572E' },
             { value: `${stats.streakDays}🔥`, label: 'Day Streak', color: '#F59E0B' },
           ].map(({ value, label, color }) => (
             <div key={label} className="text-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60">
@@ -362,7 +362,7 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
                 </div>
               </div>
 
-              <div className="rounded-xl bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800 p-3 text-xs text-violet-700 dark:text-violet-300">
+              <div className="rounded-xl bg-[#EEF5F1] dark:bg-[#153327]/20 border border-[#DDEBE4] dark:border-[#1D4436] p-3 text-xs text-[#265847] dark:text-[#93C2AE]">
                 Creates a new deck "{qiSource === 'vocabulary' ? qiCategory : 'Common Phrases'}" with{' '}
                 {qiCount === 0
                   ? `all ${qiSource === 'vocabulary' ? (vocabulary.find(c => c.name === qiCategory)?.items.length ?? 0) : commonPhrases.length}`

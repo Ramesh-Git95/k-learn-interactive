@@ -114,7 +114,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
             <span style={{ display: 'inline-block', animation: 'flipHintTap 0.5s ease-in-out infinite alternate' }}>👇</span>
             <span>Tap to see the meaning!</span>
           </div>
-          <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '7px solid #8B5CF6' }} />
+          <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '7px solid #3F8571' }} />
         </div>
       )}
 
@@ -137,8 +137,8 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
               : isStudied
               ? 'bg-white dark:bg-gray-900 border-green-300 dark:border-green-700 cursor-pointer hover:shadow-lg'
               : showFlipBubble
-              ? 'bg-white dark:bg-gray-900 border-pink-400 dark:border-pink-500 cursor-pointer hover:shadow-lg ring-2 ring-pink-300 dark:ring-pink-600'
-              : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 cursor-pointer hover:shadow-lg hover:border-pink-200 dark:hover:border-pink-800'
+              ? 'bg-white dark:bg-gray-900 border-[#F07A55] dark:border-[#E4572E] cursor-pointer hover:shadow-lg ring-2 ring-[#F5A183] dark:ring-[#C13F22]'
+              : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 cursor-pointer hover:shadow-lg hover:border-[#F8C4AE] dark:hover:border-[#7E2A15]'
           }`}>
             {isStudied && (
               <div className="absolute top-2 left-2 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center shadow-sm">
@@ -146,7 +146,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
               </div>
             )}
             <div className="absolute top-2 right-2 flex gap-1">
-              <button onClick={speak} className="p-1.5 rounded-lg text-gray-400 hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors" aria-label={`Pronounce ${item.korean}`}>
+              <button onClick={speak} className="p-1.5 rounded-lg text-gray-400 hover:text-[#E4572E] hover:bg-[#FDEEE6] dark:hover:bg-[#5F2010]/20 transition-colors" aria-label={`Pronounce ${item.korean}`}>
                 🔊
               </button>
               <button onClick={handleBookmark} className={`p-1.5 rounded-lg transition-colors ${isBookmarked ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-400 hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'}`} aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}>
@@ -188,7 +188,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
             onClick={e => requireAuth(e, () => setShowExamples(true))}
             title={isAuthenticated ? 'See example sentences' : 'Sign in to see examples'}
             className="text-xs font-semibold px-3 py-1.5 rounded-xl transition-all hover:scale-105"
-            style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.1), rgba(139,92,246,0.1))', color: '#EC4899' }}
+            style={{ background: 'linear-gradient(135deg, rgba(228,87,46,0.1), rgba(63,133,113,0.1))', color: '#E4572E' }}
           >
             {isAuthenticated ? '💡 Examples' : '🔒 Examples'}
           </button>
@@ -197,7 +197,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
           onClick={e => requireAuth(e, () => setShowAddToSRS(true))}
           title={isAuthenticated ? 'Add this word to a spaced repetition deck' : 'Sign in to add to SRS'}
           className="text-xs font-semibold px-3 py-1.5 rounded-xl transition-all hover:scale-105"
-          style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(6,182,212,0.1))', color: '#8B5CF6' }}
+          style={{ background: 'linear-gradient(135deg, rgba(63,133,113,0.1), rgba(47,93,138,0.1))', color: '#3F8571' }}
         >
           {isAuthenticated ? '＋ SRS' : '🔒 SRS'}
         </button>
@@ -222,7 +222,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
 
             <div className="space-y-3">
               {examples.map((ex, i) => (
-                <div key={i} className="p-4 rounded-xl bg-pink-50 dark:bg-pink-900/10 border-l-4 border-l-pink-400">
+                <div key={i} className="p-4 rounded-xl bg-[#FDEEE6] dark:bg-[#5F2010]/10 border-l-4 border-l-[#F07A55]">
                   <div className="flex items-start justify-between gap-2">
                     <p className="font-bold text-gray-900 dark:text-white flex-1 text-base">{ex.korean}</p>
                     <button onClick={e => speakExample(ex.korean, e)} aria-label="Pronounce example" className="flex-shrink-0 w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-400 transition-colors">

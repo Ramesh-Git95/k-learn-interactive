@@ -72,7 +72,7 @@ const BookmarkList: React.FC<BookmarkListProps> = ({ bookmarks, toggleBookmark }
                       <button
                         onClick={() => speak(item.korean)}
                         aria-label={`Pronounce ${item.korean}`}
-                        className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors"
+                        className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:text-[#E4572E] hover:bg-[#FDEEE6] dark:hover:bg-[#5F2010]/20 transition-colors"
                       >
                         <Volume2 className="w-4 h-4" />
                       </button>

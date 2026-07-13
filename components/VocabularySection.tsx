@@ -99,7 +99,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
       {/* Hero */}
       <div
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
-        style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 60%, #F59E0B 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #3F8571 0%, #E4572E 60%, #F59E0B 100%)' }}
       >
         <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['안녕','사랑','감사','행복','韓','가나다'].map((w, i) => (
@@ -112,7 +112,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
               <span className="text-4xl">📖</span>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-white">Essential Vocabulary</h1>
-                <p className="text-purple-100 text-sm">필수 어휘 · {totalWords} words</p>
+                <p className="text-[#DDEBE4] text-sm">필수 어휘 · {totalWords} words</p>
               </div>
             </div>
             <p className="text-white/80 text-sm max-w-lg">
@@ -131,11 +131,11 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
 
       {/* Guest banner */}
       {!isAuthenticated && (
-        <div className="mb-6 p-4 rounded-2xl border border-pink-200 dark:border-pink-800/40 bg-pink-50 dark:bg-pink-900/10 flex items-start gap-3">
+        <div className="mb-6 p-4 rounded-2xl border border-[#F8C4AE] dark:border-[#7E2A15]/40 bg-[#FDEEE6] dark:bg-[#5F2010]/10 flex items-start gap-3">
           <span className="text-2xl">👋</span>
           <div className="flex-1">
-            <h3 className="font-bold text-pink-800 dark:text-pink-200 mb-0.5">Welcome, Korean learner!</h3>
-            <p className="text-sm text-pink-600 dark:text-pink-300 mb-2">You're exploring as a guest. Flip any card and start learning — sign up to save progress!</p>
+            <h3 className="font-bold text-[#7E2A15] dark:text-[#F8C4AE] mb-0.5">Welcome, Korean learner!</h3>
+            <p className="text-sm text-[#C13F22] dark:text-[#F5A183] mb-2">You're exploring as a guest. Flip any card and start learning — sign up to save progress!</p>
             <button onClick={openRegister} className="text-sm font-bold text-white px-4 py-1.5 rounded-xl transition-transform hover:scale-105" style={{ background: 'var(--brand-gradient)' }}>
               Sign up free 🚀
             </button>

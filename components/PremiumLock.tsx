@@ -42,13 +42,13 @@ export const LockedCard: React.FC<LockedCardProps> = ({ label, sublabel, emoji =
   const { openUpgradeModal } = useUpgradeModal();
   return (
     <div
-      className="relative flex flex-col items-center justify-center text-center p-5 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 cursor-pointer hover:border-violet-300 dark:hover:border-violet-600 transition-colors group"
+      className="relative flex flex-col items-center justify-center text-center p-5 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 cursor-pointer hover:border-[#93C2AE] dark:hover:border-[#2E6B59] transition-colors group"
       onClick={onClick ?? openUpgradeModal}
     >
       <div className="text-2xl mb-2 opacity-50 group-hover:opacity-75 transition-opacity">{emoji}</div>
-      <p className="text-sm font-black text-gray-400 dark:text-gray-500 group-hover:text-violet-500 dark:group-hover:text-violet-400 transition-colors">{label}</p>
+      <p className="text-sm font-black text-gray-400 dark:text-gray-500 group-hover:text-[#3F8571] dark:group-hover:text-[#6BA88F] transition-colors">{label}</p>
       {sublabel && <p className="text-xs text-gray-300 dark:text-gray-600 mt-0.5">{sublabel}</p>}
-      <span className="mt-2.5 text-[10px] font-black px-2 py-0.5 rounded-full bg-gradient-to-r from-pink-100 to-violet-100 dark:from-pink-900/30 dark:to-violet-900/30 text-violet-600 dark:text-violet-400">
+      <span className="mt-2.5 text-[10px] font-black px-2 py-0.5 rounded-full bg-gradient-to-r from-[#FBDCCB] to-[#DDEBE4] dark:from-[#5F2010]/30 dark:to-[#153327]/30 text-[#2E6B59] dark:text-[#6BA88F]">
         ⭐ Premium
       </span>
     </div>
@@ -68,7 +68,7 @@ export const LockedRowBanner: React.FC<LockedRowBannerProps> = ({ count, label =
   const noun = count === 1 ? (singularLabel ?? label.replace(/s$/, '')) : label;
   return (
     <div
-      className="flex items-center justify-between rounded-2xl border border-dashed border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/10 px-5 py-4 cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-900/20 transition-colors"
+      className="flex items-center justify-between rounded-2xl border border-dashed border-[#BFDACD] dark:border-[#1D4436] bg-[#EEF5F1] dark:bg-[#153327]/10 px-5 py-4 cursor-pointer hover:bg-[#DDEBE4] dark:hover:bg-[#153327]/20 transition-colors"
       onClick={openUpgradeModal}
     >
       <div className="flex items-center gap-3">
@@ -108,7 +108,7 @@ export const LockedTab: React.FC<LockedTabBadgeProps> = ({ children, isActive, o
     style={isActive ? { background: 'linear-gradient(135deg, #9CA3AF, #6B7280)' } : {}}
   >
     {children}
-    <span className="text-[9px] font-black bg-gradient-to-r from-pink-500 to-violet-500 text-transparent bg-clip-text">⭐</span>
+    <span className="text-[9px] font-black bg-gradient-to-r from-[#E4572E] to-[#3F8571] text-transparent bg-clip-text">⭐</span>
   </button>
 );
 
@@ -126,7 +126,7 @@ export const UpgradeNudge: React.FC<UpgradeNudgeProps> = ({ message, className =
       <span>{message}</span>
       <button
         onClick={openUpgradeModal}
-        className="font-black text-violet-500 hover:underline"
+        className="font-black text-[#3F8571] hover:underline"
       >
         See Premium →
       </button>

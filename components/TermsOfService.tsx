@@ -94,7 +94,7 @@ const TermsOfService: React.FC = () => {
         <div className="mt-6 text-center">
           <button
             onClick={() => window.history.back()}
-            className="text-sm text-violet-600 dark:text-violet-400 hover:underline font-bold"
+            className="text-sm text-[#2E6B59] dark:text-[#6BA88F] hover:underline font-bold"
           >
             ← Back
           </button>

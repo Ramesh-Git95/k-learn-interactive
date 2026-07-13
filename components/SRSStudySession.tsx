@@ -25,7 +25,7 @@ interface SRSStudySessionProps {
 const DIFFICULTY_CONFIG: Record<ReviewResult, { label: string; emoji: string; color: string; hoverColor: string }> = {
   again: { label: 'Again', emoji: '😓', color: '#EF4444', hoverColor: '#DC2626' },
   hard:  { label: 'Hard',  emoji: '😅', color: '#F97316', hoverColor: '#EA580C' },
-  good:  { label: 'Good',  emoji: '😊', color: '#3B82F6', hoverColor: '#2563EB' },
+  good:  { label: 'Good',  emoji: '😊', color: '#24476B', hoverColor: '#2563EB' },
   easy:  { label: 'Easy',  emoji: '🤩', color: '#22C55E', hoverColor: '#16A34A' },
 };
 
@@ -103,9 +103,9 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
         </p>
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
-            { value: sessionStats.reviewed, label: 'Reviewed', color: '#8B5CF6' },
+            { value: sessionStats.reviewed, label: 'Reviewed', color: '#3F8571' },
             { value: sessionStats.correct, label: 'Correct', color: '#22C55E' },
-            { value: accuracy + '%', label: 'Accuracy', color: '#EC4899' },
+            { value: accuracy + '%', label: 'Accuracy', color: '#E4572E' },
           ].map(({ value, label, color }) => (
             <div key={label} className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800">
               <div className="text-xl font-black" style={{ color }}>{value}</div>
@@ -248,7 +248,7 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
                       <div className="flex items-start gap-2">
                         <span className="text-base">💡</span>
                         <p className="text-xs text-gray-600 dark:text-gray-300 flex-1">Tap a button to rate your recall. Higher ratings = longer interval before next review.</p>
-                        <button onClick={dismissIntro} className="text-xs font-bold text-pink-500 hover:text-pink-600 flex-shrink-0">Got it</button>
+                        <button onClick={dismissIntro} className="text-xs font-bold text-[#E4572E] hover:text-[#C13F22] flex-shrink-0">Got it</button>
                       </div>
                     </div>
                   )}
@@ -281,9 +281,9 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
         <div className="mt-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4">
           <div className="grid grid-cols-3 gap-3 text-center">
             {[
-              { value: sessionStats.reviewed, label: 'Reviewed', color: '#8B5CF6' },
+              { value: sessionStats.reviewed, label: 'Reviewed', color: '#3F8571' },
               { value: sessionStats.correct, label: 'Correct', color: '#22C55E' },
-              { value: sessionStats.total - sessionStats.reviewed, label: 'Remaining', color: '#EC4899' },
+              { value: sessionStats.total - sessionStats.reviewed, label: 'Remaining', color: '#E4572E' },
             ].map(({ value, label, color }) => (
               <div key={label}>
                 <div className="text-xl font-black" style={{ color }}>{value}</div>

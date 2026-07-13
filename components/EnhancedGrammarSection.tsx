@@ -23,21 +23,21 @@ interface PatternCardProps {
   isAdvanced?: boolean;
 }
 
-const PatternCard: React.FC<PatternCardProps> = ({ pattern, index, done, onToggle, accentColor = '#EC4899', isAdvanced = false }) => (
+const PatternCard: React.FC<PatternCardProps> = ({ pattern, index, done, onToggle, accentColor = '#E4572E', isAdvanced = false }) => (
   <div className={`bg-white dark:bg-gray-900 rounded-2xl border shadow-sm transition-all duration-300 overflow-hidden ${
     done
       ? 'border-green-300 dark:border-green-700 ring-1 ring-green-300 dark:ring-green-700'
       : 'border-gray-100 dark:border-gray-800 hover:shadow-md'
   }`}>
     {/* Color accent bar */}
-    <div className="h-1 w-full" style={{ background: done ? 'linear-gradient(90deg, #22C55E, #059669)' : `linear-gradient(90deg, ${accentColor}, #8B5CF6)` }} />
+    <div className="h-1 w-full" style={{ background: done ? 'linear-gradient(90deg, #22C55E, #059669)' : `linear-gradient(90deg, ${accentColor}, #3F8571)` }} />
 
     <div className="p-5 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-2">
             <h3 className="text-lg sm:text-xl font-black" style={{
-              background: done ? 'linear-gradient(135deg,#22C55E,#059669)' : `linear-gradient(135deg, ${accentColor}, #8B5CF6)`,
+              background: done ? 'linear-gradient(135deg,#22C55E,#059669)' : `linear-gradient(135deg, ${accentColor}, #3F8571)`,
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
             }}>
               {pattern.pattern}
@@ -118,7 +118,7 @@ const EnhancedGrammarSection: React.FC<EnhancedGrammarSectionProps> = ({ progres
               <span className="text-4xl">📝</span>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-white">Grammar Patterns</h1>
-                <p className="text-cyan-100 text-sm">기초 문법 · {grammarPatterns.length} patterns</p>
+                <p className="text-[#D8E4EF] text-sm">기초 문법 · {grammarPatterns.length} patterns</p>
               </div>
             </div>
             <p className="text-white/80 text-sm max-w-lg">
@@ -138,14 +138,14 @@ const EnhancedGrammarSection: React.FC<EnhancedGrammarSectionProps> = ({ progres
       {/* Basic Patterns */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black text-white" style={{ background: 'linear-gradient(135deg, #06B6D4, #8B5CF6)' }}>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black text-white" style={{ background: 'linear-gradient(135deg, #2F5D8A, #3F8571)' }}>
             {basicPatterns.filter((_, i) => isCompleted(i)).length}/{basicPatterns.length}
           </div>
           <h2 className="text-lg font-black text-gray-900 dark:text-white">Basic Grammar <span className="text-gray-400 dark:text-gray-500 font-normal text-sm">(Free)</span></h2>
         </div>
         <div className="space-y-4">
           {(isAuthenticated ? basicPatterns : basicPatterns.slice(0, GUEST_PATTERN_LIMIT)).map((pattern, i) => (
-            <PatternCard key={pattern.pattern} pattern={pattern} index={i} done={isCompleted(i)} onToggle={toggle} accentColor="#EC4899" />
+            <PatternCard key={pattern.pattern} pattern={pattern} index={i} done={isCompleted(i)} onToggle={toggle} accentColor="#E4572E" />
           ))}
         </div>
         {!isAuthenticated && guestMarkCount >= GUEST_MARK_THRESHOLD && basicPatterns.length > GUEST_PATTERN_LIMIT && (

@@ -22,7 +22,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ currentSection, setActiveSectio
     <nav aria-label="Breadcrumb" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 sm:mb-4 overflow-x-auto">
       <button
         onClick={() => setActiveSection('dashboard')}
-        className="flex items-center space-x-1 hover:text-pink-500 dark:hover:text-pink-400 transition-colors whitespace-nowrap touch-target"
+        className="flex items-center space-x-1 hover:text-[#E4572E] dark:hover:text-[#F07A55] transition-colors whitespace-nowrap touch-target"
       >
         <span>🏠</span>
         <span className="hidden sm:inline">Dashboard</span>
@@ -32,7 +32,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ currentSection, setActiveSectio
       {currentSection !== 'dashboard' && (
         <>
           <Chevron />
-          <div className="flex items-center space-x-1 text-pink-500 dark:text-pink-400 font-medium whitespace-nowrap">
+          <div className="flex items-center space-x-1 text-[#E4572E] dark:text-[#F07A55] font-medium whitespace-nowrap">
             <span>{current?.icon ?? '📄'}</span>
             <span className="truncate">{current?.title ?? currentSection}</span>
           </div>

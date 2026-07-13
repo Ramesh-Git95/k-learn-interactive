@@ -52,7 +52,7 @@ function getLabel(score: number): { label: string; emoji: string; colorClass: st
   if (score >= 90) return { label: 'Perfect!',       emoji: '🎉', colorClass: 'text-emerald-600 dark:text-emerald-400' };
   if (score >= 70) return { label: 'Great!',         emoji: '👍', colorClass: 'text-blue-600    dark:text-blue-400'    };
   if (score >= 50) return { label: 'Almost there!',  emoji: '💪', colorClass: 'text-amber-600   dark:text-amber-400'   };
-  return               { label: 'Try again!',        emoji: '🔄', colorClass: 'text-rose-600    dark:text-rose-400'    };
+  return               { label: 'Try again!',        emoji: '🔄', colorClass: 'text-[#A83619]    dark:text-[#F07A55]'    };
 }
 
 const isBrowserSupported = (): boolean =>

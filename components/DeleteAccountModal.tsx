@@ -43,7 +43,7 @@ const DeleteAccountModal: React.FC<Props> = ({ onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden">
         {/* Red accent bar */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-red-500 to-rose-600" />
+        <div className="h-1.5 w-full bg-gradient-to-r from-red-500 to-[#A83619]" />
 
         <div className="p-7">
           {/* Icon + title */}

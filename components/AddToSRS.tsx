@@ -91,7 +91,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
         </div>
 
         {/* Word preview */}
-        <div className="mx-5 mb-4 p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(236,72,153,0.08), rgba(139,92,246,0.08))' }}>
+        <div className="mx-5 mb-4 p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(228,87,46,0.08), rgba(63,133,113,0.08))' }}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-black flex-shrink-0"
               style={{ background: 'var(--brand-gradient)', color: 'white' }}>
@@ -100,7 +100,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
             <div className="min-w-0">
               <div className="font-black text-gray-900 dark:text-white text-base leading-tight">{content.korean}</div>
               {content.romanization && <div className="text-xs text-gray-500 dark:text-gray-400">{content.romanization}</div>}
-              <div className="text-xs font-semibold" style={{ color: '#EC4899' }}>{content.english}</div>
+              <div className="text-xs font-semibold" style={{ color: '#E4572E' }}>{content.english}</div>
             </div>
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
                   onChange={e => setCustomName(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleCustomCreate()}
                   placeholder={suggestedName}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 placeholder-gray-400 dark:placeholder-gray-500"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#F07A55] placeholder-gray-400 dark:placeholder-gray-500"
                 />
                 <div className="flex gap-2">
                   <button
@@ -168,7 +168,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
         ) : decks.length === 1 ? (
           /* ── Single deck — just confirm ── */
           <div className="px-5 pb-5 space-y-3">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-pink-300 dark:border-pink-700">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-[#F5A183] dark:border-[#A83619]">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
                 style={{ background: 'var(--brand-gradient)', color: 'white' }}>
                 🧠
@@ -177,7 +177,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
                 <div className="font-bold text-sm text-gray-900 dark:text-white truncate">{decks[0].name}</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">{decks[0].cards.length} cards</div>
               </div>
-              <span className="text-xs font-bold text-pink-500">Selected ✓</span>
+              <span className="text-xs font-bold text-[#E4572E]">Selected ✓</span>
             </div>
             <button
               onClick={handleAddToSelected}
@@ -201,7 +201,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
                   onChange={e => setCustomName(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleCustomCreate()}
                   placeholder="New deck name..."
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 placeholder-gray-400"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#F07A55] placeholder-gray-400"
                 />
                 <div className="flex gap-2">
                   <button onClick={() => setShowCustomName(false)} className="flex-1 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold text-sm transition-colors">Cancel</button>
@@ -226,7 +226,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
                   onClick={() => setSelectedDeckId(deck.id)}
                   className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
                     selectedDeckId === deck.id
-                      ? 'border-pink-400 dark:border-pink-600 bg-pink-50 dark:bg-pink-900/20'
+                      ? 'border-[#F07A55] dark:border-[#C13F22] bg-[#FDEEE6] dark:bg-[#5F2010]/20'
                       : 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/60 hover:border-gray-200 dark:hover:border-gray-700'
                   }`}
                 >
@@ -235,10 +235,10 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
                     🧠
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className={`font-bold text-sm truncate ${selectedDeckId === deck.id ? 'text-pink-700 dark:text-pink-300' : 'text-gray-900 dark:text-white'}`}>{deck.name}</div>
+                    <div className={`font-bold text-sm truncate ${selectedDeckId === deck.id ? 'text-[#A83619] dark:text-[#F5A183]' : 'text-gray-900 dark:text-white'}`}>{deck.name}</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">{deck.cards.length} cards</div>
                   </div>
-                  {selectedDeckId === deck.id && <span className="text-pink-500 text-sm flex-shrink-0">✓</span>}
+                  {selectedDeckId === deck.id && <span className="text-[#E4572E] text-sm flex-shrink-0">✓</span>}
                 </button>
               ))}
             </div>
@@ -269,7 +269,7 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
                   onChange={e => setCustomName(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleCustomCreate()}
                   placeholder="New deck name..."
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 placeholder-gray-400"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#F07A55] placeholder-gray-400"
                 />
                 <div className="flex gap-2">
                   <button onClick={() => setShowCustomName(false)} className="flex-1 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold text-sm transition-colors">Cancel</button>

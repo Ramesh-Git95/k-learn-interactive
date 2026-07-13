@@ -212,13 +212,13 @@ const LEVEL_INFO: Record<number, { name: string; desc: string; color: string; ti
   2: {
     name: 'TOPIK I — Level 2',
     desc: 'You can handle everyday survival situations and basic conversations using common vocabulary.',
-    color: '#3B82F6',
+    color: '#24476B',
     tip: 'Practice connecting sentences with -고, -지만, -아서/어서. Expand vocabulary to ~2,000 words for TOPIK I.',
   },
   3: {
     name: 'TOPIK II — Level 3',
     desc: 'You can communicate in most daily life situations and understand basic social topics.',
-    color: '#8B5CF6',
+    color: '#3F8571',
     tip: 'Study intermediate grammar: -려면, -기 위해서, relative clauses. Build social and news vocabulary.',
   },
   4: {
@@ -236,7 +236,7 @@ const LEVEL_INFO: Record<number, { name: string; desc: string; color: string; ti
   6: {
     name: 'TOPIK II — Level 6',
     desc: 'Near-native proficiency. You can use Korean at a high professional or academic level.',
-    color: '#EC4899',
+    color: '#E4572E',
     tip: 'Engage with academic writing, watch dramas without subtitles, and practise formal presentations.',
   },
 };
@@ -327,7 +327,7 @@ const TopikAssessment: React.FC = () => {
 
         {/* Hero */}
         <div className="relative rounded-3xl overflow-hidden mb-6 p-6 sm:p-8 text-center"
-          style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)' }}>
+          style={{ background: 'linear-gradient(135deg, #0D141F 0%, #16202F 40%, #1E3A5C 100%)' }}>
           <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
             {['읽기', '어휘', '문법', '쓰기', '듣기', 'TOPIK'].map((w, i) => (
               <span key={i} className="absolute text-white/5 font-black"
@@ -397,7 +397,7 @@ const TopikAssessment: React.FC = () => {
         <button
           onClick={() => setScreen('quiz')}
           className="w-full py-4 text-white font-black rounded-2xl text-base hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg"
-          style={{ background: 'linear-gradient(135deg, #1a1a2e, #0f3460)' }}>
+          style={{ background: 'linear-gradient(135deg, #0D141F, #1E3A5C)' }}>
           Start Assessment 시작하기 →
         </button>
       </div>
@@ -406,7 +406,7 @@ const TopikAssessment: React.FC = () => {
 
   // ── Quiz screen ──────────────────────────────────────────────────────────────
   if (screen === 'quiz') {
-    const levelColors: Record<number, string> = { 1: '#10B981', 2: '#3B82F6', 3: '#8B5CF6', 4: '#F59E0B', 5: '#EF4444', 6: '#EC4899' };
+    const levelColors: Record<number, string> = { 1: '#10B981', 2: '#24476B', 3: '#3F8571', 4: '#F59E0B', 5: '#EF4444', 6: '#E4572E' };
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
 
@@ -414,7 +414,7 @@ const TopikAssessment: React.FC = () => {
         <div className="flex items-center gap-3 mb-4">
           <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
             <div className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, #1a1a2e, #0f3460)' }} />
+              style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, #0D141F, #1E3A5C)' }} />
           </div>
           <span className="text-xs font-black text-gray-400 dark:text-gray-500 flex-shrink-0">
             {qIdx + 1} / {totalQs}
@@ -490,7 +490,7 @@ const TopikAssessment: React.FC = () => {
         {chosen !== null && (
           <button onClick={advance}
             className="w-full py-3 text-white text-sm font-black rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-            style={{ background: 'linear-gradient(135deg, #1a1a2e, #0f3460)' }}>
+            style={{ background: 'linear-gradient(135deg, #0D141F, #1E3A5C)' }}>
             {qIdx + 1 >= totalQs ? '🏁 See My Results' : 'Next Question →'}
           </button>
         )}
@@ -556,7 +556,7 @@ const TopikAssessment: React.FC = () => {
               <span>🔒</span>
               <span>Levels 4–6 hidden</span>
               <button onClick={startUpgrade}
-                className="font-black text-violet-500 hover:underline">Get Premium →</button>
+                className="font-black text-[#3F8571] hover:underline">Get Premium →</button>
             </div>
           </div>
         )}
@@ -581,14 +581,14 @@ const TopikAssessment: React.FC = () => {
               value={certName}
               onChange={e => setCertName(e.target.value)}
               placeholder="Enter your name…"
-              className="w-full px-4 py-2.5 text-sm font-semibold rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-400"
+              className="w-full px-4 py-2.5 text-sm font-semibold rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#6BA88F]"
             />
           </div>
 
           {/* Certificate card */}
           <div id="topik-cert"
             className="rounded-3xl overflow-hidden mb-4 p-6 sm:p-8 text-center relative"
-            style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%)', border: `3px solid ${levelInfo.color}` }}>
+            style={{ background: 'linear-gradient(135deg, #0D141F 0%, #16202F 40%, #1E3A5C 100%)', border: `3px solid ${levelInfo.color}` }}>
             <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none opacity-10">
               {['한국어', '한', '국', '어', '🇰🇷', '인증'].map((w, i) => (
                 <span key={i} className="absolute font-black text-white"
@@ -645,7 +645,7 @@ const TopikAssessment: React.FC = () => {
             window.dispatchEvent(event);
           }}
           className="py-3 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-          style={{ background: 'linear-gradient(135deg, #1a1a2e, #0f3460)' }}>
+          style={{ background: 'linear-gradient(135deg, #0D141F, #1E3A5C)' }}>
           📋 Practice TOPIK →
         </button>
       </div>

@@ -152,7 +152,7 @@ export default function Dashboard({
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
 
         {/* ── Welcome Header ──────────────────────────── */}
-        <div className="relative rounded-3xl overflow-hidden p-8" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)' }}>
+        <div className="relative rounded-3xl overflow-hidden p-8" style={{ background: 'linear-gradient(135deg, #0D141F 0%, #16202F 60%, #1E3A5C 100%)' }}>
           <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10" style={{ background: '#E4572E', filter: 'blur(60px)', transform: 'translate(30%,-30%)' }} />
           <div className="absolute bottom-0 left-1/3 w-48 h-48 rounded-full opacity-10" style={{ background: '#3F8571', filter: 'blur(50px)', transform: 'translateY(30%)' }} />
 
@@ -319,20 +319,20 @@ export default function Dashboard({
 
         {/* ── Word of the Day ─────────────────────────── */}
         <div
-          className="rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 border border-cyan-100 dark:border-cyan-900/40"
-          style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.06) 0%, rgba(139,92,246,0.06) 100%)' }}
+          className="rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 border border-[#D8E4EF] dark:border-[#122840]/40"
+          style={{ background: 'linear-gradient(135deg, rgba(47,93,138,0.06) 0%, rgba(63,133,113,0.06) 100%)' }}
         >
           <div className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: 'linear-gradient(135deg,#3F8571,#2F5D8A)' }}>
             📅
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 mb-1">Word of the Day</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#264D74] dark:text-[#5C85B0] mb-1">Word of the Day</p>
             <div className="flex items-baseline gap-3 flex-wrap">
               <span className="text-2xl font-black text-gray-900 dark:text-white">{dailyWord.korean}</span>
               <span className="text-sm text-gray-400 dark:text-gray-500 italic">{dailyWord.romanization}</span>
               <span className="text-base font-semibold text-gray-700 dark:text-gray-300">— {dailyWord.english}</span>
             </div>
-            <span className="inline-block mt-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400">{dailyWord.category}</span>
+            <span className="inline-block mt-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#D8E4EF] dark:bg-[#122840]/30 text-[#264D74] dark:text-[#5C85B0]">{dailyWord.category}</span>
           </div>
           <button
             onClick={() => setActiveSection('vocabulary')}
@@ -451,7 +451,7 @@ export default function Dashboard({
 
         {/* ── Upgrade Banner (free users) ──────────────── */}
         {subscriptionTier === 'free' && (
-          <div className="relative rounded-3xl overflow-hidden p-6 sm:p-8" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' }}>
+          <div className="relative rounded-3xl overflow-hidden p-6 sm:p-8" style={{ background: 'linear-gradient(135deg, #0D141F 0%, #16202F 100%)' }}>
             <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-15" style={{ background: '#E4572E', filter: 'blur(50px)', transform: 'translate(20%,-20%)' }} />
             <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
               <div>

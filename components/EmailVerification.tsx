@@ -182,7 +182,7 @@ const EmailVerification: React.FC<EmailVerificationProps> = ({ onVerified }) => 
               </p>
               <button
                 onClick={() => window.location.href = '/?verified=true'}
-                className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300"
+                className="w-full py-3 bg-gradient-to-r from-blue-600 to-[#24476B] text-white font-semibold rounded-lg hover:from-blue-700 hover:to-[#1F4160] transition-all duration-300"
               >
                 Continue to App
               </button>

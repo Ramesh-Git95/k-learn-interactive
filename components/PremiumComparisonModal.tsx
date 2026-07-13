@@ -54,7 +54,7 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
           <div className="text-4xl mb-2">⭐</div>
           <h2 className="text-2xl font-black text-white tracking-tight">K-Learn Premium</h2>
-          <p className="text-pink-100/80 text-sm mt-1">Cancel anytime · No long-term commitment</p>
+          <p className="text-[#FBDCCB]/80 text-sm mt-1">Cancel anytime · No long-term commitment</p>
 
           <div className="inline-flex items-baseline gap-2 mt-4 bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-2.5 border border-white/20">
             <span className="text-4xl font-black text-white">$4</span>
@@ -106,7 +106,7 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
           </table>
 
           {/* Indie note */}
-          <div className="mx-4 my-4 p-4 rounded-2xl border border-pink-100 dark:border-pink-800/30" style={{ background: 'linear-gradient(135deg, rgba(228,87,46,0.05), rgba(63,133,113,0.05))' }}>
+          <div className="mx-4 my-4 p-4 rounded-2xl border border-[#FBDCCB] dark:border-[#7E2A15]/30" style={{ background: 'linear-gradient(135deg, rgba(228,87,46,0.05), rgba(63,133,113,0.05))' }}>
             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               🌱 K-Learn is independently built by a small team of friends — no ads, no investors.
               Your $4 goes straight into new features, shipped every week.

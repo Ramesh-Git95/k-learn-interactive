@@ -45,9 +45,9 @@ const UserProfile: React.FC = () => {
   const subscriptionStatus = user.subscription?.status || 'active';
 
   const stats = [
-    { label: 'XP Points',     value: user.progress?.xp || 0,                           color: '#EC4899' },
+    { label: 'XP Points',     value: user.progress?.xp || 0,                           color: '#E4572E' },
     { label: 'Day Streak',    value: user.progress?.streak || 0,                        color: '#22C55E' },
-    { label: 'Lessons Done',  value: user.progress?.completedLessons?.length || 0,      color: '#8B5CF6' },
+    { label: 'Lessons Done',  value: user.progress?.completedLessons?.length || 0,      color: '#3F8571' },
     { label: 'Cards Learned', value: user.progress?.srsData?.totalCards || 0,           color: '#F59E0B' },
   ];
 
@@ -226,7 +226,7 @@ const UserProfile: React.FC = () => {
                     <button
                       onClick={() => openBillingPortal('manage')}
                       disabled={stripeLoading}
-                      className="w-full py-2 text-xs font-black rounded-xl border-2 border-indigo-400 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-40"
+                      className="w-full py-2 text-xs font-black rounded-xl border-2 border-[#5C85B0] text-[#24476B] dark:text-[#8CAECB] hover:bg-[#EAF1F7] dark:hover:bg-[#122840]/20 transition-all disabled:opacity-40"
                     >
                       {stripeLoading ? 'Opening…' : '💳 Manage billing / update card'}
                     </button>
@@ -244,7 +244,7 @@ const UserProfile: React.FC = () => {
           ) : (
             <div
               className="rounded-xl p-4"
-              style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.08), rgba(236,72,153,0.08))' }}
+              style={{ background: 'linear-gradient(135deg, rgba(63,133,113,0.08), rgba(228,87,46,0.08))' }}
             >
               <p className="text-sm font-black text-gray-900 dark:text-white mb-1">You're on the Free plan 🆓</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Here's what Premium unlocks:</p>

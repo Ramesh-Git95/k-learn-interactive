@@ -144,7 +144,7 @@ const TypingDojo: React.FC = () => {
   };
 
   const timerPct = (timeLeft / TOTAL_SECONDS) * 100;
-  const timerColor = timeLeft > 20 ? '#8B5CF6' : timeLeft > 10 ? '#F59E0B' : '#EF4444';
+  const timerColor = timeLeft > 20 ? '#3F8571' : timeLeft > 10 ? '#F59E0B' : '#EF4444';
 
   // ── Idle screen ──────────────────────────────────────────────────────────────
   if (state === 'idle') {
@@ -181,7 +181,7 @@ const TypingDojo: React.FC = () => {
             </div>
             <button
               onClick={startGame}
-              className="px-10 py-3 bg-white text-purple-700 font-black rounded-xl hover:scale-[1.03] active:scale-[0.97] transition-transform text-sm"
+              className="px-10 py-3 bg-white text-[#265847] font-black rounded-xl hover:scale-[1.03] active:scale-[0.97] transition-transform text-sm"
             >
               Start Challenge →
             </button>
@@ -193,10 +193,10 @@ const TypingDojo: React.FC = () => {
             <span>📖</span> How to play
           </h2>
           <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-            <li className="flex gap-2"><span className="text-violet-500 font-bold">1.</span> A Korean word appears on screen</li>
-            <li className="flex gap-2"><span className="text-violet-500 font-bold">2.</span> Type its English meaning and press <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">Enter</kbd></li>
-            <li className="flex gap-2"><span className="text-violet-500 font-bold">3.</span> Press <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">Tab</kbd> or click Skip to pass a word</li>
-            <li className="flex gap-2"><span className="text-violet-500 font-bold">4.</span> Minor punctuation differences are forgiven — spelling counts!</li>
+            <li className="flex gap-2"><span className="text-[#3F8571] font-bold">1.</span> A Korean word appears on screen</li>
+            <li className="flex gap-2"><span className="text-[#3F8571] font-bold">2.</span> Type its English meaning and press <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">Enter</kbd></li>
+            <li className="flex gap-2"><span className="text-[#3F8571] font-bold">3.</span> Press <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">Tab</kbd> or click Skip to pass a word</li>
+            <li className="flex gap-2"><span className="text-[#3F8571] font-bold">4.</span> Minor punctuation differences are forgiven — spelling counts!</li>
           </ul>
         </div>
       </div>
@@ -207,9 +207,9 @@ const TypingDojo: React.FC = () => {
   if (state === 'done') {
     const grade =
       accuracy >= 90 ? { label: 'Master', emoji: '🏆', color: 'text-yellow-600 dark:text-yellow-400' }
-      : accuracy >= 70 ? { label: 'Proficient', emoji: '⭐', color: 'text-violet-600 dark:text-violet-400' }
+      : accuracy >= 70 ? { label: 'Proficient', emoji: '⭐', color: 'text-[#2E6B59] dark:text-[#6BA88F]' }
       : accuracy >= 50 ? { label: 'Practicing', emoji: '📈', color: 'text-blue-600 dark:text-blue-400' }
-      : { label: 'Keep Going', emoji: '💪', color: 'text-pink-600 dark:text-pink-400' };
+      : { label: 'Keep Going', emoji: '💪', color: 'text-[#C13F22] dark:text-[#F07A55]' };
 
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
@@ -236,7 +236,7 @@ const TypingDojo: React.FC = () => {
         </div>
 
         {isFree && (
-          <div className="bg-gradient-to-r from-pink-50 to-violet-50 dark:from-pink-900/20 dark:to-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-2xl p-5 mb-5 text-center">
+          <div className="bg-gradient-to-r from-[#FDEEE6] to-[#EEF5F1] dark:from-[#5F2010]/20 dark:to-[#153327]/20 border border-[#BFDACD] dark:border-[#1D4436] rounded-2xl p-5 mb-5 text-center">
             <p className="text-sm font-black text-gray-900 dark:text-white mb-1">You got {correct} right in 15 seconds!</p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Imagine what you could do in 60 seconds. The full challenge is waiting.</p>
             <button
@@ -341,11 +341,11 @@ const TypingDojo: React.FC = () => {
           {current?.korean}
         </p>
         {showRomanization ? (
-          <p className="text-sm text-violet-500 dark:text-violet-400 font-bold">{current?.romanization}</p>
+          <p className="text-sm text-[#3F8571] dark:text-[#6BA88F] font-bold">{current?.romanization}</p>
         ) : (
           <button
             onClick={() => setShowRomanization(true)}
-            className="text-xs text-gray-400 dark:text-gray-500 hover:text-violet-500 dark:hover:text-violet-400 transition-colors"
+            className="text-xs text-gray-400 dark:text-gray-500 hover:text-[#3F8571] dark:hover:text-[#6BA88F] transition-colors"
           >
             Show romanization (hint)
           </button>
@@ -366,7 +366,7 @@ const TypingDojo: React.FC = () => {
             if (e.key === 'Tab') { e.preventDefault(); handleSkip(); }
           }}
           placeholder="Type English meaning…"
-          className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-violet-400 text-sm font-medium"
+          className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#6BA88F] text-sm font-medium"
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="off"
@@ -376,7 +376,7 @@ const TypingDojo: React.FC = () => {
           type="submit"
           disabled={!input.trim()}
           className="px-5 py-3 text-white text-sm font-black rounded-xl disabled:opacity-40 hover:scale-[1.03] active:scale-[0.97] transition-transform"
-          style={{ background: 'linear-gradient(135deg, #8B5CF6, #EC4899)' }}
+          style={{ background: 'linear-gradient(135deg, #3F8571, #E4572E)' }}
         >
           ↵
         </button>

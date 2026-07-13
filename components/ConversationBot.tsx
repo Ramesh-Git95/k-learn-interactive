@@ -233,7 +233,7 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
       {/* Header */}
       <div
         className="flex items-center justify-between px-4 py-3 text-white flex-shrink-0"
-        style={{ background: 'linear-gradient(135deg, #06B6D4, #8B5CF6)' }}
+        style={{ background: 'linear-gradient(135deg, #2F5D8A, #3F8571)' }}
       >
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 text-xl">🤖</div>
@@ -340,8 +340,8 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
               </div>
 
               {msg.translation && msg.showTranslation && (
-                <div className="mt-1.5 px-3 py-2 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border-l-2 border-cyan-400">
-                  <p className="text-xs text-cyan-800 dark:text-cyan-200">{msg.translation}</p>
+                <div className="mt-1.5 px-3 py-2 bg-[#EAF1F7] dark:bg-[#122840]/20 rounded-xl border-l-2 border-[#5C85B0]">
+                  <p className="text-xs text-[#18344D] dark:text-[#B7CDE0]">{msg.translation}</p>
                 </div>
               )}
 
@@ -354,17 +354,17 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
                     onClick={() => speakText(msg.text)}
                     disabled={isSpeaking}
                     aria-label="Read message aloud"
-                    className="p-1 text-violet-500 hover:text-violet-600 dark:hover:text-violet-400 disabled:opacity-40 transition-colors"
+                    className="p-1 text-[#3F8571] hover:text-[#2E6B59] dark:hover:text-[#6BA88F] disabled:opacity-40 transition-colors"
                   >
                     <Volume2 className="w-3.5 h-3.5" />
                   </button>
                 )}
                 {msg.translation ? (
-                  <button onClick={() => toggleTranslation(msg.id)} className="text-[10px] text-cyan-600 dark:text-cyan-400 hover:underline">
+                  <button onClick={() => toggleTranslation(msg.id)} className="text-[10px] text-[#264D74] dark:text-[#5C85B0] hover:underline">
                     {msg.showTranslation ? L('Hide', '숨기기') : L('Show', '보기')}
                   </button>
                 ) : (
-                  <button onClick={() => handleTranslate(msg.id, msg.text)} disabled={translatingId === msg.id} className="text-[10px] text-cyan-600 dark:text-cyan-400 hover:underline disabled:opacity-50">
+                  <button onClick={() => handleTranslate(msg.id, msg.text)} disabled={translatingId === msg.id} className="text-[10px] text-[#264D74] dark:text-[#5C85B0] hover:underline disabled:opacity-50">
                     {translatingId === msg.id ? L('Translating…', '번역 중…') : L('Translate', '번역하기')}
                   </button>
                 )}
@@ -393,7 +393,7 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
             onChange={e => setInputText(e.target.value)}
             onKeyDown={handleKeyPress}
             placeholder={L('Type in Korean…', '한국어로 메시지를 입력하세요…')}
-            className="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl resize-none text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            className="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl resize-none text-sm focus:outline-none focus:ring-2 focus:ring-[#F07A55] bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             rows={2}
             disabled={isLoading || isListening}
           />
@@ -411,7 +411,7 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
               <button
                 onClick={startListening}
                 disabled={isLoading}
-                className="w-9 h-9 flex items-center justify-center rounded-xl bg-violet-500 text-white disabled:opacity-40 flex-shrink-0"
+                className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#3F8571] text-white disabled:opacity-40 flex-shrink-0"
                 title={L('Start voice input', '음성 입력 시작')}
               >
                 🎙️

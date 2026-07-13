@@ -82,8 +82,8 @@ export default function BookmarkFlashcards({ bookmarks, onClose }: BookmarkFlash
                 strokeDasharray={`${(pct / 100) * 213.6} 213.6`} />
               <defs>
                 <linearGradient id="bfg" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#EC4899" />
-                  <stop offset="100%" stopColor="#8B5CF6" />
+                  <stop offset="0%" stopColor="#E4572E" />
+                  <stop offset="100%" stopColor="#3F8571" />
                 </linearGradient>
               </defs>
             </svg>

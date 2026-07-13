@@ -194,7 +194,7 @@ export const PremiumPrompt: React.FC<{
   const { startUpgrade } = useUpgrade();
 
   return (
-    <div className={`bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center ${className}`}>
+    <div className={`bg-gradient-to-r from-blue-50 to-[#EAF1F7] dark:from-blue-900/20 dark:to-[#122840]/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center ${className}`}>
       <div className="text-4xl mb-3">🔒</div>
       <h3 className="text-xl font-bold text-blue-900 dark:text-blue-100 mb-2">
         Premium Feature: {feature}
@@ -204,7 +204,7 @@ export const PremiumPrompt: React.FC<{
       </p>
       <button
         onClick={startUpgrade}
-        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-[#24476B] text-white font-semibold rounded-lg hover:from-blue-700 hover:to-[#1F4160] transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       >
         Get Premium — $4/month
       </button>

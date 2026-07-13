@@ -61,10 +61,10 @@ const PHRASE_CONTEXTS  = [...new Set(commonPhrases.map(p => p.context || 'Genera
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const TYPE_BADGE: Record<string, { label: string; cls: string }> = {
-  vocabulary: { label: 'Vocab',  cls: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400' },
+  vocabulary: { label: 'Vocab',  cls: 'bg-[#DDEBE4] text-[#265847] dark:bg-[#153327]/30 dark:text-[#6BA88F]' },
   phrase:     { label: 'Phrase', cls: 'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400'   },
   grammar:    { label: 'Grammar',cls: 'bg-amber-100  text-amber-700  dark:bg-amber-900/30  dark:text-amber-400'  },
-  character:  { label: 'Hangul', cls: 'bg-pink-100   text-pink-700   dark:bg-pink-900/30   dark:text-pink-400'   },
+  character:  { label: 'Hangul', cls: 'bg-[#FBDCCB]   text-[#A83619]   dark:bg-[#5F2010]/30   dark:text-[#F07A55]'   },
 };
 
 function normalize(s: string) { return s.toLowerCase().replace(/\s+/g, ' ').trim(); }
@@ -93,13 +93,13 @@ function ItemRow({
         inDeck
           ? 'border-gray-100 dark:border-gray-800 opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-800/40'
           : selected
-          ? 'border-pink-400 dark:border-pink-600 bg-pink-50 dark:bg-pink-900/20'
+          ? 'border-[#F07A55] dark:border-[#C13F22] bg-[#FDEEE6] dark:bg-[#5F2010]/20'
           : 'border-transparent hover:border-gray-200 dark:hover:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/60'
       }`}
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className={`text-base font-black ${selected ? 'text-pink-700 dark:text-pink-300' : 'text-gray-900 dark:text-white'}`}>
+          <span className={`text-base font-black ${selected ? 'text-[#A83619] dark:text-[#F5A183]' : 'text-gray-900 dark:text-white'}`}>
             {item.korean}
           </span>
           {item.romanization && (
@@ -206,7 +206,7 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Type any word in English, Korean or romanization…"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-400 sticky top-0"
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F07A55] sticky top-0"
               />
               {!query.trim() ? (
                 <div className="text-center py-12 text-gray-400 dark:text-gray-500">
@@ -254,7 +254,7 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
                 </>
               ) : (
                 <>
-                  <button onClick={() => setVocabCat(null)} className="flex items-center gap-1 text-xs font-bold mb-3 px-1" style={{ color: '#EC4899' }}>
+                  <button onClick={() => setVocabCat(null)} className="flex items-center gap-1 text-xs font-bold mb-3 px-1" style={{ color: '#E4572E' }}>
                     ← All categories
                   </button>
                   <p className="text-sm font-black text-gray-900 dark:text-white mb-2 px-1">{vocabCat}</p>
@@ -289,7 +289,7 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
                 </>
               ) : (
                 <>
-                  <button onClick={() => setPhraseCat(null)} className="flex items-center gap-1 text-xs font-bold mb-3 px-1" style={{ color: '#EC4899' }}>
+                  <button onClick={() => setPhraseCat(null)} className="flex items-center gap-1 text-xs font-bold mb-3 px-1" style={{ color: '#E4572E' }}>
                     ← All contexts
                   </button>
                   <p className="text-sm font-black text-gray-900 dark:text-white mb-2 px-1">{phraseCat}</p>
@@ -338,11 +338,11 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
                             disabled={inDeck}
                             className={`p-3 rounded-xl border-2 flex flex-col items-center transition-all ${
                               inDeck ? 'border-gray-100 dark:border-gray-800 opacity-50 cursor-not-allowed'
-                              : isSel ? 'border-pink-400 dark:border-pink-600 bg-pink-50 dark:bg-pink-900/20'
+                              : isSel ? 'border-[#F07A55] dark:border-[#C13F22] bg-[#FDEEE6] dark:bg-[#5F2010]/20'
                               : 'border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 bg-gray-50 dark:bg-gray-800'
                             }`}
                           >
-                            <span className={`text-2xl font-black ${isSel ? 'text-pink-600 dark:text-pink-400' : 'text-gray-900 dark:text-white'}`}>{h.char}</span>
+                            <span className={`text-2xl font-black ${isSel ? 'text-[#C13F22] dark:text-[#F07A55]' : 'text-gray-900 dark:text-white'}`}>{h.char}</span>
                             <span className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{h.romanization}</span>
                             {inDeck && <span className="text-[10px] text-gray-400 mt-0.5">added</span>}
                           </button>

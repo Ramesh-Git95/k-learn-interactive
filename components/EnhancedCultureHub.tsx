@@ -16,9 +16,9 @@ type Subsection = 'insights' | 'regional' | 'lifestyle' | 'modern';
 
 const SUBSECTIONS: { id: Subsection; title: string; icon: string; description: string; isPremium?: boolean; gradient: string }[] = [
   { id: 'insights',  title: 'Cultural Insights', icon: '🎭', description: 'Essential Korean customs & social norms',        gradient: 'var(--brand-gradient)' },
-  { id: 'regional',  title: 'Regional Explorer', icon: '🗺️', description: 'Discover Korea\'s diverse regions',              gradient: 'linear-gradient(135deg, #06B6D4, #3B82F6)', isPremium: true },
-  { id: 'lifestyle', title: 'Daily Life',         icon: '🏠', description: 'How Koreans live, work & socialize',             gradient: 'linear-gradient(135deg, #10B981, #06B6D4)', isPremium: true },
-  { id: 'modern',    title: 'Modern Korea',       icon: '🌆', description: 'K-pop, tech & contemporary trends',              gradient: 'linear-gradient(135deg, #F59E0B, #EC4899)', isPremium: true },
+  { id: 'regional',  title: 'Regional Explorer', icon: '🗺️', description: 'Discover Korea\'s diverse regions',              gradient: 'linear-gradient(135deg, #2F5D8A, #24476B)', isPremium: true },
+  { id: 'lifestyle', title: 'Daily Life',         icon: '🏠', description: 'How Koreans live, work & socialize',             gradient: 'linear-gradient(135deg, #10B981, #2F5D8A)', isPremium: true },
+  { id: 'modern',    title: 'Modern Korea',       icon: '🌆', description: 'K-pop, tech & contemporary trends',              gradient: 'linear-gradient(135deg, #F59E0B, #E4572E)', isPremium: true },
 ];
 
 const UPGRADE_CONTENT: Record<string, { feature: string; description: string; benefits: string[] }> = {
@@ -54,7 +54,7 @@ const EnhancedCultureHub: React.FC<EnhancedCultureHubProps> = ({ progress, toggl
       {/* Hero */}
       <div
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
-        style={{ background: 'linear-gradient(135deg, #F59E0B 0%, #EC4899 40%, #8B5CF6 80%, #06B6D4 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #F59E0B 0%, #E4572E 40%, #3F8571 80%, #2F5D8A 100%)' }}
       >
         <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           {['🇰🇷','한복','태권도','김치','K-pop'].map((w, i) => (

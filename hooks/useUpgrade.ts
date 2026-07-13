@@ -18,7 +18,7 @@ function showRedirectOverlay() {
   el.innerHTML =
     '<style>@keyframes kl-spin{to{transform:rotate(360deg)}}</style>' +
     '<div class="kl-overlay-card">' +
-    '<div style="width:38px;height:38px;border:4px solid #EC4899;border-top-color:transparent;border-radius:50%;' +
+    '<div style="width:38px;height:38px;border:4px solid #E4572E;border-top-color:transparent;border-radius:50%;' +
     'animation:kl-spin 0.8s linear infinite;"></div>' +
     '<div class="kl-overlay-text">Redirecting to secure checkout…</div></div>';
   document.body.appendChild(el);

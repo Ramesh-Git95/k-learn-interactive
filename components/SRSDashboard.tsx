@@ -24,7 +24,7 @@ export default function SRSDashboard({ onStartStudy, onManageDecks }: SRSDashboa
         <div className="flex items-center gap-3">
           <div
             className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shadow-sm"
-            style={{ background: 'linear-gradient(135deg, #8B5CF6, #EC4899)' }}
+            style={{ background: 'linear-gradient(135deg, #3F8571, #E4572E)' }}
           >
             🧠
           </div>
@@ -45,9 +45,9 @@ export default function SRSDashboard({ onStartStudy, onManageDecks }: SRSDashboa
       {/* Quick Stats */}
       <div className="grid grid-cols-4 gap-3 mb-5">
         {[
-          { value: totalDueCards, label: 'Due Now', color: '#EC4899' },
-          { value: stats.todayReviews, label: 'Today', color: '#8B5CF6' },
-          { value: stats.todayNew, label: 'New', color: '#06B6D4' },
+          { value: totalDueCards, label: 'Due Now', color: '#E4572E' },
+          { value: stats.todayReviews, label: 'Today', color: '#3F8571' },
+          { value: stats.todayNew, label: 'New', color: '#2F5D8A' },
           { value: stats.streakDays, label: 'Streak 🔥', color: '#F59E0B' },
         ].map(({ value, label, color }) => (
           <div

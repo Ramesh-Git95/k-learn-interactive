@@ -88,7 +88,7 @@ const Footer: React.FC = () => {
                   <li key={name}>
                     <button
                       onClick={() => handleSection(section)}
-                      className="text-xs text-gray-600 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors duration-200"
+                      className="text-xs text-gray-600 dark:text-gray-400 hover:text-[#E4572E] dark:hover:text-[#F07A55] transition-colors duration-200"
                     >
                       {name}
                     </button>
@@ -105,7 +105,7 @@ const Footer: React.FC = () => {
                   <li key={name}>
                     <button
                       onClick={() => setActivePage(page)}
-                      className="text-xs text-gray-600 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors duration-200 text-left"
+                      className="text-xs text-gray-600 dark:text-gray-400 hover:text-[#E4572E] dark:hover:text-[#F07A55] transition-colors duration-200 text-left"
                     >
                       {name}
                     </button>
@@ -126,7 +126,7 @@ const Footer: React.FC = () => {
                           ? window.open(`/${page}`, '_blank')
                           : setActivePage(page)
                       }
-                      className="text-xs text-gray-600 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors duration-200 text-left"
+                      className="text-xs text-gray-600 dark:text-gray-400 hover:text-[#E4572E] dark:hover:text-[#F07A55] transition-colors duration-200 text-left"
                     >
                       {name}
                     </button>
@@ -153,7 +153,7 @@ const Footer: React.FC = () => {
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-gray-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors duration-200"
+                  className="text-sm text-gray-400 hover:text-[#E4572E] dark:hover:text-[#F07A55] transition-colors duration-200"
                   aria-label={label}
                 >
                   {emoji}
@@ -164,7 +164,7 @@ const Footer: React.FC = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={openManageCookies}
-                className="text-[11px] text-gray-400 dark:text-gray-500 hover:text-pink-500 dark:hover:text-pink-400 transition-colors"
+                className="text-[11px] text-gray-400 dark:text-gray-500 hover:text-[#E4572E] dark:hover:text-[#F07A55] transition-colors"
               >
                 🍪 Manage Cookies
               </button>

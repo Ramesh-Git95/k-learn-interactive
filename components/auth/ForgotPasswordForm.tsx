@@ -78,7 +78,7 @@ export function ForgotPasswordForm({ onBack }: Props) {
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-pink-400 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#F07A55] focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
                   placeholder="you@email.com"
                   required
                   disabled={loading}

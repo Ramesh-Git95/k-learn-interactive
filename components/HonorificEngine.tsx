@@ -347,20 +347,20 @@ const LEVEL_COLORS = {
     dot: 'bg-blue-500',
   },
   polite: {
-    bg: 'bg-violet-50 dark:bg-violet-900/20',
-    border: 'border-violet-200 dark:border-violet-700',
-    badge: 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300',
+    bg: 'bg-[#EEF5F1] dark:bg-[#153327]/20',
+    border: 'border-[#BFDACD] dark:border-[#265847]',
+    badge: 'bg-[#DDEBE4] dark:bg-[#153327]/40 text-[#265847] dark:text-[#93C2AE]',
     label: '해요체',
     sublabel: 'Polite',
-    dot: 'bg-violet-500',
+    dot: 'bg-[#3F8571]',
   },
   casual: {
-    bg: 'bg-pink-50 dark:bg-pink-900/20',
-    border: 'border-pink-200 dark:border-pink-700',
-    badge: 'bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300',
+    bg: 'bg-[#FDEEE6] dark:bg-[#5F2010]/20',
+    border: 'border-[#F8C4AE] dark:border-[#A83619]',
+    badge: 'bg-[#FBDCCB] dark:bg-[#5F2010]/40 text-[#A83619] dark:text-[#F5A183]',
     label: '반말',
     sublabel: 'Casual',
-    dot: 'bg-pink-500',
+    dot: 'bg-[#E4572E]',
   },
 };
 
@@ -393,7 +393,7 @@ const HonorificEngine: React.FC = () => {
       {/* Hero */}
       <div
         className="rounded-2xl p-6 sm:p-8 mb-8 text-white relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #3B82F6 0%, #8B5CF6 60%, #EC4899 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #24476B 0%, #3F8571 60%, #E4572E 100%)' }}
       >
         {['존댓말', '반말', '경어', '합쇼체', '해요체'].map((w, i) => (
           <span
@@ -439,9 +439,9 @@ const HonorificEngine: React.FC = () => {
                   ? 'text-white shadow-md'
                   : locked
                   ? 'bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500'
-                  : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-violet-300 dark:hover:border-violet-600'
+                  : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-[#93C2AE] dark:hover:border-[#2E6B59]'
               }`}
-              style={activeCat === c.id ? { background: locked ? 'linear-gradient(135deg, #9CA3AF, #6B7280)' : 'linear-gradient(135deg, #3B82F6, #8B5CF6)' } : {}}
+              style={activeCat === c.id ? { background: locked ? 'linear-gradient(135deg, #9CA3AF, #6B7280)' : 'linear-gradient(135deg, #24476B, #3F8571)' } : {}}
             >
               {c.emoji} {c.label}
               {locked && <span className="text-[9px]">⭐</span>}
@@ -528,7 +528,7 @@ const HonorificEngine: React.FC = () => {
       </div>
 
       {/* Footer tip */}
-      <div className="mt-8 bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-900/20 dark:to-violet-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-5">
+      <div className="mt-8 bg-gradient-to-r from-blue-50 to-[#EEF5F1] dark:from-blue-900/20 dark:to-[#153327]/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-5">
         <h3 className="font-black text-gray-900 dark:text-white mb-2 flex items-center gap-2">
           <span>📖</span> When to use each level
         </h3>
@@ -538,12 +538,12 @@ const HonorificEngine: React.FC = () => {
             <span><strong className="text-blue-700 dark:text-blue-300">Formal (합쇼체)</strong> — Military, news broadcasts, formal speeches, strict corporate settings.</span>
           </div>
           <div className="flex gap-2">
-            <span className="w-2 h-2 rounded-full bg-violet-500 flex-shrink-0 mt-1" />
-            <span><strong className="text-violet-700 dark:text-violet-300">Polite (해요체)</strong> — Everyday default for strangers, elders, workplaces, shops, and service interactions.</span>
+            <span className="w-2 h-2 rounded-full bg-[#3F8571] flex-shrink-0 mt-1" />
+            <span><strong className="text-[#265847] dark:text-[#93C2AE]">Polite (해요체)</strong> — Everyday default for strangers, elders, workplaces, shops, and service interactions.</span>
           </div>
           <div className="flex gap-2">
-            <span className="w-2 h-2 rounded-full bg-pink-500 flex-shrink-0 mt-1" />
-            <span><strong className="text-pink-700 dark:text-pink-300">Casual (반말)</strong> — Close friends, romantic partners, children, and peers who mutually agree to drop formality.</span>
+            <span className="w-2 h-2 rounded-full bg-[#E4572E] flex-shrink-0 mt-1" />
+            <span><strong className="text-[#A83619] dark:text-[#F5A183]">Casual (반말)</strong> — Close friends, romantic partners, children, and peers who mutually agree to drop formality.</span>
           </div>
         </div>
       </div>

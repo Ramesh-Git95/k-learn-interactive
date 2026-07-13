@@ -112,8 +112,8 @@ const MiniLearningPath: React.FC<MiniLearningPathProps> = ({
                       status === 'completed'
                         ? 'bg-green-500 text-white'
                         : status === 'current'
-                        ? 'bg-pink-500 text-white ring-2 ring-pink-200 dark:ring-pink-500/50'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-pink-50/50 dark:hover:bg-pink-500/30'
+                        ? 'bg-[#E4572E] text-white ring-2 ring-[#F8C4AE] dark:ring-[#E4572E]/50'
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-[#FDEEE6]/50 dark:hover:bg-[#E4572E]/30'
                     }`}
                   >
                     {status === 'completed' ? '✓' : step.shortTitle}
@@ -128,7 +128,7 @@ const MiniLearningPath: React.FC<MiniLearningPathProps> = ({
             </span>
             <button
               onClick={() => setIsExpanded(true)}
-              className="text-pink-500 dark:text-pink-400 hover:bg-pink-50/20 dark:hover:bg-pink-500/20 rounded p-1 transition-colors touch-target"
+              className="text-[#E4572E] dark:text-[#F07A55] hover:bg-[#FDEEE6]/20 dark:hover:bg-[#E4572E]/20 rounded p-1 transition-colors touch-target"
               title="See full learning path"
             >
               <Icon icon="menu" className="w-3 h-3" />
@@ -138,7 +138,7 @@ const MiniLearningPath: React.FC<MiniLearningPathProps> = ({
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 mt-2">
           <div
             className={`h-1 rounded-full transition-all duration-500 ${
-              corePct >= 100 ? 'bg-green-500' : 'bg-pink-500'
+              corePct >= 100 ? 'bg-green-500' : 'bg-[#E4572E]'
             }`}
             style={{ width: `${corePct}%` }}
           />
@@ -181,10 +181,10 @@ const MiniLearningPath: React.FC<MiniLearningPathProps> = ({
                       onClick={() => setActiveSection(step.id)}
                       className={`relative p-2 sm:p-3 rounded-lg text-center transition-all duration-200 hover:scale-105 touch-target ${
                         status === 'current'
-                          ? 'bg-pink-500 text-white shadow-md scale-105'
+                          ? 'bg-[#E4572E] text-white shadow-md scale-105'
                           : status === 'completed'
                           ? 'bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800'
-                          : 'bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white hover:bg-pink-50/30 dark:hover:bg-pink-500/10 border border-transparent hover:border-pink-200 dark:hover:border-pink-800'
+                          : 'bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white hover:bg-[#FDEEE6]/30 dark:hover:bg-[#E4572E]/10 border border-transparent hover:border-[#F8C4AE] dark:hover:border-[#7E2A15]'
                       }`}
                     >
                       <div className="text-lg sm:text-xl mb-1">{step.icon}</div>
@@ -226,11 +226,11 @@ const MiniLearningPath: React.FC<MiniLearningPathProps> = ({
       <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
         <div className="flex items-center justify-between mb-1">
           <span className="text-xs text-gray-500 dark:text-gray-400">Core curriculum</span>
-          <span className="text-xs font-semibold text-pink-500 dark:text-pink-400">{completedCore}/{CORE.length} done</span>
+          <span className="text-xs font-semibold text-[#E4572E] dark:text-[#F07A55]">{completedCore}/{CORE.length} done</span>
         </div>
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
           <div
-            className={`h-1.5 rounded-full transition-all duration-500 ${corePct >= 100 ? 'bg-green-500' : 'bg-pink-500'}`}
+            className={`h-1.5 rounded-full transition-all duration-500 ${corePct >= 100 ? 'bg-green-500' : 'bg-[#E4572E]'}`}
             style={{ width: `${corePct}%` }}
           />
         </div>

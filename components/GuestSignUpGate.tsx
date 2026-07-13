@@ -60,7 +60,7 @@ const GuestSignUpGate: React.FC<Props> = ({ visibleCount, totalCount, type, allU
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? 'scale(1) translateY(0)' : 'scale(0.88) translateY(24px)',
-            background: 'linear-gradient(160deg, #1e3a8a 0%, #1e40af 45%, #1d4ed8 100%)',
+            background: 'linear-gradient(160deg, #0D141F 0%, #16202F 45%, #1E3A5C 100%)',
           }}
         >
           {/* Top accent bar */}

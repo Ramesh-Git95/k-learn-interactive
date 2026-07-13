@@ -56,9 +56,9 @@ const AuthenticationRequired: React.FC = () => {
         </button>
       </div>
 
-      <div className="mt-5 p-4 rounded-2xl bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800/40">
-        <p className="text-xs font-black text-violet-700 dark:text-violet-300 mb-2 uppercase tracking-wider">Why sign up?</p>
-        <ul className="text-xs text-violet-600 dark:text-violet-400 space-y-1">
+      <div className="mt-5 p-4 rounded-2xl bg-[#EEF5F1] dark:bg-[#153327]/20 border border-[#BFDACD] dark:border-[#1D4436]/40">
+        <p className="text-xs font-black text-[#265847] dark:text-[#93C2AE] mb-2 uppercase tracking-wider">Why sign up?</p>
+        <ul className="text-xs text-[#2E6B59] dark:text-[#6BA88F] space-y-1">
           {['Save quiz scores & progress', 'Track your learning streaks', 'Sync across devices', 'Access detailed statistics'].map(b => (
             <li key={b}>✅ {b}</li>
           ))}
@@ -261,7 +261,7 @@ const QuizComponent: React.FC = () => {
   if (currentQuestionIndex >= questions.length && questions.length > 0) {
     const percentage = (score / questions.length) * 100;
     const resultEmoji = percentage === 100 ? '🏆' : percentage >= 80 ? '🎉' : percentage >= 60 ? '👏' : '📚';
-    const resultColor = percentage === 100 ? '#22C55E' : percentage >= 80 ? '#3B82F6' : percentage >= 60 ? '#F59E0B' : '#F97316';
+    const resultColor = percentage === 100 ? '#22C55E' : percentage >= 80 ? '#24476B' : percentage >= 60 ? '#F59E0B' : '#F97316';
     const resultMsg = percentage === 100 ? 'Perfect score!' : percentage >= 80 ? 'Excellent work!' : percentage >= 60 ? 'Good job! Keep going!' : 'Keep studying!';
 
     // quizStats.averageScore is stored as a 0-1 fraction; convert to 0-100 to combine with percentage
@@ -270,9 +270,9 @@ const QuizComponent: React.FC = () => {
 
     const stats = [
       { label: 'Score', value: `${score}/${questions.length}`, color: resultColor },
-      { label: 'Percentage', value: `${percentage.toFixed(0)}%`, color: '#8B5CF6' },
-      { label: 'Total Quizzes', value: quizStats.totalQuizzes + 1, color: '#06B6D4' },
-      { label: 'Avg Score', value: `${newAvg.toFixed(0)}%`, color: '#EC4899' },
+      { label: 'Percentage', value: `${percentage.toFixed(0)}%`, color: '#3F8571' },
+      { label: 'Total Quizzes', value: quizStats.totalQuizzes + 1, color: '#2F5D8A' },
+      { label: 'Avg Score', value: `${newAvg.toFixed(0)}%`, color: '#E4572E' },
       { label: 'Perfect Scores', value: quizStats.perfectScores + (percentage === 100 ? 1 : 0), color: '#F59E0B' },
       { label: 'Streak', value: newStreak, color: '#22C55E' },
     ];
@@ -418,14 +418,14 @@ const QuizComponent: React.FC = () => {
         <div className="mb-4">
           <div className="flex justify-between text-xs mb-1">
             <span className="text-gray-500 dark:text-gray-400 font-medium">Time Left</span>
-            <span className={`font-black ${timeLeft <= 10 ? 'text-red-500' : 'text-pink-500'}`}>{timeLeft}s</span>
+            <span className={`font-black ${timeLeft <= 10 ? 'text-red-500' : 'text-[#E4572E]'}`}>{timeLeft}s</span>
           </div>
           <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-1000"
               style={{
                 width: `${(timeLeft / 30) * 100}%`,
-                background: timeLeft <= 10 ? 'linear-gradient(90deg,#EF4444,#DC2626)' : 'linear-gradient(90deg,#F59E0B,#EC4899)',
+                background: timeLeft <= 10 ? 'linear-gradient(90deg,#EF4444,#DC2626)' : 'linear-gradient(90deg,#F59E0B,#E4572E)',
               }}
             />
           </div>
@@ -509,7 +509,7 @@ const QuizComponent: React.FC = () => {
                 <>
                   <button
                     onClick={() => setShowExplanation(!showExplanation)}
-                    className="text-xs font-bold text-pink-500 dark:text-pink-400 hover:underline"
+                    className="text-xs font-bold text-[#E4572E] dark:text-[#F07A55] hover:underline"
                   >
                     {showExplanation ? '▲ Hide' : '▼ Show'} explanation
                   </button>
@@ -522,8 +522,8 @@ const QuizComponent: React.FC = () => {
                   )}
                 </>
               ) : (
-                <div className="mt-2 p-2.5 bg-violet-50 dark:bg-violet-900/20 rounded-xl text-xs">
-                  <p className="text-violet-700 dark:text-violet-300">
+                <div className="mt-2 p-2.5 bg-[#EEF5F1] dark:bg-[#153327]/20 rounded-xl text-xs">
+                  <p className="text-[#265847] dark:text-[#93C2AE]">
                     🔒 Detailed explanations available with{' '}
                     <button onClick={openUpgradeModal} className="font-black underline">Premium</button>
                   </p>

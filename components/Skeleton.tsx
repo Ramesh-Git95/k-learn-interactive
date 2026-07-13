@@ -33,7 +33,7 @@ export const AppBootSkeleton: React.FC = () => (
         <Skeleton className="h-64 rounded-2xl" />
         <Skeleton className="h-64 rounded-2xl" />
       </div>
-      <p className="text-center mt-8 text-sm font-korean text-pink-400/80">한글배움 · loading…</p>
+      <p className="text-center mt-8 text-sm font-korean text-[#F07A55]/80">한글배움 · loading…</p>
     </div>
   </div>
 );
@@ -75,7 +75,7 @@ export const StudyCardSkeleton: React.FC<{ onCancel?: () => void }> = ({ onCance
       </div>
       {onCancel && (
         <p className="text-center mt-4">
-          <button onClick={onCancel} className="text-sm text-pink-500 hover:text-pink-600 font-semibold">Cancel</button>
+          <button onClick={onCancel} className="text-sm text-[#E4572E] hover:text-[#C13F22] font-semibold">Cancel</button>
         </p>
       )}
     </div>

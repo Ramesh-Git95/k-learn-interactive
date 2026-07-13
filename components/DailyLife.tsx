@@ -57,7 +57,7 @@ const DailyLife: React.FC<DailyLifeProps> = ({ progress, toggleProgress }) => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-pink-500 dark:text-pink-400 mb-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#E4572E] dark:text-[#F07A55] mb-2">
             🏠 Korean Daily Life
           </h1>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
@@ -67,13 +67,13 @@ const DailyLife: React.FC<DailyLifeProps> = ({ progress, toggleProgress }) => {
         <div className="flex items-center space-x-3 sm:space-x-4 mt-4 sm:mt-0">
           <div className="bg-white dark:bg-gray-900 rounded-lg px-3 sm:px-4 py-2 shadow-sm">
             <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Progress: </span>
-            <span className="font-semibold text-pink-500 dark:text-pink-400 text-sm sm:text-base">
+            <span className="font-semibold text-[#E4572E] dark:text-[#F07A55] text-sm sm:text-base">
               {Math.round(getTotalProgressPercentage())}%
             </span>
           </div>
           <div className="w-16 sm:w-20 lg:w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
             <div 
-              className="bg-pink-500 dark:bg-pink-500 h-2 rounded-full transition-all duration-300" 
+              className="bg-[#E4572E] dark:bg-[#E4572E] h-2 rounded-full transition-all duration-300" 
               style={{ width: `${getTotalProgressPercentage()}%` }}
             ></div>
           </div>
@@ -102,7 +102,7 @@ const DailyLife: React.FC<DailyLifeProps> = ({ progress, toggleProgress }) => {
                   }}
                   className={`w-full p-4 rounded-xl text-left transition-all duration-300 ${
                     selectedTopic.id === topic.id
-                      ? 'bg-pink-500 text-white dark:bg-pink-500 shadow-lg'
+                      ? 'bg-[#E4572E] text-white dark:bg-[#E4572E] shadow-lg'
                       : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white hover:shadow-md'
                   }`}
                 >
@@ -126,7 +126,7 @@ const DailyLife: React.FC<DailyLifeProps> = ({ progress, toggleProgress }) => {
                       className={`h-1.5 rounded-full transition-all duration-300 ${
                         selectedTopic.id === topic.id 
                           ? 'bg-white/60' 
-                          : 'bg-pink-500/60 dark:bg-pink-500/60'
+                          : 'bg-[#E4572E]/60 dark:bg-[#E4572E]/60'
                       }`}
                       style={{ width: `${(completedSections / totalSections) * 100}%` }}
                     ></div>
@@ -159,7 +159,7 @@ const DailyLife: React.FC<DailyLifeProps> = ({ progress, toggleProgress }) => {
                   }}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     selectedSection.id === section.id
-                      ? 'bg-pink-500 text-white dark:bg-pink-500'
+                      ? 'bg-[#E4572E] text-white dark:bg-[#E4572E]'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
@@ -180,7 +180,7 @@ const DailyLife: React.FC<DailyLifeProps> = ({ progress, toggleProgress }) => {
                 onClick={() => setActiveTab('content')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   activeTab === 'content'
-                    ? 'bg-pink-500 text-white dark:bg-pink-500'
+                    ? 'bg-[#E4572E] text-white dark:bg-[#E4572E]'
                     : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
@@ -191,7 +191,7 @@ const DailyLife: React.FC<DailyLifeProps> = ({ progress, toggleProgress }) => {
                   onClick={() => setActiveTab('vocabulary')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     activeTab === 'vocabulary'
-                      ? 'bg-pink-500 text-white dark:bg-pink-500'
+                      ? 'bg-[#E4572E] text-white dark:bg-[#E4572E]'
                       : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -203,7 +203,7 @@ const DailyLife: React.FC<DailyLifeProps> = ({ progress, toggleProgress }) => {
                   onClick={() => setActiveTab('phrases')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     activeTab === 'phrases'
-                      ? 'bg-pink-500 text-white dark:bg-pink-500'
+                      ? 'bg-[#E4572E] text-white dark:bg-[#E4572E]'
                       : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -215,7 +215,7 @@ const DailyLife: React.FC<DailyLifeProps> = ({ progress, toggleProgress }) => {
                   onClick={() => setActiveTab('examples')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     activeTab === 'examples'
-                      ? 'bg-pink-500 text-white dark:bg-pink-500'
+                      ? 'bg-[#E4572E] text-white dark:bg-[#E4572E]'
                       : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -276,7 +276,7 @@ const DailyLife: React.FC<DailyLifeProps> = ({ progress, toggleProgress }) => {
                     className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
                       isSectionCompleted(selectedTopic.id, selectedSection.id)
                         ? 'bg-green-500 text-white'
-                        : 'bg-pink-500 text-white hover:bg-pink-500/80 dark:bg-pink-500 dark:hover:bg-pink-600'
+                        : 'bg-[#E4572E] text-white hover:bg-[#E4572E]/80 dark:bg-[#E4572E] dark:hover:bg-[#C13F22]'
                     }`}
                   >
                     <Icon 
@@ -293,14 +293,14 @@ const DailyLife: React.FC<DailyLifeProps> = ({ progress, toggleProgress }) => {
             {activeTab === 'vocabulary' && selectedSection.vocabulary && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {selectedSection.vocabulary.map((vocab, index) => (
-                  <div key={index} className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700/30 dark:to-gray-700/20 rounded-lg p-4">
+                  <div key={index} className="bg-gradient-to-r from-blue-50 to-[#EEF5F1] dark:from-gray-700/30 dark:to-gray-700/20 rounded-lg p-4">
                     <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                       {vocab.korean}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                       {vocab.romanization}
                     </div>
-                    <div className="text-base text-pink-500 dark:text-pink-400 font-medium">
+                    <div className="text-base text-[#E4572E] dark:text-[#F07A55] font-medium">
                       {vocab.english}
                     </div>
                   </div>
@@ -319,7 +319,7 @@ const DailyLife: React.FC<DailyLifeProps> = ({ progress, toggleProgress }) => {
                     <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                       {phrase.romanization}
                     </div>
-                    <div className="text-base text-pink-500 dark:text-pink-400 font-medium mb-2">
+                    <div className="text-base text-[#E4572E] dark:text-[#F07A55] font-medium mb-2">
                       {phrase.english}
                     </div>
                     <div className="flex items-center justify-between">
@@ -343,8 +343,8 @@ const DailyLife: React.FC<DailyLifeProps> = ({ progress, toggleProgress }) => {
             {activeTab === 'examples' && selectedSection.examples && (
               <div className="space-y-4">
                 {selectedSection.examples.map((example, index) => (
-                  <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
-                    <div className="text-sm font-medium text-purple-700 dark:text-purple-300 mb-3">
+                  <div key={index} className="bg-gradient-to-r from-[#EEF5F1] to-[#FDEEE6] dark:from-[#153327]/20 dark:to-[#5F2010]/20 rounded-lg p-4 border border-[#BFDACD] dark:border-[#1D4436]">
+                    <div className="text-sm font-medium text-[#265847] dark:text-[#93C2AE] mb-3">
                       💼 {example.situation}
                     </div>
                     <div className="text-lg font-bold text-gray-900 dark:text-white mb-2">
@@ -353,7 +353,7 @@ const DailyLife: React.FC<DailyLifeProps> = ({ progress, toggleProgress }) => {
                     <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                       {example.romanization}
                     </div>
-                    <div className="text-base text-pink-500 dark:text-pink-400 font-medium">
+                    <div className="text-base text-[#E4572E] dark:text-[#F07A55] font-medium">
                       {example.english}
                     </div>
                   </div>
