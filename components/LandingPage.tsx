@@ -20,22 +20,22 @@ const marqueeWords = [
 ];
 
 const CORE_FEATURES = [
-  { emoji: '가',  title: 'Hangul Mastery',       desc: 'Every consonant, vowel & syllable block — interactive drills with pronunciation audio.', gradient: 'from-pink-500 to-rose-500',      live: true  },
-  { emoji: '📖', title: 'Vocabulary Builder',    desc: '1,000+ essential words across 10 categories. Click to hear native pronunciation.', gradient: 'from-violet-500 to-purple-600', live: true  },
-  { emoji: '✏️', title: 'Grammar Patterns',      desc: 'Sentence structure from particles to verb endings — beginner to advanced.', gradient: 'from-orange-400 to-pink-500',    live: true  },
-  { emoji: '🧠', title: 'Spaced Repetition',     desc: 'SM-2 algorithm schedules every review at exactly the right moment. Build decks in seconds with Quick Import.', gradient: 'from-blue-500 to-indigo-600',    live: true  },
-  { emoji: '🤖', title: 'AI Conversation',       desc: 'Chat with a Gemini-powered AI tutor that adapts to your level and corrects your Korean naturally.', gradient: 'from-teal-400 to-emerald-500',   live: true  },
-  { emoji: '🎭', title: 'Honorific Engine',      desc: 'Master 존댓말 vs 반말 — formal, polite, and casual forms side-by-side with cultural notes.', gradient: 'from-rose-500 to-orange-500',    live: true  },
-  { emoji: '⌨️', title: 'Typing Dojo',           desc: '60-second vocabulary race. Type as many Korean words as you can — track your WPM and accuracy.', gradient: 'from-cyan-500 to-teal-500',      live: true  },
-  { emoji: '📋', title: 'TOPIK Prep',            desc: 'Official TOPIK I & II practice questions — vocabulary drills and reading comprehension.', gradient: 'from-amber-500 to-yellow-500',   live: true  },
-  { emoji: '✍️', title: 'Stroke Canvas',         desc: 'Draw Hangul characters on a canvas and get real-time stroke-order feedback.', gradient: 'from-fuchsia-500 to-pink-500',   live: false },
-  { emoji: '🎬', title: 'K-Drama Shadowing',     desc: 'Listen to real drama lines, repeat them, and compare your pronunciation with AI.', gradient: 'from-red-500 to-pink-500',       live: false },
+  { emoji: '가',  title: 'Hangul Mastery',       desc: 'Every consonant, vowel & syllable block — interactive drills with pronunciation audio.', gradient: 'from-[#E4572E] to-[#C13F22]',    live: true  },
+  { emoji: '📖', title: 'Vocabulary Builder',    desc: '1,000+ essential words across 10 categories. Click to hear native pronunciation.', gradient: 'from-[#3F8571] to-[#2E6B59]',  live: true  },
+  { emoji: '✏️', title: 'Grammar Patterns',      desc: 'Sentence structure from particles to verb endings — beginner to advanced.', gradient: 'from-[#D9A441] to-[#C08A2D]',    live: true  },
+  { emoji: '🧠', title: 'Spaced Repetition',     desc: 'SM-2 algorithm schedules every review at exactly the right moment. Build decks in seconds with Quick Import.', gradient: 'from-[#2F5D8A] to-[#24476B]',    live: true  },
+  { emoji: '🤖', title: 'AI Conversation',       desc: 'Chat with a Gemini-powered AI tutor that adapts to your level and corrects your Korean naturally.', gradient: 'from-[#3F8571] to-[#2F5D8A]',   live: true  },
+  { emoji: '🎭', title: 'Honorific Engine',      desc: 'Master 존댓말 vs 반말 — formal, polite, and casual forms side-by-side with cultural notes.', gradient: 'from-[#8E3B54] to-[#6E2C40]',    live: true  },
+  { emoji: '⌨️', title: 'Typing Dojo',           desc: '60-second vocabulary race. Type as many Korean words as you can — track your WPM and accuracy.', gradient: 'from-[#2F5D8A] to-[#3F8571]',      live: true  },
+  { emoji: '📋', title: 'TOPIK Prep',            desc: 'Official TOPIK I & II practice questions — vocabulary drills and reading comprehension.', gradient: 'from-[#D9A441] to-[#8E3B54]',   live: true  },
+  { emoji: '✍️', title: 'Stroke Canvas',         desc: 'Draw Hangul characters on a canvas and get real-time stroke-order feedback.', gradient: 'from-[#E4572E] to-[#8E3B54]',   live: false },
+  { emoji: '🎬', title: 'K-Drama Shadowing',     desc: 'Listen to real drama lines, repeat them, and compare your pronunciation with AI.', gradient: 'from-[#B8402F] to-[#8E3B54]',       live: false },
 ];
 
 const STEPS = [
-  { n: '01', title: 'Build the Foundation',  desc: 'Start with Hangul in 30 minutes, then unlock vocabulary, grammar, and culture at your own pace.',                     color: '#EC4899' },
-  { n: '02', title: 'Practice for Real',     desc: 'Chat with the AI tutor, race in Typing Dojo, study honorifics, and prep for TOPIK — all in one tab.',                  color: '#8B5CF6' },
-  { n: '03', title: 'Never Forget',          desc: 'The SM-2 spaced repetition engine reviews every card at exactly the right moment. Knowledge sticks permanently.',       color: '#06B6D4' },
+  { n: '01', title: 'Build the Foundation',  desc: 'Start with Hangul in 30 minutes, then unlock vocabulary, grammar, and culture at your own pace.',                     color: '#E4572E' },
+  { n: '02', title: 'Practice for Real',     desc: 'Chat with the AI tutor, race in Typing Dojo, study honorifics, and prep for TOPIK — all in one tab.',                  color: '#3F8571' },
+  { n: '03', title: 'Never Forget',          desc: 'The SM-2 spaced repetition engine reviews every card at exactly the right moment. Knowledge sticks permanently.',       color: '#2F5D8A' },
 ];
 
 const TESTIMONIALS = [
@@ -275,7 +275,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
   const visibleFeatures = showAllFeatures ? CORE_FEATURES : CORE_FEATURES.slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 overflow-hidden">
+    <div className="kl-landing min-h-screen bg-white dark:bg-gray-950 overflow-hidden">
       <style>{`
         @keyframes marquee    { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         @keyframes floatA     { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-18px) rotate(5deg); } }
@@ -292,46 +292,94 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         .fade-up       { animation: fadeUp 0.7s ease-out forwards; }
         .blob          { animation: blobPulse 8s ease-in-out infinite; }
 
+        /* ── "Hanji & Dancheong" palette preview — scoped to the landing page ──
+           Ink navy (먹) · hanji paper cream · persimmon/dancheong red (장단) ·
+           celadon green (뇌록) · ochre gold (황) · dusk blue (삼청).
+           Redefining the --brand-* vars here re-skins every element on this
+           page that references them, without touching the rest of the app. */
+        .kl-landing {
+          --kl-ink: #16202F;
+          --kl-ink-deep: #0D141F;
+          --kl-ink-card: #1B2637;
+          --kl-hanji: #FAF5EB;
+          --kl-hanji-card: #FFFCF4;
+          --kl-hanji-deep: #F1E9D7;
+          --kl-persimmon: #E4572E;
+          --kl-celadon: #3F8571;
+          --kl-gold: #D9A441;
+          --kl-plum: #8E3B54;
+          --kl-dusk: #2F5D8A;
+          --brand-gradient: linear-gradient(135deg, #E4572E, #B8402F 55%, #8E3B54);
+          --brand-gradient-h: linear-gradient(90deg, #E4572E, #8E3B54);
+          --brand-gradient-hero: linear-gradient(135deg, #E4572E 0%, #8E3B54 55%, #2F5D8A 100%);
+          --brand-gradient-hero-rev: linear-gradient(135deg, #2F5D8A 0%, #8E3B54 45%, #E4572E 100%);
+          background: var(--kl-hanji);
+        }
+        .dark .kl-landing { background: var(--kl-ink-deep); }
+
+        /* Surfaces: warm paper instead of white/gray; ink instead of near-black */
+        .kl-landing .bg-white { background-color: var(--kl-hanji-card); }
+        .kl-landing .bg-gray-50 { background-color: var(--kl-hanji-deep); }
+        .kl-landing section.bg-white { background-color: var(--kl-hanji); }
+        .kl-landing .bg-gray-50\\/60 { background-color: rgba(241,233,215,0.6); }
+        .dark .kl-landing .bg-white, .dark .kl-landing .bg-gray-50 { background-color: var(--kl-ink-card); }
+        .dark .kl-landing section.bg-white { background-color: var(--kl-ink-deep); }
+        .dark .kl-landing section.bg-gray-50 { background-color: var(--kl-ink); }
+        .dark .kl-landing .bg-gray-50\\/60 { background-color: rgba(27,38,55,0.5); }
+
+        /* Warm paper borders */
+        .kl-landing .border-gray-100, .kl-landing .border-gray-200 { border-color: #E7DCC6; }
+        .dark .kl-landing .border-gray-100, .dark .kl-landing .border-gray-200 { border-color: #26334A; }
+
+        /* Accent remaps: pink -> persimmon, violet -> celadon, yellow -> gold */
+        .kl-landing .text-pink-400, .kl-landing .text-pink-500, .kl-landing .text-pink-600 { color: var(--kl-persimmon); }
+        .kl-landing .text-violet-500, .kl-landing .text-violet-700 { color: var(--kl-celadon); }
+        .kl-landing .text-yellow-400 { color: var(--kl-gold); }
+        .kl-landing .bg-pink-100 { background-color: rgba(228,87,46,0.12); }
+        .kl-landing .bg-violet-100 { background-color: rgba(63,133,113,0.14); }
+        .kl-landing [class*="hover:text-pink"]:hover { color: var(--kl-persimmon); }
+        .kl-landing [class*="hover:border-pink"]:hover { border-color: var(--kl-persimmon); }
+
         .gradient-text {
           background: var(--brand-gradient-hero);
           -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
         .gradient-text-warm {
-          background: linear-gradient(135deg,#EC4899,#F97316);
+          background: linear-gradient(135deg,#E4572E,#D9A441);
           -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
         .btn-primary {
           background: var(--brand-gradient);
           transition: all 0.25s ease;
-          box-shadow: 0 4px 20px rgba(236,72,153,0.35);
+          box-shadow: 0 4px 20px rgba(228,87,46,0.35);
         }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(236,72,153,0.5); }
-        .btn-outline { border:2px solid #E5E7EB; transition:all 0.25s ease; }
-        .dark .btn-outline { border-color:#374151; color:#D1D5DB; }
-        .btn-outline:hover { border-color:#EC4899; color:#EC4899; transform:translateY(-2px); }
-        .dark .btn-outline:hover { border-color:#EC4899; color:#F472B6; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(228,87,46,0.5); }
+        .btn-outline { border:2px solid #E3D7BF; transition:all 0.25s ease; }
+        .dark .btn-outline { border-color:#324158; color:#D6CDBD; }
+        .btn-outline:hover { border-color:#E4572E; color:#E4572E; transform:translateY(-2px); }
+        .dark .btn-outline:hover { border-color:#F07A55; color:#F07A55; }
         .card-hover { transition:all 0.3s cubic-bezier(0.4,0,0.2,1); }
         .card-hover:hover { transform:translateY(-5px); box-shadow:0 20px 40px rgba(0,0,0,0.1); }
         .dark .card-hover:hover { box-shadow:0 20px 40px rgba(0,0,0,0.4); }
-        .check-free  { background: #D1FAE5; color: #059669; }
-        .dark .check-free  { background: rgba(16,185,129,0.15); color: #34D399; }
+        .check-free  { background: #DDEBE4; color: #2E6B59; }
+        .dark .check-free  { background: rgba(63,133,113,0.18); color: #7FC0AC; }
         .check-premium { background: var(--brand-gradient); color: white; }
       `}</style>
 
       {/* ── HERO ──────────────────────────────────────────────────── */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-4 pt-24 pb-16 overflow-hidden">
         {/* Background blobs */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 opacity-40 dark:opacity-20 blob" style={{ background: '#FCE7F3', filter: 'blur(60px)' }} />
-        <div className="absolute top-1/3 -right-24 w-80 h-80 opacity-30 dark:opacity-15 blob" style={{ background: '#EDE9FE', filter: 'blur(50px)', animationDelay: '3s' }} />
-        <div className="absolute -bottom-24 left-1/3 w-72 h-72 opacity-25 dark:opacity-10 blob" style={{ background: '#CFFAFE', filter: 'blur(50px)', animationDelay: '5s' }} />
+        <div className="absolute -top-32 -left-32 w-96 h-96 opacity-40 dark:opacity-20 blob" style={{ background: '#F4D8C8', filter: 'blur(60px)' }} />
+        <div className="absolute top-1/3 -right-24 w-80 h-80 opacity-30 dark:opacity-15 blob" style={{ background: '#D8E6DE', filter: 'blur(50px)', animationDelay: '3s' }} />
+        <div className="absolute -bottom-24 left-1/3 w-72 h-72 opacity-25 dark:opacity-10 blob" style={{ background: '#F0E2C4', filter: 'blur(50px)', animationDelay: '5s' }} />
 
         {/* Floating characters */}
         {[
-          { char: '가', color: '#EC4899', top: '12%', left: '4%',  size: '5rem', cls: 'float-a', op: 0.12 },
-          { char: '나', color: '#8B5CF6', top: '20%', right: '6%', size: '4rem', cls: 'float-b', op: 0.10 },
-          { char: '다', color: '#06B6D4', bottom:'28%',left: '8%', size: '3.5rem',cls: 'float-c', op: 0.10 },
-          { char: '한', color: '#F97316', bottom:'30%',right:'8%', size: '5.5rem',cls: 'float-a', op: 0.08 },
-          { char: '글', color: '#10B981', top: '50%', left: '2%',  size: '3rem', cls: 'float-b', op: 0.07 },
+          { char: '가', color: '#E4572E', top: '12%', left: '4%',  size: '5rem', cls: 'float-a', op: 0.12 },
+          { char: '나', color: '#3F8571', top: '20%', right: '6%', size: '4rem', cls: 'float-b', op: 0.10 },
+          { char: '다', color: '#2F5D8A', bottom:'28%',left: '8%', size: '3.5rem',cls: 'float-c', op: 0.10 },
+          { char: '한', color: '#D9A441', bottom:'30%',right:'8%', size: '5.5rem',cls: 'float-a', op: 0.08 },
+          { char: '글', color: '#8E3B54', top: '50%', left: '2%',  size: '3rem', cls: 'float-b', op: 0.07 },
         ].map((f, i) => (
           <div key={i} className={`absolute ${f.cls} pointer-events-none select-none dark:opacity-[0.18]`}
             style={{ fontSize: f.size, fontWeight: 900, color: f.color, fontFamily: 'Noto Sans KR,sans-serif', opacity: f.op, top: f.top, bottom: (f as any).bottom, left: f.left, right: (f as any).right }}>
@@ -341,7 +389,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
 
         <div className={`relative z-10 max-w-5xl mx-auto text-center ${loaded ? 'fade-up' : 'opacity-0'}`}>
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-50 to-violet-50 dark:from-pink-900/30 dark:to-violet-900/30 border border-pink-200 dark:border-pink-700/50 rounded-full px-5 py-2 mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full px-5 py-2 mb-8 border" style={{ background: 'rgba(228,87,46,0.08)', borderColor: 'rgba(228,87,46,0.30)' }}>
             <span className="text-base">🎬</span>
             <span className="text-sm font-semibold text-pink-600 dark:text-pink-400">Built for K-Drama fans · Not another Duolingo</span>
             <span className="text-base">🇰🇷</span>
@@ -353,14 +401,14 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             <span className="block gradient-text">With Subtitles</span>
           </h1>
 
-          <p className="text-xl sm:text-2xl mb-3 font-bold" style={{ fontFamily: 'Noto Sans KR,sans-serif', color: '#EC4899' }}>
+          <p className="text-xl sm:text-2xl mb-3 font-bold" style={{ fontFamily: 'Noto Sans KR,sans-serif', color: 'var(--kl-persimmon)' }}>
             한국어를 진짜로 배워봐요! ✨
           </p>
           <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-4 max-w-xl mx-auto leading-relaxed">
             The only Korean learning app built for K-drama fans.
             AI conversations, 1,000+ words, real grammar — not tourist phrases.
           </p>
-          <p className="text-sm sm:text-base font-black mb-10 max-w-lg mx-auto" style={{ color: '#8B5CF6' }}>
+          <p className="text-sm sm:text-base font-black mb-10 max-w-lg mx-auto" style={{ color: 'var(--kl-celadon)' }}>
             Just $4/month. Cancel anytime. Less than a coffee ☕
           </p>
 
@@ -471,9 +519,9 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
           </FadeIn>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { section: 'vocabulary' as const, emoji: '📖', title: 'Vocabulary', desc: '39 free words across 3 categories · 1,000+ with Premium. Click to hear native pronunciation.', gradient: 'from-pink-500 to-rose-500' },
-              { section: 'grammar'    as const, emoji: '✏️', title: 'Grammar',    desc: 'Sentence patterns from particles to verb endings',    gradient: 'from-violet-500 to-purple-600' },
-              { section: 'culture'   as const, emoji: '🎌', title: 'Culture',    desc: 'K-pop, K-drama, regions, customs & daily Korean life', gradient: 'from-orange-400 to-pink-500' },
+              { section: 'vocabulary' as const, emoji: '📖', title: 'Vocabulary', desc: '39 free words across 3 categories · 1,000+ with Premium. Click to hear native pronunciation.', gradient: 'from-[#E4572E] to-[#C13F22]' },
+              { section: 'grammar'    as const, emoji: '✏️', title: 'Grammar',    desc: 'Sentence patterns from particles to verb endings',    gradient: 'from-[#3F8571] to-[#2E6B59]' },
+              { section: 'culture'   as const, emoji: '🎌', title: 'Culture',    desc: 'K-pop, K-drama, regions, customs & daily Korean life', gradient: 'from-[#D9A441] to-[#B8402F]' },
             ].map((item, i) => (
               <FadeIn key={item.section} delay={i * 120}>
                 <button
@@ -592,7 +640,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                   </div>
                   <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-5 italic flex-1">"{t.text}"</p>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-100 to-violet-100 dark:from-pink-900/40 dark:to-violet-900/40 flex items-center justify-center text-xl flex-shrink-0">{t.avatar}</div>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl flex-shrink-0" style={{ background: 'rgba(228,87,46,0.12)' }}>{t.avatar}</div>
                     <div>
                       <div className="font-bold text-gray-900 dark:text-white text-sm">{t.author}</div>
                       <div className="text-gray-400 text-xs">{t.role}</div>
@@ -644,7 +692,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
 
             {/* Premium */}
             <FadeIn delay={150}>
-            <div className="card-hover relative rounded-3xl p-8 overflow-hidden" style={{ background: 'linear-gradient(135deg,#1a1a2e 0%,#16213e 100%)' }}>
+            <div className="card-hover relative rounded-3xl p-8 overflow-hidden" style={{ background: 'linear-gradient(160deg,#1B2637 0%,#0D141F 100%)' }}>
               <div className="absolute -top-px left-1/2 -translate-x-1/2">
                 <span className="inline-block px-5 py-1.5 text-xs font-black uppercase tracking-widest rounded-b-full text-white" style={{ background: 'var(--brand-gradient)' }}>
                   Best Value
@@ -654,7 +702,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
               <div className="flex items-end gap-2 mb-1">
                 <span className="text-5xl font-black text-white">$4</span>
                 <span className="text-gray-400 text-lg mb-1.5">/month</span>
-                <span className="mb-2 text-xs font-black px-2 py-0.5 rounded-full text-white bg-emerald-500/30 text-emerald-300">☕ less than a coffee</span>
+                <span className="mb-2 text-xs font-black px-2 py-0.5 rounded-full" style={{ background: 'rgba(217,164,65,0.22)', color: '#E8C983' }}>☕ less than a coffee</span>
               </div>
               <div className="text-gray-400 text-sm mb-6">Cancel anytime · secure payment via Stripe</div>
               <ul className="space-y-2.5 mb-8">
@@ -739,9 +787,9 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* ── FINAL CTA ────────────────────────────────────────────── */}
-      <section className="py-24 px-4 relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%)' }}>
-        <div className="absolute top-0 left-0 w-80 h-80 opacity-10 blob" style={{ background: '#EC4899', filter: 'blur(80px)' }} />
-        <div className="absolute bottom-0 right-0 w-80 h-80 opacity-10 blob" style={{ background: '#8B5CF6', filter: 'blur(80px)', animationDelay: '4s' }} />
+      <section className="py-24 px-4 relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#0D141F 0%,#16202F 55%,#1E3A5C 100%)' }}>
+        <div className="absolute top-0 left-0 w-80 h-80 opacity-10 blob" style={{ background: '#E4572E', filter: 'blur(80px)' }} />
+        <div className="absolute bottom-0 right-0 w-80 h-80 opacity-10 blob" style={{ background: '#3F8571', filter: 'blur(80px)', animationDelay: '4s' }} />
 
         <FadeIn>
         <div className="relative z-10 max-w-3xl mx-auto text-center">
@@ -750,7 +798,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
           </div>
           <h2 className="text-4xl md:text-6xl font-black text-white mb-5 leading-tight">
             Ready to Actually<br />
-            <span style={{ background: 'linear-gradient(135deg,#EC4899,#F97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            <span style={{ background: 'linear-gradient(135deg,#E4572E,#D9A441)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
               Learn Korean?
             </span>
           </h2>
