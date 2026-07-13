@@ -44,10 +44,10 @@ const GuestFreeBanner: React.FC<GuestFreeBannerProps> = ({ onNavigate }) => {
   if (!visible) return null;
 
   return (
-    <div className="animate-fadeIn border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-pink-50 via-violet-50 to-cyan-50 dark:from-pink-950/25 dark:via-violet-950/25 dark:to-cyan-950/25">
+    <div className="animate-fadeIn border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-[#FBEAE3] via-[#E9F1EC] to-[#E7EEF5] dark:from-[#E4572E]/10 dark:via-[#3F8571]/10 dark:to-[#2F5D8A]/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center gap-x-3 gap-y-2 flex-wrap">
         <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-          ✨ New here? Explore these <span className="font-black text-pink-600 dark:text-pink-400">free</span> — no signup needed:
+          ✨ New here? Explore these <span className="font-black text-[#E4572E] dark:text-[#F07A55]">free</span> — no signup needed:
         </span>
 
         <div className="flex items-center gap-2 flex-wrap">

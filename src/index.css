@@ -77,12 +77,12 @@ body {
 
 /* ── Focus management for accessibility ─────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid #8B5CF6;
+  outline: 2px solid #E4572E;
   outline-offset: 2px;
 }
 
 .dark :focus-visible {
-  outline-color: #A78BFA;
+  outline-color: #F07A55;
 }
 
 /* The spotlight search input auto-focuses when the modal opens; the modal is
@@ -158,13 +158,13 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #98C1D9, #3D5A80);
+  background: linear-gradient(45deg, #E4572E, #8E3B54);
   border-radius: 10px;
   transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, #3D5A80, #293241);
+  background: linear-gradient(45deg, #C13F22, #6E2C40);
 }
 
 ::-webkit-scrollbar-corner {
@@ -173,15 +173,15 @@ body {
 
 /* ── Dark mode scrollbar ────────────────────────────────────────────────── */
 .dark ::-webkit-scrollbar-track {
-  background: #2d3748;
+  background: #1B2637;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #4a5568, #98c1d9);
+  background: linear-gradient(45deg, #C13F22, #8E3B54);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, #98c1d9, #a0aec0);
+  background: linear-gradient(45deg, #E4572E, #A64A68);
 }
 
 /* ── Theme transition effects ───────────────────────────────────────────── */
@@ -245,13 +245,13 @@ body {
 
 /* ── Custom selection colors ────────────────────────────────────────────── */
 ::selection {
-  background-color: #98C1D9;
-  color: #293241;
+  background-color: #F4CDBC;
+  color: #3A2418;
 }
 
 .dark ::selection {
-  background-color: #98c1d9;
-  color: #1a202c;
+  background-color: #E4572E;
+  color: #FAF5EB;
 }
 
 /* ── Print styles ────────────────────────────────────────────────────────── */
@@ -272,13 +272,28 @@ body {
    ────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --brand-pink: #EC4899;
-  --brand-violet: #8B5CF6;
-  --brand-cyan: #06B6D4;
-  --brand-gradient: linear-gradient(135deg, #EC4899, #8B5CF6);
-  --brand-gradient-h: linear-gradient(90deg, #EC4899, #8B5CF6);
-  --brand-gradient-hero: linear-gradient(135deg, #EC4899 0%, #8B5CF6 60%, #06B6D4 100%);
-  --brand-gradient-hero-rev: linear-gradient(135deg, #06B6D4 0%, #8B5CF6 50%, #EC4899 100%);
+  /* ── Hanji & Dancheong palette (Step 2) ─────────────────────────────────
+     Drawn from Korean traditional color: persimmon (장단), celadon (뇌록),
+     ochre gold (황), dusk blue (삼청), plum, ink and hanji paper. */
+  --kl-persimmon: #E4572E;
+  --kl-persimmon-deep: #C13F22;
+  --kl-celadon: #3F8571;
+  --kl-gold: #D9A441;
+  --kl-plum: #8E3B54;
+  --kl-dusk: #2F5D8A;
+  --kl-ink: #16202F;
+  --kl-ink-deep: #0D141F;
+  --kl-hanji: #FAF5EB;
+
+  /* Legacy brand aliases — every component referencing these re-skins at once.
+     "Seoul at dusk" gradient: persimmon → lacquer red → dusk plum/blue. */
+  --brand-pink: var(--kl-persimmon);
+  --brand-violet: var(--kl-celadon);
+  --brand-cyan: var(--kl-dusk);
+  --brand-gradient: linear-gradient(135deg, #E4572E, #B8402F 55%, #8E3B54);
+  --brand-gradient-h: linear-gradient(90deg, #E4572E, #8E3B54);
+  --brand-gradient-hero: linear-gradient(135deg, #E4572E 0%, #8E3B54 55%, #2F5D8A 100%);
+  --brand-gradient-hero-rev: linear-gradient(135deg, #2F5D8A 0%, #8E3B54 45%, #E4572E 100%);
 }
 
 /* ── Hierarchy utilities ──────────────────────────────────────────────────
@@ -289,19 +304,19 @@ body {
 .btn-brand {
   background-image: var(--brand-gradient);
   color: #fff;
-  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+  box-shadow: 0 4px 14px rgba(228, 87, 46, 0.35);
   transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
 .btn-brand:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(139, 92, 246, 0.45);
+  box-shadow: 0 8px 22px rgba(228, 87, 46, 0.45);
   filter: brightness(1.03);
 }
 
 .btn-brand:active {
   transform: translateY(0) scale(0.98);
-  box-shadow: 0 3px 10px rgba(139, 92, 246, 0.35);
+  box-shadow: 0 3px 10px rgba(228, 87, 46, 0.35);
 }
 
 .btn-brand:disabled {
@@ -312,25 +327,25 @@ body {
 }
 
 .badge-brand {
-  background: rgba(139, 92, 246, 0.10);
-  color: #7C3AED;
+  background: rgba(63, 133, 113, 0.12);
+  color: #2E6B59;
 }
 
 .dark .badge-brand {
-  background: rgba(139, 92, 246, 0.20);
-  color: #C4B5FD;
+  background: rgba(63, 133, 113, 0.22);
+  color: #7FC0AC;
 }
 
 .tab-brand-active {
-  background: rgba(236, 72, 153, 0.10);
-  box-shadow: inset 0 0 0 1.5px rgba(236, 72, 153, 0.4);
-  color: #DB2777;
+  background: rgba(228, 87, 46, 0.10);
+  box-shadow: inset 0 0 0 1.5px rgba(228, 87, 46, 0.4);
+  color: #C13F22;
 }
 
 .dark .tab-brand-active {
-  background: rgba(236, 72, 153, 0.18);
-  box-shadow: inset 0 0 0 1.5px rgba(244, 114, 182, 0.45);
-  color: #F472B6;
+  background: rgba(228, 87, 46, 0.18);
+  box-shadow: inset 0 0 0 1.5px rgba(240, 122, 85, 0.45);
+  color: #F07A55;
 }
 
 /* ── Upgrade redirect overlay card ──────────────────────────────────────── */

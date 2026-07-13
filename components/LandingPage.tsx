@@ -287,11 +287,10 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         .fade-up       { animation: fadeUp 0.7s ease-out forwards; }
         .blob          { animation: blobPulse 8s ease-in-out infinite; }
 
-        /* ── "Hanji & Dancheong" palette preview — scoped to the landing page ──
-           Ink navy (먹) · hanji paper cream · persimmon/dancheong red (장단) ·
-           celadon green (뇌록) · ochre gold (황) · dusk blue (삼청).
-           Redefining the --brand-* vars here re-skins every element on this
-           page that references them, without touching the rest of the app. */
+        /* ── "Hanji & Dancheong" — landing-specific surface treatment ──
+           The brand gradients/accents are global (src/index.css). This block
+           adds the paper/ink SURFACES (hanji cream, ink navy) plus utility
+           remaps that are, for now, unique to the landing page. */
         .kl-landing {
           --kl-ink: #16202F;
           --kl-ink-deep: #0D141F;
@@ -304,10 +303,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
           --kl-gold: #D9A441;
           --kl-plum: #8E3B54;
           --kl-dusk: #2F5D8A;
-          --brand-gradient: linear-gradient(135deg, #E4572E, #B8402F 55%, #8E3B54);
-          --brand-gradient-h: linear-gradient(90deg, #E4572E, #8E3B54);
-          --brand-gradient-hero: linear-gradient(135deg, #E4572E 0%, #8E3B54 55%, #2F5D8A 100%);
-          --brand-gradient-hero-rev: linear-gradient(135deg, #2F5D8A 0%, #8E3B54 45%, #E4572E 100%);
+          /* --brand-* gradients now come from the global palette in src/index.css */
           background: var(--kl-hanji);
         }
         .dark .kl-landing { background: var(--kl-ink-deep); }

@@ -24,19 +24,19 @@ interface DashboardProps {
 }
 
 const SECTION_META: { id: Section; name: string; icon: string; gradient: string; bar: string }[] = [
-  { id: 'hangul',     name: 'Hangul',     icon: '한', gradient: 'from-pink-500 to-rose-500',      bar: '#EC4899' },
-  { id: 'vocabulary', name: 'Vocabulary', icon: '📖', gradient: 'from-violet-500 to-purple-600',  bar: '#7C3AED' },
-  { id: 'grammar',    name: 'Grammar',    icon: '📝', gradient: 'from-orange-400 to-pink-500',    bar: '#F97316' },
-  { id: 'phrases',    name: 'Phrases',    icon: '💬', gradient: 'from-teal-400 to-emerald-500',   bar: '#14B8A6' },
-  { id: 'culture',    name: 'Culture',    icon: '🎭', gradient: 'from-yellow-400 to-orange-500',  bar: '#EAB308' },
-  { id: 'quiz',       name: 'Quiz',       icon: '🧠', gradient: 'from-blue-500 to-indigo-600',    bar: '#3B82F6' },
+  { id: 'hangul',     name: 'Hangul',     icon: '한', gradient: 'from-[#E4572E] to-[#C13F22]',  bar: '#E4572E' },
+  { id: 'vocabulary', name: 'Vocabulary', icon: '📖', gradient: 'from-[#3F8571] to-[#2E6B59]',  bar: '#3F8571' },
+  { id: 'grammar',    name: 'Grammar',    icon: '📝', gradient: 'from-[#D9A441] to-[#C08A2D]',  bar: '#D9A441' },
+  { id: 'phrases',    name: 'Phrases',    icon: '💬', gradient: 'from-[#2F5D8A] to-[#3F8571]',  bar: '#2F5D8A' },
+  { id: 'culture',    name: 'Culture',    icon: '🎭', gradient: 'from-[#D9A441] to-[#8E3B54]',  bar: '#8E3B54' },
+  { id: 'quiz',       name: 'Quiz',       icon: '🧠', gradient: 'from-[#2F5D8A] to-[#24476B]',  bar: '#24476B' },
 ];
 
 const QUICK_ACTIONS: { id: Section; label: string; icon: string; sub: string; gradient: string }[] = [
-  { id: 'vocabulary',   label: 'Study Vocab',     icon: '📖', sub: 'Learn new words',       gradient: 'from-violet-500 to-purple-600' },
-  { id: 'hangul',       label: 'Practice Hangul', icon: '한', sub: 'Korean alphabet',       gradient: 'from-pink-500 to-rose-500' },
-  { id: 'quiz',         label: 'Take a Quiz',     icon: '🧠', sub: 'Test your knowledge',   gradient: 'from-blue-500 to-indigo-600' },
-  { id: 'conversation', label: 'AI Chat',          icon: '🤖', sub: 'Practice conversation', gradient: 'from-teal-400 to-emerald-500' },
+  { id: 'vocabulary',   label: 'Study Vocab',     icon: '📖', sub: 'Learn new words',       gradient: 'from-[#3F8571] to-[#2E6B59]' },
+  { id: 'hangul',       label: 'Practice Hangul', icon: '한', sub: 'Korean alphabet',       gradient: 'from-[#E4572E] to-[#C13F22]' },
+  { id: 'quiz',         label: 'Take a Quiz',     icon: '🧠', sub: 'Test your knowledge',   gradient: 'from-[#2F5D8A] to-[#24476B]' },
+  { id: 'conversation', label: 'AI Chat',          icon: '🤖', sub: 'Practice conversation', gradient: 'from-[#3F8571] to-[#2F5D8A]' },
 ];
 
 const PRACTICE_TOOLS: { id: Section; label: string; icon: string; sub: string; freeLabel: string; isPremium: boolean }[] = [
@@ -153,8 +153,8 @@ export default function Dashboard({
 
         {/* ── Welcome Header ──────────────────────────── */}
         <div className="relative rounded-3xl overflow-hidden p-8" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)' }}>
-          <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10" style={{ background: '#EC4899', filter: 'blur(60px)', transform: 'translate(30%,-30%)' }} />
-          <div className="absolute bottom-0 left-1/3 w-48 h-48 rounded-full opacity-10" style={{ background: '#8B5CF6', filter: 'blur(50px)', transform: 'translateY(30%)' }} />
+          <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10" style={{ background: '#E4572E', filter: 'blur(60px)', transform: 'translate(30%,-30%)' }} />
+          <div className="absolute bottom-0 left-1/3 w-48 h-48 rounded-full opacity-10" style={{ background: '#3F8571', filter: 'blur(50px)', transform: 'translateY(30%)' }} />
 
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
             <div>
@@ -163,7 +163,7 @@ export default function Dashboard({
                 안녕하세요, <span style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{firstName}!</span> 👋
               </h1>
               <p className="text-gray-400 text-sm">
-                <span className="text-pink-400 font-semibold" style={{ fontFamily: 'Noto Sans KR, sans-serif' }}>{motivation.ko}</span>
+                <span className="text-[#F07A55] font-semibold" style={{ fontFamily: 'Noto Sans KR, sans-serif' }}>{motivation.ko}</span>
                 {' '}— {motivation.en}
               </p>
             </div>
@@ -177,8 +177,8 @@ export default function Dashboard({
                     strokeDasharray={`${(overall / 100) * 175.9} 175.9`} />
                   <defs>
                     <linearGradient id="prog-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#EC4899" />
-                      <stop offset="100%" stopColor="#8B5CF6" />
+                      <stop offset="0%" stopColor="#E4572E" />
+                      <stop offset="100%" stopColor="#8E3B54" />
                     </linearGradient>
                   </defs>
                 </svg>
@@ -226,7 +226,7 @@ export default function Dashboard({
                   }
                 }}
                 disabled={isSyncing}
-                className="flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-semibold text-white border border-white/20 hover:border-pink-400/50 transition-colors disabled:opacity-40"
+                className="flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-semibold text-white border border-white/20 hover:border-[#F07A55]/50 transition-colors disabled:opacity-40"
               >
                 <span className={isSyncing ? 'animate-spin inline-block' : ''}>🔄</span>
                 {isSyncing ? 'Syncing…' : 'Sync Now'}
@@ -242,7 +242,7 @@ export default function Dashboard({
           <div className={`stat-card bg-white dark:bg-gray-900 rounded-2xl p-5 border shadow-sm col-span-2 sm:col-span-1 ${
             xp.streakAtRisk ? 'border-orange-200 dark:border-orange-800 ring-1 ring-orange-200 dark:ring-orange-800' : 'border-gray-100 dark:border-gray-800'
           }`}>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-3 shadow" style={{ background: 'linear-gradient(135deg,#F97316,#EC4899)' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-3 shadow" style={{ background: 'linear-gradient(135deg,#D9A441,#E4572E)' }}>
               🔥
             </div>
             <div className="flex items-end gap-1.5 mb-0.5">
@@ -289,14 +289,14 @@ export default function Dashboard({
           <button
             onClick={() => setActiveSection('srs')}
             className={`stat-card bg-white dark:bg-gray-900 rounded-2xl p-5 border shadow-sm text-left group ${
-              srsStats.totalDue > 0 ? 'border-pink-200 dark:border-pink-800 ring-1 ring-pink-200 dark:ring-pink-800 hover:border-pink-400 dark:hover:border-pink-600' : 'border-gray-100 dark:border-gray-800 hover:border-violet-200 dark:hover:border-violet-800'
+              srsStats.totalDue > 0 ? 'border-[#E4572E]/30 dark:border-[#E4572E]/40 ring-1 ring-[#E4572E]/30 dark:ring-[#E4572E]/40 hover:border-[#E4572E]/60 dark:hover:border-[#F07A55]/60' : 'border-gray-100 dark:border-gray-800 hover:border-[#3F8571]/40 dark:hover:border-[#3F8571]/50'
             } transition-colors`}
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-lg mb-3 shadow">🧠</div>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2F5D8A] to-[#24476B] flex items-center justify-center text-lg mb-3 shadow">🧠</div>
             <div className="text-2xl font-black text-gray-900 dark:text-white">{srsStats.totalDue}</div>
             <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">cards to review</div>
             <div className="text-sm font-semibold text-gray-600 dark:text-gray-300 mt-1">SRS Due Now</div>
-            <div className="mt-2 text-[11px] font-bold text-violet-500 dark:text-violet-400 group-hover:underline">
+            <div className="mt-2 text-[11px] font-bold text-[#2F5D8A] dark:text-[#7FA6CC] group-hover:underline">
               {srsStats.totalDue > 0 ? 'Review now →' : 'Open SRS →'}
             </div>
           </button>
@@ -322,7 +322,7 @@ export default function Dashboard({
           className="rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 border border-cyan-100 dark:border-cyan-900/40"
           style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.06) 0%, rgba(139,92,246,0.06) 100%)' }}
         >
-          <div className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: 'linear-gradient(135deg,#06B6D4,#8B5CF6)' }}>
+          <div className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: 'linear-gradient(135deg,#3F8571,#2F5D8A)' }}>
             📅
           </div>
           <div className="flex-1 min-w-0">
@@ -337,7 +337,7 @@ export default function Dashboard({
           <button
             onClick={() => setActiveSection('vocabulary')}
             className="flex-shrink-0 px-4 py-2 rounded-xl text-white text-sm font-bold transition-transform hover:scale-[1.02]"
-            style={{ background: 'linear-gradient(135deg,#06B6D4,#8B5CF6)' }}
+            style={{ background: 'linear-gradient(135deg,#3F8571,#2F5D8A)' }}
           >
             Study More →
           </button>
@@ -440,7 +440,7 @@ export default function Dashboard({
             <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm">
               <div className="flex flex-wrap gap-3">
                 {achievements.map((a, i) => (
-                  <span key={i} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-pink-50 to-violet-50 dark:from-pink-900/20 dark:to-violet-900/20 border border-pink-100 dark:border-pink-800/30 text-pink-700 dark:text-pink-400">
+                  <span key={i} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-[#FBEAE3] to-[#E9F1EC] dark:from-[#E4572E]/15 dark:to-[#3F8571]/15 border border-[#E4572E]/20 dark:border-[#E4572E]/30 text-[#C13F22] dark:text-[#F07A55]">
                     {a}
                   </span>
                 ))}
@@ -452,12 +452,12 @@ export default function Dashboard({
         {/* ── Upgrade Banner (free users) ──────────────── */}
         {subscriptionTier === 'free' && (
           <div className="relative rounded-3xl overflow-hidden p-6 sm:p-8" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' }}>
-            <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-15" style={{ background: '#EC4899', filter: 'blur(50px)', transform: 'translate(20%,-20%)' }} />
+            <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-15" style={{ background: '#E4572E', filter: 'blur(50px)', transform: 'translate(20%,-20%)' }} />
             <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl">🚀</span>
-                  <span className="text-xs font-bold uppercase tracking-widest text-pink-400">Limited Offer</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#F07A55]">Limited Offer</span>
                 </div>
                 <h3 className="text-xl font-black text-white mb-1">Get Premium</h3>
                 <p className="text-gray-400 text-sm max-w-sm">
@@ -472,7 +472,7 @@ export default function Dashboard({
                 <div className="flex gap-2">
                   <button
                     onClick={openUpgradeModal}
-                    className="px-4 py-2.5 rounded-xl text-sm font-bold text-white border border-white/20 hover:border-pink-400/50 transition-colors"
+                    className="px-4 py-2.5 rounded-xl text-sm font-bold text-white border border-white/20 hover:border-[#F07A55]/50 transition-colors"
                   >
                     See What's Included
                   </button>

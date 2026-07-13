@@ -64,7 +64,7 @@ const NavItem: React.FC<NavItemProps> = ({ title, icon, isActive, onClick, showF
     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
       isActive
         ? 'text-white shadow-md'
-        : 'text-gray-600 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-pink-50 dark:hover:bg-gray-800'
+        : 'text-gray-600 dark:text-gray-400 hover:text-[#E4572E] dark:hover:text-[#F07A55] hover:bg-[#E4572E]/10 dark:hover:bg-gray-800'
     }`}
     style={isActive ? { background: 'var(--brand-gradient)' } : {}}
     aria-current={isActive ? 'page' : undefined}
@@ -188,7 +188,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
   }, [showMoreMenu, showUserMenu]);
 
   const tierBadge = subscriptionTier === 'premium'
-    ? { label: '⭐ Premium', cls: 'bg-gradient-to-r from-pink-100 to-violet-100 dark:from-pink-900/30 dark:to-violet-900/30 text-pink-700 dark:text-pink-400' }
+    ? { label: '⭐ Premium', cls: 'bg-gradient-to-r from-[#FBEAE3] to-[#E9F1EC] dark:from-[#E4572E]/20 dark:to-[#3F8571]/20 text-[#C13F22] dark:text-[#F07A55]' }
     : { label: '🆓 Free', cls: 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400' };
 
   return (
@@ -261,7 +261,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                   className={`nav-more-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                     megaMenuGroups.flatMap(g => g.items).some(s => s.id === activeSection)
                       ? 'active shadow-md'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-pink-50 dark:hover:bg-gray-800'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-[#E4572E] dark:hover:text-[#F07A55] hover:bg-[#E4572E]/10 dark:hover:bg-gray-800'
                   }`}
                 >
                   <span>More</span>
@@ -286,7 +286,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                               onClick={() => handleNav(item.id as Section)}
                               className={`w-full px-3 py-2 rounded-xl text-left flex items-center gap-2.5 text-sm font-medium transition-colors duration-150 ${
                                 activeSection === item.id
-                                  ? 'bg-pink-50 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400'
+                                  ? 'bg-[#E4572E]/10 dark:bg-[#E4572E]/15 text-[#C13F22] dark:text-[#F07A55]'
                                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                               }`}
                             >
@@ -301,7 +301,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                                 </span>
                               )}
                               {activeSection === item.id && !item._isNew && (
-                                <span className="w-1.5 h-1.5 rounded-full bg-pink-500" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#E4572E]" />
                               )}
                             </button>
                           ))}
@@ -351,7 +351,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                 <div className="hidden md:flex items-center gap-2">
                   <button
                     onClick={openLogin}
-                    className="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors duration-200"
+                    className="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-[#E4572E] dark:hover:text-[#F07A55] transition-colors duration-200"
                   >
                     Sign In
                   </button>
@@ -404,7 +404,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                       {subscriptionTier === 'free' && (
                         <button
                           className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-800 transition-opacity duration-200 hover:opacity-90 w-full text-left"
-                          style={{ background: 'linear-gradient(135deg, #1a1a2e, #16213e)' }}
+                          style={{ background: 'linear-gradient(160deg, #1B2637, #0D141F)' }}
                           onClick={() => { setShowUserMenu(false); startUpgrade(); }}
                         >
                           <span className="text-xl">🚀</span>
@@ -412,7 +412,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                             <div className="text-sm font-bold text-white">Get Premium</div>
                             <div className="text-xs text-gray-400">$4/month · cancel anytime</div>
                           </div>
-                          <svg className="w-4 h-4 text-pink-400 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-4 h-4 text-[#F07A55] ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         </button>
@@ -550,7 +550,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                 <div className="flex gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
                   <button
                     onClick={() => { openLogin(); setIsMenuOpen(false); }}
-                    className="flex-1 py-3 text-sm font-semibold text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-pink-400 hover:text-pink-600 transition-colors duration-200"
+                    className="flex-1 py-3 text-sm font-semibold text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-[#E4572E] hover:text-[#E4572E] transition-colors duration-200"
                   >
                     Sign In
                   </button>
