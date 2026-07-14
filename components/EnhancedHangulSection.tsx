@@ -95,7 +95,7 @@ const HangulSection: React.FC<HangulSectionProps> = ({ progress = {}, toggleProg
         </div>
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-3">
-            <span className="text-4xl font-black text-white" style={{ fontFamily: 'Noto Sans KR, sans-serif' }}>한</span>
+            <span className="text-4xl font-black text-white" style={{ fontFamily: 'Pretendard Variable, sans-serif' }}>한</span>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight">The Korean Alphabet</h1>
               <p className="text-[#FBDCCB] font-semibold text-sm">한글 · Hangul</p>

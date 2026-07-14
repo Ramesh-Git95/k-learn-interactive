@@ -131,7 +131,7 @@ export default function Dashboard({
         .progress-bar { transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
         .korean-action-icon {
           background: linear-gradient(135deg,#ffffff33,#ffffff11);
-          font-family: 'Noto Sans KR', sans-serif;
+          font-family: 'Pretendard Variable', sans-serif;
           font-weight: 900;
         }
         .heatmap-dot { transition: all 0.2s ease; }
@@ -163,7 +163,7 @@ export default function Dashboard({
                 안녕하세요, <span style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{firstName}!</span> 👋
               </h1>
               <p className="text-gray-400 text-sm">
-                <span className="text-[#F07A55] font-semibold" style={{ fontFamily: 'Noto Sans KR, sans-serif' }}>{motivation.ko}</span>
+                <span className="text-[#F07A55] font-semibold" style={{ fontFamily: 'Pretendard Variable, sans-serif' }}>{motivation.ko}</span>
                 {' '}— {motivation.en}
               </p>
             </div>
@@ -413,7 +413,7 @@ export default function Dashboard({
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2.5">
-                      <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${sec.gradient} flex items-center justify-center text-base shadow-sm`} style={{ fontFamily: 'Noto Sans KR, sans-serif', fontWeight: 900 }}>
+                      <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${sec.gradient} flex items-center justify-center text-base shadow-sm`} style={{ fontFamily: 'Pretendard Variable, sans-serif', fontWeight: 900 }}>
                         {sec.icon}
                       </div>
                       <span className="font-bold text-gray-900 dark:text-white text-sm">{sec.name}</span>

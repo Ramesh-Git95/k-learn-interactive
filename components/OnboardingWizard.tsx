@@ -153,7 +153,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
                         : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'
                     }`}
                   >
-                    <span className="text-xl font-black text-gray-400 w-8 text-center" style={{ fontFamily: 'Noto Sans KR,sans-serif' }}>{l.emoji}</span>
+                    <span className="text-xl font-black text-gray-400 w-8 text-center" style={{ fontFamily: 'Pretendard Variable,sans-serif' }}>{l.emoji}</span>
                     <div>
                       <div className="font-bold text-gray-900 dark:text-white text-sm">{l.label}</div>
                       <div className="text-gray-400 text-xs">{l.sub}</div>

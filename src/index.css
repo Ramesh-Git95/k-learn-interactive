@@ -18,13 +18,14 @@
   }
 }
 
-/* Theme tokens ported from the old CDN inline config so the Inter font stack,
-   font-korean utility, and custom animations keep working. The han/dm/hc color
-   tokens from the old config were unused in the codebase and dropped. */
+/* Font system (Step 2): General Sans for Latin body/UI, Clash Display for
+   headlines, Pretendard for Korean — the typeface of modern Korean product
+   design. The font-korean utility and custom animations live here too. */
 @theme {
   /* Fonts */
-  --font-sans: 'Inter', 'Noto Sans KR', sans-serif;
-  --font-korean: 'Noto Sans KR', sans-serif;
+  --font-sans: 'General Sans', 'Pretendard Variable', 'Pretendard', sans-serif;
+  --font-korean: 'Pretendard Variable', 'Pretendard', 'Noto Sans KR', sans-serif;
+  --font-display: 'Clash Display', 'Pretendard Variable', 'Pretendard', sans-serif;
 
   /* Custom animations (utility: animate-<name>) */
   --animate-flip-3d: flip-3d 0.6s ease-in-out;
@@ -58,9 +59,16 @@ html {
 }
 
 body {
-  font-family: 'Inter', 'Noto Sans KR', sans-serif;
+  font-family: 'General Sans', 'Pretendard Variable', 'Pretendard', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Display face for major headings; Korean glyphs inside headings fall back to
+   Pretendard. Clash Display tops out at 700 — browsers synthesize font-black. */
+h1, h2, h3 {
+  font-family: 'Clash Display', 'Pretendard Variable', 'Pretendard', sans-serif;
+  letter-spacing: -0.01em;
 }
 
 /* ── Enhanced accessibility ────────────────────────────────────────────── */
@@ -358,7 +366,7 @@ body {
   align-items: center;
   gap: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-  font-family: Inter, system-ui, sans-serif;
+  font-family: 'General Sans', 'Pretendard Variable', system-ui, sans-serif;
 }
 
 .dark .kl-overlay-card {

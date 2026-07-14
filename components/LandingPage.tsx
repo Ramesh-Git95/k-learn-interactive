@@ -140,7 +140,7 @@ const HangulDemo: React.FC = () => {
           >
             <span
               className={`text-xl sm:text-2xl font-black leading-none ${active === i ? 'text-pink-500' : 'text-white'}`}
-              style={{ fontFamily: 'Noto Sans KR, sans-serif' }}
+              style={{ fontFamily: 'Pretendard Variable, sans-serif' }}
             >
               {ch.char}
             </span>
@@ -155,7 +155,7 @@ const HangulDemo: React.FC = () => {
 
       {active !== null ? (
         <div className="text-center bg-white/10 rounded-2xl p-4">
-          <span className="text-4xl font-black text-white" style={{ fontFamily: 'Noto Sans KR, sans-serif' }}>
+          <span className="text-4xl font-black text-white" style={{ fontFamily: 'Pretendard Variable, sans-serif' }}>
             {DEMO_CHARS[active].char}
           </span>
           <div className="text-white font-bold mt-1">
@@ -373,7 +373,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
           { char: '글', color: '#8E3B54', top: '50%', left: '2%',  size: '3rem', cls: 'float-b', op: 0.07 },
         ].map((f, i) => (
           <div key={i} className={`absolute ${f.cls} pointer-events-none select-none dark:opacity-[0.18]`}
-            style={{ fontSize: f.size, fontWeight: 900, color: f.color, fontFamily: 'Noto Sans KR,sans-serif', opacity: f.op, top: f.top, bottom: (f as any).bottom, left: f.left, right: (f as any).right }}>
+            style={{ fontSize: f.size, fontWeight: 900, color: f.color, fontFamily: 'Pretendard Variable,sans-serif', opacity: f.op, top: f.top, bottom: (f as any).bottom, left: f.left, right: (f as any).right }}>
             {f.char}
           </div>
         ))}
@@ -392,7 +392,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             <span className="block gradient-text">With Subtitles</span>
           </h1>
 
-          <p className="text-xl sm:text-2xl mb-3 font-bold" style={{ fontFamily: 'Noto Sans KR,sans-serif', color: 'var(--kl-persimmon)' }}>
+          <p className="text-xl sm:text-2xl mb-3 font-bold" style={{ fontFamily: 'Pretendard Variable,sans-serif', color: 'var(--kl-persimmon)' }}>
             한국어를 진짜로 배워봐요! ✨
           </p>
           <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-4 max-w-xl mx-auto leading-relaxed">
@@ -467,7 +467,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         <div className="flex whitespace-nowrap">
           <div className="marquee-track flex gap-8 pr-8">
             {[...marqueeWords, ...marqueeWords].map((w, i) => (
-              <span key={i} className="text-white font-semibold text-base opacity-90" style={{ fontFamily: i % 2 === 0 ? 'Noto Sans KR,sans-serif' : 'inherit' }}>
+              <span key={i} className="text-white font-semibold text-base opacity-90" style={{ fontFamily: i % 2 === 0 ? 'Pretendard Variable,sans-serif' : 'inherit' }}>
                 {w}<span className="mx-4 opacity-40">·</span>
               </span>
             ))}
@@ -562,7 +562,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                   </span>
                 )}
                 <div className="relative z-10">
-                  <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${f.gradient} flex items-center justify-center text-xl mb-4 shadow`} style={{ fontFamily: 'Noto Sans KR,sans-serif', fontWeight: 900 }}>
+                  <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${f.gradient} flex items-center justify-center text-xl mb-4 shadow`} style={{ fontFamily: 'Pretendard Variable,sans-serif', fontWeight: 900 }}>
                     {f.emoji}
                   </div>
                   <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2">{f.title}</h3>
@@ -626,7 +626,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             <div className="relative bg-white dark:bg-gray-900 p-8 sm:p-10 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
               <div
                 className="absolute -top-5 left-8 w-11 h-11 rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-md"
-                style={{ background: 'var(--brand-gradient)', fontFamily: 'Noto Sans KR, sans-serif' }}
+                style={{ background: 'var(--brand-gradient)', fontFamily: 'Pretendard Variable, sans-serif' }}
               >
                 한
               </div>
@@ -795,7 +795,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
 
         <FadeIn>
         <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <div className="text-6xl mb-5 font-black" style={{ fontFamily: 'Noto Sans KR,sans-serif', background: 'var(--brand-gradient-hero)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          <div className="text-6xl mb-5 font-black" style={{ fontFamily: 'Pretendard Variable,sans-serif', background: 'var(--brand-gradient-hero)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
             한국어
           </div>
           <h2 className="text-4xl md:text-6xl font-black text-white mb-5 leading-tight">

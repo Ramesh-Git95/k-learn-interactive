@@ -140,14 +140,14 @@ export default function BookmarkFlashcards({ bookmarks, onClose }: BookmarkFlash
         >
           {cardState === 'front' ? (
             <>
-              <div className="text-5xl font-black text-gray-900 dark:text-white mb-3" style={{ fontFamily: 'Noto Sans KR,sans-serif' }}>
+              <div className="text-5xl font-black text-gray-900 dark:text-white mb-3" style={{ fontFamily: 'Pretendard Variable,sans-serif' }}>
                 {korean}
               </div>
               <p className="text-gray-400 text-sm">Tap to reveal</p>
             </>
           ) : (
             <>
-              <div className="text-3xl font-black text-gray-900 dark:text-white mb-1" style={{ fontFamily: 'Noto Sans KR,sans-serif' }}>
+              <div className="text-3xl font-black text-gray-900 dark:text-white mb-1" style={{ fontFamily: 'Pretendard Variable,sans-serif' }}>
                 {korean}
               </div>
               {romanization && <div className="text-gray-400 text-sm mb-2 italic">/{romanization}/</div>}

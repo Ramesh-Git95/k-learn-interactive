@@ -240,7 +240,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
               className="flex items-center gap-2.5 group flex-shrink-0"
               aria-label="K-Learn home"
             >
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-base shadow-md group-hover:scale-105 transition-transform duration-200" style={{ background: 'var(--brand-gradient)', fontFamily: 'Noto Sans KR, sans-serif' }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-base shadow-md group-hover:scale-105 transition-transform duration-200" style={{ background: 'var(--brand-gradient)', fontFamily: 'Pretendard Variable, sans-serif' }}>
                 한
               </div>
               <span className="text-xl font-black tracking-tight" style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>

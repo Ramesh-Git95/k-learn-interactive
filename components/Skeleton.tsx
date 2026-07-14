@@ -13,7 +13,7 @@ export const AppBootSkeleton: React.FC = () => (
     <div className="h-[66px] bg-white/80 dark:bg-gray-950/80 border-b border-gray-100 dark:border-gray-800 flex items-center px-4 sm:px-6">
       <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-base" style={{ background: 'var(--brand-gradient)', fontFamily: 'Noto Sans KR, sans-serif' }}>한</div>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-base" style={{ background: 'var(--brand-gradient)', fontFamily: 'Pretendard Variable, sans-serif' }}>한</div>
           <Skeleton className="w-20 h-5" />
         </div>
         <div className="hidden md:flex items-center gap-3">
