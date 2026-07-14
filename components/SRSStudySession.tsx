@@ -81,6 +81,37 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
   const currentCard = studySession.currentCard;
   const progress = studySession.progress;
 
+  const handleReview = (result: ReviewResult) => {
+    actions.submitReview(getQualityFromResult(result), 5);
+    setSessionStats(p => ({
+      reviewed: p.reviewed + 1,
+      correct: p.correct + (result === 'easy' || result === 'good' ? 1 : 0),
+      total: p.total,
+    }));
+    actions.nextCard();
+    setShowAnswer(false);
+  };
+
+  // Keyboard shortcuts (desktop power flow): Space/Enter reveals, 1–4 grades,
+  // Esc exits. Re-subscribes on card/answer change so the closure stays fresh.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+      if (!currentCard || studySession.isComplete) return;
+      if (e.key === 'Escape') { onExit(); return; }
+      if (!showAnswer) {
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setShowAnswer(true); }
+        return;
+      }
+      const gradeKeys: Record<string, ReviewResult> = { '1': 'again', '2': 'hard', '3': 'good', '4': 'easy' };
+      if (gradeKeys[e.key]) { e.preventDefault(); handleReview(gradeKeys[e.key]); }
+      else if (e.key === ' ') e.preventDefault(); // keep Space from scrolling the page
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+    // handleReview is recreated per render; re-subscribing on these deps keeps it current.
+  }, [showAnswer, currentCard, studySession.isComplete, onExit]);
+
   if (!deck) {
     return (
       <CenteredCard>
@@ -121,17 +152,6 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
   if (!currentCard) {
     return <StudyCardSkeleton onCancel={onExit} />;
   }
-
-  const handleReview = (result: ReviewResult) => {
-    actions.submitReview(getQualityFromResult(result), 5);
-    setSessionStats(p => ({
-      reviewed: p.reviewed + 1,
-      correct: p.correct + (result === 'easy' || result === 'good' ? 1 : 0),
-      total: p.total,
-    }));
-    actions.nextCard();
-    setShowAnswer(false);
-  };
 
   const getIntervalBadge = (difficulty: ReviewResult): string => {
     if (!currentCard) {
@@ -205,7 +225,7 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
 
       {/* Card Area */}
       <div className="max-w-2xl mx-auto p-4 pt-6">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden">
+        <div key={currentCard.id} className="animate-scaleIn bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden">
           {/* Front */}
           <div className="p-8 text-center min-h-[280px] flex flex-col justify-center">
             <span className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-4 badge-brand">
@@ -219,7 +239,7 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
             )}
 
             {showAnswer && (
-              <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
+              <div className="animate-fadeIn mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
                 <div className="text-2xl font-bold mb-2" style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                   {currentCard.content.english}
                 </div>
@@ -233,12 +253,17 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
           {/* Action area */}
           <div className="p-5 bg-gray-50 dark:bg-gray-950/50 border-t border-gray-100 dark:border-gray-800">
             {!showAnswer ? (
-              <button
-                onClick={() => setShowAnswer(true)}
-                className="w-full py-3.5 rounded-xl font-bold text-base btn-brand"
-              >
-                Reveal Answer
-              </button>
+              <>
+                <button
+                  onClick={() => setShowAnswer(true)}
+                  className="w-full py-3.5 rounded-xl font-bold text-base btn-brand"
+                >
+                  Reveal Answer
+                </button>
+                <p className="hidden sm:block text-center text-[11px] text-gray-400 dark:text-gray-500 mt-2.5">
+                  Press <kbd className="px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 font-mono text-[10px]">Space</kbd> to reveal
+                </p>
+              </>
             ) : (
               <>
                 <div className="mb-3 relative">
@@ -254,7 +279,7 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
                   )}
                 </div>
                 <div className="grid grid-cols-4 gap-2">
-                  {(['again', 'hard', 'good', 'easy'] as ReviewResult[]).map(r => {
+                  {(['again', 'hard', 'good', 'easy'] as ReviewResult[]).map((r, i) => {
                     const cfg = DIFFICULTY_CONFIG[r];
                     return (
                       <Tooltip key={r} content={`${cfg.emoji} ${TOOLTIP[r]}`} position="top" maxWidth="max-w-xs">
@@ -264,6 +289,7 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
                             className="w-full py-2.5 rounded-xl text-white text-sm font-bold transition-transform hover:scale-105 active:scale-95 shadow-sm"
                             style={{ background: cfg.color }}
                           >
+                            <span className="hidden sm:inline-block text-[10px] font-black bg-white/25 rounded px-1 mr-1 align-middle">{i + 1}</span>
                             {cfg.emoji} {cfg.label}
                           </button>
                           <span className="text-[10px] text-gray-400 dark:text-gray-500">{getIntervalBadge(r)}</span>
@@ -272,6 +298,9 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
                     );
                   })}
                 </div>
+                <p className="hidden sm:block text-center text-[11px] text-gray-400 dark:text-gray-500 mt-3">
+                  Keys <kbd className="px-1 py-0.5 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 font-mono text-[10px]">1</kbd>–<kbd className="px-1 py-0.5 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 font-mono text-[10px]">4</kbd> to grade · <kbd className="px-1 py-0.5 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 font-mono text-[10px]">Esc</kbd> to exit
+                </p>
               </>
             )}
           </div>
