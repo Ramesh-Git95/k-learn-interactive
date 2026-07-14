@@ -70,6 +70,18 @@ const FAQ = [
   { q: 'Will I get future features?',                    a: 'Yes — your Premium subscription includes everything we build. K-Drama Shadowing, Stroke Canvas, and more, at no extra charge.' },
 ];
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const speakKorean = (text: string) => {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR';
+    u.rate = 0.75;
+    window.speechSynthesis.speak(u);
+  }
+};
+
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 const AnimatedCounter: React.FC<{ end: number; suffix?: string }> = ({ end, suffix = '' }) => {
@@ -281,6 +293,8 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         @keyframes shimmer    { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
 
         .marquee-track { animation: marquee 30s linear infinite; }
+        .marquee-hover:hover .marquee-track { animation-play-state: paused; }
+        @media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
         .float-a       { animation: floatA 7s ease-in-out infinite; }
         .float-b       { animation: floatB 9s ease-in-out infinite; }
         .float-c       { animation: floatC 6s ease-in-out infinite; }
@@ -358,7 +372,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       `}</style>
 
       {/* ── HERO ──────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-4 pt-24 pb-16 overflow-hidden">
+      <section className="relative min-h-[85vh] flex flex-col items-center justify-center px-4 pt-10 sm:pt-14 pb-16 overflow-hidden">
         {/* Background blobs */}
         <div className="absolute -top-32 -left-32 w-96 h-96 opacity-40 dark:opacity-20 blob" style={{ background: '#F4D8C8', filter: 'blur(60px)' }} />
         <div className="absolute top-1/3 -right-24 w-80 h-80 opacity-30 dark:opacity-15 blob" style={{ background: '#D8E6DE', filter: 'blur(50px)', animationDelay: '3s' }} />
@@ -378,98 +392,124 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
           </div>
         ))}
 
-        <div className={`relative z-10 max-w-5xl mx-auto text-center ${loaded ? 'fade-up' : 'opacity-0'}`}>
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full px-5 py-2 mb-8 border" style={{ background: 'rgba(228,87,46,0.08)', borderColor: 'rgba(228,87,46,0.30)' }}>
-            <span className="text-base">🎬</span>
-            <span className="text-sm font-semibold text-pink-600 dark:text-pink-400">Built for K-Drama fans · Not another Duolingo</span>
-            <span className="text-base">🇰🇷</span>
-          </div>
+        <div className={`relative z-10 max-w-6xl mx-auto ${loaded ? 'fade-up' : 'opacity-0'}`}>
+          {/* Two-column hero: copy left, live product demo right (first viewport).
+              Stacks to the original single-column order on mobile. */}
+          <div className="grid lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-14 items-center">
 
-          {/* Headline */}
-          <h1 className="text-5xl sm:text-7xl md:text-8xl font-black leading-none mb-5 tracking-tight">
-            <span className="block text-gray-900 dark:text-white">Stop Watching</span>
-            <span className="block gradient-text">With Subtitles</span>
-          </h1>
-
-          <p className="text-xl sm:text-2xl mb-3 font-bold" style={{ fontFamily: 'Pretendard Variable,sans-serif', color: 'var(--kl-persimmon)' }}>
-            한국어를 진짜로 배워봐요! ✨
-          </p>
-          <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-4 max-w-xl mx-auto leading-relaxed">
-            The only Korean learning app built for K-drama fans.
-            AI conversations, 1,000+ words, real grammar — not tourist phrases.
-          </p>
-          <p className="text-sm sm:text-base font-black mb-10 max-w-lg mx-auto" style={{ color: 'var(--kl-celadon)' }}>
-            Just $4/month. Cancel anytime. Less than a coffee ☕
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
-            <button onClick={handleStart} className="btn-primary text-white font-bold text-lg px-10 py-4 rounded-2xl">
-              Start for Free →
-            </button>
-            <a
-              href="#pricing"
-              className="btn-outline text-gray-700 dark:text-gray-200 font-bold text-lg px-10 py-4 rounded-2xl inline-block"
-            >
-              See Plans ↓
-            </a>
-          </div>
-
-          <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
-            Just $4/month · cancel anytime ·{' '}
-            <button
-              onClick={() => openLogin ? openLogin() : window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
-              className="text-pink-400 hover:underline font-semibold"
-            >
-              Already a member? Sign in →
-            </button>
-          </p>
-
-          {/* vs Duolingo pill */}
-          <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/40 rounded-full px-4 py-1.5 mb-10">
-            <span className="text-xs font-black text-green-700 dark:text-green-400">💰 Duolingo costs $84–168/year. K-Learn is just $4/month.</span>
-          </div>
-
-          {/* Trust row */}
-          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-400 dark:text-gray-500 mb-14">
-            {['⚡ Free to start', '🔒 No credit card', '🎬 K-Drama vocab packs', '🧠 SM-2 spaced repetition'].map((t, i, arr) => (
-              <React.Fragment key={t}>
-                <span>{t}</span>
-                {i < arr.length - 1 && <span className="hidden sm:inline">·</span>}
-              </React.Fragment>
-            ))}
-          </div>
-
-          {/* ── Live Hangul Demo ── */}
-          <div className="relative rounded-3xl overflow-hidden" style={{ background: 'var(--brand-gradient-hero)' }}>
-            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 20%, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-            <div className="relative z-10 p-6 sm:p-8">
-              <div className="flex items-center justify-center gap-2 mb-5">
-                <span className="text-2xl">🎮</span>
-                <h3 className="text-white font-black text-lg sm:text-xl">Try Hangul Right Now</h3>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/20 text-white">Interactive</span>
+            {/* ── Left — copy ── */}
+            <div className="text-center lg:text-left">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 rounded-full px-5 py-2 mb-8 border" style={{ background: 'rgba(228,87,46,0.08)', borderColor: 'rgba(228,87,46,0.30)' }}>
+                <span className="text-base">🎬</span>
+                <span className="text-sm font-semibold text-pink-600 dark:text-pink-400">Built for K-Drama fans · Not another Duolingo</span>
+                <span className="text-base">🇰🇷</span>
               </div>
-              <HangulDemo />
-              <button
-                onClick={handleStart}
-                className="mt-5 mx-auto block bg-white text-pink-600 font-black text-sm px-6 py-2.5 rounded-xl hover:scale-[1.02] transition-transform"
-              >
-                Learn all 40 characters for free →
-              </button>
+
+              {/* Headline */}
+              <h1 className="text-5xl sm:text-6xl xl:text-7xl font-black leading-none mb-5 tracking-tight">
+                <span className="block text-gray-900 dark:text-white">Stop Watching</span>
+                <span className="block gradient-text">With Subtitles</span>
+              </h1>
+
+              <p className="text-xl sm:text-2xl mb-3 font-bold" style={{ fontFamily: 'Pretendard Variable,sans-serif', color: 'var(--kl-persimmon)' }}>
+                한국어를 진짜로 배워봐요! ✨
+              </p>
+              <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-4 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                The only Korean learning app built for K-drama fans.
+                AI conversations, 1,000+ words, real grammar — not tourist phrases.
+              </p>
+              <p className="text-sm sm:text-base font-black mb-8 max-w-lg mx-auto lg:mx-0" style={{ color: 'var(--kl-celadon)' }}>
+                Just $4/month. Cancel anytime. Less than a coffee ☕
+              </p>
+
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center mb-6">
+                <button onClick={handleStart} className="btn-primary text-white font-bold text-lg px-10 py-4 rounded-2xl">
+                  Start for Free →
+                </button>
+                <a
+                  href="#pricing"
+                  className="btn-outline text-gray-700 dark:text-gray-200 font-bold text-lg px-10 py-4 rounded-2xl inline-block"
+                >
+                  See Plans ↓
+                </a>
+              </div>
+
+              <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
+                Just $4/month · cancel anytime ·{' '}
+                <button
+                  onClick={() => openLogin ? openLogin() : window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
+                  className="text-pink-400 hover:underline font-semibold"
+                >
+                  Already a member? Sign in →
+                </button>
+              </p>
+
+              {/* vs Duolingo pill */}
+              <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/40 rounded-full px-4 py-1.5 mb-8">
+                <span className="text-xs font-black text-green-700 dark:text-green-400">💰 Duolingo costs $84–168/year. K-Learn is just $4/month.</span>
+              </div>
+
+              {/* Trust row */}
+              <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 text-xs sm:text-sm text-gray-400 dark:text-gray-500">
+                {['⚡ Free to start', '🔒 No credit card', '🎬 K-Drama vocab packs', '🧠 SM-2 spaced repetition'].map((t, i, arr) => (
+                  <React.Fragment key={t}>
+                    <span>{t}</span>
+                    {i < arr.length - 1 && <span className="hidden sm:inline">·</span>}
+                  </React.Fragment>
+                ))}
+              </div>
             </div>
+
+            {/* ── Right — live Hangul demo (the product, above the fold) ── */}
+            <div className="relative rounded-3xl overflow-hidden shadow-2xl" style={{ background: 'var(--brand-gradient-hero)' }}>
+              <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 20%, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+              <div className="relative z-10 p-6 sm:p-8">
+                <div className="flex items-center justify-center gap-2 mb-5">
+                  <span className="text-2xl">🎮</span>
+                  <h3 className="text-white font-black text-lg sm:text-xl">Try Hangul Right Now</h3>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/20 text-white">Interactive</span>
+                </div>
+                <HangulDemo />
+                <button
+                  onClick={handleStart}
+                  className="mt-5 mx-auto block bg-white text-pink-600 font-black text-sm px-6 py-2.5 rounded-xl hover:scale-[1.02] transition-transform"
+                >
+                  Learn all 40 characters for free →
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
 
-      {/* ── MARQUEE ──────────────────────────────────────────────── */}
-      <div className="py-4 overflow-hidden" style={{ background: 'var(--brand-gradient-hero)' }}>
+      {/* ── MARQUEE — hover to pause, tap any Korean word to hear it ── */}
+      <div className="marquee-hover py-3 overflow-hidden" style={{ background: 'var(--brand-gradient-hero)' }}>
+        <div className="text-center text-[11px] font-black uppercase tracking-widest text-white/80 mb-2.5">
+          🔊 Tap any Korean word to hear it · 눌러서 들어보세요
+        </div>
         <div className="flex whitespace-nowrap">
-          <div className="marquee-track flex gap-8 pr-8">
+          <div className="marquee-track flex items-center gap-4 pr-4">
             {[...marqueeWords, ...marqueeWords].map((w, i) => (
-              <span key={i} className="text-white font-semibold text-base opacity-90" style={{ fontFamily: i % 2 === 0 ? 'Pretendard Variable,sans-serif' : 'inherit' }}>
-                {w}<span className="mx-4 opacity-40">·</span>
-              </span>
+              <React.Fragment key={i}>
+                {i % 2 === 0 ? (
+                  <button
+                    onClick={() => speakKorean(w)}
+                    title="Tap to hear the pronunciation"
+                    aria-label={`Hear ${w} pronounced`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 hover:bg-white/30 border border-white/20 text-white font-semibold text-base transition-all duration-150 hover:-translate-y-0.5"
+                    style={{ fontFamily: 'Pretendard Variable,sans-serif' }}
+                  >
+                    <span aria-hidden="true" className="text-sm">🔊</span>
+                    {w}
+                  </button>
+                ) : (
+                  <span className="text-white/80 font-semibold text-base">{w}</span>
+                )}
+                <span className="text-white/40" aria-hidden="true">·</span>
+              </React.Fragment>
             ))}
           </div>
         </div>
