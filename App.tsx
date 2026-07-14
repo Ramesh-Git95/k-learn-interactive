@@ -192,6 +192,14 @@ const AppContent: React.FC = () => {
     setActiveSection(section);
     window.location.hash = section;
   };
+
+  // Remember the last learning surface (any navigation path) for the
+  // dashboard's "Continue where you left off" card.
+  useEffect(() => {
+    if (activeSection && activeSection !== 'dashboard' && activeSection !== 'profile') {
+      try { localStorage.setItem('kl-last-section', activeSection); } catch { /* ignore */ }
+    }
+  }, [activeSection]);
   const [isLoading, setIsLoading] = useState(true);
   const [isThemeTransitioning, setIsThemeTransitioning] = useState(false);
   

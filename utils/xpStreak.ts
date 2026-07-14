@@ -12,7 +12,7 @@ export interface StreakData {
   currentStreak: number;
   longestStreak: number;
   lastStudyDate: string; // 'YYYY-MM-DD'
-  studyDates: string[];  // rolling 30-day log
+  studyDates: string[];  // rolling 180-day log (feeds the study heatmap)
 }
 
 // Level thresholds — XP needed to START each level
@@ -84,7 +84,8 @@ export function markStudyToday(): boolean {
   streak.longestStreak = Math.max(streak.longestStreak, streak.currentStreak);
   streak.lastStudyDate = today;
   if (!streak.studyDates.includes(today)) {
-    streak.studyDates = [...streak.studyDates, today].slice(-30);
+    // Keep ~6 months of history — feeds the dashboard study heatmap (26 weeks).
+    streak.studyDates = [...streak.studyDates, today].slice(-180);
   }
 
   localStorage.setItem(STREAK_KEY, JSON.stringify(streak));

@@ -10,8 +10,10 @@ import { useSRSContext } from '../contexts/SRSContext';
 import SRSDashboard from './SRSDashboard';
 import LearningPath from './LearningPath';
 import BookmarkFlashcards from './BookmarkFlashcards';
+import StudyHeatmap from './StudyHeatmap';
 import { vocabulary } from '../data/koreanData';
 import { useUpgrade } from '../hooks/useUpgrade';
+import { SECTIONS } from '../constants';
 
 
 interface DashboardProps {
@@ -117,6 +119,33 @@ export default function Dashboard({
   const overall      = getOverallProgress();
   const achievements = getAchievements();
   const levelName    = LEVEL_NAMES[xp.level] ?? 'Master';
+
+  // "Continue where you left off" — last visited learning surface (written by
+  // App.tsx on every navigation), falling back to the first incomplete core
+  // section for brand-new users.
+  const continueTarget = (() => {
+    let stored: string | null = null;
+    try { stored = localStorage.getItem('kl-last-section'); } catch { /* ignore */ }
+    if (stored) {
+      const meta = SECTIONS.find(s => s.id === stored);
+      if (meta) return { id: meta.id as Section, title: meta.title, icon: meta.icon, resumed: true };
+    }
+    for (const sec of SECTION_META) {
+      const total = getSectionTotalItems(sec.id);
+      if (total > 0 && getSectionCompletedItems(sec.id) < total) {
+        return { id: sec.id, title: sec.name, icon: sec.icon, resumed: false };
+      }
+    }
+    return null;
+  })();
+
+  // Progress bar on the Continue card — only for core sections with counts.
+  const continuePct = (() => {
+    if (!continueTarget) return null;
+    const total = getSectionTotalItems(continueTarget.id);
+    if (!SECTION_META.some(s => s.id === continueTarget.id) || total <= 0) return null;
+    return Math.round((getSectionCompletedItems(continueTarget.id) / total) * 100);
+  })();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -235,6 +264,36 @@ export default function Dashboard({
           )}
         </div>
 
+        {/* ── Continue where you left off ──────────────── */}
+        {continueTarget && (
+          <button
+            onClick={() => setActiveSection(continueTarget.id)}
+            className="w-full flex items-center gap-4 rounded-2xl p-5 text-left text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
+            style={{ background: 'var(--brand-gradient)' }}
+          >
+            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-2xl flex-shrink-0" style={{ fontFamily: 'Pretendard Variable, sans-serif', fontWeight: 900 }}>
+              {continueTarget.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[11px] font-black uppercase tracking-widest text-white/70">
+                {continueTarget.resumed ? 'Continue where you left off' : 'Start your next step'}
+              </div>
+              <div className="text-lg font-black truncate">{continueTarget.title}</div>
+              {continuePct !== null && (
+                <div className="mt-1.5 flex items-center gap-2">
+                  <div className="w-full max-w-[180px] h-1.5 bg-white/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-white/90 rounded-full" style={{ width: `${continuePct}%` }} />
+                  </div>
+                  <span className="text-[11px] font-bold text-white/70">{continuePct}%</span>
+                </div>
+              )}
+            </div>
+            <span className="flex-shrink-0 px-4 py-2 rounded-xl bg-white text-[#C13F22] text-sm font-black">
+              Continue →
+            </span>
+          </button>
+        )}
+
         {/* ── Stat Cards ──────────────────────────────── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
 
@@ -316,6 +375,9 @@ export default function Dashboard({
             </div>
           </button>
         </div>
+
+        {/* ── Study Activity heatmap (26 weeks) ────────── */}
+        <StudyHeatmap currentStreak={xp.currentStreak} longestStreak={xp.longestStreak} />
 
         {/* ── Word of the Day ─────────────────────────── */}
         <div
