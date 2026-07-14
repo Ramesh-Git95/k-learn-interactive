@@ -6,30 +6,17 @@ import { ToastProvider, useToastContext } from './contexts/ToastContext';
 import { ProgressProvider } from './contexts/ProgressContext';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
-import EnhancedHangulSection from './components/EnhancedHangulSection';
-import VocabularySection from './components/VocabularySection';
-import EnhancedGrammarSection from './components/EnhancedGrammarSection';
-import EnhancedPhrasesSection from './components/EnhancedPhrasesSection';
-import EnhancedCultureHub from './components/EnhancedCultureHub';
-import AuthenticatedQuizSection from './components/AuthenticatedQuizSection';
-import UserProfile from './components/UserProfile';
-import ConversationSection from './components/ConversationSection';
-import BookmarkList from './components/BookmarkList';
+import LandingPage from './components/LandingPage';
 import MiniLearningPath from './components/MiniLearningPath';
 import FloatingProgress from './components/FloatingProgress';
 import Breadcrumb from './components/Breadcrumb';
 import { AppBootSkeleton } from './components/Skeleton';
-import SRSManager from './components/SRSManager';
-import SRSStudySession from './components/SRSStudySession';
 import ToastContainer from './components/ToastContainer';
-import EmailVerification from './components/EmailVerification';
-import TermsOfService from './components/TermsOfService';
-import PrivacyPolicy from './components/PrivacyPolicy';
 import EmailVerificationBanner from './components/EmailVerificationBanner';
-import OnboardingWizard from './components/OnboardingWizard';
 import Footer from './components/Footer';
 import CookieConsent from './components/CookieConsent';
 import GuestFreeBanner from './components/GuestFreeBanner';
+import { ResetPasswordForm } from './components/auth/ResetPasswordForm';
 import { apiClient } from './services/apiClient';
 import useLocalStorage from './hooks/useLocalStorage';
 import { SRSProvider, useSRSContext } from './contexts/SRSContext';
@@ -38,17 +25,42 @@ import { UpgradeModalProvider } from './contexts/UpgradeModalContext';
 import { useFeatureAccess } from './hooks/useFeatureAccess';
 import { vocabulary, grammarPatterns, commonPhrases, cultureTips, hangulCharacters, koreanRegions, dailyLifeTopics, modernKoreaTopics } from './data/koreanData';
 import { useProgress } from './contexts/ProgressContext';
-import LearningPath from './components/LearningPath';
-import LandingPage from './components/LandingPage';
-import { ResetPasswordForm } from './components/auth/ResetPasswordForm';
-import TopikPrepSection from './components/TopikPrepSection';
-import HonorificEngine from './components/HonorificEngine';
-import CultureCards from './components/CultureCards';
-import TypingDojo from './components/TypingDojo';
-import KDramaSection from './components/KDramaSection';
-import KPopSection from './components/KPopSection';
-import TopikAssessment from './components/TopikAssessment';
-import ReadingSection from './components/ReadingSection';
+
+// ── Code-split sections (performance) ────────────────────────────────────────
+// Each section loads on demand as its own chunk, keeping the initial bundle to
+// the shell (header + dashboard + landing). Data files imported only by one
+// section (kpopData, kdramaData, TOPIK banks, reading passages) move into that
+// section's chunk automatically.
+const EnhancedHangulSection    = React.lazy(() => import('./components/EnhancedHangulSection'));
+const VocabularySection        = React.lazy(() => import('./components/VocabularySection'));
+const EnhancedGrammarSection   = React.lazy(() => import('./components/EnhancedGrammarSection'));
+const EnhancedPhrasesSection   = React.lazy(() => import('./components/EnhancedPhrasesSection'));
+const EnhancedCultureHub       = React.lazy(() => import('./components/EnhancedCultureHub'));
+const AuthenticatedQuizSection = React.lazy(() => import('./components/AuthenticatedQuizSection'));
+const UserProfile              = React.lazy(() => import('./components/UserProfile'));
+const ConversationSection      = React.lazy(() => import('./components/ConversationSection'));
+const BookmarkList             = React.lazy(() => import('./components/BookmarkList'));
+const SRSManager               = React.lazy(() => import('./components/SRSManager'));
+const SRSStudySession          = React.lazy(() => import('./components/SRSStudySession'));
+const TopikPrepSection         = React.lazy(() => import('./components/TopikPrepSection'));
+const TopikAssessment          = React.lazy(() => import('./components/TopikAssessment'));
+const ReadingSection           = React.lazy(() => import('./components/ReadingSection'));
+const HonorificEngine          = React.lazy(() => import('./components/HonorificEngine'));
+const CultureCards             = React.lazy(() => import('./components/CultureCards'));
+const TypingDojo               = React.lazy(() => import('./components/TypingDojo'));
+const KDramaSection            = React.lazy(() => import('./components/KDramaSection'));
+const KPopSection              = React.lazy(() => import('./components/KPopSection'));
+const EmailVerification        = React.lazy(() => import('./components/EmailVerification'));
+const TermsOfService           = React.lazy(() => import('./components/TermsOfService'));
+const PrivacyPolicy            = React.lazy(() => import('./components/PrivacyPolicy'));
+const OnboardingWizard         = React.lazy(() => import('./components/OnboardingWizard'));
+
+// Lightweight fallback shown while a section chunk downloads.
+const SectionLoader = () => (
+  <div className="flex items-center justify-center py-24" role="status" aria-label="Loading section">
+    <div className="w-10 h-10 rounded-full border-4 border-gray-200 dark:border-gray-700 animate-spin" style={{ borderTopColor: '#E4572E' }} />
+  </div>
+);
 
 // Load cookie testing utilities in development
 // Commented out temporarily - these files are optional for production
@@ -262,13 +274,13 @@ const AppContent: React.FC = () => {
   // Special routes — placed after all hooks to satisfy Rules of Hooks
   const currentPath = window.location.pathname;
   if (currentPath.startsWith('/verify-email')) {
-    return <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}><EmailVerification /></div>;
+    return <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}><React.Suspense fallback={<AppBootSkeleton />}><EmailVerification /></React.Suspense></div>;
   }
   if (currentPath === '/terms') {
-    return <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}><TermsOfService /></div>;
+    return <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}><React.Suspense fallback={<AppBootSkeleton />}><TermsOfService /></React.Suspense></div>;
   }
   if (currentPath === '/privacy') {
-    return <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}><PrivacyPolicy /></div>;
+    return <div className={`min-h-screen ${theme === 'dark' ? 'dark' : ''}`}><React.Suspense fallback={<AppBootSkeleton />}><PrivacyPolicy /></React.Suspense></div>;
   }
 
   const toggleTheme = () => {
@@ -636,7 +648,9 @@ const AppContent: React.FC = () => {
           </>
         )}
         
-        {renderSection()}
+        <React.Suspense fallback={<SectionLoader />}>
+          {renderSection()}
+        </React.Suspense>
       </div>
       
       {/* Floating Progress - XP & streak ring */}
@@ -650,7 +664,9 @@ const AppContent: React.FC = () => {
     <CookieConsent />
 
     {showOnboarding && (
-      <OnboardingWizard onComplete={() => setShowOnboarding(false)} />
+      <React.Suspense fallback={null}>
+        <OnboardingWizard onComplete={() => setShowOnboarding(false)} />
+      </React.Suspense>
     )}
   </div>
   );
