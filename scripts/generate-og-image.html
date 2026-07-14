@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>K-Learn OG Image Generator</title>
+<!-- One-time dev utility: open this file in a browser, click Download, and
+     save the result over public/og-image.jpg. Not shipped to production. -->
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,600,700&f[]=clash-display@600,700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+  body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; background: #F1E9D7; font-family: 'General Sans', sans-serif; }
+  canvas { width: min(90vw, 800px); height: auto; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+  button { padding: 14px 36px; border: none; border-radius: 14px; background: linear-gradient(135deg,#E4572E,#8E3B54); color: #fff; font: 800 16px 'General Sans', sans-serif; cursor: pointer; }
+  button:hover { transform: translateY(-1px); }
+  p { color: #6b6154; font-size: 13px; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1200" height="630"></canvas>
+<button id="dl">⬇ Download og-image.jpg</button>
+<p>Save it as <b>public/og-image.jpg</b> in the repo, then commit &amp; deploy.</p>
+<script>
+(async () => {
+  const ctx = document.getElementById('c').getContext('2d');
+  const W = 1200, H = 630;
+
+  try {
+    await Promise.all([
+      document.fonts.load('900 300px "Pretendard Variable"'),
+      document.fonts.load('700 92px "Clash Display"'),
+      document.fonts.load('600 34px "General Sans"'),
+    ]);
+  } catch (e) { /* fall back to system fonts */ }
+
+  // Ink background + dancheong glows
+  ctx.fillStyle = '#0D141F';
+  ctx.fillRect(0, 0, W, H);
+  const glow = (x, y, r, color) => {
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, color); g.addColorStop(1, 'rgba(13,20,31,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  };
+  glow(W * 0.92, H * 0.10, 420, 'rgba(228,87,46,0.30)');
+  glow(W * 0.05, H * 0.95, 460, 'rgba(63,133,113,0.25)');
+  glow(W * 0.75, H * 0.85, 380, 'rgba(47,93,138,0.20)');
+
+  // Giant faint Hangul decoration, right side
+  ctx.fillStyle = 'rgba(250,245,235,0.05)';
+  ctx.font = '900 330px "Pretendard Variable", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('한', W * 0.86, H * 0.78);
+
+  ctx.textAlign = 'left';
+
+  // Logo tile + wordmark
+  const tile = 64, tx = 80, ty = 70;
+  const tg = ctx.createLinearGradient(tx, ty, tx + tile, ty + tile);
+  tg.addColorStop(0, '#E4572E'); tg.addColorStop(1, '#8E3B54');
+  ctx.fillStyle = tg;
+  ctx.beginPath(); ctx.roundRect(tx, ty, tile, tile, 16); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = '900 36px "Pretendard Variable", sans-serif';
+  ctx.fillText('한', tx + 14, ty + 45);
+  ctx.font = '700 40px "Clash Display", "General Sans", sans-serif';
+  ctx.fillText('K-Learn', tx + tile + 20, ty + 46);
+
+  // Headline
+  ctx.fillStyle = '#FAF5EB';
+  ctx.font = '700 96px "Clash Display", "General Sans", sans-serif';
+  ctx.fillText('Stop Watching', 80, 300);
+  const hg = ctx.createLinearGradient(80, 0, 900, 0);
+  hg.addColorStop(0, '#F07A55'); hg.addColorStop(0.6, '#E4572E'); hg.addColorStop(1, '#D9A441');
+  ctx.fillStyle = hg;
+  ctx.fillText('With Subtitles', 80, 405);
+
+  // Subline
+  ctx.fillStyle = '#8B94A3';
+  ctx.font = '600 30px "General Sans", sans-serif';
+  ctx.fillText('Learn Korean the real way — AI conversations · SRS · TOPIK · culture', 80, 472);
+
+  // Footer: domain + price chip
+  ctx.fillStyle = '#D9A441';
+  ctx.font = '700 32px "General Sans", sans-serif';
+  ctx.fillText('korean-learn.com', 80, 560);
+  const chipText = '$4/month · cancel anytime';
+  ctx.font = '700 24px "General Sans", sans-serif';
+  const cw = ctx.measureText(chipText).width + 48;
+  ctx.fillStyle = 'rgba(63,133,113,0.20)';
+  ctx.strokeStyle = 'rgba(63,133,113,0.55)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(400, 528, cw, 46, 23); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#7FC0AC';
+  ctx.fillText(chipText, 424, 559);
+
+  document.getElementById('dl').onclick = () => {
+    document.getElementById('c').toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'og-image.jpg';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }, 'image/jpeg', 0.92);
+  };
+})();
+</script>
+</body>
+</html>

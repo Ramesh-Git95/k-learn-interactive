@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
-export type FooterPage = 'help' | 'study-guide' | 'community' | 'about' | 'privacy' | 'terms';
+export type FooterPage = 'help' | 'study-guide' | 'community' | 'about' | 'privacy' | 'terms' | 'changelog';
 
 interface Props {
   page: FooterPage;
@@ -409,6 +409,64 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
             {typeof body === 'string' ? <p>{body}</p> : body}
           </div>
         ))}
+      </div>
+    ),
+  },
+
+  // ─── CHANGELOG / WHAT'S NEW ─────────────────────────────────────────────────
+  changelog: {
+    title: "What's New",
+    emoji: '🌱',
+    content: (
+      <div className="space-y-8">
+        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+          K-Learn ships improvements every week. Here's what's landed recently —
+          every update is included in Premium at no extra cost.
+        </p>
+
+        {[
+          {
+            period: 'July 2026',
+            items: [
+              { icon: '🎨', title: 'A whole new look — Hanji & Dancheong', desc: 'Complete redesign drawn from Korean traditional color: persimmon, celadon, ochre and ink — plus new typography, including Pretendard for beautiful Hangul.' },
+              { icon: '⚡', title: 'Twice as fast', desc: 'The app now loads in roughly half the size, with each section loading on demand.' },
+              { icon: '⌨️', title: 'Anki-style keyboard reviews', desc: 'Blast through SRS sessions without the mouse: Space reveals, 1–4 grades, Esc exits.' },
+              { icon: '📈', title: 'Continue card + study heatmap', desc: 'The dashboard now resumes where you left off, and a 6-month activity heatmap tracks every day you study.' },
+              { icon: '📤', title: 'Share the Word of the Day', desc: 'Turn today\'s word into a beautiful image card for Instagram or WhatsApp with one tap.' },
+              { icon: '🔍', title: 'See Premium before you buy', desc: 'Locked sections now show real content previews instead of walls — know exactly what you\'re unlocking.' },
+              { icon: '✨', title: 'Smoother everything', desc: 'Sections now glide into place with native page transitions.' },
+            ],
+          },
+          {
+            period: 'Spring 2026',
+            items: [
+              { icon: '🎤', title: 'K-Pop Lyrics Mode', desc: 'Learn Korean through annotated lyrics — tap any word for meaning, romanization, and one-tap SRS import.' },
+              { icon: '📋', title: 'TOPIK Level Assessment', desc: 'A 20-question assessment estimating your TOPIK level (1–6), with a downloadable certificate.' },
+              { icon: '📚', title: 'Reading Passages', desc: 'Short Korean texts with tap-to-define on every word — from beginner stories to advanced essays.' },
+              { icon: '🎬', title: 'K-Drama vocabulary packs', desc: 'Real phrases from the dramas you love, ready to study and add to your decks.' },
+            ],
+          },
+        ].map(({ period, items }) => (
+          <div key={period}>
+            <h3 className="text-xs font-black uppercase tracking-widest text-[#E4572E] mb-4">{period}</h3>
+            <div className="space-y-4">
+              {items.map(({ icon, title, desc }) => (
+                <div key={title} className="flex gap-4">
+                  <div className="text-2xl flex-shrink-0">{icon}</div>
+                  <div>
+                    <h4 className="font-black text-gray-900 dark:text-white text-sm mb-1">{title}</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <div className="rounded-2xl p-5 text-center" style={{ background: 'linear-gradient(135deg, rgba(228,87,46,0.06), rgba(63,133,113,0.06))' }}>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Have a feature request?</p>
+          <a href="mailto:hello@k-learn.app" className="font-black text-[#E4572E] hover:underline text-sm">hello@k-learn.app</a>
+        </div>
       </div>
     ),
   },

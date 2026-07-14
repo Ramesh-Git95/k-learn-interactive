@@ -30,6 +30,7 @@ const Footer: React.FC = () => {
     { name: 'Help Center',  page: 'help' },
     { name: 'Study Guide',  page: 'study-guide' },
     { name: 'Community',    page: 'community' },
+    { name: "What's New 🌱", page: 'changelog' },
   ];
 
   const company: { name: string; page: FooterPage }[] = [

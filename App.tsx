@@ -55,6 +55,7 @@ const EmailVerification        = React.lazy(() => import('./components/EmailVeri
 const TermsOfService           = React.lazy(() => import('./components/TermsOfService'));
 const PrivacyPolicy            = React.lazy(() => import('./components/PrivacyPolicy'));
 const OnboardingWizard         = React.lazy(() => import('./components/OnboardingWizard'));
+const NotFound                 = React.lazy(() => import('./components/NotFound'));
 
 // Lightweight fallback shown while a section chunk downloads.
 const SectionLoader = () => (
@@ -599,6 +600,19 @@ const AppContent: React.FC = () => {
             window.location.replace('/');
           }}
         />
+      </div>
+    );
+  }
+
+  // Unknown path → branded 404. Placed after every known special route
+  // (verify-email, terms, privacy, reset-password). Hostinger's SPA fallback
+  // serves index.html for all paths, so the app decides what 404 looks like.
+  if (currentPath !== '/' && currentPath !== '/index.html') {
+    return (
+      <div className={theme === 'dark' ? 'dark' : ''}>
+        <React.Suspense fallback={<AppBootSkeleton />}>
+          <NotFound />
+        </React.Suspense>
       </div>
     );
   }
