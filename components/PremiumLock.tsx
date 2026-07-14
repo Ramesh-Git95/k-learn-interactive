@@ -30,6 +30,60 @@ export const PremiumLockBanner: React.FC<PremiumLockProps> = ({
   );
 };
 
+interface PeekOverlayProps {
+  title?: string;
+  description?: string;
+}
+
+/** Frosted CTA overlay for blur+peek gating — absolutely fills its relative parent. */
+export const PeekOverlay: React.FC<PeekOverlayProps> = ({
+  title = 'Premium Content',
+  description = 'Upgrade to unlock everything you can see here.',
+}) => {
+  const { openUpgradeModal } = useUpgradeModal();
+  return (
+    <div className="absolute inset-0 z-10 flex flex-col items-center justify-end text-center p-6 bg-gradient-to-b from-transparent via-white/55 to-white/95 dark:via-gray-950/55 dark:to-gray-950/95">
+      <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full text-white mb-3 shadow" style={{ background: 'var(--brand-gradient)' }}>
+        ⭐ Premium preview
+      </span>
+      <h3 className="text-lg font-black text-gray-900 dark:text-white mb-1">{title}</h3>
+      <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 max-w-sm">{description}</p>
+      <button
+        onClick={openUpgradeModal}
+        className="px-7 py-2.5 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-lg"
+        style={{ background: 'var(--brand-gradient)' }}
+      >
+        Unlock with Premium — $4/mo →
+      </button>
+    </div>
+  );
+};
+
+interface PremiumPeekProps extends PeekOverlayProps {
+  children: React.ReactNode;
+  /** Height of the peek window in px (content beyond it is cropped). */
+  maxHeight?: number;
+  className?: string;
+}
+
+/** Blur + peek gate: renders the REAL premium content blurred and inert inside
+ *  a capped window, with a frosted upgrade CTA on top. Seeing genuine content
+ *  behind the frost converts better than a hard lock wall. */
+export const PremiumPeek: React.FC<PremiumPeekProps> = ({
+  title,
+  description,
+  children,
+  maxHeight = 440,
+  className = '',
+}) => (
+  <div className={`relative overflow-hidden rounded-2xl ${className}`} style={{ maxHeight }}>
+    <div className="pointer-events-none select-none blur-[5px]" aria-hidden="true" inert>
+      {children}
+    </div>
+    <PeekOverlay title={title} description={description} />
+  </div>
+);
+
 interface LockedCardProps {
   label: string;
   sublabel?: string;

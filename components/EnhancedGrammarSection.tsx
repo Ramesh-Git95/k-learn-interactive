@@ -1,7 +1,7 @@
 import React from 'react';
 import { grammarPatterns } from '../data/koreanData';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
-import { PremiumLockBanner } from './PremiumLock';
+import { PremiumPeek } from './PremiumLock';
 import { useAuth } from '../contexts/AuthContext';
 import GuestSignUpGate from './GuestSignUpGate';
 import type { GrammarPattern } from '../types';
@@ -191,10 +191,25 @@ const EnhancedGrammarSection: React.FC<EnhancedGrammarSectionProps> = ({ progres
             })}
           </div>
         ) : (
-          <PremiumLockBanner
+          <PremiumPeek
             title="Advanced Grammar — Premium"
             description={`Unlock ${advancedPatterns.length} advanced patterns: conditionals, complex sentence structures, and formal speech levels.`}
-          />
+            maxHeight={420}
+          >
+            <div className="space-y-4">
+              {advancedPatterns.slice(0, 2).map((pattern, i) => (
+                <PatternCard
+                  key={pattern.pattern}
+                  pattern={pattern}
+                  index={basicCount + i}
+                  done={false}
+                  onToggle={() => {}}
+                  accentColor="#F59E0B"
+                  isAdvanced
+                />
+              ))}
+            </div>
+          </PremiumPeek>
         )}
       </div>
     </div>

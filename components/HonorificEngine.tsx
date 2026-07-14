@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
-import { PremiumLockBanner } from './PremiumLock';
+import { PeekOverlay } from './PremiumLock';
 
 const FREE_CATEGORY_IDS = ['greetings', 'requests'];
 
@@ -450,18 +450,14 @@ const HonorificEngine: React.FC = () => {
         })}
       </div>
 
-      {/* Locked category gate */}
-      {isActiveLocked && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mb-6">
-          <PremiumLockBanner
-            title={`${cat.emoji} ${cat.label} — Premium`}
-            description={`Unlock all ${cat.entries.length} ${cat.label.toLowerCase()} speech level pairs with Premium. ${cat.entries[0]?.base ? `Includes "${cat.entries[0].base}" and more.` : ''}`}
-          />
-        </div>
-      )}
-
-      {/* Entries */}
-      <div className={`space-y-3 ${isActiveLocked ? 'opacity-0 pointer-events-none h-0 overflow-hidden' : ''}`}>
+      {/* Entries — when the category is locked, the real entries render blurred
+          inside a capped peek window with a frosted upgrade CTA (blur + peek). */}
+      <div className={isActiveLocked ? 'relative max-h-[440px] overflow-hidden rounded-2xl' : ''}>
+      <div
+        className={`space-y-3 ${isActiveLocked ? 'pointer-events-none select-none blur-[5px]' : ''}`}
+        aria-hidden={isActiveLocked || undefined}
+        inert={isActiveLocked || undefined}
+      >
         {cat.entries.map((entry, idx) => {
           const key = `${activeCat}-${idx}`;
           const isOpen = expanded === key;
@@ -525,6 +521,13 @@ const HonorificEngine: React.FC = () => {
             </div>
           );
         })}
+      </div>
+      {isActiveLocked && (
+        <PeekOverlay
+          title={`${cat.emoji} ${cat.label} — Premium`}
+          description={`All ${cat.entries.length} ${cat.label.toLowerCase()} speech-level pairs — formal, polite & casual forms with cultural notes.`}
+        />
+      )}
       </div>
 
       {/* Footer tip */}

@@ -5,7 +5,7 @@ import DailyLife from './DailyLife';
 import ModernKorea from './ModernKorea';
 import UpgradeModal from './UpgradeModal';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
-import { PremiumLockBanner, LockedRowBanner } from './PremiumLock';
+import { PremiumPeek, LockedRowBanner } from './PremiumLock';
 
 interface EnhancedCultureHubProps {
   progress: { [key: string]: boolean };
@@ -168,12 +168,14 @@ const EnhancedCultureHub: React.FC<EnhancedCultureHubProps> = ({ progress, toggl
 
         {active === 'regional' && (
           subscriptionTier === 'free' ? (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-              <PremiumLockBanner
-                title="🗺️ Regional Explorer — Premium"
-                description="Discover Korea's diverse regions — Seoul, Busan, Jeju and more. Detailed cultural and travel guides for every region."
-              />
-            </div>
+            <PremiumPeek
+              title="🗺️ Regional Explorer — Premium"
+              description="Discover Korea's diverse regions — Seoul, Busan, Jeju and more. Everything you see here unlocks with Premium."
+              maxHeight={520}
+              className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm"
+            >
+              <RegionalExplorer progress={progress} toggleProgress={toggleProgress} />
+            </PremiumPeek>
           ) : (
             <RegionalExplorer progress={progress} toggleProgress={toggleProgress} />
           )
@@ -181,12 +183,14 @@ const EnhancedCultureHub: React.FC<EnhancedCultureHubProps> = ({ progress, toggl
 
         {active === 'lifestyle' && (
           subscriptionTier === 'free' ? (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-              <PremiumLockBanner
-                title="🏠 Daily Life Insights — Premium"
-                description="Learn how Koreans really live — apartments, work culture, social customs, and everyday etiquette."
-              />
-            </div>
+            <PremiumPeek
+              title="🏠 Daily Life Insights — Premium"
+              description="How Koreans really live — apartments, work culture, social customs, and everyday etiquette."
+              maxHeight={520}
+              className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm"
+            >
+              <DailyLife progress={progress} toggleProgress={toggleProgress} />
+            </PremiumPeek>
           ) : (
             <DailyLife progress={progress} toggleProgress={toggleProgress} />
           )
@@ -194,12 +198,14 @@ const EnhancedCultureHub: React.FC<EnhancedCultureHubProps> = ({ progress, toggl
 
         {active === 'modern' && (
           subscriptionTier === 'free' ? (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-              <PremiumLockBanner
-                title="🌆 Modern Korea — Premium"
-                description="K-pop industry, gaming & esports, beauty trends, and Korea's tech innovations — all in one place."
-              />
-            </div>
+            <PremiumPeek
+              title="🌆 Modern Korea — Premium"
+              description="K-pop industry, gaming & esports, beauty trends, and Korea's tech innovations — all in one place."
+              maxHeight={520}
+              className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm"
+            >
+              <ModernKorea progress={progress} toggleProgress={toggleProgress} />
+            </PremiumPeek>
           ) : (
             <ModernKorea progress={progress} toggleProgress={toggleProgress} />
           )
