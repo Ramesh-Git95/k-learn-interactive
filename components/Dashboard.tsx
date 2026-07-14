@@ -11,6 +11,7 @@ import SRSDashboard from './SRSDashboard';
 import LearningPath from './LearningPath';
 import BookmarkFlashcards from './BookmarkFlashcards';
 import StudyHeatmap from './StudyHeatmap';
+import ShareableWordCard from './ShareableWordCard';
 import { vocabulary } from '../data/koreanData';
 import { useUpgrade } from '../hooks/useUpgrade';
 import { SECTIONS } from '../constants';
@@ -80,6 +81,7 @@ export default function Dashboard({
   const xp                           = useXPStreak();
 
   const [showBookmarkFC, setShowBookmarkFC]   = useState(false);
+  const [showShareWord, setShowShareWord]     = useState(false);
 
   const today      = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const motivation = MOTIVATIONAL[new Date().getDay() % MOTIVATIONAL.length];
@@ -396,14 +398,28 @@ export default function Dashboard({
             </div>
             <span className="inline-block mt-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#D8E4EF] dark:bg-[#122840]/30 text-[#264D74] dark:text-[#5C85B0]">{dailyWord.category}</span>
           </div>
-          <button
-            onClick={() => setActiveSection('vocabulary')}
-            className="flex-shrink-0 px-4 py-2 rounded-xl text-white text-sm font-bold transition-transform hover:scale-[1.02]"
-            style={{ background: 'linear-gradient(135deg,#3F8571,#2F5D8A)' }}
-          >
-            Study More →
-          </button>
+          <div className="flex-shrink-0 flex items-center gap-2">
+            <button
+              onClick={() => setShowShareWord(true)}
+              className="px-4 py-2 rounded-xl text-sm font-bold border-2 border-[#3F8571]/40 text-[#2E6B59] dark:text-[#7FC0AC] hover:border-[#3F8571] transition-colors"
+              title="Share today's word as an image"
+            >
+              📤 Share
+            </button>
+            <button
+              onClick={() => setActiveSection('vocabulary')}
+              className="px-4 py-2 rounded-xl text-white text-sm font-bold transition-transform hover:scale-[1.02]"
+              style={{ background: 'linear-gradient(135deg,#3F8571,#2F5D8A)' }}
+            >
+              Study More →
+            </button>
+          </div>
         </div>
+
+        {/* ── Shareable Word of the Day card modal ─────── */}
+        {showShareWord && (
+          <ShareableWordCard word={dailyWord} onClose={() => setShowShareWord(false)} />
+        )}
 
         {/* ── Quick Actions ────────────────────────────── */}
         <div>
