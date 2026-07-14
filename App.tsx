@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import type { Section, Bookmark } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AuthModalProvider } from './contexts/AuthModalContext';
@@ -78,7 +79,35 @@ const AppContent: React.FC = () => {
   const [theme, setTheme] = useLocalStorage<'dark' | 'light'>(LS_THEME_KEY, 'light');
   const [showOnboarding, setShowOnboarding] = useState(false);
   // Initialize activeSection as null for landing page, dashboard for authenticated users
-  const [activeSection, setActiveSection] = useState<Section | null>(null);
+  const [activeSection, _setActiveSection] = useState<Section | null>(null);
+  const activeSectionRef = React.useRef<Section | null>(null);
+
+  // Section swaps animate via the View Transitions API — a native cross-fade
+  // that makes hash routing feel app-like. Progressive enhancement: instant
+  // swap on unsupported browsers or when the user prefers reduced motion.
+  const setActiveSection = useCallback((section: Section | null) => {
+    // Nav clicks also write location.hash, whose hashchange listener echoes
+    // this call with the same section — without this guard the echo starts a
+    // second transition that aborts the first (AbortError + double-fade).
+    if (section === activeSectionRef.current) return;
+    activeSectionRef.current = section;
+
+    const doc = document as Document & {
+      startViewTransition?: (cb: () => void) => { ready: Promise<void>; finished: Promise<void> };
+    };
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (!doc.startViewTransition || reduceMotion) {
+      _setActiveSection(section);
+      return;
+    }
+    const vt = doc.startViewTransition(() => {
+      flushSync(() => _setActiveSection(section));
+    });
+    // If a rapid follow-up navigation skips this transition, its promises
+    // reject with AbortError — expected behavior, not an error.
+    vt.ready.catch(() => {});
+    vt.finished.catch(() => {});
+  }, []);
 
   // Initialize dashboard for authenticated users only on first load
   useEffect(() => {
@@ -624,11 +653,12 @@ const AppContent: React.FC = () => {
         toggleTheme={toggleTheme}
       />
     
-    <main 
+    <main
       id="main-content"
       className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8"
       role="main"
       aria-live="polite"
+      style={{ viewTransitionName: 'section-content' }}
     >
       <div className="animate-fadeIn">
         {/* Only show navigation elements for authenticated users */}
