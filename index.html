@@ -115,6 +115,46 @@
       }
     }
     </script>
+
+    <!-- FAQ rich results — keep in sync with the FAQ array in components/LandingPage.tsx -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How much does Premium cost?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Just $4/month — cancel anytime, no long-term commitment. Every new feature we ship is included at no extra cost." }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I try before I buy?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Absolutely. The free tier is generous — Hangul, 3 vocabulary categories (39 words), 5 basic grammar patterns, 5 AI chats per day, and full SRS. No credit card required to start." }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need any prior Korean knowledge?",
+          "acceptedAnswer": { "@type": "Answer", "text": "None at all. The Hangul module teaches the entire alphabet from scratch. Most learners can read Korean in under a week." }
+        },
+        {
+          "@type": "Question",
+          "name": "How long until I can have a real conversation?",
+          "acceptedAnswer": { "@type": "Answer", "text": "With daily 20-minute sessions, most learners can handle basic conversations in 2–3 months. The AI tutor accelerates this significantly." }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the payment secure?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Payment is processed securely by Stripe — the payments platform trusted by millions of businesses worldwide. You can cancel anytime from your profile." }
+        },
+        {
+          "@type": "Question",
+          "name": "Will I get future features?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes — your Premium subscription includes everything we build. K-Drama Shadowing, Stroke Canvas, and more, at no extra charge." }
+        }
+      ]
+    }
+    </script>
     <link rel="preconnect" href="https://api.fontshare.com">
     <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
