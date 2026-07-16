@@ -76,34 +76,25 @@
   animation: var(--animate-border);
 }
 
-/* Blue variant — dusk/navy highlight that suits both themes */
-.kl-border-glow-blue {
-  background: conic-gradient(
-    from var(--border-angle),
-    #2F5D8A, #5C85B0, #1E3A5C, #8CAECB, #2F5D8A
-  );
-  animation: var(--animate-border);
-}
-
-/* Chip-sized spinning blue ring (border-box technique — no wrapper needed).
-   The padding-box layer supplies the chip's own background per theme. */
+/* Chip-sized spinning ring in the brand colors (border-box technique — no
+   wrapper needed). The padding-box layer supplies the chip's own background
+   per theme. */
 .kl-chip-glow {
   border: 1.5px solid transparent;
   background:
     linear-gradient(#FFFCF4, #FFFCF4) padding-box,
-    conic-gradient(from var(--border-angle), #2F5D8A, #5C85B0, #1E3A5C, #8CAECB, #2F5D8A) border-box;
+    conic-gradient(from var(--border-angle), #E4572E, #D9A441, #3F8571, #2F5D8A, #8E3B54, #E4572E) border-box;
   animation: var(--animate-border);
 }
 
 .dark .kl-chip-glow {
   background:
     linear-gradient(#1B2637, #1B2637) padding-box,
-    conic-gradient(from var(--border-angle), #5C85B0, #8CAECB, #2F5D8A, #7FA6CC, #5C85B0) border-box;
+    conic-gradient(from var(--border-angle), #E4572E, #D9A441, #3F8571, #2F5D8A, #8E3B54, #E4572E) border-box;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .kl-border-glow,
-  .kl-border-glow-blue,
   .kl-chip-glow { animation: none; }
 }
 

@@ -519,7 +519,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             🔊 Tap a word to hear it
           </span>
           <div className="marquee-hover marquee-mask flex-1 w-full overflow-hidden">
-            <div className="marquee-track flex items-center gap-3 pr-3 w-max">
+            <div className="marquee-track flex items-center gap-3 pr-3 py-1 w-max">
               {[...marqueePairs, ...marqueePairs].map((p, i) => (
                 <button
                   key={i}
@@ -686,7 +686,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             </div>
           </FadeIn>
           <FadeIn delay={120}>
-            <div className="kl-border-glow-blue rounded-3xl p-[2px] shadow-sm">
+            <div className="kl-border-glow rounded-3xl p-[2px] shadow-sm">
             <div className="relative bg-white dark:bg-gray-900 p-8 sm:p-10 rounded-[22px]">
               <div
                 className="absolute -top-5 left-8 w-11 h-11 rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-md"
