@@ -19,6 +19,19 @@ const marqueeWords = [
   '어디예요?', 'Where is it?', '얼마예요?', 'How much?', '멋있다', 'Cool!',
 ];
 
+// Korean/English pairs for the marquee chips (marqueeWords alternates ko/en).
+const marqueePairs = Array.from({ length: Math.floor(marqueeWords.length / 2) }, (_, i) => ({
+  ko: marqueeWords[i * 2],
+  en: marqueeWords[i * 2 + 1],
+}));
+
+// Rotating hero badge lines — cycle with a small fade/rise animation.
+const HERO_BADGES = [
+  '🎬 Built for K-Drama fans · Not another Duolingo 🇰🇷',
+  '🧠 SM-2 spaced repetition — knowledge that sticks ✨',
+  '☕ Just $4/month · less than a coffee',
+];
+
 const CORE_FEATURES = [
   { emoji: '가',  title: 'Hangul Mastery',       desc: 'Every consonant, vowel & syllable block — interactive drills with pronunciation audio.', gradient: 'from-[#E4572E] to-[#C13F22]',    live: true  },
   { emoji: '📖', title: 'Vocabulary Builder',    desc: '1,000+ essential words across 10 categories. Click to hear native pronunciation.', gradient: 'from-[#3F8571] to-[#2E6B59]',  live: true  },
@@ -259,6 +272,13 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
   const { user } = useAuth();
   const [loaded, setLoaded] = useState(false);
   const [showAllFeatures, setShowAllFeatures] = useState(false);
+  const [badgeIdx, setBadgeIdx] = useState(0);
+
+  // Cycle the hero badge lines every few seconds
+  useEffect(() => {
+    const t = setInterval(() => setBadgeIdx(i => (i + 1) % HERO_BADGES.length), 3800);
+    return () => clearInterval(t);
+  }, []);
 
   let openRegister: (() => void) | null = null;
   let openLogin: (() => void) | null = null;
@@ -295,6 +315,10 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         .marquee-track { animation: marquee 30s linear infinite; }
         .marquee-hover:hover .marquee-track { animation-play-state: paused; }
         @media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
+        .marquee-mask {
+          mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+          -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+        }
         .float-a       { animation: floatA 7s ease-in-out infinite; }
         .float-b       { animation: floatB 9s ease-in-out infinite; }
         .float-c       { animation: floatC 6s ease-in-out infinite; }
@@ -400,10 +424,10 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             {/* ── Left — copy ── */}
             <div className="text-center lg:text-left">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full px-5 py-2 mb-8 border" style={{ background: 'rgba(228,87,46,0.08)', borderColor: 'rgba(228,87,46,0.30)' }}>
-                <span className="text-base">🎬</span>
-                <span className="text-sm font-semibold text-pink-600 dark:text-pink-400">Built for K-Drama fans · Not another Duolingo</span>
-                <span className="text-base">🇰🇷</span>
+              <div className="inline-flex items-center rounded-full px-5 py-2 mb-8 border overflow-hidden" style={{ background: 'rgba(228,87,46,0.08)', borderColor: 'rgba(228,87,46,0.30)' }}>
+                <span key={badgeIdx} className="animate-fadeIn text-sm font-semibold text-pink-600 dark:text-pink-400 whitespace-nowrap">
+                  {HERO_BADGES[badgeIdx]}
+                </span>
               </div>
 
               {/* Headline */}
@@ -463,7 +487,8 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             </div>
 
             {/* ── Right — live Hangul demo (the product, above the fold) ── */}
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl" style={{ background: 'var(--brand-gradient-hero)' }}>
+            <div className="kl-border-glow rounded-3xl p-[2px] shadow-2xl">
+            <div className="relative rounded-[22px] overflow-hidden" style={{ background: 'var(--brand-gradient-hero)' }}>
               <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 20%, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
               <div className="relative z-10 p-6 sm:p-8">
                 <div className="flex items-center justify-center gap-2 mb-5">
@@ -480,37 +505,35 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                 </button>
               </div>
             </div>
+            </div>
 
           </div>
         </div>
       </section>
 
-      {/* ── MARQUEE — hover to pause, tap any Korean word to hear it ── */}
-      <div className="marquee-hover py-3 overflow-hidden" style={{ background: 'var(--brand-gradient-hero)' }}>
-        <div className="text-center text-[11px] font-black uppercase tracking-widest text-white/80 mb-2.5">
-          🔊 Tap any Korean word to hear it · 눌러서 들어보세요
-        </div>
-        <div className="flex whitespace-nowrap">
-          <div className="marquee-track flex items-center gap-4 pr-4">
-            {[...marqueeWords, ...marqueeWords].map((w, i) => (
-              <React.Fragment key={i}>
-                {i % 2 === 0 ? (
-                  <button
-                    onClick={() => speakKorean(w)}
-                    title="Tap to hear the pronunciation"
-                    aria-label={`Hear ${w} pronounced`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 hover:bg-white/30 border border-white/20 text-white font-semibold text-base transition-all duration-150 hover:-translate-y-0.5"
-                    style={{ fontFamily: 'Pretendard Variable,sans-serif' }}
-                  >
-                    <span aria-hidden="true" className="text-sm">🔊</span>
-                    {w}
-                  </button>
-                ) : (
-                  <span className="text-white/80 font-semibold text-base">{w}</span>
-                )}
-                <span className="text-white/40" aria-hidden="true">·</span>
-              </React.Fragment>
-            ))}
+      {/* ── MARQUEE — soft chips on the page background, faded at both edges,
+             static label in front. Hover to pause, tap a chip to hear it. ── */}
+      <div className="px-4 py-8">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center gap-3 sm:gap-5">
+          <span className="flex-shrink-0 text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
+            🔊 Tap a word to hear it
+          </span>
+          <div className="marquee-hover marquee-mask flex-1 w-full overflow-hidden">
+            <div className="marquee-track flex items-center gap-3 pr-3 w-max">
+              {[...marqueePairs, ...marqueePairs].map((p, i) => (
+                <button
+                  key={i}
+                  onClick={() => speakKorean(p.ko)}
+                  title="Tap to hear the pronunciation"
+                  aria-label={`Hear ${p.ko} (${p.en}) pronounced`}
+                  className="kl-chip-glow inline-flex items-center gap-2 px-4 py-1.5 rounded-full shadow-sm hover:shadow hover:-translate-y-0.5 transition-all duration-150 whitespace-nowrap"
+                >
+                  <span aria-hidden="true" className="text-xs text-[#E4572E]">🔊</span>
+                  <span className="text-sm font-bold text-gray-800 dark:text-gray-200" style={{ fontFamily: 'Pretendard Variable,sans-serif' }}>{p.ko}</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">{p.en}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -663,7 +686,8 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             </div>
           </FadeIn>
           <FadeIn delay={120}>
-            <div className="relative bg-white dark:bg-gray-900 p-8 sm:p-10 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
+            <div className="kl-border-glow-blue rounded-3xl p-[2px] shadow-sm">
+            <div className="relative bg-white dark:bg-gray-900 p-8 sm:p-10 rounded-[22px]">
               <div
                 className="absolute -top-5 left-8 w-11 h-11 rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-md"
                 style={{ background: 'var(--brand-gradient)', fontFamily: 'Pretendard Variable, sans-serif' }}
@@ -690,6 +714,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                   🌱 Independently built &amp; actively maintained
                 </span>
               </div>
+            </div>
             </div>
           </FadeIn>
         </div>
@@ -734,7 +759,8 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
 
             {/* Premium */}
             <FadeIn delay={150}>
-            <div className="card-hover relative rounded-3xl p-8 overflow-hidden" style={{ background: 'linear-gradient(160deg,#1B2637 0%,#0D141F 100%)' }}>
+            <div className="kl-border-glow rounded-3xl p-[2px]">
+            <div className="card-hover relative rounded-[22px] p-8 overflow-hidden" style={{ background: 'linear-gradient(160deg,#1B2637 0%,#0D141F 100%)' }}>
               <div className="absolute -top-px left-1/2 -translate-x-1/2">
                 <span className="inline-block px-5 py-1.5 text-xs font-black uppercase tracking-widest rounded-b-full text-white" style={{ background: 'var(--brand-gradient)' }}>
                   Best Value
@@ -772,6 +798,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                   Already a member? Sign in →
                 </button>
               </p>
+            </div>
             </div>
             </FadeIn>
           </div>

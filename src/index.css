@@ -27,6 +27,9 @@
   --font-korean: 'Pretendard Variable', 'Pretendard', 'Noto Sans KR', sans-serif;
   --font-display: 'Clash Display', 'Pretendard Variable', 'Pretendard', sans-serif;
 
+  /* Animated gradient border (spin the conic angle) — used by .kl-border-glow */
+  --animate-border: border 4s linear infinite;
+
   /* Custom animations (utility: animate-<name>) */
   --animate-flip-3d: flip-3d 0.6s ease-in-out;
   --animate-flip-3d-back: flip-3d-back 0.6s ease-in-out;
@@ -52,6 +55,57 @@
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
 @keyframes theme-switch { 0% { transform: rotate(0deg); } 100% { transform: rotate(180deg); } }
 @keyframes skeleton-wave { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@keyframes border { to { --border-angle: 360deg; } }
+
+/* Registered angle so the conic gradient can animate smoothly */
+@property --border-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* ── Animated gradient border ─────────────────────────────────────────────
+   Wrap any rounded card:  <div class="kl-border-glow rounded-3xl p-[2px]">
+   The inner card keeps its own background (use a slightly smaller radius,
+   e.g. rounded-[22px], so the 2px ring shows evenly). */
+.kl-border-glow {
+  background: conic-gradient(
+    from var(--border-angle),
+    #E4572E, #D9A441, #3F8571, #2F5D8A, #8E3B54, #E4572E
+  );
+  animation: var(--animate-border);
+}
+
+/* Blue variant — dusk/navy highlight that suits both themes */
+.kl-border-glow-blue {
+  background: conic-gradient(
+    from var(--border-angle),
+    #2F5D8A, #5C85B0, #1E3A5C, #8CAECB, #2F5D8A
+  );
+  animation: var(--animate-border);
+}
+
+/* Chip-sized spinning blue ring (border-box technique — no wrapper needed).
+   The padding-box layer supplies the chip's own background per theme. */
+.kl-chip-glow {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(#FFFCF4, #FFFCF4) padding-box,
+    conic-gradient(from var(--border-angle), #2F5D8A, #5C85B0, #1E3A5C, #8CAECB, #2F5D8A) border-box;
+  animation: var(--animate-border);
+}
+
+.dark .kl-chip-glow {
+  background:
+    linear-gradient(#1B2637, #1B2637) padding-box,
+    conic-gradient(from var(--border-angle), #5C85B0, #8CAECB, #2F5D8A, #7FA6CC, #5C85B0) border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kl-border-glow,
+  .kl-border-glow-blue,
+  .kl-chip-glow { animation: none; }
+}
 
 /* ── Base typography and font loading ───────────────────────────────────── */
 html {
