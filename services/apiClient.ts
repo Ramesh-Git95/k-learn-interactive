@@ -169,6 +169,19 @@ class ApiClient {
     return this.request<{ decks: any[] }>('/srs/decks');
   }
 
+  // Daily guided session ("Today's Session") — server-persisted so users can
+  // resume after a crash/refresh/device switch.
+  async getTodaySession(date: string) {
+    return this.request<{ session: DailySessionData | null }>(`/session/today?date=${date}`);
+  }
+
+  async saveTodaySession(payload: DailySessionData) {
+    return this.request<{ session: DailySessionData }>('/session/today', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  }
+
   // Progress endpoints
   async getProgress() {
     return this.request<{
@@ -244,6 +257,25 @@ class ApiClient {
       joinedDate: string;
     }>('/progress/stats');
   }
+}
+
+// Daily guided session shape shared with the backend DailySession model.
+// Each step carries its own baseline (progress counter snapshot) + goal so
+// completion is auto-detected against live numbers, per step.
+export interface DailySessionStep {
+  id: 'srs' | 'learn' | 'quiz';
+  label: string;
+  target: string;
+  baseline: number;
+  goal: number;
+  done: boolean;
+  doneAt: string | null;
+}
+
+export interface DailySessionData {
+  date: string; // 'YYYY-MM-DD' (user-local)
+  steps: DailySessionStep[];
+  completedAt: string | null;
 }
 
 // Create and export API client instance

@@ -60,6 +60,7 @@ const aiExamplesRoutes = require('./routes/ai-examples');
 const srsRoutes = require('./routes/srs');
 const aiRoutes = require('./routes/ai');
 const stripeRoutes = require('./routes/stripe');
+const sessionRoutes = require('./routes/session');
 console.log('✅ Routes loaded successfully');
 
 // Use routes
@@ -70,6 +71,7 @@ app.use('/api/ai-examples', aiExamplesRoutes);
 app.use('/api/srs', srsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/stripe', stripeRoutes);
+app.use('/api/session', sessionRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

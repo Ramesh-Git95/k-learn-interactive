@@ -12,6 +12,7 @@ import LearningPath from './LearningPath';
 import BookmarkFlashcards from './BookmarkFlashcards';
 import StudyHeatmap from './StudyHeatmap';
 import ShareableWordCard from './ShareableWordCard';
+import TodaysSession from './TodaysSession';
 import { vocabulary } from '../data/koreanData';
 import { useUpgrade } from '../hooks/useUpgrade';
 import { SECTIONS } from '../constants';
@@ -77,7 +78,7 @@ export default function Dashboard({
   const { subscriptionTier }         = useFeatureAccess();
   const { openUpgradeModal }         = useUpgradeModal();
   const { startUpgrade }             = useUpgrade();
-  const { stats: srsStats }          = useSRSContext();
+  const { stats: srsStats, decks: srsDecks } = useSRSContext();
   const xp                           = useXPStreak();
 
   const [showBookmarkFC, setShowBookmarkFC]   = useState(false);
@@ -265,6 +266,16 @@ export default function Dashboard({
             </div>
           )}
         </div>
+
+        {/* ── Today's Session — the one-decision daily plan ── */}
+        <TodaysSession
+          srsDue={srsStats.totalDue}
+          decks={srsDecks}
+          getSectionTotalItems={getSectionTotalItems}
+          getSectionCompletedItems={getSectionCompletedItems}
+          setActiveSection={setActiveSection}
+          onStartStudy={onStartStudy}
+        />
 
         {/* ── Continue where you left off ──────────────── */}
         {continueTarget && (
