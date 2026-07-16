@@ -14,6 +14,7 @@ import Breadcrumb from './components/Breadcrumb';
 import { AppBootSkeleton } from './components/Skeleton';
 import ToastContainer from './components/ToastContainer';
 import EmailVerificationBanner from './components/EmailVerificationBanner';
+import PastDueBanner from './components/PastDueBanner';
 import Footer from './components/Footer';
 import CookieConsent from './components/CookieConsent';
 import GuestFreeBanner from './components/GuestFreeBanner';
@@ -686,6 +687,9 @@ const AppContent: React.FC = () => {
             
             {/* Email Verification Banner */}
             <EmailVerificationBanner />
+
+            {/* Failed-payment banner (past_due subscriptions) */}
+            <PastDueBanner />
             
             {/* Mini Learning Path - show on all content sections */}
             {!['dashboard', 'bookmarks', 'profile', 'cookie-demo'].includes(activeSection) && (

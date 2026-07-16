@@ -5,13 +5,15 @@ React SPA (hash-routed sections) + Express/MongoDB backend + Stripe subscription
 
 ## Deployment model (important)
 
-- **Backend** → Railway (`https://k-learn-interactive-production.up.railway.app/api`).
-  **Auto-deploys on every push to `main`.** Backend changes go live within minutes of pushing.
+- **Backend** → Render free tier (`https://k-learn-interactive.onrender.com/api`) — migrated
+  off Railway July 2026. **Auto-deploys on push to `main`** (Render's GitHub integration;
+  root directory `backend`). Free tier sleeps after ~15 min idle → first request takes
+  ~30–50 s to wake. That's normal, not an outage.
 - **Frontend** → Hostinger via FTP. **Manual deploy only:** GitHub → Actions →
   "Deploy to Hostinger" → Run workflow. Pushing to `main` does NOT update the live frontend.
 - **Workflow rule:** always `git push origin main` immediately after committing — push is part of "done".
-- Secrets live in `backend/.env` locally (gitignored) and in Railway Variables for production.
-  Never commit keys.
+- Secrets live in `backend/.env` locally (gitignored) and in Render environment variables for
+  production. Never commit keys.
 
 ## Stack
 
@@ -90,7 +92,7 @@ User subscription shape (`backend/models/User.js`): `type` free|premium|pro, `st
 ## Environment variables
 
 Frontend build (set in `.github/workflows/deploy.yml`): `VITE_API_URL`.
-Backend (Railway + local `backend/.env`): `MONGODB_URI`, `JWT_SECRET`, `CORS_ORIGIN`,
+Backend (Render + local `backend/.env`): `MONGODB_URI`, `JWT_SECRET`, `CORS_ORIGIN`,
 `FRONTEND_URL` (= https://korean-learn.com), `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` ($4/mo
 recurring price), `STRIPE_WEBHOOK_SECRET`, `GEMINI_API_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`.
 
@@ -122,7 +124,15 @@ recurring price), `STRIPE_WEBHOOK_SECRET`, `GEMINI_API_KEY`, `RESEND_API_KEY`, `
 ## Deferred / known limitations
 
 - **Hash routing** means only the homepage is crawlable/indexable (SEO limitation; sitemap
-  contains one URL).
-- AI chat has **no conversation memory** (each message sent standalone) and the free daily chat
-  limit is **client-side localStorage** only.
-- No failed-payment banner yet (past_due users silently keep access during Stripe's retry window).
+  contains one URL; FAQPage JSON-LD in index.html partially compensates — keep it in sync
+  with the FAQ array in `components/LandingPage.tsx`).
+
+## Resolved former limitations (July 2026 — don't re-fix)
+
+- AI chat **has conversation memory**: `ConversationBot` sends the last 8 turns; the backend
+  (`routes/ai.js` `sanitizeHistory`) re-validates/caps them before Gemini.
+- AI daily limits are **server-enforced** (`routes/ai.js` CHAT_LIMITS + `GET /api/ai/quota`);
+  the client counter is display-only. Keep CHAT_LIMITS in sync with `useFeatureAccess.tsx`.
+- **Failed-payment banner exists**: app-wide `components/PastDueBanner.tsx` (rendered beside
+  EmailVerificationBanner in App.tsx) plus a matching banner in UserProfile — both open the
+  Stripe portal when `subscription.status === 'past_due'`.
