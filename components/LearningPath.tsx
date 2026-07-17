@@ -6,9 +6,15 @@ interface LearningPathProps {
   currentSection: Section;
   setActiveSection: (section: Section) => void;
   progress: { [key: string]: boolean };
+  /** When provided, each step shows its live completion bar (absorbs the old
+   *  "Progress by Section" grid — one block instead of two). */
+  getSectionTotalItems?: (section: Section) => number;
+  getSectionCompletedItems?: (section: Section) => number;
 }
 
-const LearningPath: React.FC<LearningPathProps> = ({ currentSection, setActiveSection, progress }) => {
+const LearningPath: React.FC<LearningPathProps> = ({
+  currentSection, setActiveSection, progress, getSectionTotalItems, getSectionCompletedItems,
+}) => {
   const learningSteps = [
     { 
       id: 'hangul' as Section, 
@@ -149,6 +155,21 @@ const LearningPath: React.FC<LearningPathProps> = ({ currentSection, setActiveSe
                 }`}>
                   {step.description}
                 </p>
+                {getSectionTotalItems && getSectionCompletedItems && (() => {
+                  const total = getSectionTotalItems(step.id);
+                  const done = getSectionCompletedItems(step.id);
+                  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+                  return (
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: 'var(--brand-gradient-h)' }} />
+                      </div>
+                      <span className={`text-[11px] font-bold flex-shrink-0 ${isLocked ? 'text-gray-400 dark:text-gray-500' : 'text-gray-500 dark:text-gray-400'}`}>
+                        {done}/{total} · {pct}%
+                      </span>
+                    </div>
+                  );
+                })()}
                 <div className="flex items-center justify-between">
                   <span className={`text-xs ${
                     isLocked ? 'text-gray-400 dark:text-gray-400/50' : 'text-gray-500 dark:text-gray-400'

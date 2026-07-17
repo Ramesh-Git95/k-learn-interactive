@@ -35,10 +35,13 @@ interface TodaysSessionProps {
   getSectionCompletedItems: (section: Section) => number;
   setActiveSection: (section: Section) => void;
   onStartStudy?: (deckId: string) => void;
+  /** Fired when the session's completed state resolves/changes — lets the
+   *  dashboard swap in follow-up content (e.g. the Continue card). */
+  onCompleteChange?: (complete: boolean) => void;
 }
 
 export default function TodaysSession({
-  srsDue, decks, getSectionTotalItems, getSectionCompletedItems, setActiveSection, onStartStudy,
+  srsDue, decks, getSectionTotalItems, getSectionCompletedItems, setActiveSection, onStartStudy, onCompleteChange,
 }: TodaysSessionProps) {
   const [session, setSession] = useState<DailySessionData | null>(null);
   const [quizzesToday, setQuizzesToday] = useState<number | null>(null);
@@ -164,6 +167,15 @@ export default function TodaysSession({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, fingerprint, quizzesToday]);
 
+  // Report completion upward (dashboard swaps in follow-up content). The
+  // setter passed from the dashboard bails on same-value updates, so the
+  // unstable inline-prop identity is harmless here.
+  const isComplete = !!session && (!!session.completedAt || (session.steps.length > 0 && session.steps.every(s => s.done)));
+  useEffect(() => {
+    if (!loading && session) onCompleteChange?.(isComplete);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isComplete, loading]);
+
   if (loading) {
     return <div className="skeleton h-32 rounded-2xl" aria-label="Loading today's session" />;
   }
@@ -171,7 +183,7 @@ export default function TodaysSession({
 
   const doneCount = session.steps.filter(s => s.done).length;
   const total = session.steps.length;
-  const complete = !!session.completedAt || doneCount === total;
+  const complete = isComplete;
   const current = session.steps.find(s => !s.done);
 
   const startStep = (step: DailySessionStep) => {

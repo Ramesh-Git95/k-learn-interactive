@@ -83,6 +83,7 @@ export default function Dashboard({
 
   const [showBookmarkFC, setShowBookmarkFC]   = useState(false);
   const [showShareWord, setShowShareWord]     = useState(false);
+  const [sessionDone, setSessionDone]         = useState(false);
 
   const today      = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const motivation = MOTIVATIONAL[new Date().getDay() % MOTIVATIONAL.length];
@@ -275,10 +276,13 @@ export default function Dashboard({
           getSectionCompletedItems={getSectionCompletedItems}
           setActiveSection={setActiveSection}
           onStartStudy={onStartStudy}
+          onCompleteChange={setSessionDone}
         />
 
-        {/* ── Continue where you left off ──────────────── */}
-        {continueTarget && (
+        {/* ── Continue where you left off — shown once today's session is
+               done, as the "keep going?" nudge (redundant before that:
+               the session's Up-next already answers it) ── */}
+        {sessionDone && continueTarget && (
           <button
             onClick={() => setActiveSection(continueTarget.id)}
             className="w-full flex items-center gap-4 rounded-2xl p-5 text-left text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
@@ -307,90 +311,17 @@ export default function Dashboard({
           </button>
         )}
 
-        {/* ── Stat Cards ──────────────────────────────── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-
-          {/* Streak card — full 7-day heatmap */}
-          <div className={`stat-card bg-white dark:bg-gray-900 rounded-2xl p-5 border shadow-sm col-span-2 sm:col-span-1 ${
-            xp.streakAtRisk ? 'border-orange-200 dark:border-orange-800 ring-1 ring-orange-200 dark:ring-orange-800' : 'border-gray-100 dark:border-gray-800'
-          }`}>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg mb-3 shadow" style={{ background: 'linear-gradient(135deg,#D9A441,#E4572E)' }}>
-              🔥
-            </div>
-            <div className="flex items-end gap-1.5 mb-0.5">
-              <span className="text-2xl font-black text-gray-900 dark:text-white">{xp.currentStreak}</span>
-              {xp.streakAtRisk && (
-                <span className="mb-0.5 text-[10px] font-black px-1.5 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 animate-pulse">
-                  Study today!
-                </span>
-              )}
-            </div>
-            <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">day streak</div>
-            <div className="text-sm font-semibold text-gray-600 dark:text-gray-300 mt-1 mb-3">Study Streak</div>
-            {/* 7-day heatmap */}
-            <div className="flex gap-1">
-              {xp.weekHeatmap.map(day => (
-                <div key={day.dateStr} className="flex-1 flex flex-col items-center gap-1">
-                  <div
-                    className={`heatmap-dot w-full aspect-square rounded-md ${
-                      day.studied
-                        ? 'opacity-100'
-                        : day.isToday
-                        ? 'opacity-30'
-                        : 'bg-gray-100 dark:bg-gray-800'
-                    }`}
-                    style={day.studied ? { background: 'var(--brand-gradient)' } : {}}
-                  />
-                  <span className="text-[9px] text-gray-400 dark:text-gray-600 leading-none">
-                    {day.label === 'Today' ? '▼' : day.label.slice(0, 1)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Items Completed */}
-          <div className="stat-card bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-lg mb-3 shadow">✅</div>
-            <div className="text-2xl font-black text-gray-900 dark:text-white">{getTotalCompleted()}</div>
-            <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">total items</div>
-            <div className="text-sm font-semibold text-gray-600 dark:text-gray-300 mt-1">Completed</div>
-          </div>
-
-          {/* SRS Due Now */}
-          <button
-            onClick={() => setActiveSection('srs')}
-            className={`stat-card bg-white dark:bg-gray-900 rounded-2xl p-5 border shadow-sm text-left group ${
-              srsStats.totalDue > 0 ? 'border-[#E4572E]/30 dark:border-[#E4572E]/40 ring-1 ring-[#E4572E]/30 dark:ring-[#E4572E]/40 hover:border-[#E4572E]/60 dark:hover:border-[#F07A55]/60' : 'border-gray-100 dark:border-gray-800 hover:border-[#3F8571]/40 dark:hover:border-[#3F8571]/50'
-            } transition-colors`}
-          >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2F5D8A] to-[#24476B] flex items-center justify-center text-lg mb-3 shadow">🧠</div>
-            <div className="text-2xl font-black text-gray-900 dark:text-white">{srsStats.totalDue}</div>
-            <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">cards to review</div>
-            <div className="text-sm font-semibold text-gray-600 dark:text-gray-300 mt-1">SRS Due Now</div>
-            <div className="mt-2 text-[11px] font-bold text-[#2F5D8A] dark:text-[#7FA6CC] group-hover:underline">
-              {srsStats.totalDue > 0 ? 'Review now →' : 'Open SRS →'}
-            </div>
-          </button>
-
-          {/* Bookmarks — clickable to start flashcard session */}
-          <button
-            onClick={() => bookmarks.length > 0 && setShowBookmarkFC(true)}
-            disabled={bookmarks.length === 0}
-            className="stat-card bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm text-left group hover:border-yellow-200 dark:hover:border-yellow-800 transition-colors disabled:cursor-default disabled:hover:border-gray-100 dark:disabled:hover:border-gray-800"
-          >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-400 flex items-center justify-center text-lg mb-3 shadow">⭐</div>
-            <div className="text-2xl font-black text-gray-900 dark:text-white">{bookmarks.length}</div>
-            <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">saved words</div>
-            <div className="text-sm font-semibold text-gray-600 dark:text-gray-300 mt-1">Bookmarks</div>
-            <div className="mt-2 text-[11px] font-bold text-yellow-500 dark:text-yellow-400 group-hover:underline">
-              {bookmarks.length > 0 ? 'Study flashcards →' : 'Bookmark words while studying'}
-            </div>
-          </button>
-        </div>
-
-        {/* ── Study Activity heatmap (26 weeks) ────────── */}
-        <StudyHeatmap currentStreak={xp.currentStreak} longestStreak={xp.longestStreak} />
+        {/* ── Stats + Study Activity (merged into one card) ── */}
+        <StudyHeatmap
+          currentStreak={xp.currentStreak}
+          longestStreak={xp.longestStreak}
+          streakAtRisk={xp.streakAtRisk}
+          completed={getTotalCompleted()}
+          srsDue={srsStats.totalDue}
+          bookmarks={bookmarks.length}
+          onReview={() => setActiveSection('srs')}
+          onBookmarks={() => bookmarks.length > 0 && setShowBookmarkFC(true)}
+        />
 
         {/* ── Word of the Day ─────────────────────────── */}
         <div
@@ -432,9 +363,20 @@ export default function Dashboard({
           <ShareableWordCard word={dailyWord} onClose={() => setShowShareWord(false)} />
         )}
 
-        {/* ── Quick Actions ────────────────────────────── */}
+        {/* ── Explore — quick actions + practice tools, one section ── */}
         <div>
-          <h2 className="text-xl font-black text-gray-900 dark:text-white mb-4">Quick Actions</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-black text-gray-900 dark:text-white">Explore</h2>
+            {subscriptionTier === 'free' && (
+              <button
+                onClick={openUpgradeModal}
+                className="text-xs font-black px-3 py-1.5 rounded-lg text-white"
+                style={{ background: 'var(--brand-gradient)' }}
+              >
+                ⭐ Unlock All
+              </button>
+            )}
+          </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {QUICK_ACTIONS.map(a => (
               <button
@@ -450,23 +392,7 @@ export default function Dashboard({
               </button>
             ))}
           </div>
-        </div>
-
-        {/* ── Practice Tools ───────────────────────────── */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-black text-gray-900 dark:text-white">Practice Tools</h2>
-            {subscriptionTier === 'free' && (
-              <button
-                onClick={openUpgradeModal}
-                className="text-xs font-black px-3 py-1.5 rounded-lg text-white"
-                style={{ background: 'var(--brand-gradient)' }}
-              >
-                ⭐ Unlock All
-              </button>
-            )}
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
             {PRACTICE_TOOLS.map(tool => (
               <button
                 key={tool.id}
@@ -486,41 +412,8 @@ export default function Dashboard({
           </div>
         </div>
 
-        {/* ── Progress by Section ──────────────────────── */}
-        <div>
-          <h2 className="text-xl font-black text-gray-900 dark:text-white mb-4">Progress by Section</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {SECTION_META.map(sec => {
-              const total = getSectionTotalItems(sec.id);
-              const done  = getSectionCompletedItems(sec.id);
-              const pct   = total > 0 ? (done / total) * 100 : 0;
-              return (
-                <div
-                  key={sec.id}
-                  className="section-card bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm"
-                  onClick={() => setActiveSection(sec.id)}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${sec.gradient} flex items-center justify-center text-base shadow-sm`} style={{ fontFamily: 'Pretendard Variable, sans-serif', fontWeight: 900 }}>
-                        {sec.icon}
-                      </div>
-                      <span className="font-bold text-gray-900 dark:text-white text-sm">{sec.name}</span>
-                    </div>
-                    <span className="text-sm font-black" style={{ color: sec.bar }}>{Math.round(pct)}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-2">
-                    <div
-                      className="progress-bar h-2 rounded-full"
-                      style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${sec.bar}99, ${sec.bar})` }}
-                    />
-                  </div>
-                  <div className="text-xs text-gray-400 dark:text-gray-500">{done} of {total} completed</div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        {/* Progress-by-section grid removed — the Learning Path below now
+            carries a live completion bar per step (same data, one block). */}
 
         {/* ── Achievements ─────────────────────────────── */}
         {achievements.length > 0 && (
@@ -587,7 +480,7 @@ export default function Dashboard({
           />
         </div>
 
-        {/* ── Learning Path ────────────────────────────── */}
+        {/* ── Learning Path (with per-step progress bars) ── */}
         <LearningPath
           currentSection={
             (['hangul', 'vocabulary', 'phrases', 'grammar', 'culture', 'quiz'] as Section[])
@@ -595,6 +488,8 @@ export default function Dashboard({
           }
           setActiveSection={setActiveSection}
           progress={progress}
+          getSectionTotalItems={getSectionTotalItems}
+          getSectionCompletedItems={getSectionCompletedItems}
         />
 
       </div>

@@ -14,9 +14,18 @@ type CellState = 'studied' | 'empty' | 'today' | 'future';
 interface StudyHeatmapProps {
   currentStreak: number;
   longestStreak: number;
+  /** Merged dashboard stats (absorbed the old 4-card stat row) */
+  streakAtRisk?: boolean;
+  completed?: number;
+  srsDue?: number;
+  bookmarks?: number;
+  onReview?: () => void;
+  onBookmarks?: () => void;
 }
 
-export default function StudyHeatmap({ currentStreak, longestStreak }: StudyHeatmapProps) {
+export default function StudyHeatmap({
+  currentStreak, longestStreak, streakAtRisk, completed, srsDue, bookmarks, onReview, onBookmarks,
+}: StudyHeatmapProps) {
   const studied = new Set(getStreakData().studyDates);
   const todayStr = todayISO();
 
@@ -59,13 +68,44 @@ export default function StudyHeatmap({ currentStreak, longestStreak }: StudyHeat
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm">
-      <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
         <h2 className="text-base font-black text-gray-900 dark:text-white">📈 Study Activity</h2>
-        <div className="flex items-center gap-3 text-xs font-bold text-gray-500 dark:text-gray-400">
-          <span>🔥 {currentStreak} day streak</span>
-          <span>🏆 {longestStreak} best</span>
-          <span className="hidden sm:inline">✅ {totalDays} days studied</span>
-        </div>
+        {streakAtRisk && (
+          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 animate-pulse">
+            🔥 Study today to keep your streak!
+          </span>
+        )}
+      </div>
+
+      {/* Merged stat chips — absorbed the old four-card stat row */}
+      <div className="flex items-center gap-2 flex-wrap mb-4 text-xs font-bold">
+        <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">🔥 {currentStreak} day streak</span>
+        <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">🏆 {longestStreak} best</span>
+        <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">✅ {totalDays} days studied</span>
+        {typeof completed === 'number' && (
+          <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">📚 {completed} items done</span>
+        )}
+        {typeof srsDue === 'number' && onReview && (
+          <button
+            onClick={onReview}
+            className={`px-2.5 py-1 rounded-full transition-colors ${
+              srsDue > 0
+                ? 'bg-[#E4572E]/10 text-[#C13F22] dark:text-[#F07A55] hover:bg-[#E4572E]/20'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+            }`}
+          >
+            🧠 {srsDue} due{srsDue > 0 ? ' · review →' : ''}
+          </button>
+        )}
+        {typeof bookmarks === 'number' && onBookmarks && (
+          <button
+            onClick={onBookmarks}
+            disabled={bookmarks === 0}
+            className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:cursor-default disabled:hover:bg-gray-100 dark:disabled:hover:bg-gray-800"
+          >
+            ⭐ {bookmarks} saved{bookmarks > 0 ? ' · flashcards →' : ''}
+          </button>
+        )}
       </div>
 
       <div className="overflow-x-auto pb-1">
