@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import type { Section } from '../types';
 import { SRSCard, SpacedRepetitionSystem } from '../services/spacedRepetition';
 import { useSRSContext } from '../contexts/SRSContext';
 import Tooltip from './Tooltip';
+import NextUpCard from './NextUpCard';
 import { StudyCardSkeleton } from './Skeleton';
 
 export type ReviewResult = 'again' | 'hard' | 'good' | 'easy';
@@ -20,6 +22,9 @@ interface SRSStudySessionProps {
   deckId: string;
   onComplete: () => void;
   onExit: () => void;
+  /** Navigate to a section from the completion screen (clears study state
+   *  first in App) — powers the Next-up chaining card. */
+  onNavigateNext?: (section: Section) => void;
 }
 
 const DIFFICULTY_CONFIG: Record<ReviewResult, { label: string; emoji: string; color: string; hoverColor: string }> = {
@@ -39,7 +44,7 @@ function CenteredCard({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudySessionProps) {
+export default function SRSStudySession({ deckId, onComplete, onExit, onNavigateNext }: SRSStudySessionProps) {
   const { decks, studySession, actions } = useSRSContext();
   const deck = decks.find(d => d.id === deckId);
   const [showAnswer, setShowAnswer] = useState(false);
@@ -144,7 +149,11 @@ export default function SRSStudySession({ deckId, onComplete, onExit }: SRSStudy
             </div>
           ))}
         </div>
-        <button onClick={onExit} className="w-full py-3 rounded-xl text-white font-bold text-sm" style={{ background: 'var(--brand-gradient)' }}>Return to Dashboard</button>
+        {/* Next-up chaining — momentum instead of re-deciding */}
+        <NextUpCard onNavigate={onNavigateNext} className="mb-3" />
+        <button onClick={onExit} className="w-full py-2.5 rounded-xl text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+          Return to Dashboard
+        </button>
       </CenteredCard>
     );
   }

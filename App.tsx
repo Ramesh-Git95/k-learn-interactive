@@ -513,6 +513,14 @@ const AppContent: React.FC = () => {
           deckId={studyDeckId}
           onComplete={handleCompleteStudy}
           onExit={handleExitStudy}
+          onNavigateNext={(section) => {
+            // Clear study state, then navigate once (avoids the dashboard
+            // detour handleExitStudy would take).
+            srsActions.finishSession();
+            setIsStudying(false);
+            setStudyDeckId(null);
+            handleSetActiveSection(section);
+          }}
         />
       );
     }

@@ -4,6 +4,7 @@ import type { QuizQuestion } from '../types';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { PremiumLockBanner } from './PremiumLock';
+import NextUpCard from './NextUpCard';
 import { useDailyActivity } from '../hooks/useDailyActivity';
 import { useAuth } from '../contexts/AuthContext';
 import { useProgress } from '../contexts/ProgressContext';
@@ -304,7 +305,7 @@ const QuizComponent: React.FC = () => {
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <button
             onClick={restartQuiz}
             className="flex-1 py-3 font-black rounded-xl btn-brand"
@@ -318,6 +319,9 @@ const QuizComponent: React.FC = () => {
             {isTimedMode ? '⏸ Disable Timer' : '⏱ Enable Timer'}
           </button>
         </div>
+
+        {/* Next-up chaining — momentum instead of re-deciding */}
+        <NextUpCard exclude="quiz" />
       </div>
     );
   }
