@@ -5,6 +5,7 @@ import Tooltip from './Tooltip';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { useDailyActivity } from '../hooks/useDailyActivity';
 import { LockedRowBanner } from './PremiumLock';
+import SoftNudge from './SoftNudge';
 import PronunciationButton from './PronunciationButton';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
 import { FREE_PHRASES_COUNT } from '../constants';
@@ -68,8 +69,22 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
   const currentCount = dailyActivity.phrasesStudied;
   const limitReached = subscriptionTier === 'free' && hasReachedLimit('phrasesStudyPerDay', currentCount);
 
+  // Soft guidance (never a lock): phrases display Korean text — nudge
+  // learners who haven't touched the alphabet yet.
+  const hangulStudied = Object.keys(progress).filter(k => k.startsWith('hangul_char_') && progress[k]).length;
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
+      {hangulStudied < 10 && (
+        <SoftNudge
+          id="hangul-first-phrases"
+          className="mb-6"
+          text={<>💭 Tip: most learners do <strong>Hangul basics first</strong> (~30 min) — the romanization here helps, but reading the real Korean is the goal.</>}
+          actionLabel="Start Hangul →"
+          actionSection="hangul"
+        />
+      )}
+
       {/* Hero */}
       <div
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"

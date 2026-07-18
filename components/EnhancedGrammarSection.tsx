@@ -2,6 +2,7 @@ import React from 'react';
 import { grammarPatterns } from '../data/koreanData';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { PremiumPeek } from './PremiumLock';
+import SoftNudge from './SoftNudge';
 import { useAuth } from '../contexts/AuthContext';
 import GuestSignUpGate from './GuestSignUpGate';
 import type { GrammarPattern } from '../types';
@@ -100,8 +101,22 @@ const EnhancedGrammarSection: React.FC<EnhancedGrammarSectionProps> = ({ progres
   const basicPatterns = grammarPatterns.slice(0, basicCount);
   const advancedPatterns = grammarPatterns.slice(basicCount);
 
+  // Soft guidance (never a lock): grammar examples are unreadable without
+  // Hangul — nudge learners who haven't touched the alphabet yet.
+  const hangulStudied = Object.keys(progress).filter(k => k.startsWith('hangul_char_') && progress[k]).length;
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+      {hangulStudied < 10 && (
+        <SoftNudge
+          id="hangul-first-grammar"
+          className="mb-6"
+          text={<>💭 Tip: most learners do <strong>Hangul basics first</strong> (~30 min) — it makes every grammar example below readable.</>}
+          actionLabel="Start Hangul →"
+          actionSection="hangul"
+        />
+      )}
+
       {/* Hero */}
       <div
         className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
