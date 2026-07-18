@@ -99,17 +99,26 @@ export default function SyllablePlayer({ text, romanization, autoPlay = false }:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Size blocks to the syllable count so they stay on ONE row for typical
+  // words/phrases; very long ones scroll horizontally rather than wrapping.
+  const count = speakableIdx.length;
+  const box = count <= 4 ? 'w-16 h-16 text-3xl'
+            : count <= 6 ? 'w-[52px] h-[52px] text-2xl'
+            : count <= 9 ? 'w-11 h-11 text-xl'
+            : 'w-9 h-9 text-lg';
+
   return (
-    <div className="flex flex-col items-center gap-4">
-      {/* Syllable blocks */}
-      <div className="flex items-center justify-center flex-wrap gap-2">
+    <div className="flex flex-col items-center gap-4 w-full">
+      {/* Syllable blocks — single row (centered; scrolls if very long) */}
+      <div className="w-full overflow-x-auto">
+        <div className="flex items-center gap-2 w-max mx-auto px-1 py-1">
         {tokens.map((tok, i) =>
           tok.speak ? (
             <button
               key={i}
               onClick={() => tapBlock(i)}
               aria-label={`Hear syllable ${tok.text}`}
-              className={`flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl text-2xl sm:text-3xl font-black transition-all duration-200 ${
+              className={`flex-shrink-0 flex items-center justify-center rounded-2xl font-black transition-all duration-200 ${box} ${
                 activeIdx === i
                   ? 'text-white scale-110 shadow-lg'
                   : 'bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 hover:-translate-y-0.5 hover:border-[#E4572E]/50'
@@ -122,11 +131,12 @@ export default function SyllablePlayer({ text, romanization, autoPlay = false }:
               {tok.text}
             </button>
           ) : (
-            <span key={i} className="text-2xl text-gray-300 dark:text-gray-600 px-0.5">
+            <span key={i} className="flex-shrink-0 text-2xl text-gray-300 dark:text-gray-600 px-0.5">
               {tok.text.trim() ? tok.text : ' '}
             </span>
           ),
         )}
+        </div>
       </div>
 
       {/* Romanization hint (secondary, toggle) */}

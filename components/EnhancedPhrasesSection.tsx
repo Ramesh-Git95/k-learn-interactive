@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { commonPhrases } from '../data/koreanData';
 import type { Bookmark, PhraseItem } from '../types';
 import Tooltip from './Tooltip';
@@ -6,6 +6,7 @@ import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { useDailyActivity } from '../hooks/useDailyActivity';
 import { LockedRowBanner } from './PremiumLock';
 import SoftNudge from './SoftNudge';
+import SoundItOutModal from './SoundItOutModal';
 import PronunciationButton from './PronunciationButton';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
 import { FREE_PHRASES_COUNT } from '../constants';
@@ -33,6 +34,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
   const { hasReachedLimit, getLimit, subscriptionTier } = useFeatureAccess();
   const { dailyActivity, trackActivity } = useDailyActivity();
   const { openUpgradeModal } = useUpgradeModal();
+  const [soundOut, setSoundOut] = useState<PhraseItem | null>(null);
 
   const isBookmarked = (item: PhraseItem) => bookmarks.some(b => 'korean' in b && b.korean === item.korean);
   const isPhraseStudied = (i: number) => !!progress[`phrase_${i}`];
@@ -45,15 +47,6 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
     }
     toggleProgress(`phrase_${i}`);
     return true;
-  };
-
-  const speak = (korean: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(korean);
-      u.lang = 'ko-KR'; u.rate = 0.8;
-      window.speechSynthesis.speak(u);
-    }
   };
 
   const filteredPhrases = useMemo(() =>
@@ -75,6 +68,16 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
+      {/* Sound-it-out (syllable player) modal */}
+      {soundOut && (
+        <SoundItOutModal
+          korean={soundOut.korean}
+          english={soundOut.english}
+          romanization={soundOut.romanization}
+          onClose={() => setSoundOut(null)}
+        />
+      )}
+
       {hangulStudied < 10 && (
         <SoftNudge
           id="hangul-first-phrases"
@@ -105,7 +108,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
               </div>
             </div>
             <p className="text-white/80 text-sm max-w-lg">
-              Master essential Korean phrases for everyday conversation. Tap 🔊 to hear pronunciation, ❤️ to bookmark, ✓ to mark as studied.
+              Master essential Korean phrases for everyday conversation. Tap 🔊 to sound it out syllable-by-syllable, ❤️ to bookmark, ✓ to mark as studied.
             </p>
           </div>
           <div className="flex-shrink-0 bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center min-w-[110px]">
@@ -140,8 +143,9 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
         </div>
       )}
 
-      {/* Phrases list */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+      {/* Phrases list — no overflow-hidden so row tooltips aren't clipped;
+          first/last rows round their own corners instead. */}
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
         {filteredPhrases.length > 0 ? (
           <ul className="divide-y divide-gray-50 dark:divide-gray-800">
             {filteredPhrases.map((phrase) => {
@@ -153,7 +157,7 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
               return (
                 <li
                   key={phrase.korean}
-                  className={`p-4 sm:p-5 transition-all duration-200 ${studied ? 'bg-green-50/60 dark:bg-green-900/10' : 'hover:bg-gray-50/60 dark:hover:bg-gray-800/40'}`}
+                  className={`p-4 sm:p-5 transition-all duration-200 first:rounded-t-2xl last:rounded-b-2xl ${studied ? 'bg-green-50/60 dark:bg-green-900/10' : 'hover:bg-gray-50/60 dark:hover:bg-gray-800/40'}`}
                 >
                   {/* Left accent */}
                   <div className="flex gap-3">
@@ -177,8 +181,8 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
 
                         {/* Action buttons */}
                         <div className="flex items-center gap-1 flex-shrink-0">
-                          <Tooltip content="Listen to Korean pronunciation" position="top" maxWidth="max-w-xs">
-                            <button onClick={() => speak(phrase.korean)} className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:text-[#E4572E] hover:bg-[#FDEEE6] dark:hover:bg-[#5F2010]/20 transition-colors text-base">
+                          <Tooltip content="Sound it out — syllable by syllable" position="top" maxWidth="max-w-xs">
+                            <button onClick={() => setSoundOut(phrase)} className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:text-[#E4572E] hover:bg-[#FDEEE6] dark:hover:bg-[#5F2010]/20 transition-colors text-base">
                               🔊
                             </button>
                           </Tooltip>

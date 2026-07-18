@@ -23,6 +23,10 @@ const Tooltip: React.FC<TooltipProps> = ({
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
+  // Suppress re-showing after a click until the pointer genuinely leaves and
+  // re-enters. Without this, clicking a trigger that opens a modal leaves the
+  // tooltip stuck on top of it (the covered button never fires mouseleave).
+  const suppressRef = useRef(false);
 
   // Smart max-width calculation based on content length and screen size
   const getSmartMaxWidth = () => {
@@ -182,6 +186,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   };
 
   const showTooltip = () => {
+    if (suppressRef.current) return; // just clicked — don't re-show until re-enter
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
@@ -246,11 +251,12 @@ const Tooltip: React.FC<TooltipProps> = ({
   if (!content) return <>{children}</>;
 
   return (
-    <div 
+    <div
       ref={triggerRef}
       className={`relative inline-block ${className}`}
-      onMouseEnter={showTooltip}
-      onMouseLeave={hideTooltip}
+      onMouseEnter={() => { suppressRef.current = false; showTooltip(); }}
+      onMouseLeave={() => { suppressRef.current = false; hideTooltip(); }}
+      onMouseDown={() => { suppressRef.current = true; hideTooltip(); }}
       onFocus={showTooltip}
       onBlur={hideTooltip}
     >
