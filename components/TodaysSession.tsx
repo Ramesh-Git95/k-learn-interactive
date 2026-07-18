@@ -222,15 +222,15 @@ export default function TodaysSession({
     );
   }
 
-  // ── Active session card ───────────────────────────────────────────────────
+  // ── Active session card — light card in light mode, ink gradient in dark ──
   return (
-    <div className="rounded-2xl p-5 sm:p-6 text-white shadow-lg" style={{ background: 'linear-gradient(135deg, #0D141F 0%, #16202F 55%, #1E3A5C 100%)' }}>
+    <div className="rounded-2xl p-5 sm:p-6 bg-white border border-gray-100 shadow-sm dark:border-transparent dark:shadow-lg dark:bg-gradient-to-br dark:from-[#0D141F] dark:via-[#16202F] dark:to-[#1E3A5C]">
       <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
-        <h2 className="text-base font-black flex items-center gap-2">
+        <h2 className="text-base font-black flex items-center gap-2 text-gray-900 dark:text-white">
           ⚡ Today's Session
-          <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-white/10 text-white/70">~15 min</span>
+          <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-[#E4572E]/10 text-[#C13F22] dark:bg-white/10 dark:text-white/70">~15 min</span>
         </h2>
-        <span className="text-xs font-bold text-white/60">{doneCount}/{total} done · progress saved automatically</span>
+        <span className="text-xs font-bold text-gray-400 dark:text-white/60">{doneCount}/{total} done · progress saved automatically</span>
       </div>
 
       {/* Steps */}
@@ -244,15 +244,15 @@ export default function TodaysSession({
               disabled={step.done}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left transition-all duration-150 ${
                 step.done
-                  ? 'bg-white/5 text-white/40'
+                  ? 'bg-gray-50 text-gray-400 dark:bg-white/5 dark:text-white/40'
                   : isCurrent
-                  ? 'bg-white/15 border border-[#F07A55]/50 hover:bg-white/20'
-                  : 'bg-white/5 hover:bg-white/10 text-white/70'
+                  ? 'bg-[#E4572E]/10 border border-[#E4572E]/40 hover:bg-[#E4572E]/15 text-gray-900 dark:bg-white/15 dark:border-[#F07A55]/50 dark:hover:bg-white/20 dark:text-white'
+                  : 'bg-gray-50 hover:bg-gray-100 text-gray-600 dark:bg-white/5 dark:hover:bg-white/10 dark:text-white/70'
               }`}
             >
               <span className="text-lg" aria-hidden="true">{step.done ? '✅' : STEP_ICONS[step.id]}</span>
               <span className={`flex-1 text-sm font-semibold ${step.done ? 'line-through' : ''}`}>{displayLabel(step)}</span>
-              {isCurrent && <span className="text-[10px] font-black uppercase tracking-wider text-[#F07A55]">Up next →</span>}
+              {isCurrent && <span className="text-[10px] font-black uppercase tracking-wider text-[#C13F22] dark:text-[#F07A55]">Up next →</span>}
             </button>
           );
         })}
@@ -260,7 +260,7 @@ export default function TodaysSession({
 
       {/* Progress + CTA */}
       <div className="flex items-center gap-4">
-        <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+        <div className="flex-1 h-2 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
           <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(doneCount / total) * 100}%`, background: 'var(--brand-gradient-h)' }} />
         </div>
         {current && (
