@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthModal } from '../contexts/AuthModalContext';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { PremiumLockBanner } from './PremiumLock';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
+import { saveTopikEstimate } from '../utils/topikEstimate';
 import { useUpgrade } from '../hooks/useUpgrade';
 
 const OPTION_LABELS = ['①', '②', '③', '④'];
@@ -302,6 +303,11 @@ const TopikAssessment: React.FC = () => {
 
   const estimatedLevel = screen === 'results' ? computeLevel() : 0;
   const totalCorrect = screen === 'results' ? activeQs.filter((q, i) => answers[i] === q.answer).length : 0;
+
+  // Persist the estimate for placement (dashboard level card + path skipping).
+  useEffect(() => {
+    if (screen === 'results' && estimatedLevel >= 1) saveTopikEstimate(estimatedLevel);
+  }, [screen, estimatedLevel]);
 
   // Per-level breakdown
   const levelBreakdown = (screen === 'results' ? [1, 2, 3, 4, 5, 6] : []).map(L => {

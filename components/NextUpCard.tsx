@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Section } from '../types';
 import { useProgress } from '../contexts/ProgressContext';
+import { canSkipHangul } from '../utils/topikEstimate';
 
 // "Next up →" momentum card, shown on completion screens (SRS session, quiz)
 // so finishing something chains into the next path step instead of dumping
@@ -26,7 +27,11 @@ interface NextUpCardProps {
 export default function NextUpCard({ exclude, onNavigate, className = '' }: NextUpCardProps) {
   const { progress } = useProgress();
 
-  const next = PATH.find(s => s.id !== exclude && !progress[`section_${s.id}`]);
+  // TOPIK placement: tested level 2+ learners already read Hangul — skip it.
+  const skipHangul = canSkipHangul();
+  const next = PATH.find(s =>
+    s.id !== exclude && !(skipHangul && s.id === 'hangul') && !progress[`section_${s.id}`]
+  );
   if (!next) return null; // whole path complete — nothing to chain
 
   const go = () => {

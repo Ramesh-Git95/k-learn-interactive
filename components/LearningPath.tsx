@@ -10,10 +10,13 @@ interface LearningPathProps {
    *  "Progress by Section" grid — one block instead of two). */
   getSectionTotalItems?: (section: Section) => number;
   getSectionCompletedItems?: (section: Section) => number;
+  /** Placement: sections treated as satisfied for unlocking later steps (e.g.
+   *  TOPIK 2+ learners skip Hangul without it blocking the rest of the path). */
+  assumeDone?: Section[];
 }
 
 const LearningPath: React.FC<LearningPathProps> = ({
-  currentSection, setActiveSection, progress, getSectionTotalItems, getSectionCompletedItems,
+  currentSection, setActiveSection, progress, getSectionTotalItems, getSectionCompletedItems, assumeDone,
 }) => {
   const learningSteps = [
     { 
@@ -69,13 +72,14 @@ const LearningPath: React.FC<LearningPathProps> = ({
   const getStepStatus = (stepId: Section) => {
     if (stepId === currentSection) return 'current';
     if (progress[`section_${stepId}`]) return 'completed';
-    
-    // Check if previous steps are completed
+
+    // Check if previous steps are completed (placement-assumed sections —
+    // e.g. Hangul for TOPIK 2+ learners — count as satisfied).
     const stepIndex = learningSteps.findIndex(step => step.id === stepId);
     const previousStepsCompleted = learningSteps
       .slice(0, stepIndex)
-      .every(step => progress[`section_${step.id}`]);
-    
+      .every(step => progress[`section_${step.id}`] || assumeDone?.includes(step.id));
+
     return previousStepsCompleted ? 'available' : 'locked';
   };
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { Section } from '../types';
 import { apiClient, DailySessionData, DailySessionStep } from '../services/apiClient';
 import { todayISO } from '../utils/xpStreak';
+import { canSkipHangul } from '../utils/topikEstimate';
 import { useXPStreak } from '../hooks/useXPStreak';
 import type { SRSDeck } from '../services/spacedRepetition';
 
@@ -101,9 +102,12 @@ export default function TodaysSession({
       }
 
       // ── Compose, stage-aware ──
+      // TOPIK placement: a tested level of 2+ means the learner reads Hangul —
+      // never treat them as a newbie, and skip the alphabet in suggestions.
+      const skipHangul = canSkipHangul();
       const hangulTotal = getSectionTotalItems('hangul');
       const hangulDone = getSectionCompletedItems('hangul');
-      const isNewbie = xp.level === 1 && hangulTotal > 0 && hangulDone / hangulTotal < 0.5;
+      const isNewbie = !skipHangul && xp.level === 1 && hangulTotal > 0 && hangulDone / hangulTotal < 0.5;
 
       const learnStepFor = (id: Section, goal: number, label: string): DailySessionStep => ({
         id: 'learn', target: id, label, baseline: getSectionCompletedItems(id), goal, done: false, doneAt: null,
@@ -125,6 +129,7 @@ export default function TodaysSession({
           });
         }
         const next = PATH.find(s => {
+          if (skipHangul && s.id === 'hangul') return false;
           const total = getSectionTotalItems(s.id);
           return total > 0 && getSectionCompletedItems(s.id) < total;
         });

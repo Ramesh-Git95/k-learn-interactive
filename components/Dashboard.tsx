@@ -16,6 +16,7 @@ import TodaysSession from './TodaysSession';
 import { vocabulary } from '../data/koreanData';
 import { useUpgrade } from '../hooks/useUpgrade';
 import { SECTIONS } from '../constants';
+import { getTopikEstimate, canSkipHangul } from '../utils/topikEstimate';
 
 
 interface DashboardProps {
@@ -123,6 +124,12 @@ export default function Dashboard({
   const overall      = getOverallProgress();
   const achievements = getAchievements();
   const levelName    = LEVEL_NAMES[xp.level] ?? 'Master';
+
+  // TOPIK placement — a tested level of 2+ means the learner reads Hangul,
+  // so path surfaces skip the alphabet. (Dashboard remounts on navigation,
+  // so a plain read stays fresh after taking the assessment.)
+  const topikEstimate = getTopikEstimate();
+  const skipHangul    = canSkipHangul(topikEstimate);
 
   // "Continue where you left off" — last visited learning surface (written by
   // App.tsx on every navigation), falling back to the first incomplete core
@@ -232,6 +239,14 @@ export default function Dashboard({
                   Lv.{xp.level} {levelName}
                 </span>
                 <span className="text-gray-400 text-xs">{xp.totalXP} XP total</span>
+                {/* TOPIK level card — surfaces the assessment + placement */}
+                <button
+                  onClick={() => setActiveSection('topik-test')}
+                  className="text-xs font-black px-2.5 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors"
+                  title="TOPIK level assessment"
+                >
+                  {topikEstimate ? `📊 TOPIK ~${topikEstimate.level} · Test again →` : '📊 Find your level →'}
+                </button>
               </div>
               <span className="text-gray-500 text-xs">{xp.xpInLevel} / {xp.xpForLevel} XP to next level</span>
             </div>
@@ -484,12 +499,14 @@ export default function Dashboard({
         <LearningPath
           currentSection={
             (['hangul', 'vocabulary', 'phrases', 'grammar', 'culture', 'quiz'] as Section[])
+              .filter(id => !(skipHangul && id === 'hangul'))
               .find(id => !progress[`section_${id}`]) ?? 'quiz'
           }
           setActiveSection={setActiveSection}
           progress={progress}
           getSectionTotalItems={getSectionTotalItems}
           getSectionCompletedItems={getSectionCompletedItems}
+          assumeDone={skipHangul ? ['hangul'] : undefined}
         />
 
       </div>
