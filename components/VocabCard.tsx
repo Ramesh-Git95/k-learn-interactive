@@ -3,6 +3,7 @@ import { X, Volume2 } from 'lucide-react';
 import type { VocabItem, Bookmark } from '../types';
 import AddToSRS from './AddToSRS';
 import PronunciationButton from './PronunciationButton';
+import SoundItOutModal from './SoundItOutModal';
 import { useAuth } from '../contexts/AuthContext';
 
 const FLIP_HINT_KEY = 'k-learn-flip-seen';
@@ -28,6 +29,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
   const [isFlipped, setIsFlipped] = useState(false);
   const [showExamples, setShowExamples] = useState(false);
   const [showAddToSRS, setShowAddToSRS] = useState(false);
+  const [showSoundItOut, setShowSoundItOut] = useState(false);
   const [showFlipBubble, setShowFlipBubble] = useState(false);
   const flipHintTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -55,12 +57,9 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
 
   const speak = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(item.korean);
-      u.lang = 'ko-KR'; u.rate = 0.8;
-      window.speechSynthesis.speak(u);
-    }
+    // Open the "Sound it out" teaching view (syllable blocks + karaoke) rather
+    // than blasting the whole word at a distorted slow rate.
+    setShowSoundItOut(true);
     if ('vibrate' in navigator) navigator.vibrate(30);
   };
 
@@ -146,7 +145,7 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
               </div>
             )}
             <div className="absolute top-2 right-2 flex gap-1">
-              <button onClick={speak} className="p-1.5 rounded-lg text-gray-400 hover:text-[#E4572E] hover:bg-[#FDEEE6] dark:hover:bg-[#5F2010]/20 transition-colors" aria-label={`Pronounce ${item.korean}`}>
+              <button onClick={speak} className="p-1.5 rounded-lg text-gray-400 hover:text-[#E4572E] hover:bg-[#FDEEE6] dark:hover:bg-[#5F2010]/20 transition-colors" title="Sound it out — syllable by syllable" aria-label={`Sound out ${item.korean} syllable by syllable`}>
                 🔊
               </button>
               <button onClick={handleBookmark} className={`p-1.5 rounded-lg transition-colors ${isBookmarked ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-400 hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'}`} aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}>
@@ -236,6 +235,16 @@ const VocabCard: React.FC<VocabCardProps> = ({ item, isBookmarked, toggleBookmar
             </div>
           </div>
         </div>
+      )}
+
+      {/* Sound-it-out (syllable player) modal */}
+      {showSoundItOut && (
+        <SoundItOutModal
+          korean={item.korean}
+          english={item.english}
+          romanization={item.romanization}
+          onClose={() => setShowSoundItOut(false)}
+        />
       )}
 
       {/* Add to SRS Modal */}
