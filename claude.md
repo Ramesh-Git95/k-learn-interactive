@@ -85,6 +85,8 @@ User subscription shape (`backend/models/User.js`): `type` free|premium|pro, `st
   `useSRS`, `useDailyActivity`, `useLocalStorage`, `useSpeechRecognition`.
 - `services/` — `apiClient.ts` (HTTP + auth token), `geminiService.ts` (chat/translate calls),
   `spacedRepetition.ts` (SM-2 engine), `progressService.ts`.
+- `utils/` — `xpStreak.ts` (XP/streak engine, account-synced), `xpAwards.ts` (what each
+  completion is worth), `pronunciation.ts` (Hangul syllable segmentation).
 - `backend/routes/` — `auth.js` (register/login/verify/reset/delete — deletion cascades SRS decks
   and cancels the Stripe sub), `users.js`, `progress.js`, `srs.js` (sync strips client `_id`s),
   `ai.js`, `stripe.js`.
@@ -104,6 +106,13 @@ recurring price), `STRIPE_WEBHOOK_SECRET`, `GEMINI_API_KEY`, `RESEND_API_KEY`, `
   every render. Never put them in `useEffect`/`useCallback` dependency arrays — derive stable
   booleans or hold them in refs (this caused real production loop bugs).
 - Speech synthesis: always `speechSynthesis.cancel()` before `speak()`.
+- **`apiClient` resolves on failure**, it does not throw — a failed call returns
+  `{ success: false, data: null }`. Always check `success` before using `data`; treating a
+  failure as data has silently zeroed real user state before.
+- **Two `xp` fields exist and only one is real.** `gamification.xp` is the user's actual XP.
+  `progress.xp` is legacy: `calculateStats()` recomputes it from lesson counts on every save
+  (so anything written there is clobbered), but `GET /users/leaderboard` still ranks by it —
+  point that at `gamification.xp` if a leaderboard UI is ever built. Don't merge the two fields.
 - SRS decks are identified by their own `id` field, not Mongo `_id`; `/srs/sync` strips
   client-supplied `_id`s.
 - All UI copy says **"$4/month · cancel anytime"** (often with a "less than a coffee ☕" anchor).
@@ -136,3 +145,18 @@ recurring price), `STRIPE_WEBHOOK_SECRET`, `GEMINI_API_KEY`, `RESEND_API_KEY`, `
 - **Failed-payment banner exists**: app-wide `components/PastDueBanner.tsx` (rendered beside
   EmailVerificationBanner in App.tsx) plus a matching banner in UserProfile — both open the
   Stripe portal when `subscription.status === 'past_due'`.
+- **XP / streak / heatmap are account-synced**, not localStorage-only (they were until
+  July 2026, so the numbers followed the browser — signing in on a phone showed zeroes).
+  Source of truth is `user.gamification`; `utils/xpStreak.ts` keeps a localStorage mirror so
+  reads stay synchronous and guests still work. Rules that must hold:
+  - `/progress/gamification/merge` is **merge-up, never overwrite** (higher XP wins, study
+    dates unioned) — a fresh device's empty storage must never wipe the account.
+  - XP awards use `$inc` server-side; the streak is recomputed server-side from the full date
+    history using the **client's** local date (the server is UTC and would roll over early).
+  - Logout calls `clearLocalGamification()`, or the next sign-in on that browser inherits —
+    and then merges up — the previous user's XP.
+- **All content completion awards XP centrally** in `ProgressContext.updateProgress`, priced by
+  key prefix in `utils/xpAwards.ts`. Do NOT add per-section XP calls for content completion:
+  five sections (Hangul/Vocabulary/Grammar/Phrases/Culture) once relied on that convention and
+  silently awarded nothing. Prefix order is significant (`vocab_item_` before `vocab_`), and
+  `quiz_*` is 0 because quizzes award by score at the quiz itself.
