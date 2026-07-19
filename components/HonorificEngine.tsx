@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { PeekOverlay } from './PremiumLock';
+import SoundItOutModal from './SoundItOutModal';
 
 const FREE_CATEGORY_IDS = ['greetings', 'requests'];
 
@@ -19,14 +20,6 @@ interface HonorificCategory {
   emoji: string;
   entries: HonorificEntry[];
 }
-
-const speak = (text: string) => {
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'ko-KR';
-  u.rate = 0.85;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
-};
 
 const CATEGORIES: HonorificCategory[] = [
   {
@@ -364,12 +357,12 @@ const LEVEL_COLORS = {
   },
 };
 
-const SpeakBtn: React.FC<{ text: string; color: string }> = ({ text, color }) => (
+const SpeakBtn: React.FC<{ text: string; color: string; onPlay: () => void }> = ({ text, color, onPlay }) => (
   <button
-    onClick={() => speak(text)}
+    onClick={onPlay}
     className={`p-1.5 rounded-lg transition-all hover:scale-110 active:scale-95 ${color}`}
-    title="Listen"
-    aria-label="Listen to pronunciation"
+    title="Sound it out — syllable by syllable"
+    aria-label={`Sound out ${text}`}
   >
     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
       <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" />
@@ -382,6 +375,7 @@ const HonorificEngine: React.FC = () => {
   const isFree = subscriptionTier === 'free';
   const [activeCat, setActiveCat] = useState(CATEGORIES[0].id);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [soundOut, setSoundOut] = useState<{ korean: string; romanization: string; english: string } | null>(null);
 
   const cat = CATEGORIES.find(c => c.id === activeCat)!;
   const isActiveLocked = isFree && !FREE_CATEGORY_IDS.includes(activeCat);
@@ -390,6 +384,16 @@ const HonorificEngine: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
+      {/* Sound-it-out (syllable player) modal */}
+      {soundOut && (
+        <SoundItOutModal
+          korean={soundOut.korean}
+          english={soundOut.english}
+          romanization={soundOut.romanization}
+          onClose={() => setSoundOut(null)}
+        />
+      )}
+
       {/* Hero */}
       <div
         className="rounded-2xl p-6 sm:p-8 mb-8 text-white relative overflow-hidden"
@@ -492,7 +496,11 @@ const HonorificEngine: React.FC = () => {
                         <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${col.badge}`}>
                           {col.sublabel} · {col.label}
                         </span>
-                        <SpeakBtn text={form.korean} color={col.badge} />
+                        <SpeakBtn
+                          text={form.korean}
+                          color={col.badge}
+                          onPlay={() => setSoundOut({ korean: form.korean, romanization: form.romanization, english: `${entry.english} · ${col.label}` })}
+                        />
                       </div>
                       <p className="text-base font-black text-gray-900 dark:text-white mb-0.5">{form.korean}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{form.romanization}</p>
@@ -515,7 +523,11 @@ const HonorificEngine: React.FC = () => {
                   </span>
                   <span className="text-sm font-bold text-gray-900 dark:text-white">{entry.polite.korean}</span>
                   <span className="text-xs text-gray-400 dark:text-gray-500">{entry.polite.romanization}</span>
-                  <SpeakBtn text={entry.polite.korean} color={LEVEL_COLORS.polite.badge} />
+                  <SpeakBtn
+                    text={entry.polite.korean}
+                    color={LEVEL_COLORS.polite.badge}
+                    onPlay={() => setSoundOut({ korean: entry.polite.korean, romanization: entry.polite.romanization, english: `${entry.english} · Polite` })}
+                  />
                 </div>
               )}
             </div>

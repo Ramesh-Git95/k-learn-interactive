@@ -6,6 +6,7 @@ import { useAuthModal } from '../contexts/AuthModalContext';
 import { useToastContext } from '../contexts/ToastContext';
 import { useSRSContext } from '../contexts/SRSContext';
 import PronunciationButton from './PronunciationButton';
+import SoundItOutModal from './SoundItOutModal';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
 import { useUpgrade } from '../hooks/useUpgrade';
 
@@ -30,6 +31,7 @@ const KDramaSection: React.FC = () => {
   const [selectedDrama, setSelectedDrama] = useState<Drama | null>(null);
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>('all');
   const [addedCards, setAddedCards] = useState<Set<string>>(new Set());
+  const [soundOut, setSoundOut] = useState<DramaWord | null>(null);
 
   const handleAddToSRS = (word: DramaWord, drama: Drama) => {
     const cardKey = `${drama.id}-${word.korean}`;
@@ -169,6 +171,16 @@ const KDramaSection: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Sound-it-out (syllable player) modal */}
+      {soundOut && (
+        <SoundItOutModal
+          korean={soundOut.korean}
+          english={soundOut.english}
+          romanization={soundOut.romanization}
+          onClose={() => setSoundOut(null)}
+        />
+      )}
+
       {/* Header */}
       <div className="mb-8">
         {selectedDrama && (
@@ -298,14 +310,9 @@ const KDramaSection: React.FC = () => {
                   <div className="flex gap-2 mt-auto pt-1">
                     {/* Speak (TTS) */}
                     <button
-                      onClick={() => {
-                        const u = new SpeechSynthesisUtterance(word.korean);
-                        u.lang = 'ko-KR'; u.rate = 0.8;
-                        window.speechSynthesis.cancel();
-                        window.speechSynthesis.speak(u);
-                      }}
+                      onClick={() => setSoundOut(word)}
                       className="flex items-center gap-1 px-2.5 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
-                      title="Hear pronunciation"
+                      title="Sound it out — syllable by syllable"
                     >
                       <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
