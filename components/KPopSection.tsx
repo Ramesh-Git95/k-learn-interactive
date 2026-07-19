@@ -7,6 +7,7 @@ import { useAuthModal } from '../contexts/AuthModalContext';
 import { useSRSContext } from '../contexts/SRSContext';
 import { useToastContext } from '../contexts/ToastContext';
 import PronunciationButton from './PronunciationButton';
+import SoundItOutModal from './SoundItOutModal';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
 import { useUpgrade } from '../hooks/useUpgrade';
 
@@ -27,11 +28,12 @@ interface PopoverProps {
   anchorRef: React.RefObject<HTMLButtonElement | null>;
   onClose: () => void;
   onAddSRS: (word: KPopWord) => void;
+  onSoundItOut: (word: KPopWord) => void;
   isAuthenticated: boolean;
   isPremium: boolean;
 }
 
-function WordPopover({ word, anchorRef, onClose, onAddSRS, isAuthenticated, isPremium }: PopoverProps) {
+function WordPopover({ word, anchorRef, onClose, onAddSRS, onSoundItOut, isAuthenticated, isPremium }: PopoverProps) {
   const popRef = useRef<HTMLDivElement>(null);
   const { startUpgrade } = useUpgrade();
 
@@ -45,15 +47,6 @@ function WordPopover({ word, anchorRef, onClose, onAddSRS, isAuthenticated, isPr
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [onClose]);
-
-  const speak = () => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(word.korean);
-      u.lang = 'ko-KR'; u.rate = 0.8;
-      window.speechSynthesis.speak(u);
-    }
-  };
 
   return (
     <div
@@ -73,7 +66,7 @@ function WordPopover({ word, anchorRef, onClose, onAddSRS, isAuthenticated, isPr
             <div className="text-xs text-gray-400 dark:text-gray-500 italic">{word.romanization}</div>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={speak} aria-label={`Pronounce ${word.korean}`} className="p-1 rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+            <button onClick={() => onSoundItOut(word)} title="Sound it out — syllable by syllable" aria-label={`Sound out ${word.korean}`} className="p-1 rounded-lg text-gray-400 hover:text-[#E4572E] hover:bg-[#FDEEE6] dark:hover:bg-[#5F2010]/20 transition-colors">
               <Volume2 className="w-4 h-4" />
             </button>
             <button onClick={onClose} aria-label="Close popover" className="p-1 rounded-lg text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 transition-colors">
@@ -119,11 +112,12 @@ function WordPopover({ word, anchorRef, onClose, onAddSRS, isAuthenticated, isPr
 
 // ── Tappable word chip ────────────────────────────────────────────────────────
 
-function WordChip({ word, isAuthenticated, isPremium, onAddSRS }: {
+function WordChip({ word, isAuthenticated, isPremium, onAddSRS, onSoundItOut }: {
   word: KPopWord;
   isAuthenticated: boolean;
   isPremium: boolean;
   onAddSRS: (word: KPopWord) => void;
+  onSoundItOut: (word: KPopWord) => void;
 }) {
   const [open, setOpen] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
@@ -154,6 +148,7 @@ function WordChip({ word, isAuthenticated, isPremium, onAddSRS }: {
           anchorRef={btnRef}
           onClose={() => setOpen(false)}
           onAddSRS={w => { onAddSRS(w); setOpen(false); }}
+          onSoundItOut={w => { onSoundItOut(w); setOpen(false); }}
           isAuthenticated={isAuthenticated}
           isPremium={isPremium}
         />
@@ -164,11 +159,12 @@ function WordChip({ word, isAuthenticated, isPremium, onAddSRS }: {
 
 // ── Lyrics line ───────────────────────────────────────────────────────────────
 
-function LyricsLine({ line, isAuthenticated, isPremium, onAddSRS, showHint }: {
+function LyricsLine({ line, isAuthenticated, isPremium, onAddSRS, onSoundItOut, showHint }: {
   line: { korean: string; romanization: string; english: string; words: KPopWord[] };
   isAuthenticated: boolean;
   isPremium: boolean;
   onAddSRS: (word: KPopWord) => void;
+  onSoundItOut: (word: KPopWord) => void;
   showHint: boolean;
 }) {
   return (
@@ -181,6 +177,7 @@ function LyricsLine({ line, isAuthenticated, isPremium, onAddSRS, showHint }: {
             isAuthenticated={isAuthenticated}
             isPremium={isPremium}
             onAddSRS={onAddSRS}
+            onSoundItOut={onSoundItOut}
           />
         ))}
         {showHint && (
@@ -208,6 +205,8 @@ function SongView({ song, artist, isPremium, isAuthenticated, onBack }: {
   const { showToast } = useToastContext();
   const { startUpgrade } = useUpgrade();
   const [addedWords, setAddedWords] = useState<Set<string>>(new Set());
+  // Held here (not in the popover) so the modal survives the popover closing.
+  const [soundOut, setSoundOut] = useState<KPopWord | null>(null);
 
   const handleAddSRS = (word: KPopWord) => {
     const deckName = 'K-Pop Vocabulary';
@@ -258,10 +257,21 @@ function SongView({ song, artist, isPremium, isAuthenticated, onBack }: {
             isAuthenticated={isAuthenticated}
             isPremium={isPremium}
             onAddSRS={handleAddSRS}
+            onSoundItOut={setSoundOut}
             showHint={i === 0}
           />
         ))}
       </div>
+
+      {/* Sound-it-out (syllable player) modal */}
+      {soundOut && (
+        <SoundItOutModal
+          korean={soundOut.korean}
+          english={soundOut.english}
+          romanization={soundOut.romanization}
+          onClose={() => setSoundOut(null)}
+        />
+      )}
 
       {/* Added words summary */}
       {addedWords.size > 0 && (

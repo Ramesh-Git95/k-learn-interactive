@@ -7,6 +7,7 @@ import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { useSRSContext } from '../contexts/SRSContext';
 import { useToastContext } from '../contexts/ToastContext';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
+import SoundItOutModal from './SoundItOutModal';
 import { useUpgrade } from '../hooks/useUpgrade';
 
 const TYPE_LABEL: Record<WordType, string> = {
@@ -86,10 +87,11 @@ interface DefPanelProps {
   token: string;
   isPremium: boolean;
   onSRS: () => void;
+  onSoundItOut: () => void;
   onClose: () => void;
 }
 
-const DefPanel: React.FC<DefPanelProps> = ({ word, token, isPremium, onSRS, onClose }) => {
+const DefPanel: React.FC<DefPanelProps> = ({ word, token, isPremium, onSRS, onSoundItOut, onClose }) => {
   const { startUpgrade } = useUpgrade();
   if (!word) return null;
   return (
@@ -108,6 +110,14 @@ const DefPanel: React.FC<DefPanelProps> = ({ word, token, isPremium, onSRS, onCl
           <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{word.english}</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={onSoundItOut}
+            title="Sound it out — syllable by syllable"
+            aria-label={`Sound out ${word.korean}`}
+            className="p-1.5 rounded-lg text-gray-400 hover:text-[#E4572E] hover:bg-[#FDEEE6] dark:hover:bg-[#5F2010]/20 transition-colors text-base"
+          >
+            🔊
+          </button>
           {isPremium ? (
             <button
               onClick={onSRS}
@@ -154,6 +164,7 @@ interface ReaderProps {
 const PassageReader: React.FC<ReaderProps> = ({ passage, isPremium, isAuthenticated, onBack, onMarkRead, isRead }) => {
   const [selectedToken, setSelectedToken] = useState<string | null>(null);
   const [tappedCount, setTappedCount] = useState(0);
+  const [soundOut, setSoundOut] = useState<ReadingWord | null>(null);
   const { decks, actions: srsActions } = useSRSContext();
   const { showToast } = useToastContext();
 
@@ -274,9 +285,20 @@ const PassageReader: React.FC<ReaderProps> = ({ passage, isPremium, isAuthentica
           token={selectedToken ?? ''}
           isPremium={isPremium}
           onSRS={handleAddSRS}
+          onSoundItOut={() => setSoundOut(selectedWord)}
           onClose={() => setSelectedToken(null)}
         />
       </div>
+
+      {/* Sound-it-out (syllable player) modal */}
+      {soundOut && (
+        <SoundItOutModal
+          korean={soundOut.korean}
+          english={soundOut.english}
+          romanization={soundOut.romanization}
+          onClose={() => setSoundOut(null)}
+        />
+      )}
     </div>
   );
 };
