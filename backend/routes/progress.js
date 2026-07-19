@@ -240,4 +240,180 @@ router.get('/stats', authenticateToken, async (req, res) => {
   }
 });
 
+// ── Gamification (XP, streak, study heatmap) ─────────────────────────────────
+// These used to live in localStorage only, so the numbers followed the browser
+// instead of the account. The DB is now the source of truth; the client keeps a
+// localStorage mirror purely for instant UI and guest mode.
+
+const MAX_STUDY_DATES = 180;   // ~6 months — matches the dashboard heatmap
+const MAX_XP_PER_CALL = 500;   // sanity bound on a single award
+
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+// Shift a 'YYYY-MM-DD' string by whole days. Uses UTC internally so the
+// arithmetic never drifts, while the string itself stays the user's local day.
+function shiftDay(iso, delta) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + delta);
+  return dt.toISOString().slice(0, 10);
+}
+
+// Current streak = consecutive days ending today (or yesterday — the day isn't
+// lost until it's actually missed, so an evening study session still counts).
+function computeCurrentStreak(dates, today) {
+  const set = new Set(dates);
+  let cursor = today;
+  if (!set.has(cursor)) {
+    cursor = shiftDay(today, -1);
+    if (!set.has(cursor)) return 0;
+  }
+  let n = 0;
+  while (set.has(cursor)) { n++; cursor = shiftDay(cursor, -1); }
+  return n;
+}
+
+// Longest run anywhere in the history — recomputed from the merged dates so a
+// second device's history can extend a streak retroactively.
+function computeLongestStreak(dates) {
+  const sorted = [...new Set(dates)].sort();
+  let best = 0, run = 0, prev = null;
+  for (const day of sorted) {
+    run = prev && shiftDay(prev, 1) === day ? run + 1 : 1;
+    if (run > best) best = run;
+    prev = day;
+  }
+  return best;
+}
+
+function normaliseDates(list) {
+  return [...new Set((list || []).filter(d => typeof d === 'string' && ISO_DAY.test(d)))]
+    .sort()
+    .slice(-MAX_STUDY_DATES);
+}
+
+function shape(g) {
+  return {
+    xp: g.xp || 0,
+    currentStreak: g.currentStreak || 0,
+    longestStreak: g.longestStreak || 0,
+    lastStudyDate: g.lastStudyDate || '',
+    studyDates: g.studyDates || [],
+    achievements: g.achievements || []
+  };
+}
+
+// @route   GET /api/progress/gamification
+// @desc    Read the account's XP / streak / heatmap
+// @access  Private
+router.get('/gamification', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('gamification');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(shape(user.gamification || {}));
+  } catch (error) {
+    console.error('Error fetching gamification:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   POST /api/progress/gamification/merge
+// @desc    Reconcile this device's local values with the account (login / app open)
+// @access  Private
+// Merge-up, never overwrite: XP takes the higher value and study dates are
+// UNIONED, so a device whose localStorage is empty can't wipe the account, and a
+// device holding pre-sync history donates it instead of losing it.
+router.post('/gamification/merge', authenticateToken, async (req, res) => {
+  try {
+    const { xp, studyDates, achievements, today } = req.body || {};
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const g = user.gamification || {};
+    const day = ISO_DAY.test(today || '') ? today : new Date().toISOString().slice(0, 10);
+
+    const localXp = Number.isFinite(xp) && xp > 0 ? Math.floor(xp) : 0;
+    const mergedDates = normaliseDates([...(g.studyDates || []), ...(studyDates || [])]);
+
+    user.gamification = {
+      xp: Math.max(g.xp || 0, localXp),
+      studyDates: mergedDates,
+      currentStreak: computeCurrentStreak(mergedDates, day),
+      longestStreak: computeLongestStreak(mergedDates),
+      lastStudyDate: mergedDates[mergedDates.length - 1] || '',
+      achievements: [...new Set([...(g.achievements || []), ...(achievements || []).filter(a => typeof a === 'string')])]
+    };
+
+    await user.save();
+    res.json(shape(user.gamification));
+  } catch (error) {
+    console.error('Error merging gamification:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   POST /api/progress/gamification/xp
+// @desc    Award XP atomically
+// @access  Private
+// $inc rather than a write of the whole total, so two devices earning at once
+// can't clobber each other's award.
+router.post('/gamification/xp', authenticateToken, async (req, res) => {
+  try {
+    const raw = Number(req.body?.amount);
+    if (!Number.isFinite(raw) || raw <= 0) {
+      return res.status(400).json({ message: 'A positive amount is required' });
+    }
+    const amount = Math.min(Math.floor(raw), MAX_XP_PER_CALL);
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { $inc: { 'gamification.xp': amount } },
+      { new: true, select: 'gamification' }
+    );
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(shape(user.gamification));
+  } catch (error) {
+    console.error('Error awarding XP:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   POST /api/progress/gamification/study-day
+// @desc    Mark today as studied and recompute the streak server-side
+// @access  Private
+// `today` comes from the client because the day boundary that matters is the
+// user's own — the server runs in UTC and would roll over at the wrong moment.
+router.post('/gamification/study-day', authenticateToken, async (req, res) => {
+  try {
+    const { today } = req.body || {};
+    if (!ISO_DAY.test(today || '')) {
+      return res.status(400).json({ message: 'today must be YYYY-MM-DD' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const g = user.gamification || {};
+    const alreadyCounted = (g.studyDates || []).includes(today);
+    const dates = normaliseDates([...(g.studyDates || []), today]);
+
+    user.gamification = {
+      ...shape(g),
+      studyDates: dates,
+      currentStreak: computeCurrentStreak(dates, today),
+      longestStreak: computeLongestStreak(dates),
+      lastStudyDate: today
+    };
+
+    await user.save();
+    res.json({ ...shape(user.gamification), firstToday: !alreadyCounted });
+  } catch (error) {
+    console.error('Error marking study day:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;
+
+// Exposed for unit testing the streak maths without standing up Mongo/auth.
+module.exports._streak = { shiftDay, computeCurrentStreak, computeLongestStreak, normaliseDates };

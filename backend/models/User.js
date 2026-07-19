@@ -80,6 +80,41 @@ const userSchema = new mongoose.Schema({
     }
   },
   
+  // Cross-device gamification — the authoritative store for XP, streak and the
+  // study heatmap. The client mirrors this into localStorage for instant UI, but
+  // this is the source of truth so the numbers follow the account, not the browser.
+  // NOTE: deliberately separate from `progress.xp`, which calculateStats()
+  // recomputes from lesson counts on every save and would clobber real XP.
+  gamification: {
+    xp: {
+      type: Number,
+      default: 0
+    },
+    currentStreak: {
+      type: Number,
+      default: 0
+    },
+    longestStreak: {
+      type: Number,
+      default: 0
+    },
+    // 'YYYY-MM-DD' as observed in the user's own timezone — stored as a plain
+    // string so a traveller's day boundary doesn't shift under them.
+    lastStudyDate: {
+      type: String,
+      default: ''
+    },
+    // Rolling ~180 days of study days; feeds the dashboard heatmap.
+    studyDates: {
+      type: [String],
+      default: []
+    },
+    achievements: {
+      type: [String],
+      default: []
+    }
+  },
+
   // Learning progress
   progress: {
     level: {

@@ -257,6 +257,45 @@ class ApiClient {
       joinedDate: string;
     }>('/progress/stats');
   }
+
+  // ── Gamification: XP, streak and the study heatmap ────────────────────────
+  // Account-scoped, so the numbers follow the user across devices rather than
+  // living in one browser's localStorage.
+
+  async getGamification() {
+    return this.request<Gamification>('/progress/gamification');
+  }
+
+  /** Reconcile this device's local values with the account (merge-up, never overwrite). */
+  async mergeGamification(local: { xp: number; studyDates: string[]; today: string }) {
+    return this.request<Gamification>('/progress/gamification/merge', {
+      method: 'POST',
+      body: JSON.stringify(local),
+    });
+  }
+
+  async awardXP(amount: number) {
+    return this.request<Gamification>('/progress/gamification/xp', {
+      method: 'POST',
+      body: JSON.stringify({ amount }),
+    });
+  }
+
+  async markStudyDay(today: string) {
+    return this.request<Gamification & { firstToday: boolean }>('/progress/gamification/study-day', {
+      method: 'POST',
+      body: JSON.stringify({ today }),
+    });
+  }
+}
+
+export interface Gamification {
+  xp: number;
+  currentStreak: number;
+  longestStreak: number;
+  lastStudyDate: string;
+  studyDates: string[];
+  achievements: string[];
 }
 
 // Daily guided session shape shared with the backend DailySession model.

@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { apiClient, User } from '../services/apiClient';
+import { clearLocalGamification } from '../utils/xpStreak';
 
 // Auth context
 interface AuthState {
@@ -241,6 +242,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     
     apiClient.setToken(null);
+    // Drop the XP/streak mirror so the next person to sign in on this browser
+    // doesn't inherit — or merge up — the previous user's numbers.
+    clearLocalGamification();
     dispatch({ type: AUTH_ACTIONS.LOGOUT });
   };
 

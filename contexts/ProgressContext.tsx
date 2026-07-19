@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { progressService } from '../services/progressService';
 import { useToastContext } from './ToastContext';
-import { markStudyToday } from '../utils/xpStreak';
+import { markStudyToday, syncGamification, earnXP } from '../utils/xpStreak';
+import { xpForProgressKey } from '../utils/xpAwards';
 
 interface ProgressContextType {
   progress: { [key: string]: boolean };
@@ -68,7 +69,12 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const loadProgressFromServer = async () => {
     if (!isAuthenticated) return;
-    
+
+    // XP / streak / heatmap live on the account too. Merge-up rather than
+    // fetch-and-replace so this device's pre-sync localStorage is donated to
+    // the account instead of being overwritten by it.
+    syncGamification();
+
     setIsLoading(true);
     try {
       const serverData = await progressService.safeProgressCall(
@@ -129,9 +135,24 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const updateProgress = async (key: string, value: boolean) => {
     console.log(`🎯 Frontend: Updating ${key} = ${value}`);
 
-    // Mark streak only — XP is awarded by each section directly with appropriate amounts
     if (value) {
       markStudyToday();
+    }
+
+    // Award XP for finishing a piece of content. This used to be left entirely
+    // to each section, and five of them (Hangul, Vocabulary, Grammar, Phrases,
+    // Culture) never did it — so completing all of Hangul earned nothing.
+    // Awarding at this choke point covers every section, including future ones.
+    //
+    // The mirror is read rather than React state so the not-done → done test is
+    // synchronous and exact: it can't double-pay under StrictMode's double
+    // invoke, and re-marking something already finished pays nothing.
+    let stored: { [key: string]: boolean } = {};
+    try { stored = JSON.parse(localStorage.getItem('k-learn-progress') || '{}'); } catch { /* fall through */ }
+
+    if (value && !stored[key]) {
+      const amount = xpForProgressKey(key);
+      if (amount > 0) earnXP(amount);
     }
 
     // Update local state immediately for responsive UI
