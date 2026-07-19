@@ -495,17 +495,10 @@ export default function Dashboard({
           />
         </div>
 
-        {/* ── Learning Path (with per-step progress bars) ── */}
+        {/* ── Learning Path (lesson-sized units; derives its own progress) ── */}
         <LearningPath
-          currentSection={
-            (['hangul', 'vocabulary', 'phrases', 'grammar', 'culture', 'quiz'] as Section[])
-              .filter(id => !(skipHangul && id === 'hangul'))
-              .find(id => !progress[`section_${id}`]) ?? 'quiz'
-          }
           setActiveSection={setActiveSection}
           progress={progress}
-          getSectionTotalItems={getSectionTotalItems}
-          getSectionCompletedItems={getSectionCompletedItems}
           assumeDone={skipHangul ? ['hangul'] : undefined}
         />
 
