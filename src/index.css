@@ -107,6 +107,28 @@
     conic-gradient(from var(--border-angle), #E4572E, #D9A441, #3F8571, #2F5D8A, #8E3B54, #E4572E) border-box;
 }
 
+/* Scroll reveal — sections rise slightly into place as they're reached. Kept to
+   a short distance and a single pass: the point is that the page feels alive,
+   not that it performs. */
+.kl-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 620ms ease-out, transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.kl-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Content must never depend on motion to become readable. */
+  .kl-reveal, .kl-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* Celebration pieces. Both are decorative and must never intercept a tap, so
    the confetti is pointer-events-none at the source rather than relying on the
    host to remember. */

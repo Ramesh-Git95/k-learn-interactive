@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthModal } from '../contexts/AuthModalContext';
 import { hangulCharacters } from '../data/koreanData';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 
 interface LandingPageProps {
@@ -269,6 +270,7 @@ const FadeIn: React.FC<{
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function LandingPage({ onGetStarted }: LandingPageProps) {
+  useScrollReveal();
   const { user } = useAuth();
   const [loaded, setLoaded] = useState(false);
   const [showAllFeatures, setShowAllFeatures] = useState(false);
@@ -539,7 +541,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       </div>
 
       {/* ── STATS ────────────────────────────────────────────────── */}
-      <section className="py-14 bg-gray-50 dark:bg-gray-900/60">
+      <section className="kl-reveal py-14 bg-gray-50 dark:bg-gray-900/60">
         <div className="max-w-4xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
             { n: 1000, suf: '+', label: 'Korean Words' },
@@ -558,7 +560,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* ── FREE PREVIEW ──────────────────────────────────────────── */}
-      <section className="py-20 px-4 bg-white dark:bg-gray-950">
+      <section className="kl-reveal py-20 px-4 bg-white dark:bg-gray-950">
         <div className="max-w-5xl mx-auto">
           <FadeIn>
             <div className="text-center mb-12">
@@ -598,7 +600,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* ── FEATURES ─────────────────────────────────────────────── */}
-      <section className="py-20 px-4 bg-gray-50 dark:bg-gray-900/60">
+      <section className="kl-reveal py-20 px-4 bg-gray-50 dark:bg-gray-900/60">
         <div className="max-w-6xl mx-auto">
           <FadeIn>
             <div className="text-center mb-12">
@@ -650,7 +652,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
-      <section className="py-20 px-4 bg-white dark:bg-gray-950">
+      <section className="kl-reveal py-20 px-4 bg-white dark:bg-gray-950">
         <div className="max-w-4xl mx-auto">
           <FadeIn>
             <div className="text-center mb-12">
@@ -676,7 +678,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* ── FOUNDER'S NOTE ───────────────────────────────────────── */}
-      <section className="py-20 px-4 bg-gray-50 dark:bg-gray-900/60">
+      <section className="kl-reveal py-20 px-4 bg-gray-50 dark:bg-gray-900/60">
         <div className="max-w-3xl mx-auto">
           <FadeIn>
             <div className="text-center mb-10">
@@ -721,7 +723,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* ── PRICING ──────────────────────────────────────────────── */}
-      <section id="pricing" className="py-20 px-4 bg-white dark:bg-gray-950" style={{ scrollMarginTop: '80px' }}>
+      <section id="pricing" className="kl-reveal py-20 px-4 bg-white dark:bg-gray-950" style={{ scrollMarginTop: '80px' }}>
         <div className="max-w-5xl mx-auto">
           <FadeIn>
             <div className="text-center mb-12">
@@ -836,7 +838,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* ── FAQ ──────────────────────────────────────────────────── */}
-      <section className="py-20 px-4 bg-gray-50 dark:bg-gray-900/60">
+      <section className="kl-reveal py-20 px-4 bg-gray-50 dark:bg-gray-900/60">
         <div className="max-w-3xl mx-auto">
           <FadeIn>
             <div className="text-center mb-12">
@@ -856,7 +858,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* ── FINAL CTA ────────────────────────────────────────────── */}
-      <section className="py-24 px-4 relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#0D141F 0%,#16202F 55%,#1E3A5C 100%)' }}>
+      <section className="kl-reveal py-24 px-4 relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#0D141F 0%,#16202F 55%,#1E3A5C 100%)' }}>
         <div className="absolute top-0 left-0 w-80 h-80 opacity-10 blob" style={{ background: '#E4572E', filter: 'blur(80px)' }} />
         <div className="absolute bottom-0 right-0 w-80 h-80 opacity-10 blob" style={{ background: '#3F8571', filter: 'blur(80px)', animationDelay: '4s' }} />
 
