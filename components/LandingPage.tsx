@@ -322,10 +322,14 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
 
       {/* ── HERO ──────────────────────────────────────────────────── */}
       <section className="relative min-h-[85vh] flex flex-col items-center justify-center px-4 pt-10 sm:pt-14 pb-16 overflow-hidden">
-        {/* Background blobs */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 opacity-40 dark:opacity-20 blob" style={{ background: '#F4D8C8', filter: 'blur(60px)' }} />
-        <div className="absolute top-1/3 -right-24 w-80 h-80 opacity-30 dark:opacity-15 blob" style={{ background: '#D8E6DE', filter: 'blur(50px)', animationDelay: '3s' }} />
-        <div className="absolute -bottom-24 left-1/3 w-72 h-72 opacity-25 dark:opacity-10 blob" style={{ background: '#F0E2C4', filter: 'blur(50px)', animationDelay: '5s' }} />
+        {/* Background blobs — desktop only.
+            Their size and placement assume the wide two-column hero: at lg+ they
+            sit out in the margins. On a tall narrow phone the same offsets land
+            them in the middle of the content, where the pale mint one reads as a
+            stray bright glow beside the buttons rather than as atmosphere. */}
+        <div className="hidden lg:block absolute -top-32 -left-32 w-96 h-96 opacity-40 dark:opacity-20 blob" style={{ background: '#F4D8C8', filter: 'blur(60px)' }} />
+        <div className="hidden lg:block absolute top-1/3 -right-24 w-80 h-80 opacity-30 dark:opacity-15 blob" style={{ background: '#D8E6DE', filter: 'blur(50px)', animationDelay: '3s' }} />
+        <div className="hidden lg:block absolute -bottom-24 left-1/3 w-72 h-72 opacity-25 dark:opacity-10 blob" style={{ background: '#F0E2C4', filter: 'blur(50px)', animationDelay: '5s' }} />
 
         {/* Floating characters */}
         {[
@@ -352,10 +356,24 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             {/* ── Left — copy ── */}
             <div className={`text-center lg:text-left ${loaded ? 'kl-hero-left' : 'opacity-0'}`}>
               {/* Badge */}
-              <div className="inline-flex items-center rounded-full px-5 py-2 mb-8 border overflow-hidden" style={{ background: 'rgba(228,87,46,0.08)', borderColor: 'rgba(228,87,46,0.30)' }}>
-                <span key={badgeIdx} className="animate-fadeIn text-sm font-semibold text-pink-600 dark:text-pink-400 whitespace-nowrap">
-                  {HERO_BADGES[badgeIdx]}
-                </span>
+              {/* All three badges occupy the same grid cell, so the pill is
+                  sized by the largest one and never resizes as they rotate.
+                  Previously only the active line was rendered, with nowrap — the
+                  lines differ in length, so the pill changed width every 3.8s.
+                  On mobile the hero is centred, so both edges moved at once and
+                  the whole column visibly jumped. */}
+              <div className="inline-grid max-w-full items-center rounded-full px-5 py-2 mb-8 border overflow-hidden" style={{ background: 'rgba(228,87,46,0.08)', borderColor: 'rgba(228,87,46,0.30)' }}>
+                {HERO_BADGES.map((badge, i) => (
+                  <span
+                    key={i}
+                    aria-hidden={i !== badgeIdx}
+                    className={`col-start-1 row-start-1 text-sm font-semibold text-pink-600 dark:text-pink-400 transition-opacity duration-500 ${
+                      i === badgeIdx ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    {badge}
+                  </span>
+                ))}
               </div>
 
               {/* Headline */}
