@@ -59,6 +59,22 @@ const PHRASE_GROUPS: { title: string; subtitle: string; contexts: string[] }[] =
   { title: 'Saying how you feel', subtitle: 'Feelings and help',    contexts: ['Feelings', 'Communication', 'Emergency'] },
 ];
 
+// ── Grammar ──────────────────────────────────────────────────────────────────
+// What each pattern lets you DO, in plain English. "Grammar 2" tells a beginner
+// nothing; "Talking about the past" tells them why they'd open it. Keyed by the
+// pattern string rather than by position, so reordering or inserting patterns
+// keeps every name attached to the right one — anything unnamed simply falls
+// back to the pattern itself.
+const GRAMMAR_TOPIC: Record<string, string> = {
+  'A은/는 B입니다':               'Saying what something is',
+  'A이/가 B에 있습니다/없습니다':  'Saying where something is',
+  'Verb-았/었어요':               'Talking about the past',
+  'Verb-(으)ㄹ 거예요':           'Talking about the future',
+  'Object을/를':                  'Marking the object',
+  '안 + Verb/Adjective':          'Saying no',
+  'Verb-고 싶어요':               'Saying what you want',
+};
+
 function chunk<T>(items: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
@@ -123,11 +139,15 @@ export function buildLearningUnits(): LearningUnit[] {
   });
 
   chunk(grammarPatterns.map((_, i) => i), 2).forEach((indices, i) => {
+    const patterns = indices.map(idx => grammarPatterns[idx].pattern);
+    const topics = patterns.map(p => GRAMMAR_TOPIC[p] ?? p);
     units.push({
       id: `grammar-${i + 1}`,
       section: 'grammar' as Section,
-      title: `Grammar ${i + 1}`,
-      subtitle: indices.map(idx => grammarPatterns[idx].pattern).join(' · '),
+      title: topics.length > 1 ? `${topics[0]} & more` : topics[0],
+      // The patterns themselves become the subtitle: the title says what you can
+      // do with it, the subtitle shows the shape you'll actually be writing.
+      subtitle: patterns.join(' · '),
       itemKeys: indices.map(idx => `grammar_pattern_${idx}`),
       estMinutes: estimate(indices.length * 4), // patterns take longer than words
     });

@@ -150,7 +150,7 @@ class EmailService {
               <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}" class="button">🚀 Start Learning Now</a>
             </div>
             <div class="feature-box"><h4>📝 Master Hangul</h4><p>Learn to read and write Korean characters.</p></div>
-            <div class="feature-box"><h4>📚 Build Vocabulary</h4><p>1000+ words with AI-powered examples.</p></div>
+            <div class="feature-box"><h4>📚 Build Vocabulary</h4><p>Essential words across 10 categories, with AI-powered examples.</p></div>
             <div class="feature-box"><h4>🧠 Spaced Repetition</h4><p>Never forget what you've learned.</p></div>
             <div class="feature-box"><h4>🗣️ AI Conversations</h4><p>Practice real Korean conversations.</p></div>
             <p style="text-align:center"><em>화이팅! (Fighting! - You can do it!)</em></p>

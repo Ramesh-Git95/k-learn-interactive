@@ -4,6 +4,8 @@ import { apiClient, DailySessionData, DailySessionStep } from '../services/apiCl
 import { todayISO } from '../utils/xpStreak';
 import { canSkipHangul } from '../utils/topikEstimate';
 import { useXPStreak } from '../hooks/useXPStreak';
+import { useProgress } from '../contexts/ProgressContext';
+import { getNextUnit } from '../utils/learningUnits';
 import type { SRSDeck } from '../services/spacedRepetition';
 
 // "Today's Session" — a guided ~15-minute daily plan, persisted server-side
@@ -14,18 +16,9 @@ import type { SRSDeck } from '../services/spacedRepetition';
 // Composition is STAGE-AWARE:
 //  - Newbie (level 1, less than half of Hangul done): a gentle no-Korean-
 //    required plan — Hangul characters, culture tips (English), first phrases.
-//  - Standard: review due SRS cards → learn in the current path section → quiz.
+//  - Standard: review due SRS cards → finish the next lesson-sized unit → quiz.
 
 const REVIEW_GOAL = 5; // due-card reduction that completes the review step
-
-// Path order for picking the standard "learn" step.
-const PATH: { id: Section; name: string }[] = [
-  { id: 'hangul',     name: 'Hangul' },
-  { id: 'vocabulary', name: 'Vocabulary' },
-  { id: 'grammar',    name: 'Grammar' },
-  { id: 'phrases',    name: 'Phrases' },
-  { id: 'culture',    name: 'Culture' },
-];
 
 const STEP_ICONS: Record<DailySessionStep['id'], string> = { srs: '🧠', learn: '📖', quiz: '✍️' };
 
@@ -48,6 +41,9 @@ export default function TodaysSession({
   const [quizzesToday, setQuizzesToday] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const xp = useXPStreak();
+  // Read inside the composer only — the session is composed once per day, so a
+  // later progress change must not recompose and move the goalposts mid-session.
+  const { progress } = useProgress();
 
   const date = todayISO();
 
@@ -128,12 +124,20 @@ export default function TodaysSession({
             baseline: srsDue, goal: Math.min(srsDue, REVIEW_GOAL), done: false, doneAt: null,
           });
         }
-        const next = PATH.find(s => {
-          if (skipHangul && s.id === 'hangul') return false;
-          const total = getSectionTotalItems(s.id);
-          return total > 0 && getSectionCompletedItems(s.id) < total;
-        });
-        if (next) steps.push(learnStepFor(next.id, 3, `Learn 3 new in ${next.name}`));
+        // Target the next lesson-sized UNIT rather than a whole section.
+        // "Finish Aspirated sounds · 3 left" is a thing you can actually picture
+        // completing; "Learn 3 new in Hangul" points at a section that takes
+        // hours. Completion is still measured against the section's item count,
+        // which rises as the unit's own items are finished.
+        const nextUnit = getNextUnit(progress, skipHangul ? ['hangul'] : []);
+        if (nextUnit) {
+          const remaining = nextUnit.total - nextUnit.completed;
+          const goal = Math.min(remaining, 5);
+          const label = goal >= remaining
+            ? `Finish ${nextUnit.unit.title}`
+            : `Learn ${goal} more in ${nextUnit.unit.title}`;
+          steps.push(learnStepFor(nextUnit.unit.section, goal, label));
+        }
         steps.push({ id: 'quiz', target: 'quiz', label: 'Take one quick quiz', baseline: quizzes, goal: 1, done: false, doneAt: null });
       }
 

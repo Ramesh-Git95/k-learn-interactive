@@ -373,7 +373,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
               </p>
               <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-4 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                 The only Korean learning app built for K-drama fans.
-                AI conversations, 1,000+ words, real grammar — not tourist phrases.
+                AI conversations, 800+ words &amp; phrases, real grammar — not tourist phrases.
               </p>
               <p className="text-sm sm:text-base font-black mb-8 max-w-lg mx-auto lg:mx-0" style={{ color: 'var(--kl-celadon)' }}>
                 Just $4/month. Cancel anytime. Less than a coffee ☕
@@ -507,7 +507,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
           </FadeIn>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { section: 'vocabulary' as const, emoji: '📖', title: 'Vocabulary', desc: '39 free words across 3 categories · 1,000+ with Premium. Click to hear native pronunciation.', gradient: 'from-[#E4572E] to-[#C13F22]' },
+              { section: 'vocabulary' as const, emoji: '📖', title: 'Vocabulary', desc: '39 free words across 3 categories · all 94 with Premium. Click to hear native pronunciation.', gradient: 'from-[#E4572E] to-[#C13F22]' },
               { section: 'grammar'    as const, emoji: '✏️', title: 'Grammar',    desc: 'Sentence patterns from particles to verb endings',    gradient: 'from-[#3F8571] to-[#2E6B59]' },
               { section: 'culture'   as const, emoji: '🎌', title: 'Culture',    desc: 'K-pop, K-drama, regions, customs & daily Korean life', gradient: 'from-[#D9A441] to-[#B8402F]' },
             ].map((item, i) => (
