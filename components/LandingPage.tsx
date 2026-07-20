@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useAuthModal } from '../contexts/AuthModalContext';
 import { hangulCharacters } from '../data/koreanData';
 import { useScrollReveal } from '../hooks/useScrollReveal';
+import HangulMixer from './HangulMixer';
 
 
 interface LandingPageProps {
@@ -122,84 +123,6 @@ const AnimatedCounter: React.FC<{ end: number; suffix?: string }> = ({ end, suff
   }, [started, end]);
 
   return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
-};
-
-// Live Hangul demo — pick 8 characters, let users click to hear
-const DEMO_CHARS = hangulCharacters.slice(0, 14).filter(c => c.type === 'consonant' || c.type === 'vowel').slice(0, 8);
-
-const HangulDemo: React.FC = () => {
-  const [active, setActive] = useState<number | null>(null);
-  const [played, setPlayed] = useState<Set<number>>(new Set());
-
-  const speak = (char: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(char);
-      u.lang = 'ko-KR'; u.rate = 0.75;
-      window.speechSynthesis.speak(u);
-    }
-  };
-
-  const handleClick = (i: number) => {
-    setActive(i);
-    speak(DEMO_CHARS[i].char);
-    setPlayed(p => new Set(p).add(i));
-  };
-
-  return (
-    <div className="bg-white/10 dark:bg-white/5 backdrop-blur-sm rounded-3xl p-6 border border-white/20 max-w-xl mx-auto">
-      <p className="text-white/70 text-sm text-center mb-4 font-medium">
-        👆 Click any character to hear its pronunciation
-      </p>
-      <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 mb-5">
-        {DEMO_CHARS.map((ch, i) => (
-          <button
-            key={ch.char}
-            onClick={() => handleClick(i)}
-            className={`relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 transition-all duration-200 border-2 ${
-              active === i
-                ? 'bg-white border-white scale-110 shadow-lg'
-                : played.has(i)
-                ? 'bg-white/20 border-white/40 hover:scale-105'
-                : 'bg-white/10 border-white/20 hover:bg-white/20 hover:scale-105'
-            }`}
-          >
-            <span
-              className={`text-xl sm:text-2xl font-black leading-none ${active === i ? 'text-pink-500' : 'text-white'}`}
-              style={{ fontFamily: 'Pretendard Variable, sans-serif' }}
-            >
-              {ch.char}
-            </span>
-            {played.has(i) && (
-              <span className={`text-[9px] mt-0.5 font-bold ${active === i ? 'text-violet-500' : 'text-white/60'}`}>
-                {ch.romanization}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {active !== null ? (
-        <div className="text-center bg-white/10 rounded-2xl p-4">
-          <span className="text-4xl font-black text-white" style={{ fontFamily: 'Pretendard Variable, sans-serif' }}>
-            {DEMO_CHARS[active].char}
-          </span>
-          <div className="text-white font-bold mt-1">
-            /{DEMO_CHARS[active].romanization}/
-          </div>
-          <div className="text-white/60 text-xs mt-0.5 capitalize">{DEMO_CHARS[active].type}</div>
-        </div>
-      ) : (
-        <div className="text-center text-white/40 text-sm py-2">
-          ← Select a character above
-        </div>
-      )}
-
-      <p className="text-center text-white/50 text-xs mt-4">
-        Full Hangul alphabet · 40 characters · mastered in &lt; 1 week
-      </p>
-    </div>
-  );
 };
 
 // FAQ Accordion
@@ -418,13 +341,16 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
           </div>
         ))}
 
-        <div className={`relative z-10 max-w-6xl mx-auto ${loaded ? 'fade-up' : 'opacity-0'}`}>
+        {/* The two halves gate themselves on `loaded` below, so this wrapper no
+            longer needs its own reveal — the class it used ("fade-up") was never
+            defined in CSS and did nothing. */}
+        <div className="relative z-10 max-w-6xl mx-auto">
           {/* Two-column hero: copy left, live product demo right (first viewport).
               Stacks to the original single-column order on mobile. */}
           <div className="grid lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-14 items-center">
 
             {/* ── Left — copy ── */}
-            <div className="text-center lg:text-left">
+            <div className={`text-center lg:text-left ${loaded ? 'kl-hero-left' : 'opacity-0'}`}>
               {/* Badge */}
               <div className="inline-flex items-center rounded-full px-5 py-2 mb-8 border overflow-hidden" style={{ background: 'rgba(228,87,46,0.08)', borderColor: 'rgba(228,87,46,0.30)' }}>
                 <span key={badgeIdx} className="animate-fadeIn text-sm font-semibold text-pink-600 dark:text-pink-400 whitespace-nowrap">
@@ -489,16 +415,17 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             </div>
 
             {/* ── Right — live Hangul demo (the product, above the fold) ── */}
+            {/* Entrance sits on its own wrapper: kl-border-glow already runs the
+                rotating conic border, and putting a second animation on that
+                same element would override animation-name and freeze the glow. */}
+            <div className={loaded ? 'kl-hero-right' : 'opacity-0'}>
             <div className="kl-border-glow rounded-3xl p-[2px] shadow-2xl">
             <div className="relative rounded-[22px] overflow-hidden" style={{ background: 'var(--brand-gradient-hero)' }}>
               <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 20%, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
               <div className="relative z-10 p-6 sm:p-8">
-                <div className="flex items-center justify-center gap-2 mb-5">
-                  <span className="text-2xl">🎮</span>
-                  <h3 className="text-white font-black text-lg sm:text-xl">Try Hangul Right Now</h3>
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/20 text-white">Interactive</span>
-                </div>
-                <HangulDemo />
+                {/* The mixer carries its own badge and heading, so the old
+                    "Try Hangul Right Now" row would just repeat it. */}
+                <HangulMixer />
                 <button
                   onClick={handleStart}
                   className="mt-5 mx-auto block bg-white text-pink-600 font-black text-sm px-6 py-2.5 rounded-xl hover:scale-[1.02] transition-transform"
@@ -506,6 +433,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                   Learn all 40 characters for free →
                 </button>
               </div>
+            </div>
             </div>
             </div>
 

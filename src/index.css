@@ -107,6 +107,71 @@
     conic-gradient(from var(--border-angle), #E4572E, #D9A441, #3F8571, #2F5D8A, #8E3B54, #E4572E) border-box;
 }
 
+/* ── Hero entrance ──────────────────────────────────────────────────────── */
+/* The two halves arrive toward each other: copy from the left, the interactive
+   demo from the right. Only on the wide layout — below 1024px the hero stacks
+   into one column, where a sideways slide reads as cramped drift rather than
+   composition, so those screens get a gentle rise instead. */
+@keyframes kl-hero-from-left  { from { opacity: 0; transform: translateX(-44px); } to { opacity: 1; transform: none; } }
+@keyframes kl-hero-from-right { from { opacity: 0; transform: translateX(44px);  } to { opacity: 1; transform: none; } }
+@keyframes kl-hero-rise       { from { opacity: 0; transform: translateY(22px);  } to { opacity: 1; transform: none; } }
+
+.kl-hero-left,
+.kl-hero-right {
+  /* `both` holds the start frame, so neither half flashes at full opacity
+     before its animation begins. */
+  animation-duration: 2000ms;
+  animation-timing-function: cubic-bezier(.22, 1, .36, 1);
+  animation-fill-mode: both;
+}
+.kl-hero-left  { animation-name: kl-hero-from-left; }
+/* A small stagger reads as composed rather than mechanical. */
+.kl-hero-right { animation-name: kl-hero-from-right; animation-delay: 120ms; }
+
+@media (max-width: 1023px) {
+  .kl-hero-left,
+  .kl-hero-right { animation-name: kl-hero-rise; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kl-hero-left,
+  .kl-hero-right { animation: none; opacity: 1; transform: none; }
+}
+
+/* ── Hangul syllable mixer (landing hero) ───────────────────────────────── */
+@keyframes kl-mix-spin { to { transform: rotate(360deg); } }
+@keyframes kl-mix-breathe { 0%, 100% { opacity: .45; transform: scale(1); } 50% { opacity: .85; transform: scale(1.06); } }
+@keyframes kl-mix-materialize {
+  0%   { transform: scale(.35) rotate(-22deg); opacity: 0; filter: blur(7px); }
+  60%  { transform: scale(1.12) rotate(4deg);  opacity: 1; filter: blur(0); }
+  100% { transform: scale(1) rotate(0deg);     opacity: 1; filter: blur(0); }
+}
+@keyframes kl-mix-burst {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--kl-tx), var(--kl-ty)) scale(.2); opacity: 0; }
+}
+@keyframes kl-mix-toast {
+  0%   { transform: translate(-50%, 6px) scale(.85); opacity: 0; }
+  18%  { transform: translate(-50%, 0) scale(1);     opacity: 1; }
+  82%  { opacity: 1; }
+  100% { transform: translate(-50%, -10px) scale(.95); opacity: 0; }
+}
+
+.kl-mix-ring       { animation: kl-mix-spin 7s linear infinite; }
+.kl-mix-idle       { animation: kl-mix-breathe 2.4s ease-in-out infinite; }
+.kl-mix-syllable   { animation: kl-mix-materialize .55s cubic-bezier(.3, 1.5, .4, 1) both; }
+.kl-mix-particle   { animation: kl-mix-burst .7s ease-out forwards; }
+.kl-mix-toast      { animation: kl-mix-toast 1.6s ease-out forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* The syllable itself must still appear — it's the answer to the user's
+     action. Only the decoration around it is dropped. */
+  .kl-mix-ring, .kl-mix-idle { animation: none; }
+  .kl-mix-particle { display: none; }
+  .kl-mix-syllable { animation: none; }
+  .kl-mix-toast { animation: none; transform: translate(-50%, 0); opacity: 1; }
+}
+
 /* Scroll reveal — sections rise slightly into place as they're reached. Kept to
    a short distance and a single pass: the point is that the page feels alive,
    not that it performs. */
