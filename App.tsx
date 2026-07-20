@@ -15,6 +15,7 @@ import { AppBootSkeleton } from './components/Skeleton';
 import ToastContainer from './components/ToastContainer';
 import EmailVerificationBanner from './components/EmailVerificationBanner';
 import PastDueBanner from './components/PastDueBanner';
+import CelebrationHost from './components/CelebrationHost';
 import Footer from './components/Footer';
 import CookieConsent from './components/CookieConsent';
 import GuestFreeBanner from './components/GuestFreeBanner';
@@ -666,9 +667,12 @@ const AppContent: React.FC = () => {
       }`}
       aria-label="Korean Learning Application"
     >
+    {/* Celebrations — listens app-wide, renders only while one is showing */}
+    <CelebrationHost />
+
     {/* Skip to main content link for screen readers */}
-    <a 
-      href="#main-content" 
+    <a
+      href="#main-content"
       className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-[#E4572E] text-white px-4 py-2 rounded-lg z-50 transition-all duration-200"
     >
       Skip to main content

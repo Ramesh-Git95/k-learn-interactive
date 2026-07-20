@@ -57,6 +57,20 @@
 @keyframes skeleton-wave { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 @keyframes border { to { --border-angle: 360deg; } }
 
+/* Celebrations — confetti falls and tumbles, the badge pops in with a slight
+   overshoot so it lands rather than just appearing. */
+@keyframes kl-confetti-fall {
+  0%   { transform: translateY(-12vh) rotate(0deg); opacity: 0; }
+  10%  { opacity: 1; }
+  100% { transform: translateY(105vh) rotate(var(--kl-spin, 360deg)); opacity: 0; }
+}
+@keyframes kl-celebrate-pop {
+  0%   { transform: scale(0.7); opacity: 0; }
+  55%  { transform: scale(1.06); opacity: 1; }
+  70%  { transform: scale(0.98); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 /* Registered angle so the conic gradient can animate smoothly */
 @property --border-angle {
   syntax: '<angle>';
@@ -93,9 +107,27 @@
     conic-gradient(from var(--border-angle), #E4572E, #D9A441, #3F8571, #2F5D8A, #8E3B54, #E4572E) border-box;
 }
 
+/* Celebration pieces. Both are decorative and must never intercept a tap, so
+   the confetti is pointer-events-none at the source rather than relying on the
+   host to remember. */
+.kl-confetti {
+  pointer-events: none;
+  animation-name: kl-confetti-fall;
+  animation-timing-function: cubic-bezier(0.4, 0.1, 0.6, 1);
+  animation-fill-mode: forwards;
+}
+
+.kl-celebrate-pop {
+  animation: kl-celebrate-pop 520ms cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .kl-border-glow,
   .kl-chip-glow { animation: none; }
+  /* A celebration should still be SEEN when motion is reduced — it carries
+     information — so it fades in place instead of flying and bouncing. */
+  .kl-confetti { display: none; }
+  .kl-celebrate-pop { animation: none; opacity: 1; transform: none; }
 }
 
 /* ── Base typography and font loading ───────────────────────────────────── */

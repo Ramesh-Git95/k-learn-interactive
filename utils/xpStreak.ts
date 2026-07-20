@@ -11,6 +11,7 @@
 // Components subscribe via custom DOM events: 'klearn-xp-updated', 'klearn-streak-updated'.
 
 import { apiClient, Gamification } from '../services/apiClient';
+import { celebrate, streakMilestoneFor } from './celebrate';
 
 const XP_KEY     = 'k-learn-xp';
 const STREAK_KEY = 'k-learn-streak';
@@ -138,7 +139,29 @@ export function clearLocalGamification(): void {
 
 export function earnXP(amount: number): void {
   if (amount === 0) return;
-  writeXP(getXPData().total + amount);            // optimistic — the UI moves now
+
+  const before = getXPData().total;
+  const after = before + amount;
+  writeXP(after);                                 // optimistic — the UI moves now
+
+  // Level-ups are detected here rather than in a component because EVERY award
+  // in the app funnels through this function, so one check covers all of them.
+  // Deliberately not in applyServer(): reconciliation can raise XP for reasons
+  // that aren't an achievement (a merge pulling in another device's history),
+  // and celebrating that would be a lie.
+  if (amount > 0) {
+    const from = getLevelInfo(before).level;
+    const to = getLevelInfo(after).level;
+    if (to > from) {
+      celebrate({
+        variant: 'level',
+        emoji: '⭐',
+        title: `Level ${to}!`,
+        subtitle: `${after.toLocaleString()} XP earned so far`,
+      });
+    }
+  }
+
   if (amount > 0 && isLoggedIn()) {
     reconcile(apiClient.awardXP(amount));         // server-side $inc is race-safe
   }
@@ -175,6 +198,16 @@ export function markStudyToday(): boolean {
   }
 
   writeStreak(streak);
+
+  const milestone = streakMilestoneFor(streak.currentStreak);
+  if (milestone) {
+    celebrate({
+      variant: 'streak',
+      emoji: '🔥',
+      title: `${milestone}-day streak!`,
+      subtitle: milestone >= 30 ? 'This is a real habit now.' : 'Come back tomorrow to keep it alive.',
+    });
+  }
 
   if (isLoggedIn()) {
     // The server owns the real streak maths — it can see history this device

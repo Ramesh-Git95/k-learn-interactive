@@ -7,6 +7,7 @@ import { scoreWriting, type WritingResult } from '../utils/strokeScoring';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { useUpgrade } from '../hooks/useUpgrade';
 import { useProgress } from '../contexts/ProgressContext';
+import { celebrate } from '../utils/celebrate';
 
 // Writing practice: watch the letter being written, then write it yourself and
 // have it marked.
@@ -80,6 +81,12 @@ const WritingSection: React.FC = () => {
     // tracing proves nothing on its own.
     if (r && r.score >= 72 && mode !== 'trace' && !learned(char)) {
       updateProgress(`writing_char_${char}`, true);
+      celebrate({
+        variant: 'letter',
+        emoji: char,
+        title: 'Letter learned!',
+        subtitle: info ? `${info.name} · ${info.nameRoman}` : char,
+      });
     }
   };
 

@@ -10,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useProgress } from '../contexts/ProgressContext';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
+import { celebrate } from '../utils/celebrate';
 import { QuizSkeleton } from './Skeleton';
 
 type QuizMode = 'korean_to_english' | 'english_to_korean' | 'romanization_to_korean' | 'mixed';
@@ -196,6 +197,15 @@ const QuizComponent: React.FC = () => {
     // +5 XP per correct answer, capped at 30 per session so spamming doesn't inflate level
     earnXP(Math.min(score * 5, 30));
     markStudyToday();
+
+    if (isPerfect && questions.length > 0) {
+      celebrate({
+        variant: 'perfect',
+        emoji: '💯',
+        title: 'Perfect score!',
+        subtitle: `${score}/${questions.length} — not a single one missed`,
+      });
+    }
 
     setQuizStats(prev => ({
       totalQuizzes: prev.totalQuizzes + 1,

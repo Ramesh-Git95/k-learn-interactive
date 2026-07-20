@@ -4,6 +4,8 @@ import { progressService } from '../services/progressService';
 import { useToastContext } from './ToastContext';
 import { markStudyToday, syncGamification, earnXP } from '../utils/xpStreak';
 import { xpForProgressKey } from '../utils/xpAwards';
+import { LEARNING_UNITS } from '../utils/learningUnits';
+import { celebrate } from '../utils/celebrate';
 
 interface ProgressContextType {
   progress: { [key: string]: boolean };
@@ -153,6 +155,19 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (value && !stored[key]) {
       const amount = xpForProgressKey(key);
       if (amount > 0) earnXP(amount);
+
+      // Finishing the last item of a unit is the moment worth marking — it's the
+      // smallest thing a learner can actually complete. Checked against the
+      // mirror plus this key, since React state hasn't caught up yet.
+      const unit = LEARNING_UNITS.find(u => u.itemKeys.includes(key));
+      if (unit && unit.itemKeys.every(k => k === key || stored[k])) {
+        celebrate({
+          variant: 'unit',
+          emoji: '✅',
+          title: 'Unit complete!',
+          subtitle: unit.title,
+        });
+      }
     }
 
     // Update local state immediately for responsive UI
