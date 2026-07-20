@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthModal } from '../contexts/AuthModalContext';
-import { hangulCharacters } from '../data/koreanData';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import HangulMixer from './HangulMixer';
 
@@ -43,7 +42,7 @@ const CORE_FEATURES = [
   { emoji: '🎭', title: 'Honorific Engine',      desc: 'Master 존댓말 vs 반말 — formal, polite, and casual forms side-by-side with cultural notes.', gradient: 'from-[#8E3B54] to-[#6E2C40]',    live: true  },
   { emoji: '⌨️', title: 'Typing Dojo',           desc: '60-second vocabulary race. Type as many Korean words as you can — track your WPM and accuracy.', gradient: 'from-[#2F5D8A] to-[#3F8571]',      live: true  },
   { emoji: '📋', title: 'TOPIK Prep',            desc: 'Official TOPIK I & II practice questions — vocabulary drills and reading comprehension.', gradient: 'from-[#D9A441] to-[#8E3B54]',   live: true  },
-  { emoji: '✍️', title: 'Stroke Canvas',         desc: 'Draw Hangul characters on a canvas and get real-time stroke-order feedback.', gradient: 'from-[#E4572E] to-[#8E3B54]',   live: false },
+  { emoji: '✍️', title: 'Stroke Canvas',         desc: 'Watch each letter being written, then draw it yourself and get instant stroke-order feedback.', gradient: 'from-[#E4572E] to-[#8E3B54]',   live: true  },
   { emoji: '🎬', title: 'K-Drama Shadowing',     desc: 'Listen to real drama lines, repeat them, and compare your pronunciation with AI.', gradient: 'from-[#B8402F] to-[#8E3B54]',       live: false },
 ];
 
@@ -82,7 +81,7 @@ const FAQ = [
   { q: 'Do I need any prior Korean knowledge?',          a: 'None at all. The Hangul module teaches the entire alphabet from scratch. Most learners can read Korean in under a week.' },
   { q: 'How long until I can have a real conversation?', a: 'With daily 20-minute sessions, most learners can handle basic conversations in 2–3 months. The AI tutor accelerates this significantly.' },
   { q: 'Is the payment secure?',                         a: 'Payment is processed securely by Stripe — the payments platform trusted by millions of businesses worldwide. You can cancel anytime from your profile.' },
-  { q: 'Will I get future features?',                    a: 'Yes — your Premium subscription includes everything we build. K-Drama Shadowing, Stroke Canvas, and more, at no extra charge.' },
+  { q: 'Will I get future features?',                    a: 'Yes — your Premium subscription includes everything we build. Stroke Canvas shipped recently at no extra charge, K-Drama Shadowing is next, and the same goes for everything after it.' },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
