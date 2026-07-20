@@ -107,6 +107,41 @@
     conic-gradient(from var(--border-angle), #E4572E, #D9A441, #3F8571, #2F5D8A, #8E3B54, #E4572E) border-box;
 }
 
+/* ── Cursor spotlight ───────────────────────────────────────────────────────
+   A soft light that follows the pointer across a card. The position comes from
+   --kl-spot-x/y, set on pointermove, and the tint from --kl-spot-color so each
+   feature can glow in its own brand colour.
+
+   Gated behind `hover: hover` so touch devices — where :hover sticks after a tap
+   and would leave a light stranded mid-card — never see it. */
+.kl-spotlight { position: relative; }
+.kl-spotlight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 320ms ease;
+  background: radial-gradient(
+    380px circle at var(--kl-spot-x, 50%) var(--kl-spot-y, 50%),
+    var(--kl-spot-color, rgba(228, 87, 46, 0.18)),
+    transparent 70%
+  );
+}
+/* Dark mode needs a stronger tint to read at all: the same alpha that looks
+   like a glow over near-white looks like nothing over near-black. */
+.dark .kl-spotlight::before {
+  background: radial-gradient(
+    380px circle at var(--kl-spot-x, 50%) var(--kl-spot-y, 50%),
+    var(--kl-spot-color-dark, rgba(228, 87, 46, 0.30)),
+    transparent 70%
+  );
+}
+@media (hover: hover) {
+  .kl-spotlight:hover::before { opacity: 1; }
+}
+
 /* ── Hero entrance ──────────────────────────────────────────────────────── */
 /* The two halves arrive toward each other: copy from the left, the interactive
    demo from the right. Only on the wide layout — below 1024px the hero stacks

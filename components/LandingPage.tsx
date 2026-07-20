@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useAuthModal } from '../contexts/AuthModalContext';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import HangulMixer from './HangulMixer';
+import FeatureShowcase from './FeatureShowcase';
 
 
 interface LandingPageProps {
@@ -33,18 +34,6 @@ const HERO_BADGES = [
   '☕ Just $4/month · less than a coffee',
 ];
 
-const CORE_FEATURES = [
-  { emoji: '가',  title: 'Hangul Mastery',       desc: 'Every consonant, vowel & syllable block — interactive drills with pronunciation audio.', gradient: 'from-[#E4572E] to-[#C13F22]',    live: true  },
-  { emoji: '📖', title: 'Vocabulary Builder',    desc: '1,000+ essential words across 10 categories. Click to hear native pronunciation.', gradient: 'from-[#3F8571] to-[#2E6B59]',  live: true  },
-  { emoji: '✏️', title: 'Grammar Patterns',      desc: 'Sentence structure from particles to verb endings — beginner to advanced.', gradient: 'from-[#D9A441] to-[#C08A2D]',    live: true  },
-  { emoji: '🧠', title: 'Spaced Repetition',     desc: 'SM-2 algorithm schedules every review at exactly the right moment. Build decks in seconds with Quick Import.', gradient: 'from-[#2F5D8A] to-[#24476B]',    live: true  },
-  { emoji: '🤖', title: 'AI Conversation',       desc: 'Chat with a Gemini-powered AI tutor that adapts to your level and corrects your Korean naturally.', gradient: 'from-[#3F8571] to-[#2F5D8A]',   live: true  },
-  { emoji: '🎭', title: 'Honorific Engine',      desc: 'Master 존댓말 vs 반말 — formal, polite, and casual forms side-by-side with cultural notes.', gradient: 'from-[#8E3B54] to-[#6E2C40]',    live: true  },
-  { emoji: '⌨️', title: 'Typing Dojo',           desc: '60-second vocabulary race. Type as many Korean words as you can — track your WPM and accuracy.', gradient: 'from-[#2F5D8A] to-[#3F8571]',      live: true  },
-  { emoji: '📋', title: 'TOPIK Prep',            desc: 'Official TOPIK I & II practice questions — vocabulary drills and reading comprehension.', gradient: 'from-[#D9A441] to-[#8E3B54]',   live: true  },
-  { emoji: '✍️', title: 'Stroke Canvas',         desc: 'Watch each letter being written, then draw it yourself and get instant stroke-order feedback.', gradient: 'from-[#E4572E] to-[#8E3B54]',   live: true  },
-  { emoji: '🎬', title: 'K-Drama Shadowing',     desc: 'Listen to real drama lines, repeat them, and compare your pronunciation with AI.', gradient: 'from-[#B8402F] to-[#8E3B54]',       live: false },
-];
 
 const STEPS = [
   { n: '01', title: 'Build the Foundation',  desc: 'Start with Hangul in 30 minutes, then unlock vocabulary, grammar, and culture at your own pace.',                     color: '#E4572E' },
@@ -195,7 +184,6 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
   useScrollReveal();
   const { user } = useAuth();
   const [loaded, setLoaded] = useState(false);
-  const [showAllFeatures, setShowAllFeatures] = useState(false);
   const [badgeIdx, setBadgeIdx] = useState(0);
 
   // Cycle the hero badge lines every few seconds
@@ -223,7 +211,6 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
   const handleNavigate = (section: 'vocabulary' | 'grammar' | 'culture') =>
     window.dispatchEvent(new CustomEvent('navigate-to-section', { detail: section }));
 
-  const visibleFeatures = showAllFeatures ? CORE_FEATURES : CORE_FEATURES.slice(0, 6);
 
   return (
     <div className="kl-landing min-h-screen bg-white dark:bg-gray-950 overflow-hidden">
@@ -545,56 +532,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       </section>
 
       {/* ── FEATURES ─────────────────────────────────────────────── */}
-      <section className="kl-reveal py-20 px-4 bg-gray-50 dark:bg-gray-900/60">
-        <div className="max-w-6xl mx-auto">
-          <FadeIn>
-            <div className="text-center mb-12">
-              <span className="inline-block bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-4">
-                The Full Platform
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-gray-900 dark:text-white mb-4">
-                Everything You Need to <span className="gradient-text">Master Korean</span>
-              </h2>
-              <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto">
-                10 learning tools in one platform — 8 live now, 2 more releasing soon.
-              </p>
-            </div>
-          </FadeIn>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {visibleFeatures.map((f, i) => (
-              <FadeIn key={i} delay={i * 80}>
-              <div className="card-hover relative p-6 rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-                <div className={`absolute inset-0 bg-gradient-to-br ${f.gradient} opacity-[0.03] dark:opacity-[0.07]`} />
-                {!f.live && (
-                  <span className="absolute top-3 right-3 text-[10px] font-black px-2.5 py-1 rounded-full text-white" style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)' }}>
-                    Coming Soon
-                  </span>
-                )}
-                <div className="relative z-10">
-                  <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${f.gradient} flex items-center justify-center text-xl mb-4 shadow`} style={{ fontFamily: 'Pretendard Variable,sans-serif', fontWeight: 900 }}>
-                    {f.emoji}
-                  </div>
-                  <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2">{f.title}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{f.desc}</p>
-                </div>
-              </div>
-              </FadeIn>
-            ))}
-          </div>
-
-          {!showAllFeatures && (
-            <div className="text-center mt-8">
-              <button
-                onClick={() => setShowAllFeatures(true)}
-                className="px-6 py-3 rounded-2xl border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold text-sm hover:border-pink-400 hover:text-pink-500 dark:hover:text-pink-400 transition-all"
-              >
-                Show all {CORE_FEATURES.length} features ↓
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
+      <FeatureShowcase />
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
       <section className="kl-reveal py-20 px-4 bg-white dark:bg-gray-950">
