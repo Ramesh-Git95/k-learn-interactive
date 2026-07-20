@@ -17,6 +17,7 @@ export const SECTIONS: { id: Section; title: string; icon: string }[] = [
   { id: 'topik-test', title: 'Level Assessment', icon: '🎓' },
   { id: 'honorifics', title: 'Honorifics', icon: '🎭' },
   { id: 'culture-cards', title: 'Culture Cards', icon: '🌸' },
+  { id: 'writing', title: 'Writing', icon: '✍️' },
   { id: 'typing', title: 'Typing Dojo', icon: '⌨️' },
   { id: 'kdrama', title: 'K-Drama', icon: '🎬' },
   { id: 'kpop',   title: 'K-Pop Lyrics', icon: '🎵' },

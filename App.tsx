@@ -47,6 +47,7 @@ const SRSStudySession          = React.lazy(() => import('./components/SRSStudyS
 const TopikPrepSection         = React.lazy(() => import('./components/TopikPrepSection'));
 const TopikAssessment          = React.lazy(() => import('./components/TopikAssessment'));
 const ReadingSection           = React.lazy(() => import('./components/ReadingSection'));
+const WritingSection           = React.lazy(() => import('./components/WritingSection'));
 const HonorificEngine          = React.lazy(() => import('./components/HonorificEngine'));
 const CultureCards             = React.lazy(() => import('./components/CultureCards'));
 const TypingDojo               = React.lazy(() => import('./components/TypingDojo'));
@@ -266,7 +267,7 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
-      if (hash && ['dashboard', 'hangul', 'vocabulary', 'grammar', 'phrases', 'culture', 'quiz', 'conversation', 'bookmarks', 'srs', 'profile', 'cookie-demo', 'topik', 'topik-test', 'honorifics', 'culture-cards', 'typing', 'kdrama', 'kpop', 'reading'].includes(hash as Section)) {
+      if (hash && ['dashboard', 'hangul', 'vocabulary', 'grammar', 'phrases', 'culture', 'quiz', 'conversation', 'bookmarks', 'srs', 'profile', 'cookie-demo', 'topik', 'topik-test', 'honorifics', 'culture-cards', 'typing', 'writing', 'kdrama', 'kpop', 'reading'].includes(hash as Section)) {
         setActiveSection(hash as Section);
       }
     };
@@ -560,6 +561,8 @@ const AppContent: React.FC = () => {
         return <TopikAssessment />;
       case 'reading':
         return <ReadingSection />;
+      case 'writing':
+        return <WritingSection />;
       case 'honorifics':
         return <HonorificEngine />;
       case 'culture-cards':

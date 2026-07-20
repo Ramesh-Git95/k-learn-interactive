@@ -33,6 +33,7 @@ const megaMenuGroups = [
     items: [
       ...SECTIONS.filter(s => ['quiz', 'typing', 'srs', 'bookmarks'].includes(s.id)),
       { ...SECTIONS.find(s => s.id === 'reading')!, _isNew: true },
+      { ...SECTIONS.find(s => s.id === 'writing')!, _isNew: true },
     ],
   },
   {

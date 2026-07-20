@@ -47,6 +47,7 @@ const QUICK_ACTIONS: { id: Section; label: string; icon: string; sub: string; gr
 const PRACTICE_TOOLS: { id: Section; label: string; icon: string; sub: string; freeLabel: string; isPremium: boolean }[] = [
   { id: 'honorifics',    label: 'Honorific Engine', icon: '🎭', sub: 'Formal · Polite · Casual speech',  freeLabel: '2 of 6 free', isPremium: true },
   { id: 'culture-cards', label: 'Culture Cards',    icon: '🌸', sub: 'Korean cultural concepts',         freeLabel: '6 cards free', isPremium: true },
+  { id: 'writing',       label: 'Writing',          icon: '✍️', sub: 'Stroke order · write it yourself', freeLabel: '14 letters free', isPremium: true },
   { id: 'typing',        label: 'Typing Dojo',      icon: '⌨️', sub: '60-second vocabulary race',        freeLabel: '15-sec demo',  isPremium: true },
   { id: 'topik',         label: 'TOPIK Prep',       icon: '📋', sub: 'Official exam questions',          freeLabel: '3 q free',     isPremium: true },
 ];

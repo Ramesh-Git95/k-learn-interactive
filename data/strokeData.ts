@@ -151,6 +151,67 @@ export function getStrokes(char: string): JamoStrokes | null {
   };
 }
 
+// ── Letter identity ──────────────────────────────────────────────────────────
+// What the letter is CALLED and what it sounds like. Drawing a shape you can't
+// name teaches your hand but not your head, so this is shown beside the
+// animation. Consonants have proper names (ㄱ is 기역); vowels are simply called
+// by their own sound.
+export interface JamoInfo {
+  /** Korean name, e.g. 기역 */
+  name: string;
+  /** That name romanised, e.g. giyeok */
+  nameRoman: string;
+  /** How it sounds, anchored to an English word. */
+  sound: string;
+}
+
+export const JAMO_INFO: Record<string, JamoInfo> = {
+  // Basic consonants
+  'ㄱ': { name: '기역', nameRoman: 'giyeok',  sound: "like the g in 'go' (k at the end of a syllable)" },
+  'ㄴ': { name: '니은', nameRoman: 'nieun',   sound: "like the n in 'now'" },
+  'ㄷ': { name: '디귿', nameRoman: 'digeut',  sound: "like the d in 'do' (t at the end)" },
+  'ㄹ': { name: '리을', nameRoman: 'rieul',   sound: 'between an r and an l' },
+  'ㅁ': { name: '미음', nameRoman: 'mieum',   sound: "like the m in 'mom'" },
+  'ㅂ': { name: '비읍', nameRoman: 'bieup',   sound: "like the b in 'book' (p at the end)" },
+  'ㅅ': { name: '시옷', nameRoman: 'siot',    sound: "like the s in 'see'" },
+  'ㅇ': { name: '이응', nameRoman: 'ieung',   sound: "silent at the start, 'ng' at the end" },
+  'ㅈ': { name: '지읒', nameRoman: 'jieut',   sound: "like the j in 'jump'" },
+  'ㅊ': { name: '치읓', nameRoman: 'chieut',  sound: "like the ch in 'chair', with a puff of air" },
+  'ㅋ': { name: '키읔', nameRoman: 'kieuk',   sound: "like the k in 'kite', with a puff of air" },
+  'ㅌ': { name: '티읕', nameRoman: 'tieut',   sound: "like the t in 'top', with a puff of air" },
+  'ㅍ': { name: '피읖', nameRoman: 'pieup',   sound: "like the p in 'pen', with a puff of air" },
+  'ㅎ': { name: '히읗', nameRoman: 'hieut',   sound: "like the h in 'hat'" },
+  // Tense consonants — same sound, tightened, with no puff of air
+  'ㄲ': { name: '쌍기역', nameRoman: 'ssanggiyeok', sound: 'a tense ㄱ — sharper, no puff of air' },
+  'ㄸ': { name: '쌍디귿', nameRoman: 'ssangdigeut', sound: 'a tense ㄷ — sharper, no puff of air' },
+  'ㅃ': { name: '쌍비읍', nameRoman: 'ssangbieup',  sound: 'a tense ㅂ — sharper, no puff of air' },
+  'ㅆ': { name: '쌍시옷', nameRoman: 'ssangsiot',   sound: 'a tense ㅅ — sharper, hissed' },
+  'ㅉ': { name: '쌍지읒', nameRoman: 'ssangjieut',  sound: 'a tense ㅈ — sharper, no puff of air' },
+  // Basic vowels — named by their own sound
+  'ㅏ': { name: '아', nameRoman: 'a',   sound: "like the a in 'father'" },
+  'ㅑ': { name: '야', nameRoman: 'ya',  sound: "like the ya in 'yard'" },
+  'ㅓ': { name: '어', nameRoman: 'eo',  sound: "like the u in 'under'" },
+  'ㅕ': { name: '여', nameRoman: 'yeo', sound: "like the yu in 'young'" },
+  'ㅗ': { name: '오', nameRoman: 'o',   sound: "like the o in 'more'" },
+  'ㅛ': { name: '요', nameRoman: 'yo',  sound: "like the yo in 'yoga'" },
+  'ㅜ': { name: '우', nameRoman: 'u',   sound: "like the oo in 'moon'" },
+  'ㅠ': { name: '유', nameRoman: 'yu',  sound: "like the word 'you'" },
+  'ㅡ': { name: '으', nameRoman: 'eu',  sound: "like the oo in 'good', but with flat lips" },
+  'ㅣ': { name: '이', nameRoman: 'i',   sound: "like the ee in 'see'" },
+  // Compound vowels
+  'ㅐ': { name: '애', nameRoman: 'ae',  sound: "like the a in 'cat'" },
+  'ㅒ': { name: '얘', nameRoman: 'yae', sound: "like the ya in 'yak'" },
+  'ㅔ': { name: '에', nameRoman: 'e',   sound: "like the e in 'bed'" },
+  'ㅖ': { name: '예', nameRoman: 'ye',  sound: "like the ye in 'yes'" },
+  'ㅘ': { name: '와', nameRoman: 'wa',  sound: "like the wa in 'water'" },
+  'ㅙ': { name: '왜', nameRoman: 'wae', sound: "like the wa in 'wax'" },
+  'ㅚ': { name: '외', nameRoman: 'oe',  sound: "like the we in 'wet'" },
+  'ㅝ': { name: '워', nameRoman: 'wo',  sound: "like the wo in 'wonder'" },
+  'ㅞ': { name: '웨', nameRoman: 'we',  sound: "like the we in 'west'" },
+  'ㅟ': { name: '위', nameRoman: 'wi',  sound: "like the wee in 'week'" },
+  'ㅢ': { name: '의', nameRoman: 'ui',  sound: 'ㅡ then ㅣ, run together quickly' },
+};
+
 /** Every character writing practice can teach, in teaching order. */
 export const WRITABLE_CHARS: string[] = [
   ...CONSONANTS.map(c => c.char),

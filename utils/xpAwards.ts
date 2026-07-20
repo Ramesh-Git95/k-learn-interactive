@@ -9,6 +9,7 @@
 export const XP_FOR_KEY: ReadonlyArray<readonly [string, number]> = [
   ['quiz_',                0],  // already awarded by score at the quiz itself
   ['hangul_char_',         5],
+  ['writing_char_',        8],  // writing a letter by hand is harder than recognising it
   ['vocab_item_',          5],
   ['grammar_pattern_',    10],
   ['phrase_',              5],
