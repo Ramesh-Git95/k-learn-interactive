@@ -195,6 +195,19 @@
   .kl-tilt-pop { transform: none; }
 }
 
+/* ── Feature card hover-reveal ───────────────────────────────────────────────
+   A colour teaser sits over each preview at rest and crossfades to the real
+   mini-preview on hover. On touch — where there is no hover — the content shows
+   by default, so nothing is stranded behind an interaction that can't happen. */
+.kl-feat-rest   { transition: opacity .45s ease; }
+.kl-feat-reveal { opacity: 0; transition: opacity .45s ease; }
+.kl-feat-card:hover .kl-feat-rest   { opacity: 0; }
+.kl-feat-card:hover .kl-feat-reveal { opacity: 1; }
+@media (hover: none) {
+  .kl-feat-rest   { opacity: 0; }
+  .kl-feat-reveal { opacity: 1; }
+}
+
 /* ── Hero entrance ──────────────────────────────────────────────────────── */
 /* The two halves arrive toward each other: copy from the left, the interactive
    demo from the right. Only on the wide layout — below 1024px the hero stacks

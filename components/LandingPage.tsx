@@ -456,7 +456,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
       <section className="kl-reveal py-20 px-4 bg-white dark:bg-gray-950">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <FadeIn>
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-5xl font-black text-gray-900 dark:text-white mb-4">
