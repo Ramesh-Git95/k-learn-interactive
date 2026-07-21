@@ -494,46 +494,48 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         </div>
       </section>
 
-      {/* ── FOUNDER'S NOTE ───────────────────────────────────────── */}
-      <section className="kl-reveal py-20 px-4 bg-gray-50 dark:bg-gray-900/60">
-        <div className="max-w-3xl mx-auto">
+      {/* ── WHY K-LEARN EXISTS — a quiet note, anchored on 정 (jeong) ── */}
+      <section className="kl-reveal py-24 sm:py-28 px-4 bg-gray-50 dark:bg-gray-900/60">
+        <div className="max-w-2xl mx-auto text-center">
           <FadeIn>
-            <div className="text-center mb-10">
-              <h2 className="text-3xl sm:text-5xl font-black text-gray-900 dark:text-white mb-4">
-                Why <span className="gradient-text">K-Learn</span> Exists
-              </h2>
+            <span className="text-[11px] font-black uppercase tracking-[0.25em] text-[#3F8571]">Why we're here</span>
+
+            {/* The anchor: 정 — the Korean word for the care between people */}
+            <div className="relative mt-8 flex justify-center">
+              <span
+                className="pointer-events-none absolute top-1/2 left-1/2 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                style={{ background: 'radial-gradient(circle, rgba(63,133,113,.20), transparent 70%)', filter: 'blur(28px)' }}
+                aria-hidden
+              />
+              <span className="relative text-[104px] leading-none font-black text-[#3F8571]" style={{ fontFamily: 'Pretendard Variable, sans-serif' }}>정</span>
             </div>
+            <p className="mt-4 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+              <span className="font-bold text-gray-700 dark:text-gray-200">jeong</span> — a Korean word with no English
+              translation: the quiet, deep care that grows between people.
+            </p>
           </FadeIn>
-          <FadeIn delay={120}>
-            <div className="kl-border-glow rounded-3xl p-[2px] shadow-sm">
-            <div className="relative bg-white dark:bg-gray-900 p-8 sm:p-10 rounded-[22px]">
-              <div
-                className="absolute -top-5 left-8 w-11 h-11 rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-md"
-                style={{ background: 'var(--brand-gradient)', fontFamily: 'Pretendard Variable, sans-serif' }}
-              >
-                한
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4 pt-2">
-                K-Learn started with a simple frustration: every Korean app taught sentences like{' '}
-                <em>"the bear drinks milk"</em> — but never what people actually say in dramas, in
-                cafés, or with friends. So we built the app we wished existed: real grammar,
-                honorifics, culture, and a spaced-repetition engine that makes it stick.
+
+          <FadeIn delay={140}>
+            <div className="mx-auto mt-12 max-w-[46ch] space-y-5 text-[17px] leading-[1.85] text-gray-700 dark:text-gray-300">
+              <p>
+                Language is how people reach one another. We believe the way to learn one should be
+                within reach too — so K-Learn costs less than a coffee, on purpose, and always will.
               </p>
-              <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-                K-Learn is a small independent project — no ads, no investors, no dark patterns.
-                We ship improvements every week, and every subscription goes straight into building
-                new features.
+              <p>
+                No ads. No investors. No dark patterns pulling at your attention. Just a small,
+                independent project, made a little better every week, and built for people rather
+                than numbers.
               </p>
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <div>
-                  <div className="font-bold text-gray-900 dark:text-white text-sm">The K-Learn Team</div>
-                  <div className="text-gray-400 text-xs">A few friends who love Korean culture</div>
-                </div>
-                <span className="text-xs font-bold px-3 py-1.5 rounded-full" style={{ background: 'rgba(63,133,113,0.14)', color: 'var(--kl-celadon)' }}>
-                  🌱 Independently built &amp; actively maintained
-                </span>
-              </div>
             </div>
+
+            <p className="mx-auto mt-12 max-w-[24ch] font-display text-2xl sm:text-3xl italic leading-snug text-gray-900 dark:text-white">
+              “Learning should be a gift, not a paywall.”
+            </p>
+
+            <div className="mt-12 flex flex-col items-center">
+              <div className="mb-4 h-px w-10 bg-gray-300 dark:bg-gray-700" />
+              <div className="text-sm font-bold text-gray-900 dark:text-white">The K-Learn team</div>
+              <div className="mt-1 text-xs text-gray-400 dark:text-gray-500">Made with 정, for anyone who wants to learn</div>
             </div>
           </FadeIn>
         </div>
