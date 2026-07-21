@@ -5,6 +5,7 @@ import { useScrollReveal } from '../hooks/useScrollReveal';
 import HangulMixer from './HangulMixer';
 import FeatureShowcase from './FeatureShowcase';
 import TryItShowcase from './TryItShowcase';
+import JourneyPath from './JourneyPath';
 
 
 interface LandingPageProps {
@@ -35,12 +36,6 @@ const HERO_BADGES = [
   '☕ Just $4/month · less than a coffee',
 ];
 
-
-const STEPS = [
-  { n: '01', title: 'Build the Foundation',  desc: 'Start with Hangul in 30 minutes, then unlock vocabulary, grammar, and culture at your own pace.',                     color: '#E4572E' },
-  { n: '02', title: 'Practice for Real',     desc: 'Chat with the AI tutor, race in Typing Dojo, study honorifics, and prep for TOPIK — all in one tab.',                  color: '#3F8571' },
-  { n: '03', title: 'Never Forget',          desc: 'The SM-2 spaced repetition engine reviews every card at exactly the right moment. Knowledge sticks permanently.',       color: '#2F5D8A' },
-];
 
 
 const COMPARISON_ROWS = [
@@ -462,21 +457,10 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
               <h2 className="text-3xl sm:text-5xl font-black text-gray-900 dark:text-white mb-4">
                 Zero to <span className="gradient-text-warm">Conversational</span>
               </h2>
-              <p className="text-gray-500 dark:text-gray-400 text-lg">Three stages, one platform.</p>
+              <p className="text-gray-500 dark:text-gray-400 text-lg">One path, three milestones.</p>
             </div>
           </FadeIn>
-          <div className="grid md:grid-cols-3 gap-6">
-            {STEPS.map((s, i) => (
-              <FadeIn key={s.n} delay={i * 120}>
-                <div className="card-hover p-7 rounded-3xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
-                  <div className="text-[5rem] font-black leading-none mb-4 select-none" style={{ color: s.color, opacity: 0.12 }}>{s.n}</div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">{s.title}</h3>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">{s.desc}</p>
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: `linear-gradient(90deg, ${s.color}40, ${s.color})` }} />
-                </div>
-              </FadeIn>
-            ))}
-          </div>
+          <JourneyPath />
         </div>
       </section>
 
