@@ -150,6 +150,36 @@ const FadeIn: React.FC<{
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
+// Back-to-top — landing page only. Appears once the reader is well past the
+// hero, scrolls smoothly to the top (instant under reduced-motion).
+const BackToTop: React.FC = () => {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 700);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  const toTop = () => {
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+  };
+  return (
+    <button
+      onClick={toTop}
+      aria-label="Back to top"
+      className={`fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full text-white shadow-lg transition-all duration-300 hover:-translate-y-1 ${
+        visible ? 'opacity-100 translate-y-0' : 'pointer-events-none translate-y-3 opacity-0'
+      }`}
+      style={{ background: 'var(--brand-gradient)' }}
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M18 15l-6-6-6 6" />
+      </svg>
+    </button>
+  );
+};
+
 export default function LandingPage({ onGetStarted }: LandingPageProps) {
   useScrollReveal();
   const { user } = useAuth();
@@ -695,6 +725,8 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         </div>
         </FadeIn>
       </section>
+
+      <BackToTop />
     </div>
   );
 }
