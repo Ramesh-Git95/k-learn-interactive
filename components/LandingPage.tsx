@@ -4,6 +4,7 @@ import { useAuthModal } from '../contexts/AuthModalContext';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import HangulMixer from './HangulMixer';
 import FeatureShowcase from './FeatureShowcase';
+import TryItShowcase from './TryItShowcase';
 
 
 interface LandingPageProps {
@@ -86,32 +87,6 @@ const speakKorean = (text: string) => {
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-
-const AnimatedCounter: React.FC<{ end: number; suffix?: string }> = ({ end, suffix = '' }) => {
-  const [count, setCount] = useState(0);
-  const [started, setStarted] = useState(false);
-  const ref = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(([e]) => { if (e.isIntersecting && !started) setStarted(true); }, { threshold: 0.1 });
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [started]);
-
-  useEffect(() => {
-    if (!started) return;
-    let frame = 0;
-    const total = 60;
-    const timer = setInterval(() => {
-      frame++;
-      setCount(Math.floor((frame / total) * end));
-      if (frame >= total) clearInterval(timer);
-    }, 2000 / total);
-    return () => clearInterval(timer);
-  }, [started, end]);
-
-  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
-};
 
 // FAQ Accordion
 const FaqItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
@@ -472,67 +447,12 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         </div>
       </div>
 
-      {/* ── STATS ────────────────────────────────────────────────── */}
-      <section className="kl-reveal py-14 bg-gray-50 dark:bg-gray-900/60">
-        <div className="max-w-4xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {[
-            { n: 1000, suf: '+', label: 'Korean Words' },
-            { n: 40,   suf: '',  label: 'Hangul Characters' },
-            { n: 24,   suf: '',  label: 'Culture Cards' },
-            { n: 10,   suf: '',  label: 'Learning Tools' },
-          ].map((s, i) => (
-            <FadeIn key={i} delay={i * 100}>
-              <div className="text-4xl md:text-5xl font-black mb-1 gradient-text">
-                <AnimatedCounter end={s.n} suffix={s.suf} />
-              </div>
-              <div className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{s.label}</div>
-            </FadeIn>
-          ))}
-        </div>
-      </section>
-
-      {/* ── FREE PREVIEW ──────────────────────────────────────────── */}
-      <section className="kl-reveal py-20 px-4 bg-white dark:bg-gray-950">
-        <div className="max-w-5xl mx-auto">
-          <FadeIn>
-            <div className="text-center mb-12">
-              <span className="inline-block bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-4">
-                No Signup Required
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-gray-900 dark:text-white mb-4">
-                Try It <span className="gradient-text">Right Now</span>
-              </h2>
-              <p className="text-gray-500 dark:text-gray-400 text-lg max-w-xl mx-auto">Three full sections open to everyone — no account, no credit card.</p>
-            </div>
-          </FadeIn>
-          <div className="grid md:grid-cols-3 gap-5">
-            {[
-              { section: 'vocabulary' as const, emoji: '📖', title: 'Vocabulary', desc: '39 free words across 3 categories · all 94 with Premium. Click to hear native pronunciation.', gradient: 'from-[#E4572E] to-[#C13F22]' },
-              { section: 'grammar'    as const, emoji: '✏️', title: 'Grammar',    desc: 'Sentence patterns from particles to verb endings',    gradient: 'from-[#3F8571] to-[#2E6B59]' },
-              { section: 'culture'   as const, emoji: '🎌', title: 'Culture',    desc: 'K-pop, K-drama, regions, customs & daily Korean life', gradient: 'from-[#D9A441] to-[#B8402F]' },
-            ].map((item, i) => (
-              <FadeIn key={item.section} delay={i * 120}>
-                <button
-                  onClick={() => handleNavigate(item.section)}
-                  className="card-hover text-left p-7 rounded-3xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 shadow-sm group w-full"
-                >
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center text-2xl mb-5 shadow-md group-hover:scale-110 transition-transform`}>
-                    {item.emoji}
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{item.title}</h3>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 leading-relaxed">{item.desc}</p>
-                  <span className={`text-sm font-bold bg-gradient-to-r ${item.gradient} bg-clip-text text-transparent`}>
-                    Explore now →
-                  </span>
-                </button>
-              </FadeIn>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── TRY IT + PROGRESS (rings left, open sections right) ── */}
+      <TryItShowcase onNavigate={handleNavigate} />
 
       {/* ── FEATURES ─────────────────────────────────────────────── */}
       <FeatureShowcase />
+
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
       <section className="kl-reveal py-20 px-4 bg-white dark:bg-gray-950">

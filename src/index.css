@@ -142,6 +142,59 @@
   .kl-spotlight:hover::before { opacity: 1; }
 }
 
+/* ── Try-It / progress inset ─────────────────────────────────────────────────
+   Warm hanji surface in light mode so the section belongs to the cream page,
+   ink navy in dark mode where the neon rings read best. --kl-ring-track feeds
+   the faint ring backdrops so they invert with the theme. */
+.kl-tryit-card {
+  --kl-ring-track: rgba(20, 32, 47, 0.08);
+  background: linear-gradient(150deg, #FFFCF4 0%, #FAF1E3 55%, #F5E9DC 100%);
+  border: 1px solid rgba(20, 32, 47, 0.07);
+}
+.dark .kl-tryit-card {
+  --kl-ring-track: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(150deg, #16202F 0%, #1A2438 55%, #221A30 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Stat numbers on the Try-It inset. The default brand gradient ends in plum,
+   which is too dark to read on the navy card, so dark mode swaps to a warm
+   coral→gold gradient that stays bright on ink. */
+.kl-stat-num {
+  background-image: linear-gradient(135deg, #E4572E, #B8402F 55%, #8E3B54);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.dark .kl-stat-num {
+  background-image: linear-gradient(135deg, #F28853, #E4572E 50%, #D9A441);
+}
+
+/* ── 3D tilt ─────────────────────────────────────────────────────────────────
+   A card that leans toward the pointer. --kl-rx/ry are set on pointermove and
+   reset on leave; children with kl-tilt-pop lift toward the viewer so the tilt
+   reads as real depth rather than a flat skew.
+
+   Pure CSS transforms — GPU-composited, no library, nothing to load. Gated
+   behind `hover: hover` so a touch tap can't strand a card mid-lean, and off
+   entirely under reduced-motion. */
+.kl-tilt {
+  transform: perspective(900px) rotateX(var(--kl-rx, 0deg)) rotateY(var(--kl-ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 240ms cubic-bezier(.22, 1, .36, 1);
+  will-change: transform;
+}
+.kl-tilt-pop { transform: translateZ(34px); }
+@media (hover: hover) {
+  /* Snappier while actively tracking the cursor; the slow curve is for the
+     settle back to flat on leave. */
+  .kl-tilt:hover { transition: transform 90ms ease-out; }
+}
+@media (prefers-reduced-motion: reduce), (hover: none) {
+  .kl-tilt { transform: none !important; transition: none; }
+  .kl-tilt-pop { transform: none; }
+}
+
 /* ── Hero entrance ──────────────────────────────────────────────────────── */
 /* The two halves arrive toward each other: copy from the left, the interactive
    demo from the right. Only on the wide layout — below 1024px the hero stacks
@@ -155,7 +208,7 @@
 .kl-hero-right {
   /* `both` holds the start frame, so neither half flashes at full opacity
      before its animation begins. */
-  animation-duration: 2000ms;
+  animation-duration: 800ms;
   animation-timing-function: cubic-bezier(.22, 1, .36, 1);
   animation-fill-mode: both;
 }
