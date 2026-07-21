@@ -123,8 +123,12 @@ const COMING_SOON = [
 
 export default function FeatureShowcase() {
   return (
-    <section className="kl-reveal py-20 px-4 bg-gray-50 dark:bg-gray-900/60">
-      <div className="max-w-6xl mx-auto">
+    <section className="kl-reveal relative overflow-hidden py-20 px-4 bg-gray-50 dark:bg-gray-900/60">
+      {/* Soft brand glows — give the glass cards something to refract */}
+      <div className="pointer-events-none absolute -left-24 top-28 h-96 w-96 rounded-full opacity-45 dark:opacity-30" style={{ background: 'radial-gradient(circle, rgba(228,87,46,.18), transparent 70%)', filter: 'blur(40px)' }} />
+      <div className="pointer-events-none absolute -right-24 bottom-28 h-96 w-96 rounded-full opacity-45 dark:opacity-30" style={{ background: 'radial-gradient(circle, rgba(63,133,113,.18), transparent 70%)', filter: 'blur(40px)' }} />
+
+      <div className="relative z-10 max-w-6xl mx-auto">
         {/* Heading */}
         <div className="text-center mb-12">
           <span className="text-[11px] font-black uppercase tracking-[0.2em] text-[#3F8571]">The Full Platform</span>
@@ -144,7 +148,7 @@ export default function FeatureShowcase() {
               key={f.n}
               onMouseMove={trackCard}
               onMouseLeave={resetCard}
-              className="kl-feat-card kl-tilt kl-spotlight kl-reveal group relative flex h-full flex-col rounded-3xl border bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-xl dark:bg-gray-900"
+              className="kl-feat-card kl-glass-card kl-tilt kl-spotlight kl-reveal group relative flex h-full flex-col rounded-3xl border p-6 shadow-sm transition-shadow duration-300 hover:shadow-xl"
               style={{
                 borderColor: `${f.color}2E`,
                 ['--kl-spot-color' as string]: `${f.color}1F`,
@@ -201,7 +205,7 @@ export default function FeatureShowcase() {
               key={f.n}
               onMouseMove={trackCard}
               onMouseLeave={resetCard}
-              className="kl-tilt kl-spotlight kl-reveal rounded-2xl border border-gray-300 bg-white p-5 dark:border-gray-700 dark:bg-gray-900"
+              className="kl-glass-card kl-tilt kl-spotlight kl-reveal rounded-2xl border border-gray-300 p-5 dark:border-gray-700"
               style={{
                 ['--kl-spot-color' as string]: 'rgba(63,133,113,.22)',
                 ['--kl-spot-color-dark' as string]: 'rgba(63,133,113,.34)',

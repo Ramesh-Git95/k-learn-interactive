@@ -170,6 +170,19 @@
   background-image: linear-gradient(135deg, #F28853, #E4572E 50%, #D9A441);
 }
 
+/* Frosted-glass card surface. Warm translucent cream in light mode, translucent
+   white over ink in dark — the same tones as the Try-It parent card, but see-
+   through, so it reads as glass over the section's soft brand glows. Border and
+   per-feature tint are left to the element so this only owns the fill. */
+.kl-glass-card {
+  background: rgba(255, 252, 244, 0.60);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.dark .kl-glass-card {
+  background: rgba(255, 255, 255, 0.055);
+}
+
 /* ── 3D tilt ─────────────────────────────────────────────────────────────────
    A card that leans toward the pointer. --kl-rx/ry are set on pointermove and
    reset on leave; children with kl-tilt-pop lift toward the viewer so the tilt
