@@ -170,6 +170,17 @@
   background-image: linear-gradient(135deg, #F28853, #E4572E 50%, #D9A441);
 }
 
+/* The $4 Premium plan card (above the pricing table). A vibrant warm brand
+   gradient in light mode so it grabs the eye by colour rather than sitting as a
+   dark slab on the cream page; the established ink treatment in dark mode. White
+   content reads on both. */
+.kl-premium-card {
+  background: linear-gradient(160deg, #E4572E 0%, #B8402F 52%, #8E3B54 100%);
+}
+.dark .kl-premium-card {
+  background: linear-gradient(160deg, #1B2637 0%, #0D141F 100%);
+}
+
 /* Frosted-glass card surface. Warm translucent cream in light mode, translucent
    white over ink in dark — the same tones as the Try-It parent card, but see-
    through, so it reads as glass over the section's soft brand glows. Border and

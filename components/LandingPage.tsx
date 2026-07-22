@@ -546,7 +546,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         <div className="max-w-5xl mx-auto">
           <FadeIn>
             <div className="text-center mb-12">
-              <span className="inline-block bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-4">
+              <span className="inline-block text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full mb-4 bg-[#3F8571]/12 text-[#2E6B59] dark:bg-[#3F8571]/20 dark:text-[#5CFFB1]">
                 Simple Pricing
               </span>
               <h2 className="text-3xl sm:text-5xl font-black text-gray-900 dark:text-white mb-4">
@@ -578,79 +578,92 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
               </div>
             </FadeIn>
 
-            {/* Premium */}
+            {/* Premium — the hook. Vibrant + lifted so the eye lands here. */}
             <FadeIn delay={150}>
-            <div className="kl-border-glow rounded-3xl p-[2px]">
-            <div className="card-hover relative rounded-[22px] p-8 overflow-hidden" style={{ background: 'linear-gradient(160deg,#1B2637 0%,#0D141F 100%)' }}>
+            <div className="kl-border-glow rounded-3xl p-[2px] shadow-2xl md:scale-[1.03]">
+            <div className="kl-premium-card card-hover relative rounded-[22px] p-8 overflow-hidden text-white">
+              {/* soft top-right sheen for depth */}
+              <div className="pointer-events-none absolute -right-10 -top-12 h-44 w-44 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,.20), transparent 70%)' }} aria-hidden />
               <div className="absolute -top-px left-1/2 -translate-x-1/2">
-                <span className="inline-block px-5 py-1.5 text-xs font-black uppercase tracking-widest rounded-b-full text-white" style={{ background: 'var(--brand-gradient)' }}>
-                  Best Value
+                <span className="inline-block px-5 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-b-xl bg-white text-[#C13F22] shadow-md">
+                  ★ Best Value
                 </span>
               </div>
-              <div className="text-xs font-bold uppercase tracking-widest text-pink-400 mb-2 mt-3">Premium</div>
-              <div className="flex items-end gap-2 mb-1">
-                <span className="text-5xl font-black text-white">$4</span>
-                <span className="text-gray-400 text-lg mb-1.5">/month</span>
-                <span className="mb-2 text-xs font-black px-2 py-0.5 rounded-full" style={{ background: 'rgba(217,164,65,0.22)', color: '#E8C983' }}>☕ less than a coffee</span>
-              </div>
-              <div className="text-gray-400 text-sm mb-6">Cancel anytime · secure payment via Stripe</div>
-              <ul className="space-y-2.5 mb-8">
-                {PREMIUM_BULLETS.map((f, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-gray-300">
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs flex-shrink-0 font-bold check-premium">✓</span>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <button
-                onClick={handleStart}
-                className="btn-primary block w-full py-3.5 rounded-2xl font-bold text-white text-sm text-center"
-              >
-                Start Free · Upgrade Anytime →
-              </button>
-              <p className="text-center text-xs text-gray-500 mt-3">
-                Create free account · upgrade to Premium from your profile · payment via Stripe
-              </p>
-              <p className="text-center text-xs text-gray-600 mt-1">
+              <div className="relative z-10">
+                <div className="text-xs font-black uppercase tracking-widest text-white/70 mb-2 mt-3">Premium</div>
+                <div className="flex items-end gap-2">
+                  <span className="text-6xl font-black leading-none">$4</span>
+                  <span className="text-white/70 text-lg mb-1.5">/month</span>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap mt-3 mb-5">
+                  <span className="text-xs font-black px-2.5 py-1 rounded-full bg-white/15 text-white">☕ Less than a coffee</span>
+                  <span className="text-xs font-bold text-white/75">≈ 13¢ a day</span>
+                </div>
+                <div className="text-white/70 text-sm mb-6">Cancel anytime · secure payment via Stripe</div>
+                <ul className="space-y-2.5 mb-8">
+                  {PREMIUM_BULLETS.map((f, i) => (
+                    <li key={i} className="flex items-center gap-3 text-sm text-white/90">
+                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-[#C13F22] text-xs flex-shrink-0 font-black bg-white">✓</span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
                 <button
-                  onClick={() => openLogin ? openLogin() : window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
-                  className="text-pink-400 hover:underline"
+                  onClick={handleStart}
+                  className="block w-full py-4 rounded-2xl font-black text-sm text-center bg-white text-[#C13F22] shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-transform"
                 >
-                  Already a member? Sign in →
+                  Start Free · Upgrade Anytime →
                 </button>
-              </p>
+                <p className="text-center text-xs text-white/60 mt-3">
+                  Create free account · upgrade from your profile · payment via Stripe
+                </p>
+                <p className="text-center text-xs mt-1">
+                  <button
+                    onClick={() => openLogin ? openLogin() : window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
+                    className="text-white/90 underline hover:text-white"
+                  >
+                    Already a member? Sign in →
+                  </button>
+                </p>
+              </div>
             </div>
             </div>
             </FadeIn>
           </div>
 
-          {/* Comparison table */}
+          {/* Comparison table — spotlight Premium column */}
           <FadeIn>
-          <div className="rounded-3xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
-            <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-6 py-3">
-              <div className="text-xs font-bold uppercase tracking-wider text-gray-400">Feature</div>
-              <div className="text-xs font-bold uppercase tracking-wider text-gray-400 text-center">Free</div>
-              <div className="text-xs font-black uppercase tracking-wider text-center gradient-text">Premium</div>
-            </div>
-            {COMPARISON_ROWS.map((row, i) => (
-              <div
-                key={i}
-                className={`grid grid-cols-3 px-6 py-3 border-b border-gray-50 dark:border-gray-800/80 text-sm ${
-                  i % 2 === 0 ? 'bg-white dark:bg-gray-950' : 'bg-gray-50/60 dark:bg-gray-900/40'
-                }`}
-              >
-                <div className="font-medium text-gray-700 dark:text-gray-300">{row.feature}</div>
-                <div className="text-center text-gray-400 dark:text-gray-500 text-xs flex items-center justify-center">{row.free}</div>
-                <div className="flex items-center justify-center">
-                  <span
-                    className="inline-block text-[11px] font-bold px-2 py-0.5 rounded-full text-white"
-                    style={{ background: row.premium === '✕' ? '#9CA3AF' : 'var(--brand-gradient)' }}
-                  >
-                    {row.premium}
-                  </span>
-                </div>
+          <div className="relative overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-800 shadow-lg bg-white dark:bg-gray-950">
+            {/* Header with plan prices */}
+            <div className="grid grid-cols-[1.5fr_1fr_1.15fr] border-b border-gray-100 dark:border-gray-800">
+              <div className="self-end px-5 sm:px-8 py-5 text-xs font-black uppercase tracking-wider text-gray-400">Compare plans</div>
+              <div className="self-end px-3 py-5 text-center">
+                <div className="text-xs font-bold uppercase tracking-wider text-gray-400">Free</div>
+                <div className="mt-1 text-lg font-black text-gray-700 dark:text-gray-200">$0</div>
               </div>
-            ))}
+              <div className="px-3 py-4 text-center bg-[#E4572E]/[0.06] dark:bg-[#E4572E]/[0.1] border-l border-[#E4572E]/15">
+                <div className="text-[10px] font-black uppercase tracking-widest text-[#E4572E]">★ Best value</div>
+                <div className="mt-0.5 text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-200">Premium</div>
+                <div className="mt-0.5 text-lg font-black gradient-text">$4<span className="text-xs font-bold">/mo</span></div>
+              </div>
+            </div>
+            {/* Rows */}
+            {COMPARISON_ROWS.map((row, i) => {
+              const isCheck = row.premium === '✓';
+              const freeEmpty = row.free === '✕';
+              return (
+                <div key={i} className="group grid grid-cols-[1.5fr_1fr_1.15fr] border-b border-gray-50 dark:border-gray-900 last:border-b-0">
+                  <div className="flex items-center px-5 sm:px-8 py-3 text-sm font-semibold text-gray-700 dark:text-gray-200 transition-colors group-hover:bg-gray-50/70 dark:group-hover:bg-gray-900/40">{row.feature}</div>
+                  <div className="flex items-center justify-center px-3 py-3 text-center text-xs text-gray-400 dark:text-gray-500 transition-colors group-hover:bg-gray-50/70 dark:group-hover:bg-gray-900/40">
+                    {freeEmpty ? <span className="text-base text-gray-300 dark:text-gray-700">—</span> : row.free}
+                  </div>
+                  <div className="flex items-center justify-center gap-1.5 px-3 py-3 text-center border-l border-[#E4572E]/15 bg-[#E4572E]/[0.06] transition-colors group-hover:bg-[#E4572E]/[0.11] dark:bg-[#E4572E]/[0.1] dark:group-hover:bg-[#E4572E]/[0.16]">
+                    <span className="inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-[9px] font-black text-white" style={{ background: 'var(--brand-gradient)' }}>✓</span>
+                    {!isCheck && <span className="text-xs font-bold text-gray-800 dark:text-gray-100">{row.premium}</span>}
+                  </div>
+                </div>
+              );
+            })}
           </div>
           </FadeIn>
         </div>
