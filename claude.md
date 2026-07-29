@@ -130,6 +130,36 @@ recurring price), `STRIPE_WEBHOOK_SECRET`, `GEMINI_API_KEY`, `RESEND_API_KEY`, `
 - Avoid `*/` sequences inside CSS comments in `index.css` (e.g. writing `han-*/dm-*`) — it closes
   the comment early and silently corrupts the following `@theme` block.
 
+## Adopting design mockups without losing features (the workflow)
+
+The owner designs page mockups in Claude's design feature (claude.ai/design) and wants
+them adopted into production **one page at a time**. Mockups are *sample* UIs — they
+routinely omit real working features and carry fabricated data/claims. The owner's stated
+fear (justified): that a mockup gets copied pixel-for-pixel and the real functions
+(add-to-SRS, pronounce, examples, gating, XP, etc.) silently disappear. **Never let that
+happen.** The rule: *the mockup governs how it LOOKS; the production code governs what it
+DOES.* A function is never dropped because the picture forgot it.
+
+Follow this order every time:
+1. **Read the real component FIRST** and inventory every working thing — interactive
+   elements, handlers, props, state, gating, side effects. This list is the source of
+   truth for FUNCTION.
+2. **Map the mockup against that inventory** — note what it shows and, critically, what it
+   omits.
+3. **Build the mockup's look, wire in ALL the functions.** Where the mockup has no home for
+   a real feature, add it *in the mockup's own visual language* — never bolt it on, never
+   cut it silently.
+4. **Prove parity**: state where each real function now lives, keep typecheck at 0, and have
+   the owner test. That checklist + their testing is the safety net — not blind trust.
+5. **Correct fabrications** (fake counts, invented features, wrong "coming soon" labels)
+   against what actually ships — as was done for "1,000+ words", the fake "Fluency Engine",
+   and mislabeled features. Flag tensions and propose options rather than dropping anything.
+
+Import mockups via the **DesignSync** tool (reads the owner's claude.ai/design projects) or
+from screenshots; always read the production code yourself for the functional truth.
+Precedent this was built on: HangulMixer, FeatureShowcase, the progress rings — each adapted
+a mockup while preserving real behaviour and honest content.
+
 ## Deferred / known limitations
 
 - **Hash routing** means only the homepage is crawlable/indexable (SEO limitation; sitemap
