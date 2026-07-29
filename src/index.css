@@ -194,6 +194,11 @@
   background: rgba(255, 255, 255, 0.055);
 }
 
+/* Module accent — set --kl-acc / --kl-acc-dk on the element (from
+   utils/moduleAccent.ts) and this picks the right one per theme, reactively. */
+.kl-accent { color: var(--kl-acc); }
+.dark .kl-accent { color: var(--kl-acc-dk); }
+
 /* ── 3D tilt ─────────────────────────────────────────────────────────────────
    A card that leans toward the pointer. --kl-rx/ry are set on pointermove and
    reset on leave; children with kl-tilt-pop lift toward the viewer so the tilt
