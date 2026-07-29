@@ -33,9 +33,47 @@ export function segmentKorean(text: string): KoToken[] {
   return tokens;
 }
 
-/** Speak one chunk of Korean, resolving when it finishes (or errors/cancels).
- *  Resolves on error/cancel too so sequenced playback never hangs. */
-export function speakOnce(text: string, rate = 1): Promise<void> {
+// ── Pre-generated neural audio ────────────────────────────────────────────────
+// Core words/phrases are voiced once by Gemini TTS (scripts/generate-tts.cjs)
+// and shipped as static clips. When a clip exists we play it — consistent, clear,
+// and crucially audible on devices with no Korean voice installed, where Web
+// Speech is silent. Everything else falls back to Web Speech, so nothing breaks.
+
+const AUDIO_BASE = '/audio/tts/';
+let manifest: Record<string, string> | null = null;
+
+// Load the manifest once, early, so a clip is ready by the first tap. A miss
+// (offline, not deployed yet) just leaves us on the Web Speech path.
+function loadManifest(): void {
+  if (manifest !== null || typeof fetch === 'undefined') return;
+  manifest = {}; // prevent re-entry; fill in on success
+  fetch(`${AUDIO_BASE}manifest.json`)
+    .then(r => (r.ok ? r.json() : {}))
+    .then(m => { manifest = m; })
+    .catch(() => { /* stay empty → Web Speech */ });
+}
+if (typeof window !== 'undefined') loadManifest();
+
+function clipUrl(text: string): string | null {
+  const f = manifest?.[text.trim()];
+  return f ? AUDIO_BASE + f : null;
+}
+
+// One shared element so a new play interrupts the previous clip.
+let currentAudio: HTMLAudioElement | null = null;
+
+function playClip(url: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    const a = new Audio(url);
+    currentAudio = a;
+    a.onended = () => { if (currentAudio === a) currentAudio = null; resolve(); };
+    a.onerror = () => { if (currentAudio === a) currentAudio = null; reject(new Error('audio failed')); };
+    a.play().catch(reject);
+  });
+}
+
+function webSpeak(text: string, rate: number): Promise<void> {
   return new Promise(resolve => {
     if (!('speechSynthesis' in window)) { resolve(); return; }
     const u = new SpeechSynthesisUtterance(text);
@@ -45,6 +83,17 @@ export function speakOnce(text: string, rate = 1): Promise<void> {
     u.onerror = () => resolve();
     window.speechSynthesis.speak(u);
   });
+}
+
+/** Speak one chunk of Korean, resolving when it finishes (or errors/cancels).
+ *  Prefers a pre-generated neural clip at natural speed; otherwise Web Speech.
+ *  Resolves on error/cancel too so sequenced playback never hangs. */
+export function speakOnce(text: string, rate = 1): Promise<void> {
+  // Clips are whole-word at natural speed; slow syllable-by-syllable playback
+  // (rate < 0.9) still uses Web Speech, which can time-stretch per syllable.
+  const clip = rate >= 0.9 ? clipUrl(text) : null;
+  if (clip) return playClip(clip).catch(() => webSpeak(text, rate));
+  return webSpeak(text, rate);
 }
 
 export const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
