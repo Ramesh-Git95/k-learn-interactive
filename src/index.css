@@ -209,6 +209,79 @@
   box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
 }
 
+/* ── Welcome card ────────────────────────────────────────────────────────────
+   The one warm, charming surface in the app: a tinted hanji card with two soft
+   lights drifting slowly behind the content, like sun moving across paper. The
+   tint carries the charm in light mode; in dark the same lights read as a glow.
+   Content must sit in a `relative z-10` wrapper so the lights stay behind it. */
+.kl-welcome {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 20px;
+  border: 1px solid rgba(20, 32, 47, 0.12);
+  background: linear-gradient(135deg, #FFF3E0 0%, #FFFCF4 52%, #FDEFE8 100%);
+  box-shadow: 0 12px 34px rgba(20, 32, 47, 0.09);
+}
+.dark .kl-welcome {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, #141E2C 0%, #16202F 55%, #1C2739 100%);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+}
+
+/* Two drifting lights, different colours, speeds and directions. */
+.kl-welcome::before,
+.kl-welcome::after {
+  content: '';
+  position: absolute;
+  top: -60%;
+  height: 220%;
+  width: 42%;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(34px);
+}
+.kl-welcome::before {
+  left: -25%;
+  background: radial-gradient(closest-side, rgba(228, 87, 46, 0.30), transparent 72%);
+  animation: klDrift 19s ease-in-out infinite;
+}
+.kl-welcome::after {
+  left: -10%;
+  background: radial-gradient(closest-side, rgba(217, 164, 65, 0.26), transparent 72%);
+  animation: klDrift 26s ease-in-out infinite reverse;
+  animation-delay: -7s;
+}
+.dark .kl-welcome::before {
+  background: radial-gradient(closest-side, rgba(240, 122, 85, 0.34), transparent 72%);
+}
+.dark .kl-welcome::after {
+  background: radial-gradient(closest-side, rgba(217, 164, 65, 0.28), transparent 72%);
+}
+
+@keyframes klDrift {
+  0%   { transform: translateX(0) scale(1); }
+  50%  { transform: translateX(215%) scale(1.18); }
+  100% { transform: translateX(0) scale(1); }
+}
+
+/* Motion is decoration here — hold the lights still if motion is unwelcome. */
+@media (prefers-reduced-motion: reduce) {
+  .kl-welcome::before { animation: none; transform: translateX(40%); }
+  .kl-welcome::after  { animation: none; transform: translateX(150%); }
+}
+
+/* Drawer content reveal — the mockup's klFade. */
+@keyframes klFade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+.kl-drawer-panel { animation: klFade 0.28s ease both; }
+@media (prefers-reduced-motion: reduce) {
+  .kl-drawer-panel { animation: none; }
+}
+
 /* Quiet inset panel used inside cards (example rows, stat wells). */
 .kl-well {
   background: rgba(20, 32, 47, 0.035);

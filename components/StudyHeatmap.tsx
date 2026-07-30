@@ -71,49 +71,63 @@ export default function StudyHeatmap({
       <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
         <h2 className="font-display text-[17px] font-semibold tracking-[-0.01em] text-[#16202F] dark:text-white">Study activity</h2>
         {streakAtRisk && (
-          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 animate-pulse">
-            🔥 Study today to keep your streak!
+          <span className="text-[12px] font-semibold text-[#C13F22] dark:text-[#F07A55]">
+            Study today to keep your streak
           </span>
         )}
       </div>
 
-      {/* Merged stat chips — absorbed the old four-card stat row */}
-      <div className="flex items-center gap-2 flex-wrap mb-4 text-xs font-bold">
-        <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">🔥 {currentStreak} day streak</span>
-        <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">🏆 {longestStreak} best</span>
-        <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">✅ {totalDays} days studied</span>
-        {typeof completed === 'number' && (
-          <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">📚 {completed} items done</span>
-        )}
+      {/* Stat row — numbers lead, labels underneath (the mockup's data shape) */}
+      <div className="mb-5 grid grid-cols-3 gap-3 sm:grid-cols-5">
+        {[
+          { v: currentStreak, l: currentStreak === 1 ? 'day streak' : 'days streak' },
+          { v: longestStreak, l: 'longest' },
+          { v: totalDays, l: 'days studied' },
+          ...(typeof completed === 'number' ? [{ v: completed, l: 'items done' }] : []),
+        ].map((s, i) => (
+          <div key={i} className="kl-well rounded-xl px-3 py-2.5">
+            <div className="text-[19px] font-bold leading-none text-[#16202F] dark:text-white">{s.v}</div>
+            <div className="mt-1.5 text-[12px] text-[#4A5566] dark:text-gray-500">{s.l}</div>
+          </div>
+        ))}
         {typeof srsDue === 'number' && onReview && (
           <button
             onClick={onReview}
-            className={`px-2.5 py-1 rounded-full transition-colors ${
+            className="rounded-xl px-3 py-2.5 text-left transition-colors"
+            style={
               srsDue > 0
-                ? 'bg-[#E4572E]/10 text-[#C13F22] dark:text-[#F07A55] hover:bg-[#E4572E]/20'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-            }`}
+                ? { background: 'rgba(46,107,89,0.12)', border: '1px solid rgba(46,107,89,0.32)' }
+                : { background: 'rgba(20,32,47,0.035)', border: '1px solid rgba(20,32,47,0.10)' }
+            }
           >
-            🧠 {srsDue} due{srsDue > 0 ? ' · review →' : ''}
-          </button>
-        )}
-        {typeof bookmarks === 'number' && onBookmarks && (
-          <button
-            onClick={onBookmarks}
-            disabled={bookmarks === 0}
-            className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:cursor-default disabled:hover:bg-gray-100 dark:disabled:hover:bg-gray-800"
-          >
-            ⭐ {bookmarks} saved{bookmarks > 0 ? ' · flashcards →' : ''}
+            <div
+              className="text-[19px] font-bold leading-none"
+              style={{ color: srsDue > 0 ? '#2E6B59' : undefined }}
+            >
+              <span className={srsDue > 0 ? '' : 'text-[#16202F] dark:text-white'}>{srsDue}</span>
+            </div>
+            <div className="mt-1.5 text-[12px] text-[#4A5566] dark:text-gray-500">
+              {srsDue > 0 ? 'due · review →' : 'due now'}
+            </div>
           </button>
         )}
       </div>
+
+      {typeof bookmarks === 'number' && onBookmarks && bookmarks > 0 && (
+        <button
+          onClick={onBookmarks}
+          className="mb-4 text-[12.5px] font-semibold text-[#2E6B59] hover:underline dark:text-[#5FB89B]"
+        >
+          {bookmarks} saved {bookmarks === 1 ? 'word' : 'words'} · study as flashcards →
+        </button>
+      )}
 
       <div className="overflow-x-auto pb-1">
         <div className="inline-block">
           {/* Month labels */}
           <div className="flex gap-[3px] ml-8 mb-1">
             {monthLabels.map((m, i) => (
-              <div key={i} className="w-[11px] text-[9px] leading-none text-gray-400 dark:text-gray-600 overflow-visible whitespace-nowrap">
+              <div key={i} className="w-[11px] text-[10px] leading-none text-[#4A5566] dark:text-gray-500 overflow-visible whitespace-nowrap">
                 {m}
               </div>
             ))}
@@ -121,7 +135,7 @@ export default function StudyHeatmap({
 
           <div className="flex gap-[3px]">
             {/* Day labels */}
-            <div className="flex flex-col gap-[3px] w-7 mr-1 text-[9px] leading-[11px] text-gray-400 dark:text-gray-600">
+            <div className="flex flex-col gap-[3px] w-7 mr-1 text-[10px] leading-[11px] text-[#4A5566] dark:text-gray-500">
               {['', 'Mon', '', 'Wed', '', 'Fri', ''].map((l, i) => (
                 <div key={i} className="h-[11px]">{l}</div>
               ))}
@@ -136,12 +150,12 @@ export default function StudyHeatmap({
                     title={cell.state === 'future' ? undefined : `${cell.ds}${cell.state === 'studied' ? ' · studied ✓' : ''}`}
                     className={`w-[11px] h-[11px] rounded-[3px] ${
                       cell.state === 'studied'
-                        ? 'bg-[#E4572E]'
+                        ? 'bg-[#C13F22]'
                         : cell.state === 'today'
-                        ? 'bg-gray-100 dark:bg-gray-800 ring-1 ring-[#E4572E]'
+                        ? 'bg-[rgba(20,32,47,0.06)] dark:bg-gray-800 ring-1 ring-[#C13F22]'
                         : cell.state === 'future'
                         ? 'invisible'
-                        : 'bg-gray-100 dark:bg-gray-800'
+                        : 'bg-[rgba(20,32,47,0.06)] dark:bg-gray-800'
                     }`}
                   />
                 ))}
@@ -151,8 +165,8 @@ export default function StudyHeatmap({
         </div>
       </div>
 
-      <p className="mt-3 text-[11px] text-gray-400 dark:text-gray-500">
-        Every square is a day — study anything to fill today's square. 조금씩 나아가요! 🌱
+      <p className="mt-3 text-[12px] text-[#4A5566] dark:text-gray-500">
+        Every square is a day — study anything to fill today's.
       </p>
     </div>
   );

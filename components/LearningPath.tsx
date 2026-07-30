@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import type { Section } from '../types';
 import Icon from './Icon';
 import { getUnitProgress, getPathSummary, type UnitProgress } from '../utils/learningUnits';
+import { accentFor } from '../utils/moduleAccent';
 
 // The learning path, in lesson-sized units.
 //
@@ -58,16 +59,15 @@ const LearningPath: React.FC<LearningPathProps> = ({ setActiveSection, progress,
   return (
     <div className="kl-card p-6">
       {/* Header + overall progress */}
-      <div className="flex items-center justify-between mb-1">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-          <span className="mr-2">🗺️</span>
-          Your Path
-        </h2>
-        <span className="text-sm font-black text-gray-500 dark:text-gray-400">
+      <div className="mb-2 flex items-center justify-between gap-4">
+        <p className="text-[13.5px] text-[#4A5566] dark:text-gray-400">
+          {summary.totalUnits} units of a few minutes each — your next one is highlighted.
+        </p>
+        <span className="flex-none text-[13px] font-semibold text-[#16202F] dark:text-white">
           {summary.doneUnits}/{summary.totalUnits} done
         </span>
       </div>
-      <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-6">
+      <div className="mb-6 h-1.5 overflow-hidden rounded-full bg-[rgba(20,32,47,0.10)] dark:bg-gray-800">
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{ width: `${summary.percent}%`, background: 'var(--brand-gradient-h)' }}
@@ -80,29 +80,34 @@ const LearningPath: React.FC<LearningPathProps> = ({ setActiveSection, progress,
           const doneCount = group.items.filter(i => i.status === 'done').length;
           const folded = isCollapsed(group.section, group.items);
           const hasNext = group.items.some(i => i.unit.id === nextId);
+          const groupAccent = accentFor(group.section);
 
           return (
             <div key={group.section}>
               {/* Section header — click to fold */}
               <button
                 onClick={() => toggle(group.section, group.items)}
-                className="w-full flex items-center gap-2 mb-2 group"
+                className="group mb-2.5 flex w-full items-center gap-2.5"
               >
-                <span className="text-lg">{meta.icon}</span>
-                <span className="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 group-hover:text-[#E4572E] transition-colors">
+                <span
+                  className="flex h-7 w-7 flex-none items-center justify-center rounded-lg font-korean text-[13px] font-bold"
+                  style={{ background: `${groupAccent.light}1F`, border: `1px solid ${groupAccent.light}45`, color: groupAccent.light }}
+                >
+                  {meta.icon}
+                </span>
+                <span className="text-[13.5px] font-semibold text-[#16202F] dark:text-white">
                   {meta.label}
                 </span>
-                <span className="text-[11px] font-bold text-gray-400 dark:text-gray-500">
+                <span className="text-[12.5px] text-[#4A5566] dark:text-gray-500">
                   {doneCount}/{group.items.length}
                 </span>
-                {doneCount === group.items.length && <span className="text-green-500 text-xs">✓</span>}
-                <div className="flex-1 h-px bg-gray-100 dark:bg-gray-800" />
-                <span className={`text-gray-400 text-xs transition-transform ${folded ? '' : 'rotate-90'}`}>▶</span>
+                <div className="h-px flex-1 bg-[rgba(20,32,47,0.10)] dark:bg-gray-800" />
+                <span className={`text-[10px] text-[#4A5566] transition-transform dark:text-gray-500 ${folded ? '' : 'rotate-90'}`}>▶</span>
               </button>
 
               {folded ? (
                 hasNext && (
-                  <p className="text-[11px] text-gray-400 dark:text-gray-500 pl-7">
+                  <p className="pl-[38px] text-[12.5px] text-[#4A5566] dark:text-gray-500">
                     Your next unit is in here — tap to open
                   </p>
                 )
@@ -118,51 +123,54 @@ const LearningPath: React.FC<LearningPathProps> = ({ setActiveSection, progress,
                         key={unit.id}
                         disabled={isLocked}
                         onClick={() => setActiveSection(unit.section)}
-                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all duration-200 ${
+                        className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-all duration-200 ${
                           isLocked
-                            ? 'border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 opacity-50 cursor-not-allowed'
+                            ? 'cursor-not-allowed border-[rgba(20,32,47,0.08)] opacity-45 dark:border-gray-800'
                             : isNext
-                            ? 'border-[#E4572E] bg-[#E4572E]/5 dark:bg-[#E4572E]/10 shadow-md'
-                            : isDone
-                            ? 'border-green-200 dark:border-green-900/50 bg-green-50/50 dark:bg-green-900/10 hover:border-green-400'
-                            : 'border-gray-200 dark:border-gray-800 hover:border-[#F8C4AE] dark:hover:border-[#E4572E] hover:shadow-sm'
+                            ? 'shadow-sm'
+                            : 'border-[rgba(20,32,47,0.10)] hover:border-[rgba(20,32,47,0.24)] dark:border-gray-800 dark:hover:border-gray-600'
                         }`}
+                        style={isNext ? {
+                          borderColor: groupAccent.light,
+                          background: `${groupAccent.light}0F`,
+                        } : undefined}
                       >
-                        {/* Status dot */}
+                        {/* Status marker — count, check or lock */}
                         <span
-                          className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black ${
+                          className="flex h-7 w-7 flex-none items-center justify-center rounded-full text-[11px] font-semibold"
+                          style={
                             isDone
-                              ? 'bg-green-500 text-white'
+                              ? { background: `${groupAccent.light}24`, color: groupAccent.light }
                               : isNext
-                              ? 'text-white'
-                              : isLocked
-                              ? 'bg-gray-200 dark:bg-gray-700 text-gray-400'
-                              : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
-                          }`}
-                          style={isNext ? { background: 'var(--brand-gradient)' } : undefined}
+                              ? { background: groupAccent.light, color: '#fff' }
+                              : { background: 'rgba(20,32,47,0.06)', color: '#4A5566' }
+                          }
                         >
-                          {isDone ? <Icon icon="check" className="w-3.5 h-3.5" /> : isLocked ? '🔒' : `${completed}/${total}`}
+                          {isDone ? <Icon icon="check" className="h-3.5 w-3.5" /> : isLocked ? '·' : `${completed}/${total}`}
                         </span>
 
-                        <span className="flex-grow min-w-0">
-                          <span className={`block text-sm font-bold truncate ${
-                            isLocked ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'
+                        <span className="min-w-0 grow">
+                          <span className={`block truncate text-[14px] font-semibold ${
+                            isLocked ? 'text-[#4A5566] dark:text-gray-500' : 'text-[#16202F] dark:text-white'
                           }`}>
                             {unit.title}
                           </span>
                           {unit.subtitle && (
-                            <span className="block text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                            <span className="block truncate text-[12px] text-[#4A5566] dark:text-gray-500">
                               {unit.subtitle}
                             </span>
                           )}
                         </span>
 
-                        <span className="flex-shrink-0 flex items-center gap-2">
-                          <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500">
+                        <span className="flex flex-none items-center gap-3">
+                          <span className="text-[12px] text-[#4A5566] dark:text-gray-500">
                             {unit.estMinutes} min
                           </span>
                           {isNext && (
-                            <span className="text-[11px] font-black text-[#E4572E] dark:text-[#F07A55] whitespace-nowrap">
+                            <span
+                              className="flex h-9 items-center whitespace-nowrap rounded-lg px-3.5 text-[13px] font-semibold text-white"
+                              style={{ background: groupAccent.light }}
+                            >
                               {completed > 0 ? 'Continue →' : 'Start →'}
                             </span>
                           )}

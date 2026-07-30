@@ -7,6 +7,7 @@ import { useXPStreak } from '../hooks/useXPStreak';
 import { useProgress } from '../contexts/ProgressContext';
 import { getNextUnit } from '../utils/learningUnits';
 import type { SRSDeck } from '../services/spacedRepetition';
+import { accentFor } from '../utils/moduleAccent';
 
 // "Today's Session" — a guided ~15-minute daily plan, persisted server-side
 // (DailySession) so it survives crashes/refreshes/device switches. Every step
@@ -20,7 +21,25 @@ import type { SRSDeck } from '../services/spacedRepetition';
 
 const REVIEW_GOAL = 5; // due-card reduction that completes the review step
 
-const STEP_ICONS: Record<DailySessionStep['id'], string> = { srs: '🧠', learn: '📖', quiz: '✍️' };
+// Korean glyph per step, in the mockup's language — a tinted well with a real
+// character, not an emoji. Learn steps take the glyph of the section they point
+// at, so the row tells you what kind of work it is before you read it.
+const SECTION_GLYPH: Partial<Record<Section, string>> = {
+  hangul: '한', vocabulary: '단', phrases: '말', grammar: '법',
+  culture: '문', reading: '독', writing: '쓰', typing: '타', honorifics: '님',
+};
+const glyphFor = (step: DailySessionStep): string =>
+  step.id === 'srs' ? '복' : step.id === 'quiz' ? '시' : (SECTION_GLYPH[step.target as Section] ?? '학');
+
+// Which module colour a step borrows.
+const accentSection = (step: DailySessionStep): Section =>
+  step.id === 'srs' ? 'srs' : step.id === 'quiz' ? 'quiz' : (step.target as Section);
+
+// Rough minutes per step kind — the card already advertises "~15 min" total;
+// these split it so each row says what it costs. Estimates, not measurements.
+const STEP_MINUTES: Record<DailySessionStep['id'], number> = { srs: 4, learn: 6, quiz: 3 };
+
+const KIND_LABEL: Record<DailySessionStep['id'], string> = { srs: 'REVIEW', learn: 'LEARN', quiz: 'QUIZ' };
 
 interface TodaysSessionProps {
   srsDue: number;
@@ -217,69 +236,170 @@ export default function TodaysSession({
 
   // ── Completed state ───────────────────────────────────────────────────────
   if (complete) {
+    const acc = accentFor('vocabulary');
     return (
-      <div className="rounded-2xl p-5 border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-900/20 flex items-center gap-4 flex-wrap">
-        <span className="text-3xl" aria-hidden="true">🎉</span>
-        <div className="flex-1 min-w-[220px]">
-          <h2 className="text-base font-black text-emerald-900 dark:text-emerald-200">Today's session complete!</h2>
-          <p className="text-sm text-emerald-700 dark:text-emerald-300">
-            {total} of {total} steps done — your streak is safe. 오늘도 화이팅! 🔥
+      <div className="kl-card flex flex-wrap items-center gap-5 p-6">
+        <div
+          className="flex h-[62px] w-[62px] flex-none items-center justify-center rounded-[14px] font-korean text-2xl font-bold"
+          style={{ background: `${acc.light}24`, border: `1px solid ${acc.light}52`, color: acc.light }}
+        >
+          완
+        </div>
+        <div className="min-w-[220px] flex-1">
+          <div className="mb-1 text-[12.5px] font-semibold text-[#2E6B59] dark:text-[#5FB89B]">
+            ALL {total} STEPS DONE
+          </div>
+          <h2 className="font-display text-[21px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+            Today's session is complete
+          </h2>
+          <p className="mt-1.5 text-[13.5px] text-[#3E4A5A] dark:text-gray-400">
+            Your streak is safe. Rest is part of it — see you tomorrow.
           </p>
         </div>
-        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">See you tomorrow 🌱</span>
       </div>
     );
   }
 
-  // ── Active session card — light card in light mode, ink gradient in dark ──
+  // ── Active session card ───────────────────────────────────────────────────
+  // The mockup's queue shape: the step you are on owns the top of the card as a
+  // hero row (big well, kind label, headline, one sentence, solid button); the
+  // remaining steps are compact rows underneath, each with its own visible
+  // button. Nothing is hover-only.
+  const isCurrentStep = (s: DailySessionStep) => current?.id === s.id && current?.target === s.target;
+
+  // One honest sentence per step kind, from real numbers.
+  const blurbFor = (step: DailySessionStep): string => {
+    if (step.id === 'srs') {
+      const toGo = Math.max(0, srsDue - Math.max(0, step.baseline - step.goal));
+      return `${toGo} ${toGo === 1 ? 'card is' : 'cards are'} due now. Clearing them keeps words you have already met from slipping away.`;
+    }
+    if (step.id === 'learn') {
+      const got = Math.min(step.goal, Math.max(0, metricFor(step) - step.baseline));
+      return `${got} of ${step.goal} done. Small units — you can finish this one in a sitting.`;
+    }
+    return 'One short quiz to lock in what you learned today.';
+  };
+
   return (
-    <div className="kl-card p-5 sm:p-6">
-      <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
-        <h2 className="font-display text-[17px] font-semibold tracking-[-0.01em] flex items-center gap-2 text-[#16202F] dark:text-white">
-          ⚡ Today's Session
-          <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-[#E4572E]/10 text-[#C13F22] dark:bg-white/10 dark:text-white/70">~15 min</span>
+    <div className="kl-card overflow-hidden">
+      {/* Card header */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[rgba(20,32,47,0.12)] px-6 pb-3.5 pt-5 dark:border-gray-800">
+        <h2 className="font-display text-[17px] font-semibold tracking-[-0.01em] text-[#16202F] dark:text-white">
+          Today's session
         </h2>
-        <span className="text-xs font-bold text-gray-400 dark:text-white/60">{doneCount}/{total} done · progress saved automatically</span>
+        <span className="text-[12.5px] text-[#4A5566] dark:text-gray-400">
+          {doneCount}/{total} done · ~15 min · saved automatically
+        </span>
       </div>
 
-      {/* Steps */}
-      <div className="space-y-2 mb-4">
-        {session.steps.map(step => {
-          const isCurrent = current?.id === step.id && current?.target === step.target;
+      {session.steps.map((step, i) => {
+        const acc = accentFor(accentSection(step));
+        const hero = isCurrentStep(step);
+        const stepNo = i + 1;
+
+        // ── Hero row: the step you are on ──
+        if (hero) {
           return (
-            <button
+            <div
               key={`${step.id}-${step.target}`}
-              onClick={() => !step.done && startStep(step)}
-              disabled={step.done}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left transition-all duration-150 ${
-                step.done
-                  ? 'bg-gray-50 text-gray-400 dark:bg-white/5 dark:text-white/40'
-                  : isCurrent
-                  ? 'bg-[#E4572E]/10 border border-[#E4572E]/40 hover:bg-[#E4572E]/15 text-gray-900 dark:bg-white/15 dark:border-[#F07A55]/50 dark:hover:bg-white/20 dark:text-white'
-                  : 'bg-gray-50 hover:bg-gray-100 text-gray-600 dark:bg-white/5 dark:hover:bg-white/10 dark:text-white/70'
-              }`}
+              className="flex flex-col gap-5 border-b border-[rgba(20,32,47,0.12)] px-6 py-5 sm:flex-row sm:items-center sm:gap-6 dark:border-gray-800"
             >
-              <span className="text-lg" aria-hidden="true">{step.done ? '✅' : STEP_ICONS[step.id]}</span>
-              <span className={`flex-1 text-sm font-semibold ${step.done ? 'line-through' : ''}`}>{displayLabel(step)}</span>
-              {isCurrent && <span className="text-[10px] font-black uppercase tracking-wider text-[#C13F22] dark:text-[#F07A55]">Up next →</span>}
-            </button>
-          );
-        })}
-      </div>
+              <div
+                className="flex h-[78px] w-[78px] flex-none flex-col items-center justify-center rounded-[14px]"
+                style={{ background: `${acc.light}24`, border: `1px solid ${acc.light}52` }}
+              >
+                {step.id === 'srs' ? (
+                  <>
+                    <span className="text-[26px] font-bold leading-none" style={{ color: acc.light }}>{srsDue}</span>
+                    <span className="mt-1 text-[11.5px] font-medium" style={{ color: acc.light }}>cards</span>
+                  </>
+                ) : (
+                  <span className="font-korean text-[30px] font-bold leading-none" style={{ color: acc.light }}>
+                    {glyphFor(step)}
+                  </span>
+                )}
+              </div>
 
-      {/* Progress + CTA */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1 h-2 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
-          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(doneCount / total) * 100}%`, background: 'var(--brand-gradient-h)' }} />
-        </div>
-        {current && (
-          <button
-            onClick={() => startStep(current)}
-            className="flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-black text-white btn-brand"
+              <div className="min-w-0 flex-1">
+                <div className="mb-1.5 text-[13px] font-semibold" style={{ color: acc.light }}>
+                  STEP {stepNo} OF {total} · {KIND_LABEL[step.id]} · {STEP_MINUTES[step.id]} MIN
+                </div>
+                <div className="font-display text-[23px] font-semibold leading-[1.2] tracking-[-0.02em] text-[#16202F] dark:text-white">
+                  {step.label}
+                </div>
+                <p className="mt-2 text-[14px] leading-[1.55] text-[#3E4A5A] dark:text-gray-400">
+                  {blurbFor(step)}
+                </p>
+              </div>
+
+              <button
+                onClick={() => startStep(step)}
+                className="flex h-12 flex-none items-center justify-center rounded-[10px] px-6 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+                style={{ background: acc.light, boxShadow: `0 5px 16px ${acc.light}52` }}
+              >
+                {step.id === 'srs' ? 'Start review' : step.id === 'quiz' ? 'Start quiz' : 'Open lesson'}
+              </button>
+            </div>
+          );
+        }
+
+        // ── Compact row: done, or waiting its turn ──
+        return (
+          <div
+            key={`${step.id}-${step.target}`}
+            className={`flex items-center gap-4 px-6 py-4 ${
+              i < session.steps.length - 1 ? 'border-b border-[rgba(20,32,47,0.12)] dark:border-gray-800' : ''
+            }`}
           >
-            {doneCount === 0 ? "Start today's session →" : 'Continue →'}
-          </button>
-        )}
+            <div
+              className="flex h-[54px] w-[54px] flex-none items-center justify-center rounded-xl font-korean text-[22px] font-bold"
+              style={
+                step.done
+                  ? { background: 'rgba(20,32,47,0.04)', border: '1px solid rgba(20,32,47,0.10)', color: '#4A5566' }
+                  : { background: `${acc.light}1A`, border: `1px solid ${acc.light}45`, color: acc.light }
+              }
+            >
+              {step.done ? '✓' : glyphFor(step)}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="mb-1 text-[12.5px] font-semibold text-[#4A5566] dark:text-gray-500">
+                STEP {stepNo} · {KIND_LABEL[step.id]}
+                {!step.done && ` · ${STEP_MINUTES[step.id]} MIN`}
+                {step.done && ' · DONE'}
+              </div>
+              <div
+                className={`truncate text-[16px] font-semibold ${
+                  step.done ? 'text-[#4A5566] line-through dark:text-gray-500' : 'text-[#16202F] dark:text-white'
+                }`}
+              >
+                {displayLabel(step)}
+              </div>
+            </div>
+
+            {!step.done && (
+              <button
+                onClick={() => startStep(step)}
+                className="flex h-11 flex-none items-center rounded-[9px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[14px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+              >
+                Open
+              </button>
+            )}
+          </div>
+        );
+      })}
+
+      {/* Overall progress */}
+      <div className="flex items-center gap-3 px-6 py-4">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[rgba(20,32,47,0.10)] dark:bg-gray-800">
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${(doneCount / total) * 100}%`, background: 'var(--brand-gradient-h)' }}
+          />
+        </div>
+        <span className="flex-none text-[12px] font-medium text-[#4A5566] dark:text-gray-500">
+          {Math.round((doneCount / total) * 100)}%
+        </span>
       </div>
     </div>
   );

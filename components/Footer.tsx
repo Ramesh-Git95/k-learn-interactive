@@ -55,7 +55,7 @@ const Footer: React.FC = () => {
 
   return (
     <>
-      <footer className="bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 mt-auto">
+      <footer className="bg-[#FFFCF4] dark:bg-gray-900 border-t border-[rgba(20,32,47,0.14)] dark:border-gray-800 mt-auto">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
 
