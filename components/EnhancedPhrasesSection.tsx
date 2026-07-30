@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
+import { Heart, Check, Circle, Lock } from 'lucide-react';
 import { commonPhrases } from '../data/koreanData';
-import type { Bookmark, PhraseItem } from '../types';
-import Tooltip from './Tooltip';
+import { phraseNoteFor, WORD_FREQUENCY } from '../data/phraseNotes';
+import type { Bookmark, PhraseItem, Section } from '../types';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { useDailyActivity } from '../hooks/useDailyActivity';
 import { LockedRowBanner } from './PremiumLock';
@@ -10,38 +11,59 @@ import SoundItOutModal from './SoundItOutModal';
 import PronunciationButton from './PronunciationButton';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
 import { FREE_PHRASES_COUNT } from '../constants';
+import { accentFor } from '../utils/moduleAccent';
 
-interface EnhancedPhrasesSectionProps {
+// Phrases, one at a time, with its set beside it.
+//
+// This used to be a flat list of sixteen rows, every phrase equally loud and
+// nothing explaining how any of them were built. It is now mockup 2d's shape:
+// the set lives in a column on the left so you can see where this phrase sits
+// without leaving the page, and the phrase itself owns the middle — said, heard,
+// and then taken apart word by word.
+//
+// The word-by-word notes live in data/phraseNotes.ts. They also make a pattern
+// visible that the flat list hid completely: 주세요 appears in six of these
+// phrases, so learning it once unlocks all six.
+
+const ACC = accentFor('phrases');
+
+interface Props {
   bookmarks: Bookmark[];
   toggleBookmark: (bookmark: Bookmark) => void;
   progress: { [key: string]: boolean };
   toggleProgress: (key: string) => void;
+  setActiveSection?: (section: Section) => void;
 }
 
-const CONTEXT_COLORS: Record<string, string> = {
-  'Shopping':       '#10B981',
-  'Restaurant':     '#F97316',
-  'Directions':     '#6366F1',
-  'Introductions':  '#E4572E',
-  'General':        '#3F8571',
-  'Communication':  '#2F5D8A',
-  'Feelings':       '#F59E0B',
-  'Health':         '#24476B',
-  'Emergency':      '#EF4444',
-};
-
-const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmarks, toggleBookmark, progress, toggleProgress }) => {
+const EnhancedPhrasesSection: React.FC<Props> = ({
+  bookmarks, toggleBookmark, progress, toggleProgress, setActiveSection,
+}) => {
   const { hasReachedLimit, getLimit, subscriptionTier } = useFeatureAccess();
   const { dailyActivity, trackActivity } = useDailyActivity();
   const { openUpgradeModal } = useUpgradeModal();
   const [soundOut, setSoundOut] = useState<PhraseItem | null>(null);
+  const [picked, setPicked] = useState<string | null>(null);
+  // Which topics are open. Derived default (only the current topic) rather than
+  // seeded state, so it follows the phrase you are on instead of a stale mount
+  // snapshot. An explicit tap always wins.
+  const [groupOverrides, setGroupOverrides] = useState<Record<string, boolean>>({});
 
   const isBookmarked = (item: PhraseItem) => bookmarks.some(b => 'korean' in b && b.korean === item.korean);
   const isPhraseStudied = (i: number) => !!progress[`phrase_${i}`];
+  const origIndex = (p: PhraseItem) => commonPhrases.findIndex(x => x.korean === p.korean);
+
+  const visible = useMemo(
+    () => (subscriptionTier === 'free' ? commonPhrases.slice(0, FREE_PHRASES_COUNT) : commonPhrases),
+    [subscriptionTier],
+  );
+
+  const phrasesLimit = getLimit('phrasesStudyPerDay') as number;
+  const currentCount = dailyActivity.phrasesStudied;
+  const limitReached = subscriptionTier === 'free' && hasReachedLimit('phrasesStudyPerDay', currentCount);
 
   const handlePhraseStudied = (i: number) => {
-    const alreadyStudied = isPhraseStudied(i);
-    if (subscriptionTier === 'free' && !alreadyStudied) {
+    const already = isPhraseStudied(i);
+    if (subscriptionTier === 'free' && !already) {
       if (hasReachedLimit('phrasesStudyPerDay', dailyActivity.phrasesStudied)) return false;
       trackActivity('phrases', 1);
     }
@@ -49,26 +71,51 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
     return true;
   };
 
-  const filteredPhrases = useMemo(() =>
-    subscriptionTier === 'free' ? commonPhrases.slice(0, FREE_PHRASES_COUNT) : commonPhrases,
-    [subscriptionTier]);
+  // Open on the first phrase not yet studied — the page starts where the work is.
+  const frontier = visible.find(p => !isPhraseStudied(origIndex(p))) ?? visible[0];
+  const phrase = visible.find(p => p.korean === picked) ?? frontier;
 
-  const studiedCount = filteredPhrases.filter((_, i) => {
-    const orig = commonPhrases.findIndex(p => p.korean === filteredPhrases[i].korean);
-    return isPhraseStudied(orig);
-  }).length;
-  const overallPct = filteredPhrases.length > 0 ? Math.round((studiedCount / filteredPhrases.length) * 100) : 0;
-  const phrasesLimit = getLimit('phrasesStudyPerDay') as number;
-  const currentCount = dailyActivity.phrasesStudied;
-  const limitReached = subscriptionTier === 'free' && hasReachedLimit('phrasesStudyPerDay', currentCount);
+  const studiedCount = visible.filter(p => isPhraseStudied(origIndex(p))).length;
 
-  // Soft guidance (never a lock): phrases display Korean text — nudge
-  // learners who haven't touched the alphabet yet.
+  // The set this phrase belongs to — our `context` field is exactly that.
+  const set = visible.filter(p => p.context === phrase?.context);
+  const setPosition = set.findIndex(p => p.korean === phrase?.korean) + 1;
+
+  const note = phrase ? phraseNoteFor(phrase.korean) : null;
+  const studied = phrase ? isPhraseStudied(origIndex(phrase)) : false;
+  const blocked = limitReached && !studied;
+
+  // Groups for the left column, in data order.
+  const groups = useMemo(() => {
+    const out: { context: string; items: PhraseItem[] }[] = [];
+    visible.forEach(p => {
+      const g = out.find(x => x.context === p.context);
+      if (g) g.items.push(p);
+      else out.push({ context: p.context, items: [p] });
+    });
+    return out;
+  }, [visible]);
+
+  // A topic is open if it holds the phrase you are reading, unless you say otherwise.
+  const isGroupOpen = (context: string) => groupOverrides[context] ?? (context === phrase?.context);
+
   const hangulStudied = Object.keys(progress).filter(k => k.startsWith('hangul_char_') && progress[k]).length;
 
+  if (!phrase) {
+    return (
+      <div className="mx-auto max-w-6xl py-16 text-center">
+        <p className="text-[15px] text-[#4A5566] dark:text-gray-400">No phrases available.</p>
+      </div>
+    );
+  }
+
+  const nextPhrase = (() => {
+    const i = visible.findIndex(p => p.korean === phrase.korean);
+    return i >= 0 && i < visible.length - 1 ? visible[i + 1] : null;
+  })();
+
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
-      {/* Sound-it-out (syllable player) modal */}
+    <div className="mx-auto max-w-6xl">
       {soundOut && (
         <SoundItOutModal
           korean={soundOut.korean}
@@ -81,177 +128,300 @@ const EnhancedPhrasesSection: React.FC<EnhancedPhrasesSectionProps> = ({ bookmar
       {hangulStudied < 10 && (
         <SoftNudge
           id="hangul-first-phrases"
-          className="mb-6"
-          text={<>💭 Tip: most learners do <strong>Hangul basics first</strong> (~30 min) — the romanization here helps, but reading the real Korean is the goal.</>}
+          className="mb-5"
+          text={<>Most learners do <strong>Hangul basics first</strong> (~30 min) — the romanization here helps, but reading the real Korean is the goal.</>}
           actionLabel="Start Hangul →"
           actionSection="hangul"
         />
       )}
 
-      {/* Hero */}
-      <div
-        className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
-        style={{ background: 'var(--brand-gradient-hero)' }}
-      >
-        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
-          {['안녕','감사합니다','실례합니다','괜찮아요'].map((w, i) => (
-            <span key={i} className="absolute font-black text-white/10" style={{ fontSize: `${1.2 + (i % 2) * 0.6}rem`, top: `${(i * 37) % 85}%`, left: `${(i * 43) % 80}%` }}>{w}</span>
-          ))}
-        </div>
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-4xl">💬</span>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-black text-white">Common Phrases</h1>
-                <p className="text-[#FBDCCB] text-sm">일상 표현 · {filteredPhrases.length} phrases</p>
-              </div>
-            </div>
-            <p className="text-white/80 text-sm max-w-lg">
-              Master essential Korean phrases for everyday conversation. Tap 🔊 to sound it out syllable-by-syllable, ❤️ to bookmark, ✓ to mark as studied.
-            </p>
-          </div>
-          <div className="flex-shrink-0 bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center min-w-[110px]">
-            <div className="text-3xl font-black text-white">{studiedCount}/{filteredPhrases.length}</div>
-            <div className="text-xs text-white/70 mb-2">studied</div>
-            <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
-              <div className="h-full bg-white rounded-full transition-all duration-700" style={{ width: `${overallPct}%` }} />
-            </div>
-          </div>
+      {/* ── Header ── */}
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+        <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+          {phrase.context}
+          <span className="text-[#4A5566] dark:text-gray-500"> · phrase {setPosition} of {set.length}</span>
+        </h1>
+        {/* The tutor hand-off lives once, at the foot of the phrase — the point
+            where you have actually read it and might want to try saying it. */}
+        <div className="flex flex-none items-center gap-3.5">
+          <span className="text-[13.5px] text-[#4A5566] dark:text-gray-500">
+            {studiedCount} of {visible.length} studied
+          </span>
         </div>
       </div>
 
-      {/* Daily limit bar */}
+      {/* ── Daily limit ── */}
       {subscriptionTier === 'free' && (
-        <div className="mb-6 p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-4">
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Daily Phrase Limit</span>
-              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{currentCount}/{phrasesLimit}</span>
-            </div>
-            <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${Math.min((currentCount / phrasesLimit) * 100, 100)}%`,
-                  background: limitReached ? 'linear-gradient(90deg,#EF4444,#DC2626)' : 'var(--brand-gradient-h)',
-                }}
-              />
-            </div>
+        <div className="mb-5 flex items-center gap-4">
+          <span className="flex-none text-[12.5px] font-medium text-[#4A5566] dark:text-gray-400">Today</span>
+          <div className="h-1.5 max-w-xs flex-1 overflow-hidden rounded-full bg-[rgba(20,32,47,0.10)] dark:bg-gray-800">
+            <div className="h-full rounded-full transition-all duration-500"
+                 style={{ width: `${Math.min((currentCount / phrasesLimit) * 100, 100)}%`, background: limitReached ? '#C13F22' : ACC.light }} />
           </div>
-          {limitReached && <span className="text-xs font-bold text-red-500 flex-shrink-0">Limit reached</span>}
+          <span className="flex-none whitespace-nowrap text-[12.5px] text-[#4A5566] dark:text-gray-500">
+            {currentCount}/{phrasesLimit} phrases
+            {limitReached && <span className="ml-2 font-semibold text-[#C13F22] dark:text-[#F07A55]">limit reached</span>}
+          </span>
         </div>
       )}
 
-      {/* Phrases list — no overflow-hidden so row tooltips aren't clipped;
-          first/last rows round their own corners instead. */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-        {filteredPhrases.length > 0 ? (
-          <ul className="divide-y divide-gray-50 dark:divide-gray-800">
-            {filteredPhrases.map((phrase) => {
-              const origIdx = commonPhrases.findIndex(p => p.korean === phrase.korean);
-              const studied = isPhraseStudied(origIdx);
-              const isBlocked = limitReached && !studied;
-              const ctxColor = CONTEXT_COLORS[phrase.context] || '#3F8571';
+      <div className="flex flex-col items-start gap-5 lg:flex-row">
+        {/* ── The set, in a column. Second on mobile: the phrase you came to
+               read should not sit below a list you have to scroll past. ── */}
+        <div className="order-2 w-full flex-none lg:order-1 lg:w-[250px]">
+          <div className="mb-2.5 flex items-center justify-between gap-2">
+            <span className="text-[13px] font-semibold text-[#4A5566] dark:text-gray-400">ALL PHRASES</span>
+            <button
+              onClick={() => {
+                const anyOpen = groups.some(g => isGroupOpen(g.context));
+                const next: Record<string, boolean> = {};
+                groups.forEach(g => { next[g.context] = !anyOpen; });
+                setGroupOverrides(next);
+              }}
+              className="text-[12px] font-semibold text-[#4A5566] transition-colors hover:text-[#16202F] dark:text-gray-500 dark:hover:text-gray-300"
+            >
+              {groups.some(g => isGroupOpen(g.context)) ? 'Collapse all' : 'Expand all'}
+            </button>
+          </div>
 
+          <div className="flex flex-col gap-1 lg:max-h-[560px] lg:overflow-y-auto">
+            {groups.map(group => {
+              const open = isGroupOpen(group.context);
+              const hasCurrent = group.context === phrase.context;
+              const doneInGroup = group.items.filter(p => isPhraseStudied(origIndex(p))).length;
               return (
-                <li
-                  key={phrase.korean}
-                  className={`p-4 sm:p-5 transition-all duration-200 first:rounded-t-2xl last:rounded-b-2xl ${studied ? 'bg-green-50/60 dark:bg-green-900/10' : 'hover:bg-gray-50/60 dark:hover:bg-gray-800/40'}`}
-                >
-                  {/* Left accent */}
-                  <div className="flex gap-3">
-                    <div className="w-1 rounded-full flex-shrink-0" style={{ background: studied ? '#22C55E' : ctxColor, minHeight: '100%' }} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <span className="text-lg font-black text-gray-900 dark:text-white">{phrase.korean}</span>
-                            {studied && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">✓ Studied</span>}
-                          </div>
-                          <p className="text-xs text-gray-400 dark:text-gray-500 italic mb-1">{phrase.romanization}</p>
-                          <p className="text-sm text-gray-700 dark:text-gray-300">{phrase.english}</p>
-                          <span
-                            className="inline-block mt-2 text-[11px] font-bold px-2.5 py-0.5 rounded-full text-white"
-                            style={{ background: ctxColor }}
-                          >
-                            {phrase.context}
-                          </span>
-                        </div>
+                <div key={group.context}>
+                  {/* Topic header — the thing you scan for */}
+                  <button
+                    onClick={() => setGroupOverrides(o => ({ ...o, [group.context]: !open }))}
+                    className={`flex w-full items-center gap-2 rounded-[10px] px-3 py-2.5 text-left transition-colors ${
+                      hasCurrent ? '' : 'hover:bg-[rgba(20,32,47,0.04)] dark:hover:bg-white/5'
+                    }`}
+                    style={hasCurrent ? { background: `${ACC.light}14` } : undefined}
+                    aria-expanded={open}
+                  >
+                    {hasCurrent && (
+                      <span className="kl-pulse h-1.5 w-1.5 flex-none rounded-full" style={{ background: ACC.light }} />
+                    )}
+                    <span
+                      className="min-w-0 flex-1 truncate text-[13px] font-semibold"
+                      style={{ color: hasCurrent ? ACC.light : undefined }}
+                    >
+                      <span className={hasCurrent ? '' : 'text-[#16202F] dark:text-gray-200'}>{group.context}</span>
+                    </span>
+                    <span className="flex-none text-[12px] text-[#4A5566] dark:text-gray-500">
+                      {doneInGroup}/{group.items.length}
+                    </span>
+                    <span
+                      className={`flex-none text-[10px] text-[#4A5566] transition-transform duration-200 dark:text-gray-500 ${
+                        open ? 'rotate-90' : ''
+                      }`}
+                      aria-hidden="true"
+                    >
+                      ▶
+                    </span>
+                  </button>
 
-                        {/* Action buttons */}
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <Tooltip content="Sound it out — syllable by syllable" position="top" maxWidth="max-w-xs">
-                            <button onClick={() => setSoundOut(phrase)} className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:text-[#E4572E] hover:bg-[#FDEEE6] dark:hover:bg-[#5F2010]/20 transition-colors text-base">
-                              🔊
-                            </button>
-                          </Tooltip>
-                          <PronunciationButton korean={phrase.korean} romanization={phrase.romanization} size="sm" />
-                          <Tooltip content={isBookmarked(phrase) ? 'Remove bookmark' : 'Bookmark this phrase'} position="top" maxWidth="max-w-xs">
-                            <button onClick={() => toggleBookmark(phrase)} className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors text-base ${isBookmarked(phrase) ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-400 hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'}`}>
-                              {isBookmarked(phrase) ? '❤️' : '🤍'}
-                            </button>
-                          </Tooltip>
-                          <Tooltip
-                            content={isBlocked ? 'Daily limit reached — upgrade for unlimited!' : studied ? 'Mark as unlearned' : 'Mark as studied'}
-                            position="top"
-                            maxWidth="max-w-xs"
+                  {open && (
+                    <div className="kl-drawer-panel mt-0.5 flex flex-col gap-0.5">
+                      {group.items.map(p => {
+                        const active = p.korean === phrase.korean;
+                        const isDone = isPhraseStudied(origIndex(p));
+                        return (
+                          <button
+                            key={p.korean}
+                            onClick={() => setPicked(p.korean)}
+                            className={`block w-full rounded-[10px] px-3 py-2.5 text-left transition-colors ${
+                              active ? '' : 'hover:bg-[rgba(20,32,47,0.04)] dark:hover:bg-white/5'
+                            }`}
+                            style={active
+                              ? { background: `${ACC.light}1A`, borderLeft: `3px solid ${ACC.light}`, paddingLeft: 9 }
+                              : undefined}
                           >
-                            <button
-                              onClick={() => { if (!isBlocked) handlePhraseStudied(origIdx); }}
-                              disabled={isBlocked}
-                              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors text-base ${
-                                isBlocked ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' :
-                                studied ? 'text-green-500 bg-green-50 dark:bg-green-900/20' :
-                                'text-gray-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20'
-                              }`}
-                            >
-                              {studied ? '✅' : '⭕'}
-                            </button>
-                          </Tooltip>
-                        </div>
-                      </div>
+                            <div className={`truncate font-korean text-[15px] ${
+                              active ? 'font-bold text-[#16202F] dark:text-white'
+                              : isDone ? 'font-medium text-[#16202F]/60 dark:text-gray-500'
+                              : 'font-medium text-[#16202F] dark:text-gray-200'
+                            }`}>
+                              {p.korean}
+                            </div>
+                            <div className="mt-0.5 truncate text-[12.5px] text-[#4A5566] dark:text-gray-500">
+                              {p.english}{isDone && ' · learned'}
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
-                  </div>
-                </li>
+                  )}
+                </div>
               );
             })}
-          </ul>
-        ) : (
-          <div className="p-8 text-center text-gray-400 dark:text-gray-500">No phrases available.</div>
-        )}
-      </div>
-
-      {/* Locked premium phrases */}
-      {subscriptionTier === 'free' && commonPhrases.length > filteredPhrases.length && (() => {
-        const peek = commonPhrases.slice(filteredPhrases.length, filteredPhrases.length + 3);
-        const gridCols = peek.length === 1 ? 'grid-cols-1' : peek.length === 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-3';
-        return (
-          <div className="mt-6 space-y-3">
-            {/* Up to 3 peek phrases to trigger curiosity */}
-            <div className={`grid ${gridCols} gap-3`}>
-              {peek.map(phrase => (
-                <div
-                  key={phrase.korean}
-                  className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 cursor-pointer hover:border-[#93C2AE] dark:hover:border-[#265847] transition-colors"
-                  onClick={openUpgradeModal}
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-gray-400 dark:text-gray-500 truncate">{phrase.korean}</p>
-                    <p className="text-xs text-gray-300 dark:text-gray-600 truncate">{phrase.english}</p>
-                  </div>
-                  <span className="text-sm ml-2 flex-shrink-0">🔒</span>
-                </div>
-              ))}
-            </div>
-            <LockedRowBanner
-              count={commonPhrases.length - filteredPhrases.length}
-              label="phrases"
-              singularLabel="phrase"
-            />
           </div>
-        );
-      })()}
+
+          {/* Locked phrases */}
+          {subscriptionTier === 'free' && commonPhrases.length > visible.length && (
+            <div className="mt-4 space-y-2.5">
+              {commonPhrases.slice(visible.length, visible.length + 3).map(p => (
+                <button
+                  key={p.korean}
+                  onClick={openUpgradeModal}
+                  className="flex w-full items-center justify-between gap-2 rounded-[10px] border border-dashed border-[rgba(20,32,47,0.2)] px-3 py-2.5 text-left transition-colors hover:border-[rgba(20,32,47,0.35)] dark:border-gray-700"
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate font-korean text-[14px] font-medium text-[#4A5566] dark:text-gray-500">{p.korean}</span>
+                    <span className="block truncate text-[12px] text-[#4A5566]/70 dark:text-gray-600">{p.english}</span>
+                  </span>
+                  <Lock className="h-3.5 w-3.5 flex-none text-[#4A5566] dark:text-gray-500" />
+                </button>
+              ))}
+              <LockedRowBanner
+                count={commonPhrases.length - visible.length}
+                label="phrases"
+                singularLabel="phrase"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* ── The phrase — first on mobile, right-hand column on desktop ── */}
+        <div className="order-1 w-full min-w-0 flex-1 lg:order-2">
+          <div
+            className="mb-4 flex items-start gap-3 rounded-r-lg border-l-[3px] px-4 py-3 sm:items-center"
+            style={{ borderColor: ACC.light, background: `${ACC.light}14` }}
+          >
+            <span className="kl-accent flex-none whitespace-nowrap text-[12.5px] font-semibold"
+                  style={{ ['--kl-acc' as string]: ACC.light, ['--kl-acc-dk' as string]: ACC.dark }}>
+              DO THIS NEXT
+            </span>
+            <span className="text-[13.5px] leading-snug text-[#16202F] dark:text-gray-200">
+              Listen once, say it out loud, then check the breakdown below.
+            </span>
+          </div>
+
+          {/* The phrase itself */}
+          <div
+            className="relative rounded-[18px] border border-[rgba(20,32,47,0.14)] p-6 shadow-[0_12px_34px_rgba(20,32,47,0.09)] sm:p-8 dark:border-gray-800"
+            style={{ background: `linear-gradient(150deg, ${ACC.light}0F, ${ACC.light}1F)` }}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="text-[13px] font-semibold" style={{ color: ACC.light }}>
+                {note?.when ?? phrase.context.toUpperCase()}
+              </div>
+              <div className="flex flex-none items-center gap-1">
+                <button
+                  onClick={() => toggleBookmark(phrase)}
+                  className="rounded-lg p-1.5 transition-colors"
+                  title={isBookmarked(phrase) ? 'Saved — tap to remove' : 'Save this phrase'}
+                  aria-label={isBookmarked(phrase) ? 'Remove bookmark' : 'Add bookmark'}
+                >
+                  <Heart
+                    className={`h-[18px] w-[18px] ${isBookmarked(phrase) ? '' : 'text-[#4A5566] dark:text-gray-500'}`}
+                    style={isBookmarked(phrase) ? { color: '#C13F22' } : undefined}
+                    fill={isBookmarked(phrase) ? '#C13F22' : 'none'}
+                  />
+                </button>
+                <button
+                  onClick={() => { if (!blocked) handlePhraseStudied(origIndex(phrase)); }}
+                  disabled={blocked}
+                  className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12.5px] font-semibold transition-colors disabled:opacity-40"
+                  style={{ color: studied ? ACC.light : '#4A5566' }}
+                  title={blocked ? 'Daily limit reached' : studied ? 'Mark as not studied' : 'Mark as studied'}
+                >
+                  {studied ? <Check className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
+                  {studied ? 'studied' : 'mark studied'}
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-3.5 break-words font-korean text-[32px] font-bold leading-[1.25] text-[#16202F] sm:text-[42px] dark:text-white">
+              {phrase.korean}
+            </div>
+            <div className="mt-3 text-[16px] text-[#4A5566] dark:text-gray-400">{phrase.romanization}</div>
+            <div className="mt-3.5 font-display text-[20px] font-semibold tracking-[-0.02em] text-[#16202F] sm:text-[24px] dark:text-white">
+              {phrase.english}
+            </div>
+
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setSoundOut(phrase)}
+                className="flex h-12 items-center gap-2.5 rounded-[10px] px-[22px] text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+                style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+                title="Sound it out — syllable by syllable"
+              >
+                <span className="flex h-3.5 items-end gap-[2.5px]" aria-hidden="true">
+                  <span className="kl-bar w-[3px] bg-white" style={{ height: '100%' }} />
+                  <span className="kl-bar w-[3px] bg-white" style={{ height: '100%', animationDelay: '0.15s' }} />
+                  <span className="kl-bar w-[3px] bg-white" style={{ height: '100%', animationDelay: '0.3s' }} />
+                </span>
+                Hear it
+              </button>
+              <PronunciationButton korean={phrase.korean} romanization={phrase.romanization} size="sm" />
+              <span className="text-[13.5px] text-[#4A5566] dark:text-gray-500">
+                Played syllable by syllable.
+              </span>
+            </div>
+          </div>
+
+          {/* Word by word */}
+          {note && (
+            <>
+              <div className="mb-2.5 mt-6 text-[14px] font-semibold text-[#16202F] dark:text-white">Word by word</div>
+              <div className="overflow-hidden rounded-xl border border-[rgba(20,32,47,0.12)] bg-[#FFFCF4] dark:border-gray-800 dark:bg-gray-900">
+                <div className="hidden bg-[rgba(20,32,47,0.045)] px-4 py-2.5 text-[12.5px] font-semibold text-[#4A5566] sm:grid sm:grid-cols-[150px_130px_1fr] dark:bg-white/5 dark:text-gray-400">
+                  <span>KOREAN</span><span>SOUNDS LIKE</span><span>MEANS</span>
+                </div>
+                {note.words.map((w, i) => {
+                  const seen = WORD_FREQUENCY[w.korean] ?? 0;
+                  return (
+                    <div
+                      key={i}
+                      className="grid items-center gap-1 border-t border-[rgba(20,32,47,0.10)] px-4 py-3 sm:grid-cols-[150px_130px_1fr] sm:gap-0 dark:border-gray-800"
+                    >
+                      <span className="font-korean text-[19px] font-bold text-[#16202F] dark:text-white">{w.korean}</span>
+                      <span className="text-[13.5px] text-[#4A5566] dark:text-gray-400">{w.sounds}</span>
+                      <span className="text-[14.5px] text-[#3E4A5A] dark:text-gray-300">
+                        {w.means}
+                        {seen > 1 && (
+                          <span
+                            className="ml-2 whitespace-nowrap rounded-full px-2 py-0.5 text-[11.5px] font-semibold"
+                            style={{ background: `${ACC.light}1F`, color: ACC.light }}
+                            title={`This piece appears in ${seen} of the phrases here`}
+                          >
+                            in {seen} phrases
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* Move on */}
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            {setActiveSection && (
+              <button
+                onClick={() => setActiveSection('conversation')}
+                className="flex h-12 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+              >
+                Try it with the tutor
+              </button>
+            )}
+            {nextPhrase && (
+              <button
+                onClick={() => setPicked(nextPhrase.korean)}
+                className="ml-auto flex h-12 items-center gap-2.5 rounded-[10px] px-5 text-[14px] font-semibold text-white transition-transform hover:scale-[1.02]"
+                style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}52` }}
+              >
+                <span className="hidden sm:inline">Next phrase:</span>
+                <span className="font-korean">{nextPhrase.korean}</span>
+                →
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
