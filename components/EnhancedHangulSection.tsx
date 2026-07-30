@@ -66,7 +66,13 @@ const HangulSection: React.FC<HangulSectionProps> = ({ progress = {}, toggleProg
   // Only a LETTER counts as studied. Example words are spoken without writing
   // progress — a `hangul_char_밥` key would be junk in the DB and would also
   // award XP off the `hangul_` prefix (see utils/xpAwards.ts).
-  const speakLetter = (char: string) => { say(char); markStudied(char); };
+  //
+  // Pinning the letter here matters: without it, marking this letter studied moves
+  // the frontier, and since `picked` was still null the page would jump to the
+  // next letter the instant you pressed "Hear it" — taking the strokes with it and
+  // contradicting the instruction to hear it twice. Advancing is the Next
+  // letter button's job, not a side effect of playing a sound.
+  const speakLetter = (char: string) => { say(char); markStudied(char); setPicked(char); };
 
   // Words the learner can genuinely read now: spelled only with letters they
   // have learned (counting this one), and containing this letter.
@@ -276,12 +282,21 @@ const HangulSection: React.FC<HangulSectionProps> = ({ progress = {}, toggleProg
           label="The whole alphabet"
           meta={`${consonants.length} consonants · ${vowels.length} vowels`}
           action={
+            // Once this letter is learned, moving on becomes the obvious step —
+            // so the button fills in rather than the page moving on its own.
             <button
               onClick={() => setPicked(nextLetter.char)}
-              className="flex h-14 flex-none items-center gap-2 whitespace-nowrap rounded-xl border border-[rgba(20,32,47,0.14)] bg-[rgba(255,252,244,0.7)] px-5 text-[14px] font-semibold text-[#16202F] transition-colors hover:bg-[#FFFCF4] dark:border-gray-800 dark:bg-gray-900/50 dark:text-white dark:hover:bg-gray-900"
+              className={`flex h-14 flex-none items-center gap-2 whitespace-nowrap rounded-xl px-5 text-[14px] font-semibold transition-colors ${
+                isStudied(letter.char)
+                  ? 'text-white'
+                  : 'border border-[rgba(20,32,47,0.14)] bg-[rgba(255,252,244,0.7)] text-[#16202F] hover:bg-[#FFFCF4] dark:border-gray-800 dark:bg-gray-900/50 dark:text-white dark:hover:bg-gray-900'
+              }`}
+              style={isStudied(letter.char)
+                ? { background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }
+                : undefined}
             >
               Next letter: <span className="font-korean">{nextLetter.char}</span>
-              <ArrowRight className="h-4 w-4" style={{ color: ACC.light }} />
+              <ArrowRight className="h-4 w-4" style={isStudied(letter.char) ? undefined : { color: ACC.light }} />
             </button>
           }
         >

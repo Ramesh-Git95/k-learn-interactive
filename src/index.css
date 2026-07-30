@@ -285,6 +285,13 @@
   animation: klDraw 2.4s ease-in-out infinite alternate;
 }
 
+/* A quiet "live" pulse — marks the set you are mid-way through. */
+@keyframes klPulse {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%      { transform: scale(1.6); opacity: 0.35; }
+}
+.kl-pulse { animation: klPulse 1.8s ease-in-out infinite; }
+
 @keyframes klBars {
   0%, 100% { transform: scaleY(0.35); }
   50%      { transform: scaleY(1); }
@@ -295,8 +302,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kl-draw { animation: none; stroke-dashoffset: 0; }
-  .kl-bar  { animation: none; transform: scaleY(0.7); }
+  .kl-draw  { animation: none; stroke-dashoffset: 0; }
+  .kl-bar   { animation: none; transform: scaleY(0.7); }
+  .kl-pulse { animation: none; }
 }
 
 /* Cascade — cards entering left-to-right as a drawer section opens. Delay is set
