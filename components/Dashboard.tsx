@@ -17,6 +17,7 @@ import { vocabulary } from '../data/koreanData';
 import { useUpgrade } from '../hooks/useUpgrade';
 import { SECTIONS } from '../constants';
 import { getTopikEstimate, canSkipHangul } from '../utils/topikEstimate';
+import { accentFor } from '../utils/moduleAccent';
 
 
 interface DashboardProps {
@@ -52,16 +53,6 @@ const PRACTICE_TOOLS: { id: Section; label: string; icon: string; sub: string; f
   { id: 'topik',         label: 'TOPIK Prep',       icon: '📋', sub: 'Official exam questions',          freeLabel: '3 q free',     isPremium: true },
 ];
 
-const MOTIVATIONAL = [
-  { ko: '할 수 있어요!',       en: 'You can do it!' },
-  { ko: '화이팅!',             en: 'Fighting!' },
-  { ko: '열심히 해요!',       en: 'Work hard!' },
-  { ko: '잘 하고 있어요!',    en: "You're doing great!" },
-  { ko: '포기하지 마요!',     en: "Don't give up!" },
-  { ko: '오늘도 화이팅!',     en: 'Keep going today!' },
-  { ko: '조금씩 나아가요!',   en: 'Progress step by step!' },
-];
-
 const LEVEL_NAMES = ['', 'Beginner', 'Elementary', 'Pre-Intermediate', 'Intermediate', 'Upper-Int.', 'Advanced', 'Proficient', 'Expert', 'Master', 'Legend'];
 
 const getDailyWord = () => {
@@ -87,8 +78,6 @@ export default function Dashboard({
   const [showShareWord, setShowShareWord]     = useState(false);
   const [sessionDone, setSessionDone]         = useState(false);
 
-  const today      = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const motivation = MOTIVATIONAL[new Date().getDay() % MOTIVATIONAL.length];
   const firstName  = user?.name?.split(' ')[0] ?? 'Learner';
   const dailyWord  = getDailyWord();
 
@@ -159,25 +148,41 @@ export default function Dashboard({
     return Math.round((getSectionCompletedItems(continueTarget.id) / total) * 100);
   })();
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <style>{`
-        .stat-card { transition: all 0.25s cubic-bezier(0.4,0,0.2,1); }
-        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.1); }
-        .dark .stat-card:hover { box-shadow: 0 12px 28px rgba(0,0,0,0.35); }
-        .action-btn { transition: all 0.25s cubic-bezier(0.4,0,0.2,1); }
-        .action-btn:hover { transform: translateY(-4px) scale(1.02); }
-        .section-card { transition: all 0.2s ease; cursor: pointer; }
-        .section-card:hover { transform: translateY(-2px); }
-        .progress-bar { transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
-        .korean-action-icon {
-          background: linear-gradient(135deg,#ffffff33,#ffffff11);
-          font-family: 'Pretendard Variable', sans-serif;
-          font-weight: 900;
-        }
-        .heatmap-dot { transition: all 0.2s ease; }
-      `}</style>
+  // Calm greeting (clarity redesign): time-aware line + an honest one-sentence
+  // read of real progress. Overall % and items-completed, which used to live in
+  // the ring, are folded into the subline so nothing is lost.
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const roundedOverall = Math.round(overall);
+  const completedCount = getTotalCompleted();
+  const subline = completedCount === 0
+    ? 'Your first lesson is waiting — ten quiet minutes is enough to begin.'
+    : `You're ${roundedOverall}% through the core path — ${completedCount} ${completedCount === 1 ? 'item' : 'items'} learned so far.`;
 
+  // The one honest next action, derived from real state — reviews first, else
+  // resume, else start. Feeds the "DO THIS NEXT" strip above the daily queue.
+  const hint = (() => {
+    if (srsStats.totalDue > 0) {
+      return {
+        accent: accentFor('srs'), label: 'DO THIS NEXT',
+        text: `Clear your ${srsStats.totalDue} review ${srsStats.totalDue === 1 ? 'card' : 'cards'} first — they lock in words you've already met, before they slip.`,
+      };
+    }
+    if (continueTarget) {
+      return {
+        accent: accentFor(continueTarget.id), label: 'DO THIS NEXT',
+        text: `Pick up ${continueTarget.title} where you left off${continuePct !== null ? ` — you're ${continuePct}% through` : ''}.`,
+      };
+    }
+    return {
+      accent: accentFor('vocabulary'), label: 'START HERE',
+      text: 'Begin with a few new words — ten quiet minutes is enough to feel it.',
+    };
+  })();
+
+  return (
+    // Canvas comes from the app root (App.tsx) so it is full-bleed, not a band.
+    <div>
       {/* Onboarding wizard is mounted once in App.tsx, gated on the account's
           decks in the DB — do not mount a second localStorage-gated copy here
           (it bypassed that check and re-created duplicate starter decks). */}
@@ -192,96 +197,76 @@ export default function Dashboard({
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
 
-        {/* ── Welcome Header ──────────────────────────── */}
-        <div className="relative rounded-3xl overflow-hidden p-8" style={{ background: 'linear-gradient(135deg, #0D141F 0%, #16202F 60%, #1E3A5C 100%)' }}>
-          <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10" style={{ background: '#E4572E', filter: 'blur(60px)', transform: 'translate(30%,-30%)' }} />
-          <div className="absolute bottom-0 left-1/3 w-48 h-48 rounded-full opacity-10" style={{ background: '#3F8571', filter: 'blur(50px)', transform: 'translateY(30%)' }} />
-
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        {/* ── Greeting — calm, on the canvas (clarity redesign) ── */}
+        <div>
+          <div className="flex items-end justify-between gap-6 flex-wrap">
             <div>
-              <p className="text-gray-400 text-sm mb-1">{today}</p>
-              <h1 className="text-3xl md:text-4xl font-black text-white mb-2">
-                안녕하세요, <span style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{firstName}!</span> 👋
+              <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-[-0.03em] text-[#16202F] dark:text-white">
+                {greeting}, {firstName}
               </h1>
-              <p className="text-gray-400 text-sm">
-                <span className="text-[#F07A55] font-semibold" style={{ fontFamily: 'Pretendard Variable, sans-serif' }}>{motivation.ko}</span>
-                {' '}— {motivation.en}
+              <p className="mt-2 max-w-xl text-[15px] sm:text-base text-[#3E4A5A] dark:text-gray-400">
+                {subline}
               </p>
             </div>
-
-            {/* Overall progress ring */}
-            <div className="flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/10">
-              <div className="relative w-16 h-16 flex-shrink-0">
-                <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
-                  <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="6" />
-                  <circle cx="32" cy="32" r="28" fill="none" stroke="url(#prog-grad)" strokeWidth="6" strokeLinecap="round"
-                    strokeDasharray={`${(overall / 100) * 175.9} 175.9`} />
-                  <defs>
-                    <linearGradient id="prog-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#E4572E" />
-                      <stop offset="100%" stopColor="#8E3B54" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-white font-black text-sm">{Math.round(overall)}%</span>
-              </div>
-              <div>
-                <div className="text-white font-bold">Overall Progress</div>
-                <div className="text-gray-400 text-xs">{getTotalCompleted()} items completed</div>
+            <div className="flex-none text-right">
+              <div className="text-[13px] font-semibold text-[#16202F] dark:text-white">Day {xp.currentStreak} streak</div>
+              <div className="mt-0.5 text-[13px] text-[#4A5566] dark:text-gray-500">
+                Longest: {xp.longestStreak} {xp.longestStreak === 1 ? 'day' : 'days'}
               </div>
             </div>
           </div>
 
-          {/* ── XP Level bar ── */}
-          <div className="relative z-10 mt-5 pt-5 border-t border-white/10">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black px-2.5 py-1 rounded-full text-white" style={{ background: 'var(--brand-gradient)' }}>
-                  Lv.{xp.level} {levelName}
-                </span>
-                <span className="text-gray-400 text-xs">{xp.totalXP} XP total</span>
-                {/* TOPIK level card — surfaces the assessment + placement */}
-                <button
-                  onClick={() => setActiveSection('topik-test')}
-                  className="text-xs font-black px-2.5 py-1 rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors"
-                  title="TOPIK level assessment"
-                >
-                  {topikEstimate ? `📊 TOPIK ~${topikEstimate.level} · Test again →` : '📊 Find your level →'}
-                </button>
+          {/* Level · XP · TOPIK placement · Sync — every function from the old
+              dark header, re-homed into one quiet strip. Nothing dropped. */}
+          <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-[rgba(20,32,47,0.12)] pt-5 dark:border-gray-800">
+            <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold text-white" style={{ background: 'var(--brand-gradient)' }}>
+              Lv.{xp.level} · {levelName}
+            </span>
+            <span className="text-[11px] text-[#4A5566] dark:text-gray-500">{xp.totalXP} XP total</span>
+            <div className="flex min-w-[160px] max-w-xs flex-1 items-center gap-2">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[rgba(20,32,47,0.10)] dark:bg-gray-800">
+                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (xp.xpInLevel / xp.xpForLevel) * 100)}%`, background: 'var(--brand-gradient-h)' }} />
               </div>
-              <span className="text-gray-500 text-xs">{xp.xpInLevel} / {xp.xpForLevel} XP to next level</span>
+              <span className="whitespace-nowrap text-[11px] text-[#4A5566] dark:text-gray-500">{xp.xpInLevel}/{xp.xpForLevel} XP</span>
             </div>
-            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{
-                  width:      `${Math.min(100, (xp.xpInLevel / xp.xpForLevel) * 100)}%`,
-                  background: 'var(--brand-gradient-h)',
-                }}
-              />
-            </div>
-          </div>
-
-          {isAuthenticated && (
-            <div className="relative z-10 mt-4 flex items-center justify-between">
-              <span className="text-gray-500 text-xs">Progress is auto-synced to the cloud</span>
+            <button
+              onClick={() => setActiveSection('topik-test')}
+              className="whitespace-nowrap text-[12px] font-semibold text-[#2F5D8A] hover:underline dark:text-[#7FB0E0]"
+              title="TOPIK level assessment"
+            >
+              {topikEstimate ? `TOPIK ~${topikEstimate.level} · retest` : 'Find your level →'}
+            </button>
+            {isAuthenticated && (
               <button
                 onClick={async () => {
-                  try {
-                    await syncLocalData();
-                    showToast('Progress synced!', 'success');
-                  } catch {
-                    showToast('Sync failed. Check your connection.', 'error');
-                  }
+                  try { await syncLocalData(); showToast('Progress synced!', 'success'); }
+                  catch { showToast('Sync failed. Check your connection.', 'error'); }
                 }}
                 disabled={isSyncing}
-                className="flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-semibold text-white border border-white/20 hover:border-[#F07A55]/50 transition-colors disabled:opacity-40"
+                className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#4A5566] transition-colors hover:text-[#16202F] disabled:opacity-40 dark:text-gray-400 dark:hover:text-gray-200"
+                title="Sync progress to the cloud"
               >
-                <span className={isSyncing ? 'animate-spin inline-block' : ''}>🔄</span>
-                {isSyncing ? 'Syncing…' : 'Sync Now'}
+                <svg className={`h-3.5 w-3.5 ${isSyncing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                {isSyncing ? 'Syncing…' : 'Sync'}
               </button>
-            </div>
-          )}
+            )}
+          </div>
+        </div>
+
+        {/* ── DO THIS NEXT — one honest next action, from real state ── */}
+        <div
+          className="flex items-start gap-3 rounded-r-lg border-l-[3px] px-4 py-3 sm:items-center"
+          style={{ borderColor: hint.accent.light, background: `${hint.accent.light}14` }}
+        >
+          <span
+            className="kl-accent flex-none whitespace-nowrap text-[12.5px] font-semibold"
+            style={{ ['--kl-acc' as string]: hint.accent.light, ['--kl-acc-dk' as string]: hint.accent.dark }}
+          >
+            {hint.label}
+          </span>
+          <span className="text-[13.5px] leading-snug text-[#16202F] dark:text-gray-200">{hint.text}</span>
         </div>
 
         {/* ── Today's Session — the one-decision daily plan ── */}
@@ -301,29 +286,38 @@ export default function Dashboard({
         {sessionDone && continueTarget && (
           <button
             onClick={() => setActiveSection(continueTarget.id)}
-            className="w-full flex items-center gap-4 rounded-2xl p-5 text-left text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
-            style={{ background: 'var(--brand-gradient)' }}
+            className="kl-card flex w-full items-center gap-4 p-5 text-left transition-transform duration-200 hover:-translate-y-0.5"
           >
-            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-2xl flex-shrink-0" style={{ fontFamily: 'Pretendard Variable, sans-serif', fontWeight: 900 }}>
-              {continueTarget.icon}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[11px] font-black uppercase tracking-widest text-white/70">
-                {continueTarget.resumed ? 'Continue where you left off' : 'Start your next step'}
-              </div>
-              <div className="text-lg font-black truncate">{continueTarget.title}</div>
-              {continuePct !== null && (
-                <div className="mt-1.5 flex items-center gap-2">
-                  <div className="w-full max-w-[180px] h-1.5 bg-white/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-white/90 rounded-full" style={{ width: `${continuePct}%` }} />
-                  </div>
-                  <span className="text-[11px] font-bold text-white/70">{continuePct}%</span>
+            {(() => { const acc = accentFor(continueTarget.id); return (
+              <>
+                <div
+                  className="flex h-12 w-12 flex-none items-center justify-center rounded-xl font-korean text-xl font-bold"
+                  style={{ background: `${acc.light}1F`, border: `1px solid ${acc.light}4D`, color: acc.light }}
+                >
+                  {continueTarget.icon}
                 </div>
-              )}
-            </div>
-            <span className="flex-shrink-0 px-4 py-2 rounded-xl bg-white text-[#C13F22] text-sm font-black">
-              Continue →
-            </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[12.5px] font-semibold text-[#4A5566] dark:text-gray-400">
+                    {continueTarget.resumed ? 'CONTINUE WHERE YOU LEFT OFF' : 'START YOUR NEXT STEP'}
+                  </div>
+                  <div className="truncate text-[17px] font-semibold text-[#16202F] dark:text-white">{continueTarget.title}</div>
+                  {continuePct !== null && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="h-1.5 w-full max-w-[180px] overflow-hidden rounded-full bg-[rgba(20,32,47,0.10)] dark:bg-gray-800">
+                        <div className="h-full rounded-full" style={{ width: `${continuePct}%`, background: acc.light }} />
+                      </div>
+                      <span className="text-[11.5px] font-medium text-[#4A5566] dark:text-gray-500">{continuePct}%</span>
+                    </div>
+                  )}
+                </div>
+                <span
+                  className="flex h-11 flex-none items-center rounded-[10px] px-5 text-sm font-semibold text-white"
+                  style={{ background: acc.light }}
+                >
+                  Continue →
+                </span>
+              </>
+            ); })()}
           </button>
         )}
 
@@ -340,36 +334,29 @@ export default function Dashboard({
         />
 
         {/* ── Word of the Day ─────────────────────────── */}
-        <div
-          className="rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 border border-[#D8E4EF] dark:border-[#122840]/40"
-          style={{ background: 'linear-gradient(135deg, rgba(47,93,138,0.06) 0%, rgba(63,133,113,0.06) 100%)' }}
-        >
-          <div className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: 'linear-gradient(135deg,#3F8571,#2F5D8A)' }}>
-            📅
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#264D74] dark:text-[#5C85B0] mb-1">Word of the Day</p>
-            <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="text-2xl font-black text-gray-900 dark:text-white">{dailyWord.korean}</span>
-              <span className="text-sm text-gray-400 dark:text-gray-500 italic">{dailyWord.romanization}</span>
-              <span className="text-base font-semibold text-gray-700 dark:text-gray-300">— {dailyWord.english}</span>
+        <div className="kl-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:p-6">
+          <div className="min-w-0 flex-1">
+            <p className="mb-2 text-[12.5px] font-semibold text-[#2E6B59] dark:text-[#5FB89B]">WORD OF THE DAY</p>
+            <div className="flex flex-wrap items-baseline gap-3">
+              <span className="font-korean text-3xl font-bold text-[#16202F] dark:text-white">{dailyWord.korean}</span>
+              <span className="text-sm text-[#4A5566] dark:text-gray-500">{dailyWord.romanization}</span>
+              <span className="text-base text-[#3E4A5A] dark:text-gray-300">— {dailyWord.english}</span>
             </div>
-            <span className="inline-block mt-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#D8E4EF] dark:bg-[#122840]/30 text-[#264D74] dark:text-[#5C85B0]">{dailyWord.category}</span>
+            <span className="mt-2 inline-block text-[12px] text-[#4A5566] dark:text-gray-500">{dailyWord.category}</span>
           </div>
-          <div className="flex-shrink-0 flex items-center gap-2">
+          <div className="flex flex-none items-center gap-2.5">
             <button
               onClick={() => setShowShareWord(true)}
-              className="px-4 py-2 rounded-xl text-sm font-bold border-2 border-[#3F8571]/40 text-[#2E6B59] dark:text-[#7FC0AC] hover:border-[#3F8571] transition-colors"
+              className="flex h-11 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-4 text-sm font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
               title="Share today's word as an image"
             >
-              📤 Share
+              Share
             </button>
             <button
               onClick={() => setActiveSection('vocabulary')}
-              className="px-4 py-2 rounded-xl text-white text-sm font-bold transition-transform hover:scale-[1.02]"
-              style={{ background: 'linear-gradient(135deg,#3F8571,#2F5D8A)' }}
+              className="flex h-11 items-center rounded-[10px] bg-[#2E6B59] px-5 text-sm font-semibold text-white shadow-[0_5px_16px_rgba(46,107,89,0.32)] transition-colors hover:bg-[#25594A]"
             >
-              Study More →
+              Study more →
             </button>
           </div>
         </div>
@@ -381,50 +368,53 @@ export default function Dashboard({
 
         {/* ── Explore — quick actions + practice tools, one section ── */}
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-black text-gray-900 dark:text-white">Explore</h2>
+          <div className="mb-1 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="font-display text-[22px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+                Everything else you could do
+              </h2>
+              <p className="mt-1 text-[13.5px] text-[#4A5566] dark:text-gray-400">
+                {QUICK_ACTIONS.length + PRACTICE_TOOLS.length} modules · your session above already picks the important ones
+              </p>
+            </div>
             {subscriptionTier === 'free' && (
               <button
                 onClick={openUpgradeModal}
-                className="text-xs font-black px-3 py-1.5 rounded-lg text-white"
-                style={{ background: 'var(--brand-gradient)' }}
+                className="flex-none whitespace-nowrap text-[12.5px] font-semibold text-[#C13F22] hover:underline dark:text-[#F07A55]"
               >
-                ⭐ Unlock All
+                Unlock all →
               </button>
             )}
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {QUICK_ACTIONS.map(a => (
-              <button
-                key={a.id}
-                onClick={() => setActiveSection(a.id)}
-                className={`action-btn bg-gradient-to-br ${a.gradient} rounded-2xl p-6 text-left text-white shadow-md`}
-              >
-                <div className="w-12 h-12 rounded-xl korean-action-icon flex items-center justify-center text-2xl mb-4">
-                  {a.icon}
-                </div>
-                <div className="font-bold text-base">{a.label}</div>
-                <div className="text-white/70 text-xs mt-1">{a.sub}</div>
-              </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-            {PRACTICE_TOOLS.map(tool => (
-              <button
-                key={tool.id}
-                onClick={() => setActiveSection(tool.id)}
-                className="relative p-4 rounded-2xl text-left bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
-              >
-                {subscriptionTier === 'free' && (
-                  <span className="absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
-                    {tool.freeLabel}
-                  </span>
-                )}
-                <div className="text-3xl mb-3">{tool.icon}</div>
-                <div className="font-black text-sm text-gray-900 dark:text-white mb-1">{tool.label}</div>
-                <div className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">{tool.sub}</div>
-              </button>
-            ))}
+
+          <div className="mt-4 grid grid-cols-2 gap-3.5 lg:grid-cols-4">
+            {[...QUICK_ACTIONS, ...PRACTICE_TOOLS].map(item => {
+              const acc = accentFor(item.id);
+              const tool = 'freeLabel' in item ? item : null;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveSection(item.id)}
+                  className="kl-card group relative p-4 text-left transition-transform duration-200 hover:-translate-y-0.5"
+                >
+                  {tool && subscriptionTier === 'free' && (
+                    <span className="absolute right-3 top-3 text-[10.5px] font-medium text-[#4A5566] dark:text-gray-500">
+                      {tool.freeLabel}
+                    </span>
+                  )}
+                  <div
+                    className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl text-xl"
+                    style={{ background: `${acc.light}1F`, border: `1px solid ${acc.light}4D` }}
+                  >
+                    <span className="kl-accent font-korean font-bold" style={{ ['--kl-acc' as string]: acc.light, ['--kl-acc-dk' as string]: acc.dark }}>
+                      {item.icon}
+                    </span>
+                  </div>
+                  <div className="text-[15px] font-semibold text-[#16202F] dark:text-white">{item.label}</div>
+                  <div className="mt-1 text-[12.5px] leading-relaxed text-[#4A5566] dark:text-gray-400">{item.sub}</div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -434,11 +424,13 @@ export default function Dashboard({
         {/* ── Achievements ─────────────────────────────── */}
         {achievements.length > 0 && (
           <div>
-            <h2 className="text-xl font-black text-gray-900 dark:text-white mb-4">Achievements</h2>
-            <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm">
-              <div className="flex flex-wrap gap-3">
+            <h2 className="mb-4 font-display text-[22px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+              What you've earned
+            </h2>
+            <div className="kl-card p-5">
+              <div className="flex flex-wrap gap-2.5">
                 {achievements.map((a, i) => (
-                  <span key={i} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-[#FBEAE3] to-[#E9F1EC] dark:from-[#E4572E]/15 dark:to-[#3F8571]/15 border border-[#E4572E]/20 dark:border-[#E4572E]/30 text-[#C13F22] dark:text-[#F07A55]">
+                  <span key={i} className="kl-well inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium text-[#16202F] dark:text-gray-200">
                     {a}
                   </span>
                 ))}
@@ -449,47 +441,42 @@ export default function Dashboard({
 
         {/* ── Upgrade Banner (free users) ──────────────── */}
         {subscriptionTier === 'free' && (
-          <div className="relative rounded-3xl overflow-hidden p-6 sm:p-8" style={{ background: 'linear-gradient(135deg, #0D141F 0%, #16202F 100%)' }}>
-            <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-15" style={{ background: '#E4572E', filter: 'blur(50px)', transform: 'translate(20%,-20%)' }} />
-            <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">🚀</span>
-                  <span className="text-xs font-bold uppercase tracking-widest text-[#F07A55]">Limited Offer</span>
-                </div>
-                <h3 className="text-xl font-black text-white mb-1">Get Premium</h3>
-                <p className="text-gray-400 text-sm max-w-sm">
-                  Unlock all tools, all content, 50 AI chats/day — one payment, forever.
-                </p>
+          <div className="kl-card flex flex-col justify-between gap-5 p-6 sm:flex-row sm:items-center">
+            <div>
+              <p className="mb-1.5 text-[12.5px] font-semibold text-[#C13F22] dark:text-[#F07A55]">PREMIUM</p>
+              <h3 className="font-display text-[21px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+                Every module, all content, 50 AI chats a day
+              </h3>
+              <p className="mt-1.5 max-w-md text-[13.5px] leading-relaxed text-[#3E4A5A] dark:text-gray-400">
+                $4 a month — less than a coffee ☕, and you can cancel anytime.
+              </p>
+            </div>
+            <div className="flex flex-none flex-col items-start gap-2.5 sm:items-end">
+              <div className="flex items-end gap-1.5">
+                <span className="font-display text-[32px] font-semibold leading-none text-[#16202F] dark:text-white">$4</span>
+                <span className="text-[13px] text-[#4A5566] dark:text-gray-500">/month</span>
               </div>
-              <div className="flex flex-col items-start sm:items-end gap-2 flex-shrink-0">
-                <div className="flex items-end gap-2">
-                  <span className="text-3xl font-black text-white">$4</span>
-                  <span className="text-gray-400 text-sm mb-1">/month</span>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={openUpgradeModal}
-                    className="px-4 py-2.5 rounded-xl text-sm font-bold text-white border border-white/20 hover:border-[#F07A55]/50 transition-colors"
-                  >
-                    See What's Included
-                  </button>
-                  <button
-                    onClick={startUpgrade}
-                    className="px-5 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl whitespace-nowrap"
-                    style={{ background: 'linear-gradient(135deg, #FF90E8, #FF3366)' }}
-                  >
-                    Get Premium →
-                  </button>
-                </div>
-                <span className="text-gray-500 text-xs">Less than a coffee ☕ · cancel anytime</span>
+              <div className="flex gap-2.5">
+                <button
+                  onClick={openUpgradeModal}
+                  className="flex h-11 items-center whitespace-nowrap rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-4 text-sm font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+                >
+                  What's included
+                </button>
+                <button
+                  onClick={startUpgrade}
+                  className="flex h-11 items-center whitespace-nowrap rounded-[10px] px-5 text-sm font-semibold text-white shadow-[0_5px_16px_rgba(193,63,34,0.3)] transition-transform hover:scale-[1.02]"
+                  style={{ background: 'var(--brand-gradient)' }}
+                >
+                  Get Premium →
+                </button>
               </div>
             </div>
           </div>
         )}
 
         {/* ── SRS Dashboard ────────────────────────────── */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+        <div className="kl-card overflow-hidden">
           <SRSDashboard
             onStartStudy={onStartStudy ?? (() => {})}
             onManageDecks={() => setActiveSection('srs')}

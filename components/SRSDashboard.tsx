@@ -18,7 +18,7 @@ export default function SRSDashboard({ onStartStudy, onManageDecks }: SRSDashboa
   const totalDueCards = decksWithDueCards.reduce((sum, deck) => sum + deck.dueCount, 0);
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
+    <div className="p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
@@ -52,7 +52,7 @@ export default function SRSDashboard({ onStartStudy, onManageDecks }: SRSDashboa
         ].map(({ value, label, color }) => (
           <div
             key={label}
-            className="text-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60"
+            className="kl-well text-center p-3 rounded-xl"
           >
             <div className="text-xl font-black" style={{ color }}>{value}</div>
             <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{label}</div>
@@ -68,7 +68,7 @@ export default function SRSDashboard({ onStartStudy, onManageDecks }: SRSDashboa
             {decksWithDueCards.slice(0, 3).map(deck => (
               <div
                 key={deck.id}
-                className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/50"
+                className="kl-well flex items-center justify-between p-3 rounded-xl"
               >
                 <div>
                   <div className="text-sm font-semibold text-gray-900 dark:text-white">{deck.name}</div>

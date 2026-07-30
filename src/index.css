@@ -194,6 +194,31 @@
   background: rgba(255, 255, 255, 0.055);
 }
 
+/* Clarity surfaces — the mockup's card language, in one place so every screen
+   adopts the same paper: warm hanji card on the #F0EADC canvas, hairline ink
+   border, one soft shadow. Dark mode maps to the ink surfaces. */
+.kl-card {
+  background: #FFFCF4;
+  border: 1px solid rgba(20, 32, 47, 0.14);
+  border-radius: 18px;
+  box-shadow: 0 12px 34px rgba(20, 32, 47, 0.09);
+}
+.dark .kl-card {
+  background: #111827;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+}
+
+/* Quiet inset panel used inside cards (example rows, stat wells). */
+.kl-well {
+  background: rgba(20, 32, 47, 0.035);
+  border: 1px solid rgba(20, 32, 47, 0.10);
+}
+.dark .kl-well {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
 /* Module accent — set --kl-acc / --kl-acc-dk on the element (from
    utils/moduleAccent.ts) and this picks the right one per theme, reactively. */
 .kl-accent { color: var(--kl-acc); }

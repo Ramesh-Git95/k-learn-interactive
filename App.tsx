@@ -662,7 +662,9 @@ const AppContent: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen font-sans bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white transition-all duration-300 ease-in-out ${
+      className={`min-h-screen font-sans ${
+        activeSection ? 'bg-[#F0EADC]' : 'bg-gray-50'
+      } dark:bg-gray-950 text-gray-900 dark:text-white transition-all duration-300 ease-in-out ${
         isThemeTransitioning ? 'theme-transitioning' : ''
       }`}
       aria-label="Korean Learning Application"

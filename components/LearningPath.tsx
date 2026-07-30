@@ -56,7 +56,7 @@ const LearningPath: React.FC<LearningPathProps> = ({ setActiveSection, progress,
     setOverrides(o => ({ ...o, [section]: !isCollapsed(section, items) }));
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
+    <div className="kl-card p-6">
       {/* Header + overall progress */}
       <div className="flex items-center justify-between mb-1">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">

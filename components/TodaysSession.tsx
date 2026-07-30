@@ -233,9 +233,9 @@ export default function TodaysSession({
 
   // ── Active session card — light card in light mode, ink gradient in dark ──
   return (
-    <div className="rounded-2xl p-5 sm:p-6 bg-white border border-gray-100 shadow-sm dark:border-transparent dark:shadow-lg dark:bg-gradient-to-br dark:from-[#0D141F] dark:via-[#16202F] dark:to-[#1E3A5C]">
+    <div className="kl-card p-5 sm:p-6">
       <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
-        <h2 className="text-base font-black flex items-center gap-2 text-gray-900 dark:text-white">
+        <h2 className="font-display text-[17px] font-semibold tracking-[-0.01em] flex items-center gap-2 text-[#16202F] dark:text-white">
           ⚡ Today's Session
           <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-[#E4572E]/10 text-[#C13F22] dark:bg-white/10 dark:text-white/70">~15 min</span>
         </h2>

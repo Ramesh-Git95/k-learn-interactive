@@ -67,9 +67,9 @@ export default function StudyHeatmap({
   const totalDays = studied.size;
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800 shadow-sm">
+    <div className="kl-card p-5">
       <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
-        <h2 className="text-base font-black text-gray-900 dark:text-white">📈 Study Activity</h2>
+        <h2 className="font-display text-[17px] font-semibold tracking-[-0.01em] text-[#16202F] dark:text-white">Study activity</h2>
         {streakAtRisk && (
           <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 animate-pulse">
             🔥 Study today to keep your streak!
