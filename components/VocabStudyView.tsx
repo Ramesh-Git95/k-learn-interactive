@@ -247,23 +247,25 @@ const VocabStudyView: React.FC<Props> = ({
             >
               <ArrowLeft className="h-4 w-4" /> Previous
             </button>
+            {/* Sized to its content and filled — it is the primary action, but
+                a full-width bar on desktop reads as a banner, not a button. */}
             {index < items.length - 1 ? (
               <button
                 onClick={() => go(1)}
-                className="flex h-12 flex-1 items-center justify-between rounded-[10px] border border-[rgba(20,32,47,0.14)] bg-[rgba(255,252,244,0.7)] px-5 transition-colors hover:bg-[#FFFCF4] dark:border-gray-800 dark:bg-gray-900/50 dark:hover:bg-gray-900"
+                className="ml-auto flex h-12 items-center gap-2.5 rounded-[10px] px-5 text-[14px] font-semibold text-white transition-transform hover:scale-[1.02]"
+                style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}52` }}
               >
-                <span className="text-[14px] font-semibold text-[#16202F] dark:text-white">
-                  Next word: <span className="font-korean">{items[index + 1].korean}</span>
-                </span>
-                <ArrowRight className="h-4 w-4" style={{ color: ACC.light }} />
+                Next word: <span className="font-korean">{items[index + 1].korean}</span>
+                <ArrowRight className="h-4 w-4" />
               </button>
             ) : (
               <button
                 onClick={onExit}
-                className="flex h-12 flex-1 items-center justify-center rounded-[10px] px-5 text-[14px] font-semibold text-white"
-                style={{ background: ACC.light }}
+                className="ml-auto flex h-12 items-center gap-2.5 rounded-[10px] px-5 text-[14px] font-semibold text-white transition-transform hover:scale-[1.02]"
+                style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}52` }}
               >
                 {studiedCount === items.length ? 'Set complete — back to sets' : 'Back to sets'}
+                <ArrowRight className="h-4 w-4" />
               </button>
             )}
           </div>

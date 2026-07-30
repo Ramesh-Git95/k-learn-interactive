@@ -285,6 +285,13 @@
   animation: klDraw 2.4s ease-in-out infinite alternate;
 }
 
+/* Wrong piece tapped — a short nudge, not a punishment. */
+@keyframes klShake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-4px); }
+  75%      { transform: translateX(4px); }
+}
+
 /* A quiet "live" pulse — marks the set you are mid-way through. */
 @keyframes klPulse {
   0%, 100% { transform: scale(1);   opacity: 1; }

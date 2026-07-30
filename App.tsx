@@ -546,7 +546,7 @@ const AppContent: React.FC = () => {
       case 'vocabulary':
         return <VocabularySection bookmarks={bookmarks} toggleBookmark={toggleBookmark} progress={progress} toggleProgress={toggleProgress} />;
       case 'grammar':
-        return <EnhancedGrammarSection progress={progress} toggleProgress={toggleProgress} />;
+        return <EnhancedGrammarSection progress={progress} toggleProgress={toggleProgress} setActiveSection={setActiveSection} />;
       case 'phrases':
         return <EnhancedPhrasesSection bookmarks={bookmarks} toggleBookmark={toggleBookmark} progress={progress} toggleProgress={toggleProgress} />;
       case 'culture':
