@@ -97,7 +97,7 @@ const HangulAlphabetDrawer: React.FC<Props> = ({
     <button
       key={id}
       onClick={() => setFilter(id)}
-      className={`h-9 whitespace-nowrap rounded-[9px] px-3.5 text-[12.5px] font-semibold transition-colors ${
+      className={`inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-[9px] px-3.5 text-[12.5px] font-semibold leading-none transition-colors ${
         filter === id
           ? 'text-white'
           : 'border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] text-[#4A5566] hover:border-[rgba(20,32,47,0.28)] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400'
@@ -112,13 +112,13 @@ const HangulAlphabetDrawer: React.FC<Props> = ({
     <div className="kl-card overflow-hidden">
       {/* Toolbar */}
       <div className="flex flex-col gap-3.5 border-b border-[rgba(20,32,47,0.12)] bg-[rgba(20,32,47,0.02)] p-4 sm:p-5 md:flex-row md:items-center md:justify-between dark:border-gray-800 dark:bg-white/[0.02]">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+        <div className="flex min-w-0 items-center gap-2 overflow-x-auto pb-1 md:pb-0">
           {tab('all', 'All', counts.all)}
           {tab('consonant', 'Consonants', counts.consonant)}
           {tab('vowel', 'Vowels', counts.vowel)}
           <button
             onClick={() => setFilter('learned')}
-            className={`flex h-9 items-center gap-1.5 whitespace-nowrap rounded-[9px] px-3.5 text-[12.5px] font-semibold transition-colors ${
+            className={`inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-[9px] px-3.5 text-[12.5px] font-semibold leading-none transition-colors ${
               filter === 'learned'
                 ? 'bg-[#2E6B59] text-white'
                 : 'border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] text-[#4A5566] hover:border-[rgba(20,32,47,0.28)] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400'
@@ -132,7 +132,7 @@ const HangulAlphabetDrawer: React.FC<Props> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={toggleAll}
-            className="h-9 whitespace-nowrap rounded-[9px] border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] px-3 text-[12.5px] font-semibold text-[#4A5566] transition-colors hover:border-[rgba(20,32,47,0.28)] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
+            className="inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-[9px] border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] px-3 text-[12.5px] font-semibold leading-none text-[#4A5566] transition-colors hover:border-[rgba(20,32,47,0.28)] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
           >
             {allExpanded ? 'Collapse all' : 'Expand all'}
           </button>

@@ -32,15 +32,15 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ currentSection, setActiveSectio
       {group === 'Home' ? (
         <button
           onClick={() => setActiveSection('dashboard')}
-          className="whitespace-nowrap font-medium text-[#4A5566] transition-colors hover:text-[#16202F] dark:text-gray-400 dark:hover:text-gray-200"
+          className="shrink-0 whitespace-nowrap font-medium text-[#4A5566] transition-colors hover:text-[#16202F] dark:text-gray-400 dark:hover:text-gray-200"
         >
           Home
         </button>
       ) : (
-        <span className="whitespace-nowrap font-medium text-[#4A5566] dark:text-gray-400">{group}</span>
+        <span className="shrink-0 whitespace-nowrap font-medium text-[#4A5566] dark:text-gray-400">{group}</span>
       )}
 
-      <span className="text-[#4A5566]/50 dark:text-gray-600">/</span>
+      <span className="shrink-0 text-[#4A5566]/50 dark:text-gray-600">/</span>
 
       <span
         className="kl-accent whitespace-nowrap truncate font-semibold"

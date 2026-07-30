@@ -92,10 +92,10 @@ const WordOfDayCard: React.FC<{
   onShare: () => void;
   onStudyMore: () => void;
 }> = ({ word, onShare, onStudyMore }) => (
-  <div className="kl-card flex flex-col p-5">
+  <div className="kl-card flex h-full flex-col p-5">
     <p className="text-[12.5px] font-semibold text-[#2E6B59] dark:text-[#5FB89B]">WORD OF THE DAY</p>
     <div className="mt-4 flex-1">
-      <div className="font-korean text-[38px] font-bold leading-none text-[#16202F] dark:text-white">{word.korean}</div>
+      <div className="break-words font-korean text-[38px] font-bold leading-none text-[#16202F] dark:text-white">{word.korean}</div>
       <div className="mt-2.5 text-[13.5px] text-[#4A5566] dark:text-gray-500">{word.romanization}</div>
       <div className="mt-1 text-[16px] font-medium text-[#3E4A5A] dark:text-gray-300">{word.english}</div>
       <div className="mt-3 text-[12.5px] text-[#4A5566] dark:text-gray-500">{word.category}</div>
@@ -447,8 +447,11 @@ export default function Dashboard({
         )}
 
         {/* ── Support row: activity (2/3) beside the daily word (1/3) ── */}
+        {/* min-w-0 on the grid children: grid items default to min-width:auto,
+            so the wide heatmap would stretch its column past the viewport
+            instead of scrolling inside its own card on a phone. */}
         <div className="grid gap-5 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+          <div className="min-w-0 lg:col-span-2">
             <StudyHeatmap
               currentStreak={xp.currentStreak}
               longestStreak={xp.longestStreak}
@@ -460,11 +463,13 @@ export default function Dashboard({
               onBookmarks={() => bookmarks.length > 0 && setShowBookmarkFC(true)}
             />
           </div>
-          <WordOfDayCard
-            word={dailyWord}
-            onShare={() => setShowShareWord(true)}
-            onStudyMore={() => setActiveSection('vocabulary')}
-          />
+          <div className="min-w-0">
+            <WordOfDayCard
+              word={dailyWord}
+              onShare={() => setShowShareWord(true)}
+              onStudyMore={() => setActiveSection('vocabulary')}
+            />
+          </div>
         </div>
 
         {/* ── Shareable Word of the Day card modal ─────── */}
