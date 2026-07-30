@@ -8,7 +8,6 @@ import { ProgressProvider } from './contexts/ProgressContext';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import LandingPage from './components/LandingPage';
-import MiniLearningPath from './components/MiniLearningPath';
 import FloatingProgress from './components/FloatingProgress';
 import Breadcrumb from './components/Breadcrumb';
 import { AppBootSkeleton } from './components/Skeleton';
@@ -543,7 +542,7 @@ const AppContent: React.FC = () => {
           onStartStudy={handleStartStudy}
         />;
       case 'hangul':
-        return <EnhancedHangulSection progress={progress} toggleProgress={toggleProgress} />;
+        return <EnhancedHangulSection progress={progress} toggleProgress={toggleProgress} setActiveSection={setActiveSection} />;
       case 'vocabulary':
         return <VocabularySection bookmarks={bookmarks} toggleBookmark={toggleBookmark} progress={progress} toggleProgress={toggleProgress} />;
       case 'grammar':
@@ -707,17 +706,10 @@ const AppContent: React.FC = () => {
 
             {/* Failed-payment banner (past_due subscriptions) */}
             <PastDueBanner />
-            
-            {/* Mini Learning Path - show on all content sections */}
-            {!['dashboard', 'bookmarks', 'profile', 'cookie-demo'].includes(activeSection) && (
-              <MiniLearningPath
-                currentSection={activeSection}
-                setActiveSection={setActiveSection}
-                progress={progress}
-                getSectionTotalItems={getSectionTotalItems}
-                getSectionCompletedItems={getSectionCompletedItems}
-              />
-            )}
+            {/* The mini learning path used to sit here. Removed in the clarity
+                pass: its "done" state was visit-based (3 visits = complete), so
+                it contradicted the real item-level progress the dashboard path
+                shows, and it duplicated navigation the header already carries. */}
           </>
         )}
         

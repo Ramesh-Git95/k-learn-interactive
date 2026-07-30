@@ -272,6 +272,44 @@
   .kl-welcome::after  { animation: none; transform: translateX(150%); }
 }
 
+/* ── Teaching motion ─────────────────────────────────────────────────────────
+   Two of the mockup's four keyframes, used where they teach something rather
+   than decorate: a stroke drawing itself, and audio bars while sound plays.
+   klDraw relies on pathLength="1" on the path, so one rule fits any stroke. */
+@keyframes klDraw {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+.kl-draw {
+  stroke-dasharray: 1;
+  animation: klDraw 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes klBars {
+  0%, 100% { transform: scaleY(0.35); }
+  50%      { transform: scaleY(1); }
+}
+.kl-bar {
+  transform-origin: bottom;
+  animation: klBars 1.1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kl-draw { animation: none; stroke-dashoffset: 0; }
+  .kl-bar  { animation: none; transform: scaleY(0.7); }
+}
+
+/* Cascade — cards entering left-to-right as a drawer section opens. Delay is set
+   per item inline, so one keyframe serves any grid. */
+@keyframes klCascade {
+  from { opacity: 0; transform: translateX(-24px) scale(0.92); }
+  to   { opacity: 1; transform: none; }
+}
+.kl-cascade { animation: klCascade 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .kl-cascade { animation: none; }
+}
+
 /* Drawer content reveal — the mockup's klFade. */
 @keyframes klFade {
   from { opacity: 0; transform: translateY(-4px); }

@@ -33,6 +33,39 @@ export function segmentKorean(text: string): KoToken[] {
   return tokens;
 }
 
+// ── Jamo decomposition ───────────────────────────────────────────────────────
+// A syllable block's codepoint encodes its letters arithmetically, so a word can
+// be broken back into the jamo it is spelled with. That is what lets the Hangul
+// screen answer "which words can you actually read now?" from real progress
+// instead of a hardcoded list.
+
+const INITIALS = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const MEDIALS  = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const FINALS   = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+// Clustered finals are two letters written together — split them so a reader who
+// knows ㄱ and ㅅ counts as able to read 값.
+const CLUSTERS: Record<string, string[]> = {
+  'ㄳ': ['ㄱ','ㅅ'], 'ㄵ': ['ㄴ','ㅈ'], 'ㄶ': ['ㄴ','ㅎ'], 'ㄺ': ['ㄹ','ㄱ'],
+  'ㄻ': ['ㄹ','ㅁ'], 'ㄼ': ['ㄹ','ㅂ'], 'ㄽ': ['ㄹ','ㅅ'], 'ㄾ': ['ㄹ','ㅌ'],
+  'ㄿ': ['ㄹ','ㅍ'], 'ㅀ': ['ㄹ','ㅎ'], 'ㅄ': ['ㅂ','ㅅ'],
+};
+
+/** Every jamo used to spell the given text, in order, clusters split apart. */
+export function jamoOf(text: string): string[] {
+  const out: string[] = [];
+  for (const ch of Array.from(text)) {
+    if (!isHangulSyllable(ch)) continue;
+    const code = ch.codePointAt(0)! - 0xac00;
+    const initial = INITIALS[Math.floor(code / 588)];
+    const medial  = MEDIALS[Math.floor((code % 588) / 28)];
+    const final   = FINALS[code % 28];
+    out.push(initial, medial);
+    if (final) out.push(...(CLUSTERS[final] ?? [final]));
+  }
+  return out;
+}
+
 // ── Pre-generated neural audio ────────────────────────────────────────────────
 // Core words/phrases are voiced once by Gemini TTS (scripts/generate-tts.cjs)
 // and shipped as static clips. When a clip exists we play it — consistent, clear,
