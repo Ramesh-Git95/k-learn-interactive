@@ -335,6 +335,26 @@
   .kl-drawer-panel { animation: none; }
 }
 
+/* Premium upsell strip — warm and a little richer than an ordinary card, so an
+   upgrade reads as an offer rather than a lock. Same tint family as .kl-welcome
+   in light mode; in dark it lifts off the surface instead. */
+.kl-premium {
+  background: linear-gradient(135deg, #FFF3E0 0%, #FFFCF4 55%, #FDEFE8 100%);
+  border: 1px solid rgba(228, 87, 46, 0.28);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.kl-premium:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(228, 87, 46, 0.18);
+}
+.dark .kl-premium {
+  background: linear-gradient(135deg, #1F2A3D 0%, #16202F 55%, #241C28 100%);
+  border-color: rgba(240, 122, 85, 0.32);
+}
+.dark .kl-premium:hover {
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+}
+
 /* Quiet inset panel used inside cards (example rows, stat wells). */
 .kl-well {
   background: rgba(20, 32, 47, 0.035);

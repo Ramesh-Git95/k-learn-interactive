@@ -5,7 +5,6 @@ import { phraseNoteFor, WORD_FREQUENCY } from '../data/phraseNotes';
 import type { Bookmark, PhraseItem, Section } from '../types';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { useDailyActivity } from '../hooks/useDailyActivity';
-import { LockedRowBanner } from './PremiumLock';
 import SoftNudge from './SoftNudge';
 import SoundItOutModal from './SoundItOutModal';
 import PronunciationButton from './PronunciationButton';
@@ -274,11 +273,36 @@ const EnhancedPhrasesSection: React.FC<Props> = ({
                   <Lock className="h-3.5 w-3.5 flex-none text-[#4A5566] dark:text-gray-500" />
                 </button>
               ))}
-              <LockedRowBanner
-                count={commonPhrases.length - visible.length}
-                label="phrases"
-                singularLabel="phrase"
-              />
+              {/* A compact strip, not the full-width LockedRowBanner — that one
+                  is built for the foot of a list and has no room in a 250px column. */}
+              {/* A compact strip, not the full-width LockedRowBanner — that one
+                  is built for the foot of a list and has no room in a 250px column. */}
+              <button
+                onClick={openUpgradeModal}
+                className="kl-premium group flex w-full items-center gap-3 rounded-xl p-3 text-left"
+              >
+                <span
+                  className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] text-white"
+                  style={{ background: 'var(--brand-gradient)' }}
+                >
+                  <Lock className="h-4 w-4" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[13px] font-semibold text-[#16202F] dark:text-white">
+                    {commonPhrases.length - visible.length} more{' '}
+                    {commonPhrases.length - visible.length === 1 ? 'phrase' : 'phrases'}
+                  </span>
+                  <span className="block truncate text-[12px] text-[#4A5566] dark:text-gray-400">
+                    Unlock with Premium · $4/mo
+                  </span>
+                </span>
+                <span
+                  className="flex-none text-[13px] font-semibold text-[#C13F22] transition-transform duration-200 group-hover:translate-x-0.5 dark:text-[#F07A55]"
+                  aria-hidden="true"
+                >
+                  →
+                </span>
+              </button>
             </div>
           )}
         </div>
