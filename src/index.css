@@ -352,6 +352,26 @@
   75%      { transform: translateX(4px); }
 }
 
+/* ── Card turn ───────────────────────────────────────────────────────────────
+   A half-turn rather than a two-faced 3D flip: the card rotates to edge-on, the
+   content is swapped while it cannot be seen, and it rotates back. A true
+   two-face flip needs both faces at a fixed height, which these cards are not —
+   the back carries an explanation, examples and a tip, so it is far taller than
+   the front. This way the turn reads the same and the height is free to change. */
+@keyframes klTurn {
+  0%   { transform: perspective(1400px) rotateY(0deg); }
+  50%  { transform: perspective(1400px) rotateY(90deg); }
+  100% { transform: perspective(1400px) rotateY(0deg); }
+}
+.kl-turn {
+  animation: klTurn 460ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kl-turn { animation: none; }
+}
+
 /* A small nudge upward — draws the eye to an affordance without a label. */
 @keyframes klBob {
   0%, 100% { transform: translateY(0); }
