@@ -6,6 +6,9 @@ import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
 import { useUpgrade } from '../hooks/useUpgrade';
 import { getChatQuota } from '../services/geminiService';
+import { accentFor } from '../utils/moduleAccent';
+
+const ACC = accentFor('conversation');
 
 
 // ── Daily usage display cache (localStorage; the backend enforces the quota) ──
@@ -57,24 +60,32 @@ const ConversationSection: React.FC = () => {
   const limitReached = isAuthenticated && usedToday >= dailyLimit;
 
   // ── Tab bar ─────────────────────────────────────────────────────────────────
+  // Two ways to practise, as a plain segmented control rather than a pair of
+  // shouting gradient tabs.
   const TabBar = (
-    <div className="flex rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm mb-6">
+    <div className="mb-6 flex gap-2">
       {([
-        ['scenarios', '💬', 'Practice Scenarios'],
-        ['ai',        '🤖', 'AI Chat'],
-      ] as [Tab, string, string][]).map(([id, em, label]) => (
+        ['scenarios', 'Practice scenarios'],
+        ['ai', 'AI chat'],
+      ] as [Tab, string][]).map(([id, label]) => (
         <button
           key={id}
           onClick={() => { setTab(id); setShowBot(false); }}
-          className={`flex-1 py-2.5 text-sm font-black transition-all flex items-center justify-center gap-2 ${
-            tab === id ? 'tab-brand-active' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+          className={`inline-flex h-10 items-center gap-2 rounded-[10px] px-4 text-[13.5px] font-semibold transition-colors ${
+            tab === id
+              ? 'text-white'
+              : 'border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] text-[#4A5566] hover:border-[rgba(20,32,47,0.28)] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400'
           }`}
+          style={tab === id ? { background: ACC.light } : undefined}
         >
-          {em} {label}
+          {label}
           {id === 'ai' && isAuthenticated && dailyLimit !== Infinity && (
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-              tab === 'ai' ? 'badge-brand' : limitReached ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
-            }`}>
+            <span
+              className="rounded-full px-1.5 py-0.5 text-[11px] font-semibold"
+              style={tab === id
+                ? { background: 'rgba(255,255,255,0.22)' }
+                : { background: limitReached ? 'rgba(193,63,34,0.12)' : 'rgba(20,32,47,0.06)', color: limitReached ? '#C13F22' : undefined }}
+            >
               {remaining}/{dailyLimit}
             </span>
           )}
@@ -87,9 +98,7 @@ const ConversationSection: React.FC = () => {
   if (tab === 'scenarios') {
     return (
       <div>
-        <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto pb-0">
-          {TabBar}
-        </div>
+        <div className="mx-auto max-w-6xl">{TabBar}</div>
         <ScriptedConversation />
       </div>
     );
@@ -100,23 +109,23 @@ const ConversationSection: React.FC = () => {
   // Not logged in
   if (!isAuthenticated) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
+      <div className="mx-auto max-w-6xl">
         {TabBar}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-          <div className="p-8 text-center">
-            <div className="text-5xl mb-4">🔑</div>
-            <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2">Sign in to chat with AI</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">
-              Free accounts get <strong>5 AI conversations per day</strong>. Premium unlocks 50/day with full voice + topic controls.
-            </p>
-            <button
-              onClick={() => window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
-              className="px-8 py-3 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-              style={{ background: 'var(--brand-gradient)' }}
-            >
-              Sign In Free →
-            </button>
-          </div>
+        <div className="kl-card mx-auto max-w-2xl p-8 text-center">
+          <h2 className="font-display text-[22px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+            Sign in to chat with the tutor
+          </h2>
+          <p className="mx-auto mt-2.5 max-w-sm text-[14.5px] leading-relaxed text-[#3E4A5A] dark:text-gray-400">
+            Free accounts get <strong className="font-semibold text-[#16202F] dark:text-white">5 conversations a day</strong>.
+            Premium raises that to 50, with full voice and topic controls.
+          </p>
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
+            className="mt-6 inline-flex h-12 items-center rounded-[10px] px-6 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+            style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+          >
+            Sign in free →
+          </button>
         </div>
       </div>
     );
@@ -125,94 +134,94 @@ const ConversationSection: React.FC = () => {
   // Limit reached
   if (limitReached) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
+      <div className="mx-auto max-w-6xl">
         {TabBar}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-          <div className="p-8 text-center">
-            <div className="text-5xl mb-4">⏰</div>
-            <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2">Daily limit reached</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-              You've used all <strong>{dailyLimit} AI conversations</strong> for today.
-            </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">
-              Resets at midnight · Or upgrade for {isPremium ? 'more messages' : '50 messages/day'}
-            </p>
+        <div className="kl-card mx-auto max-w-2xl p-8 text-center">
+          <h2 className="font-display text-[22px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+            That is today&apos;s {dailyLimit} conversations
+          </h2>
+          <p className="mx-auto mt-2.5 max-w-sm text-[14.5px] leading-relaxed text-[#3E4A5A] dark:text-gray-400">
+            Your messages reset at midnight. The scripted scenarios have no limit, so you can keep
+            practising in the meantime.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={() => setTab('scenarios')}
+              className="flex h-12 items-center rounded-[10px] px-5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+              style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+            >
+              Practise a scenario →
+            </button>
             {!isPremium && (
               <button
                 onClick={startUpgrade}
-                className="px-8 py-3 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all mb-3 block w-full"
-                style={{ background: 'var(--brand-gradient)' }}
+                className="flex h-12 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
               >
-                ⭐ Get Premium — 50 AI chats/day
+                Get 50 a day · $4/mo
               </button>
             )}
-            <button
-              onClick={() => setTab('scenarios')}
-              className="text-sm font-black text-[#3F8571] hover:underline"
-            >
-              Practice with scripted scenarios instead →
-            </button>
           </div>
         </div>
       </div>
     );
   }
 
-  // Active AI chat
+  // Active AI chat. Once the bot is open it owns the page — it renders its own
+  // header and rail — so the section stops constraining it to a narrow column
+  // and a fixed-height box.
+  if (showBot) {
+    return (
+      <div className="mx-auto max-w-6xl">
+        {TabBar}
+        <ConversationBot
+          onClose={() => setShowBot(false)}
+          dailyLimit={dailyLimit}
+          usedToday={usedToday}
+          onMessageSent={handleMessageSent}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
+    <div className="mx-auto max-w-6xl">
       {TabBar}
 
-      {/* Info strip */}
-      <div className="flex items-center justify-between mb-4 px-1">
-        <div className="flex items-center gap-2">
-          <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-            isPremium
-              ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
-          }`}>
-            {isPremium ? '⭐ Premium' : '🆓 Free'}
+      <div className="kl-card mx-auto max-w-2xl p-8 text-center">
+        <div className="mb-3 flex items-center justify-center gap-2">
+          <span className="text-[12.5px] font-semibold" style={{ color: ACC.light }}>
+            {isPremium ? 'PREMIUM' : 'FREE PLAN'}
           </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            {remaining} of {dailyLimit} messages left today
+          <span className="text-[12.5px] text-[#4A5566] dark:text-gray-500">
+            · {remaining} of {dailyLimit} messages left today
           </span>
         </div>
+
+        <h2 className="font-display text-[24px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+          Talk to your Korean tutor
+        </h2>
+        <p className="mx-auto mt-2.5 max-w-md text-[14.5px] leading-relaxed text-[#3E4A5A] dark:text-gray-400">
+          Say anything in Korean or English — it replies in Korean at your level, and you can
+          hear or translate any message. Nothing you type is graded.
+        </p>
+
+        <button
+          onClick={() => setShowBot(true)}
+          className="mt-6 inline-flex h-12 items-center rounded-[10px] px-6 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+          style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+        >
+          Start a conversation →
+        </button>
+
         {!isPremium && (
           <button
             onClick={startUpgrade}
-            className="text-xs font-black text-[#E4572E] hover:underline"
+            className="mt-4 block w-full text-[13px] font-semibold text-[#C13F22] hover:underline dark:text-[#F07A55]"
           >
-            Upgrade for 50/day →
+            Get 50 messages a day with Premium · $4/mo
           </button>
         )}
       </div>
-
-      {/* Bot */}
-      {!showBot ? (
-        <div
-          className="rounded-2xl overflow-hidden p-8 text-center cursor-pointer hover:opacity-95 transition-opacity"
-          style={{ background: 'var(--brand-gradient)' }}
-          onClick={() => setShowBot(true)}
-        >
-          <div className="text-5xl mb-4">🤖</div>
-          <h2 className="text-xl font-black text-white mb-2">Start AI Conversation</h2>
-          <p className="text-white/80 text-sm mb-4">
-            Chat freely in Korean. Your AI teacher will respond naturally and correct your mistakes.
-          </p>
-          <span className="inline-block px-6 py-2.5 bg-white text-[#265847] text-sm font-black rounded-xl hover:scale-[1.02] transition-transform">
-            Start Chatting →
-          </span>
-        </div>
-      ) : (
-        <div className="h-[560px] sm:h-[640px] bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-          <ConversationBot
-            onClose={() => setShowBot(false)}
-            dailyLimit={dailyLimit}
-            usedToday={usedToday}
-            onMessageSent={handleMessageSent}
-          />
-        </div>
-      )}
     </div>
   );
 };

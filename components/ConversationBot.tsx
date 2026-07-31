@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Volume2, X } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { translateText, getConversationResponse, AiError, ChatHistoryItem } from '../services/geminiService';
 import { useToastContext } from '../contexts/ToastContext';
+import { commonPhrases } from '../data/koreanData';
+import { accentFor } from '../utils/moduleAccent';
 
 declare global {
   interface Window {
@@ -67,6 +68,20 @@ const TOPICS = [
   { id: 'work',       name: '직장',     nameEn: 'Work',           emoji: '💼' },
   { id: 'hobby',      name: '취미',     nameEn: 'Hobby',          emoji: '🎨' },
 ];
+
+const ACC = accentFor('conversation');
+
+// Which phrase contexts belong to each chat topic. Lets the "you could say"
+// suggestions come from the app's own phrase list rather than being invented —
+// so a beginner staring at an empty box is offered real Korean they can send.
+const TOPIC_CONTEXTS: Record<string, string[]> = {
+  general:    ['General', 'Feelings', 'Communication'],
+  restaurant: ['Restaurant'],
+  shopping:   ['Shopping'],
+  travel:     ['Directions', 'Emergency'],
+  work:       ['Introductions'],
+  hobby:      ['Feelings', 'General'],
+};
 
 const DIFFICULTIES = [
   { id: 'beginner',     name: '초급', nameEn: 'Beginner',     style: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' },
@@ -228,220 +243,326 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); }
   };
 
+  // Real phrases the learner could send right now, drawn from the app's own
+  // phrase list and filtered to the chosen topic. Tapping one loads it into the
+  // box rather than sending it — a stray tap should never spend a daily message.
+  const suggestions = useMemo(() => {
+    const contexts = TOPIC_CONTEXTS[selectedTopic] ?? [];
+    return commonPhrases.filter(p => contexts.includes(p.context)).slice(0, 3);
+  }, [selectedTopic]);
+
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const useSuggestion = (korean: string) => {
+    setInputText(korean);
+    inputRef.current?.focus();
+  };
+
+  const topicLabel = TOPICS.find(t => t.id === selectedTopic);
+  const busy = isListening || isSpeaking || isLoading;
+  const statusLabel = isListening ? L('Listening', '듣는 중')
+    : isSpeaking ? L('Speaking', '말하는 중')
+    : isLoading ? L('Tutor is thinking', '생각 중')
+    : L('Tutor is ready', '준비됐어요');
+
+  const railCard = 'rounded-[14px] border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] px-5 py-4 dark:border-gray-800 dark:bg-gray-900';
+
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900 rounded-2xl overflow-hidden">
-      {/* Header */}
-      <div
-        className="flex items-center justify-between px-4 py-3 text-white flex-shrink-0"
-        style={{ background: 'linear-gradient(135deg, #2F5D8A, #3F8571)' }}
-      >
-        <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 text-xl">🤖</div>
-          <div className="min-w-0">
-            <p className="font-black text-sm leading-tight truncate">{L('Korean Conversation Practice', '한국어 대화 연습')}</p>
-            <p className="text-[11px] text-white/70 truncate">{L('Practice with AI Teacher', 'AI 선생님과 함께 연습해요')}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          {dailyLimit !== Infinity && (
-            <span className={`text-[10px] font-black px-2 py-1 rounded-lg ${usedToday >= dailyLimit ? 'bg-red-500/40' : 'bg-white/20'}`}>
-              💬 {usedToday}/{dailyLimit}
+    <div className="mx-auto max-w-6xl">
+      {/* ── Header ── */}
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+        <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+          {L('AI Chat', 'AI 대화')}
+          <span className="text-[#4A5566] dark:text-gray-500">
+            {' · '}{uiLang === 'ko' ? topicLabel?.name : topicLabel?.nameEn}
+          </span>
+        </h1>
+        <div className="flex flex-none items-center gap-3.5">
+          <span className="flex items-center gap-2">
+            <span className="relative flex h-[7px] w-[7px]">
+              {busy && (
+                <span className="kl-pulse absolute inset-0 rounded-full" style={{ background: `${ACC.light}80` }} />
+              )}
+              <span className="relative h-[7px] w-[7px] rounded-full" style={{ background: busy ? ACC.light : '#4A5566' }} />
             </span>
-          )}
-          <button
-            onClick={() => setUiLang(uiLang === 'en' ? 'ko' : 'en')}
-            className="text-[11px] font-bold px-2 py-1 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
-          >
-            🌐 {uiLang === 'en' ? '한글' : 'EN'}
-          </button>
+            <span className="text-[13.5px] font-semibold text-[#16202F] dark:text-gray-200">{statusLabel}</span>
+          </span>
           {onClose && (
             <button
               onClick={onClose}
-              aria-label="Close chat"
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
+              className="flex h-12 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
             >
-              <X className="w-5 h-5 text-white" />
+              {L('End session', '대화 끝내기')}
             </button>
           )}
         </div>
       </div>
 
-      {/* Settings bar */}
-      <div className="flex flex-wrap items-center gap-2 px-3 py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 flex-shrink-0">
-        {/* Topic */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400">{L('Topic:', '주제:')}</span>
-          <select
-            value={selectedTopic}
-            onChange={e => setSelectedTopic(e.target.value)}
-            className="text-xs border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200"
-          >
-            {TOPICS.map(t => (
-              <option key={t.id} value={t.id}>{t.emoji} {uiLang === 'ko' ? t.name : t.nameEn}</option>
-            ))}
-          </select>
-        </div>
+      <div className="flex flex-col items-start gap-5 lg:flex-row">
+        {/* ── The conversation ── */}
+        <div className="order-1 w-full min-w-0 flex-1">
+          <div className="kl-card flex flex-col p-4 sm:p-6">
+            <div className="flex max-h-[52vh] min-h-[340px] flex-col gap-3.5 overflow-y-auto">
+              {messages.map(msg => (
+                <div key={msg.id} className={`flex flex-col ${msg.isUser ? 'items-end' : 'items-start'}`}>
+                  <div
+                    className={`max-w-[85%] px-4 py-3.5 ${
+                      msg.isUser
+                        ? 'rounded-[14px_14px_4px_14px] text-white'
+                        : 'kl-well rounded-[14px_14px_14px_4px]'
+                    }`}
+                    style={msg.isUser ? { background: ACC.light } : undefined}
+                  >
+                    {msg.isVoiceMessage && (
+                      <span className="mr-1.5 text-[11px] opacity-70">🎙️</span>
+                    )}
+                    <span className={`whitespace-pre-wrap font-korean text-[16px] leading-[1.55] ${
+                      msg.isUser ? 'font-semibold' : 'text-[#16202F] dark:text-white'
+                    }`}>
+                      {msg.text}
+                    </span>
 
-        {/* Difficulty */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400">{L('Level:', '난이도:')}</span>
-          <div className="flex gap-1">
-            {DIFFICULTIES.map(d => (
-              <button
-                key={d.id}
-                onClick={() => setDifficultyLevel(d.id)}
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors ${difficultyLevel === d.id ? d.style : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}`}
-              >
-                {uiLang === 'ko' ? d.name : d.nameEn}
-              </button>
-            ))}
-          </div>
-        </div>
+                    {msg.translation && msg.showTranslation && (
+                      <div
+                        className="mt-2.5 rounded-lg border-l-2 px-3 py-2 text-[13.5px]"
+                        style={{
+                          borderColor: msg.isUser ? 'rgba(255,255,255,0.5)' : ACC.light,
+                          background: msg.isUser ? 'rgba(255,255,255,0.14)' : `${ACC.light}12`,
+                          color: msg.isUser ? '#fff' : undefined,
+                        }}
+                      >
+                        <span className={msg.isUser ? '' : 'text-[#3E4A5A] dark:text-gray-300'}>{msg.translation}</span>
+                      </div>
+                    )}
+                  </div>
 
-        {/* Voice mode */}
-        {speechSupported && (
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400">🎙️ {L('Voice:', '음성:')}</span>
-            <select
-              value={voiceMode}
-              onChange={e => setVoiceMode(e.target.value as typeof voiceMode)}
-              className="text-xs border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200"
-            >
-              <option value="off">{L('Off', '끄기')}</option>
-              <option value="input">{L('Input Only', '입력만')}</option>
-              <option value="output">{L('Output Only', '출력만')}</option>
-              <option value="both">{L('Both', '입력+출력')}</option>
-            </select>
-          </div>
-        )}
+                  {/* Row actions — printed, not hover-only */}
+                  <div className={`mt-1.5 flex items-center gap-2.5 ${msg.isUser ? 'flex-row-reverse' : ''}`}>
+                    <span className="text-[11.5px] text-[#4A5566] dark:text-gray-500">
+                      {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    {speechSupported && (
+                      <button
+                        onClick={() => speakText(msg.text)}
+                        disabled={isSpeaking}
+                        aria-label={L('Read message aloud', '메시지 읽어주기')}
+                        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#4A5566] transition-colors hover:text-[#16202F] disabled:opacity-40 dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        <span className="flex h-2.5 items-end gap-[2px]" aria-hidden="true">
+                          <span className="kl-bar w-[2.5px]" style={{ height: '100%', background: ACC.light }} />
+                          <span className="kl-bar w-[2.5px]" style={{ height: '100%', background: ACC.light, animationDelay: '0.15s' }} />
+                          <span className="kl-bar w-[2.5px]" style={{ height: '100%', background: ACC.light, animationDelay: '0.3s' }} />
+                        </span>
+                        {L('Hear it', '듣기')}
+                      </button>
+                    )}
+                    {msg.translation ? (
+                      <button
+                        onClick={() => toggleTranslation(msg.id)}
+                        className="text-[12px] font-medium text-[#4A5566] transition-colors hover:text-[#16202F] dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        {msg.showTranslation ? L('Hide translation', '번역 숨기기') : L('Show translation', '번역 보기')}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleTranslate(msg.id, msg.text)}
+                        disabled={translatingId === msg.id}
+                        className="text-[12px] font-medium text-[#4A5566] transition-colors hover:text-[#16202F] disabled:opacity-50 dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        {translatingId === msg.id ? L('Translating…', '번역 중…') : L('Translate', '번역하기')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
 
-        {(isListening || isSpeaking) && (
-          <span className={`text-[11px] font-bold ml-auto ${isListening ? 'text-red-500 animate-pulse' : 'text-orange-500'}`}>
-            {isListening ? '🎙️ ' + L('Listening…', '듣는 중…') : '🔊 ' + L('Speaking…', '말하는 중…')}
-          </span>
-        )}
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
-        {messages.map(msg => (
-          <div key={msg.id} className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
-            <div className="max-w-[82%]">
-              <div
-                className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                  msg.isUser
-                    ? 'text-white rounded-br-sm'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-sm'
-                }`}
-                style={msg.isUser ? { background: 'var(--brand-gradient)' } : {}}
-              >
-                {msg.isVoiceMessage && <span className="text-[10px] opacity-70 mr-1">🎙️</span>}
-                <span className="whitespace-pre-wrap">{msg.text}</span>
-              </div>
-
-              {msg.translation && msg.showTranslation && (
-                <div className="mt-1.5 px-3 py-2 bg-[#EAF1F7] dark:bg-[#122840]/20 rounded-xl border-l-2 border-[#5C85B0]">
-                  <p className="text-xs text-[#18344D] dark:text-[#B7CDE0]">{msg.translation}</p>
+              {isLoading && (
+                <div className="kl-well flex items-center gap-1.5 self-start rounded-[14px_14px_14px_4px] px-4 py-4">
+                  {[0, 0.2, 0.4].map((d, i) => (
+                    <span
+                      key={i}
+                      className="h-1.5 w-1.5 rounded-full bg-[#4A5566] dark:bg-gray-500"
+                      style={{ animation: `klFade 1.4s ease-in-out ${d}s infinite` }}
+                    />
+                  ))}
                 </div>
               )}
+              <div ref={messagesEndRef} />
+            </div>
 
-              <div className={`flex items-center gap-2 mt-1 ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
-                <span className="text-[10px] text-gray-400">
-                  {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
-                {speechSupported && (
+            {/* ── Say something ── */}
+            <div className="mt-5 border-t border-[rgba(20,32,47,0.12)] pt-4 dark:border-gray-800">
+              {suggestions.length > 0 && (
+                <>
+                  <div className="mb-2.5 text-[13.5px] font-semibold text-[#16202F] dark:text-white">
+                    {L('You could say', '이렇게 말해보세요')}
+                    <span className="ml-2 text-[12.5px] font-normal text-[#4A5566] dark:text-gray-500">
+                      {L('tap to put it in the box', '눌러서 입력창에 넣기')}
+                    </span>
+                  </div>
+                  <div className="mb-3.5 flex flex-wrap gap-2.5">
+                    {suggestions.map(s => (
+                      <button
+                        key={s.korean}
+                        onClick={() => useSuggestion(s.korean)}
+                        className="flex h-11 items-center gap-2 rounded-full border-[1.5px] px-4 transition-transform hover:-translate-y-0.5"
+                        style={{ borderColor: `${ACC.light}66`, background: `${ACC.light}0F` }}
+                        title={s.english}
+                      >
+                        <span className="font-korean text-[15px] font-semibold text-[#16202F] dark:text-white">{s.korean}</span>
+                        <span className="text-[12.5px] text-[#4A5566] dark:text-gray-400">{s.english}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              <div className="flex items-end gap-2.5">
+                {/* The travelling glow marks where you type without a heavy border. */}
+                <div className="kl-glow-ring min-w-0 flex-1 rounded-[10px]">
+                  <textarea
+                    ref={inputRef}
+                    value={inputText}
+                    onChange={e => setInputText(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder={L('Type in Korean or English…', '한국어나 영어로 입력하세요…')}
+                    className="min-h-[48px] w-full resize-none rounded-[10px] bg-[#FFFCF4] px-4 py-3 text-[14.5px] text-[#16202F] focus:outline-none dark:bg-gray-900 dark:text-white"
+                    rows={1}
+                    disabled={isLoading || isListening}
+                  />
+                </div>
+
+                {speechSupported && (voiceMode === 'input' || voiceMode === 'both') && (
+                  isListening ? (
+                    <button
+                      onClick={stopListening}
+                      className="flex h-12 w-12 flex-none items-center justify-center rounded-[10px] bg-[#C13F22] text-white"
+                      title={L('Stop voice input', '음성 입력 중지')}
+                    >
+                      ⏹
+                    </button>
+                  ) : (
+                    <button
+                      onClick={startListening}
+                      disabled={isLoading}
+                      className="flex h-12 w-12 flex-none items-center justify-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] text-[#16202F] disabled:opacity-40 dark:border-gray-700 dark:text-gray-200"
+                      title={L('Start voice input', '음성 입력 시작')}
+                    >
+                      🎙️
+                    </button>
+                  )
+                )}
+
+                {isSpeaking && (
                   <button
-                    onClick={() => speakText(msg.text)}
-                    disabled={isSpeaking}
-                    aria-label="Read message aloud"
-                    className="p-1 text-[#3F8571] hover:text-[#2E6B59] dark:hover:text-[#6BA88F] disabled:opacity-40 transition-colors"
+                    onClick={stopSpeaking}
+                    className="flex h-12 w-12 flex-none items-center justify-center rounded-[10px] bg-[#A8761F] text-white"
+                    title={L('Stop speaking', '음성 출력 중지')}
                   >
-                    <Volume2 className="w-3.5 h-3.5" />
+                    ⏹
                   </button>
                 )}
-                {msg.translation ? (
-                  <button onClick={() => toggleTranslation(msg.id)} className="text-[10px] text-[#264D74] dark:text-[#5C85B0] hover:underline">
-                    {msg.showTranslation ? L('Hide', '숨기기') : L('Show', '보기')}
-                  </button>
-                ) : (
-                  <button onClick={() => handleTranslate(msg.id, msg.text)} disabled={translatingId === msg.id} className="text-[10px] text-[#264D74] dark:text-[#5C85B0] hover:underline disabled:opacity-50">
-                    {translatingId === msg.id ? L('Translating…', '번역 중…') : L('Translate', '번역하기')}
-                  </button>
-                )}
+
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!inputText.trim() || isLoading || usedToday >= dailyLimit}
+                  className="flex h-12 w-12 flex-none items-center justify-center rounded-[10px] text-[16px] font-semibold text-white transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
+                  style={{ background: ACC.light }}
+                  title={L('Send', '전송')}
+                >
+                  →
+                </button>
               </div>
+              <p className="mt-2 text-[12px] text-[#4A5566] dark:text-gray-500">
+                {L('Answer in Korean or English — both are fine. Enter sends, Shift+Enter adds a line.',
+                   '한국어나 영어로 답해도 괜찮아요. Enter로 전송, Shift+Enter로 줄바꿈.')}
+              </p>
             </div>
           </div>
-        ))}
+        </div>
 
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-bl-sm px-4 py-3 flex gap-1">
-              {[0, 0.1, 0.2].map((delay, i) => (
-                <div key={i} className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: `${delay}s` }} />
+        {/* ── Rail: what this session is set to ── */}
+        <div className="order-2 w-full flex-none lg:w-[290px]">
+          <div className={`${railCard} mb-3.5`}>
+            <div className="mb-3 text-[13.5px] font-semibold text-[#16202F] dark:text-white">
+              {L('Settings', '설정')}
+            </div>
+
+            <label className="mb-1.5 block text-[12.5px] text-[#4A5566] dark:text-gray-400">{L('Topic', '주제')}</label>
+            <select
+              value={selectedTopic}
+              onChange={e => setSelectedTopic(e.target.value)}
+              className="mb-4 w-full rounded-lg border border-[rgba(20,32,47,0.18)] bg-[#FFFCF4] px-3 py-2 text-[13.5px] text-[#16202F] dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+            >
+              {TOPICS.map(t => (
+                <option key={t.id} value={t.id}>{uiLang === 'ko' ? t.name : t.nameEn}</option>
+              ))}
+            </select>
+
+            <label className="mb-1.5 block text-[12.5px] text-[#4A5566] dark:text-gray-400">{L('Level', '난이도')}</label>
+            <div className="mb-4 flex gap-1.5">
+              {DIFFICULTIES.map(d => (
+                <button
+                  key={d.id}
+                  onClick={() => setDifficultyLevel(d.id)}
+                  className={`flex h-9 flex-1 items-center justify-center rounded-lg text-[12.5px] font-semibold transition-colors ${
+                    difficultyLevel === d.id
+                      ? 'text-white'
+                      : 'border border-[rgba(20,32,47,0.14)] text-[#4A5566] dark:border-gray-700 dark:text-gray-400'
+                  }`}
+                  style={difficultyLevel === d.id ? { background: ACC.light } : undefined}
+                >
+                  {uiLang === 'ko' ? d.name : d.nameEn}
+                </button>
               ))}
             </div>
+
+            {speechSupported && (
+              <>
+                <label className="mb-1.5 block text-[12.5px] text-[#4A5566] dark:text-gray-400">{L('Voice', '음성')}</label>
+                <select
+                  value={voiceMode}
+                  onChange={e => setVoiceMode(e.target.value as typeof voiceMode)}
+                  className="mb-4 w-full rounded-lg border border-[rgba(20,32,47,0.18)] bg-[#FFFCF4] px-3 py-2 text-[13.5px] text-[#16202F] dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                >
+                  <option value="off">{L('Off', '끄기')}</option>
+                  <option value="input">{L('Speak to it', '입력만')}</option>
+                  <option value="output">{L('Hear replies', '출력만')}</option>
+                  <option value="both">{L('Both', '입력+출력')}</option>
+                </select>
+              </>
+            )}
+
+            <div className="flex items-center justify-between">
+              <span className="text-[12.5px] text-[#4A5566] dark:text-gray-400">{L('Interface', '화면 언어')}</span>
+              <button
+                onClick={() => setUiLang(uiLang === 'en' ? 'ko' : 'en')}
+                className="rounded-lg border border-[rgba(20,32,47,0.18)] px-3 py-1.5 text-[12.5px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200"
+              >
+                {uiLang === 'en' ? '한글' : 'English'}
+              </button>
+            </div>
           </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
 
-      {/* Input area */}
-      <div className="px-3 py-3 border-t border-gray-100 dark:border-gray-800 flex-shrink-0">
-        <div className="flex items-end gap-2">
-          <textarea
-            value={inputText}
-            onChange={e => setInputText(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder={L('Type in Korean…', '한국어로 메시지를 입력하세요…')}
-            className="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl resize-none text-sm focus:outline-none focus:ring-2 focus:ring-[#F07A55] bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-            rows={2}
-            disabled={isLoading || isListening}
-          />
-
-          {speechSupported && (voiceMode === 'input' || voiceMode === 'both') && (
-            isListening ? (
-              <button
-                onClick={stopListening}
-                className="w-9 h-9 flex items-center justify-center rounded-xl bg-red-500 text-white animate-pulse flex-shrink-0"
-                title={L('Stop voice input', '음성 입력 중지')}
-              >
-                ⏹
-              </button>
-            ) : (
-              <button
-                onClick={startListening}
-                disabled={isLoading}
-                className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#3F8571] text-white disabled:opacity-40 flex-shrink-0"
-                title={L('Start voice input', '음성 입력 시작')}
-              >
-                🎙️
-              </button>
-            )
+          {dailyLimit !== Infinity && (
+            <div className={railCard}>
+              <div className="mb-2.5 text-[13.5px] font-semibold text-[#16202F] dark:text-white">
+                {L('Messages today', '오늘 대화')}
+              </div>
+              <div className="mb-2.5 h-1.5 overflow-hidden rounded-full bg-[rgba(20,32,47,0.10)] dark:bg-gray-800">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(100, (usedToday / dailyLimit) * 100)}%`,
+                    background: usedToday >= dailyLimit ? '#C13F22' : ACC.light,
+                  }}
+                />
+              </div>
+              <p className="text-[13.5px] text-[#4A5566] dark:text-gray-400">
+                {Math.max(0, dailyLimit - usedToday)} {L('left of', '/')} {dailyLimit}
+              </p>
+            </div>
           )}
-
-          {isSpeaking && (
-            <button
-              onClick={stopSpeaking}
-              className="w-9 h-9 flex items-center justify-center rounded-xl bg-orange-500 text-white flex-shrink-0"
-              title={L('Stop speaking', '음성 출력 중지')}
-            >
-              ⏹
-            </button>
-          )}
-
-          <button
-            onClick={handleSendMessage}
-            disabled={!inputText.trim() || isLoading || usedToday >= dailyLimit}
-            className="w-9 h-9 flex items-center justify-center rounded-xl text-white disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0 transition-all hover:scale-105 active:scale-95"
-            style={{ background: 'var(--brand-gradient)' }}
-            title={L('Send', '전송')}
-          >
-            ➤
-          </button>
         </div>
-        <p className="mt-1.5 text-[10px] text-gray-400 dark:text-gray-500 truncate">
-          {L('💡 Chat in Korean and click Translate when you need help', '💡 팁: 한국어로 대화하고 번역이 필요할 때 "번역하기"를 클릭하세요')}
-        </p>
       </div>
     </div>
   );

@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Lock } from 'lucide-react';
+import { accentFor } from '../utils/moduleAccent';
 import { Volume2 } from 'lucide-react';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
-import { LockedCard } from './PremiumLock';
+
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
+
+const ACC = accentFor('conversation');
 
 const FREE_SCENARIO_IDS = ['introductions', 'cafe'];
 
@@ -376,61 +380,79 @@ const ScriptedConversation: React.FC = () => {
   // ── Scenario selection ──────────────────────────────────────────────────────
   if (!scenario) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
-        <div className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
-          style={{ background: 'var(--brand-gradient-hero-rev)' }}>
-          <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
-            {['안녕','대화','연습','한국어','카페'].map((w, i) => (
-              <span key={i} className="absolute text-white/10 font-black"
-                style={{ fontSize: `${1.2 + (i % 2) * 0.6}rem`, top: `${(i * 37) % 85}%`, left: `${(i * 43) % 80}%` }}>{w}</span>
-            ))}
-          </div>
-          <div className="relative z-10 text-center">
-            <div className="text-5xl mb-3">💬</div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white mb-2">Conversation Practice</h1>
-            <p className="text-white/80 text-sm max-w-lg mx-auto">
-              Practice real Korean conversations with scripted dialogues. Pick a scenario and choose the right response!
-            </p>
-          </div>
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-5">
+          <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+            Practice scenarios
+          </h1>
+          <p className="mt-2 max-w-xl text-[15px] text-[#3E4A5A] dark:text-gray-400">
+            Scripted conversations with a right answer — pick a situation and choose how you would reply.
+            No daily limit on these.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {SCENARIOS.map(s => {
-            const isLocked = isFree && !FREE_SCENARIO_IDS.includes(s.id);
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {SCENARIOS.map((s2, i) => {
+            const isLocked = isFree && !FREE_SCENARIO_IDS.includes(s2.id);
             if (isLocked) {
               return (
-                <LockedCard
-                  key={s.id}
-                  emoji={s.emoji}
-                  label={s.title}
-                  sublabel={s.difficulty}
-                />
+                <button
+                  key={s2.id}
+                  onClick={openUpgradeModal}
+                  className="kl-premium kl-cascade flex flex-col items-start rounded-[18px] p-5 text-left"
+                  style={{ animationDelay: `${i * 60}ms` }}
+                >
+                  <span
+                    className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl text-white"
+                    style={{ background: 'var(--brand-gradient)' }}
+                  >
+                    <Lock className="h-4 w-4" />
+                  </span>
+                  <span className="text-[16px] font-semibold text-[#16202F] dark:text-white">{s2.title}</span>
+                  <span className="mt-1 text-[12.5px] text-[#4A5566] dark:text-gray-400">
+                    {s2.difficulty} · Premium
+                  </span>
+                  <span className="mt-3 text-[13px] font-semibold text-[#C13F22] dark:text-[#F07A55]">
+                    Unlock · $4/mo →
+                  </span>
+                </button>
               );
             }
             return (
-              <div key={s.id} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5 flex flex-col">
-                <div className="text-4xl mb-3">{s.emoji}</div>
-                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  <h3 className="text-sm font-black text-gray-900 dark:text-white">{s.title}</h3>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    s.difficulty === 'beginner'
-                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                      : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                  }`}>{s.difficulty}</span>
+              <div
+                key={s2.id}
+                className="kl-card kl-cascade flex flex-col p-5"
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <span
+                    className="flex h-11 w-11 flex-none items-center justify-center rounded-xl text-[20px]"
+                    style={{ background: `${ACC.light}1F`, border: `1px solid ${ACC.light}4D` }}
+                  >
+                    {s2.emoji}
+                  </span>
+                  <span className="text-[12px] font-medium text-[#4A5566] dark:text-gray-500">{s2.difficulty}</span>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 flex-1 leading-relaxed">{s.description}</p>
-                <button onClick={() => start(s)}
-                  className="w-full py-2 text-white text-xs font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-                  style={{ background: 'var(--brand-gradient)' }}>
-                  Start Practice →
+                <h3 className="mt-4 text-[16px] font-semibold text-[#16202F] dark:text-white">{s2.title}</h3>
+                <p className="mt-1 flex-1 text-[13px] leading-relaxed text-[#4A5566] dark:text-gray-400">{s2.description}</p>
+                <button
+                  onClick={() => start(s2)}
+                  className="mt-4 flex h-11 items-center justify-center rounded-[10px] text-[14px] font-semibold text-white transition-transform hover:scale-[1.02]"
+                  style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}3D` }}
+                >
+                  Start practice →
                 </button>
               </div>
             );
           })}
         </div>
+
         {isFree && (
-          <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
-            2 of {SCENARIOS.length} scenarios unlocked · <button onClick={openUpgradeModal} className="text-[#3F8571] font-black hover:underline">Upgrade for all {SCENARIOS.length} →</button>
+          <p className="mt-4 text-[13px] text-[#4A5566] dark:text-gray-500">
+            {FREE_SCENARIO_IDS.length} of {SCENARIOS.length} scenarios unlocked ·{' '}
+            <button onClick={openUpgradeModal} className="font-semibold text-[#C13F22] hover:underline dark:text-[#F07A55]">
+              Unlock all {SCENARIOS.length} →
+            </button>
           </p>
         )}
       </div>
@@ -440,40 +462,58 @@ const ScriptedConversation: React.FC = () => {
   // ── Completion ──────────────────────────────────────────────────────────────
   if (done) {
     const pct = score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0;
-    const resultEmoji = pct >= 80 ? '🏆' : pct >= 60 ? '👍' : '💪';
-    const resultMsg = pct >= 80 ? 'Excellent work!' : pct >= 60 ? 'Good job!' : 'Keep practicing!';
+    const resultMsg = pct >= 80 ? 'Excellent work' : pct >= 60 ? 'Good job' : 'Keep practising';
     return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
-        <div className="relative rounded-3xl overflow-hidden mb-6 p-6 text-center"
-          style={{ background: 'var(--brand-gradient-hero-rev)' }}>
-          <div className="text-5xl mb-2">{resultEmoji}</div>
-          <h2 className="text-2xl font-black text-white mb-1">{resultMsg}</h2>
-          <p className="text-white/80 text-sm">{scenario.emoji} {scenario.title}</p>
-          <div className="mt-4 inline-flex items-center gap-3 bg-white/20 rounded-2xl px-6 py-3">
-            <span className="text-3xl font-black text-white">{score.correct}/{score.total}</span>
-            <span className="text-white/80 text-sm">correct</span>
+      <div className="mx-auto max-w-3xl">
+        <div className="kl-card mb-4 flex flex-wrap items-center gap-5 p-6">
+          <div
+            className="flex h-[70px] w-[70px] flex-none flex-col items-center justify-center rounded-[14px]"
+            style={{ background: `${ACC.light}1F`, border: `1px solid ${ACC.light}4D` }}
+          >
+            <span className="text-[24px] font-bold leading-none" style={{ color: ACC.light }}>{score.correct}</span>
+            <span className="mt-1 text-[11.5px] font-medium" style={{ color: ACC.light }}>of {score.total}</span>
+          </div>
+          <div className="min-w-[200px] flex-1">
+            <div className="mb-1 text-[12.5px] font-semibold" style={{ color: ACC.light }}>SCENARIO COMPLETE</div>
+            <h2 className="font-display text-[22px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+              {resultMsg}
+            </h2>
+            <p className="mt-1.5 text-[13.5px] text-[#3E4A5A] dark:text-gray-400">
+              {scenario.title} · {pct}% right first time
+            </p>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5 mb-4">
-          <p className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">📋 Full Dialogue</p>
-          <div className="space-y-3">
+        <div className="kl-card mb-4 p-5 sm:p-6">
+          <div className="mb-4 text-[14px] font-semibold text-[#16202F] dark:text-white">The whole conversation</div>
+          <div className="flex flex-col gap-3">
             {history.map(({ line, chosenOpt }, i) => (
-              <div key={i} className={`flex ${line.speaker === 'you' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl ${
-                  line.speaker === 'native' ? 'bg-gray-100 dark:bg-gray-800 rounded-tl-sm' : 'rounded-tr-sm'
-                }`} style={line.speaker === 'you' ? { background: 'var(--brand-gradient)' } : {}}>
+              <div key={i} className={`flex flex-col ${line.speaker === 'you' ? 'items-end' : 'items-start'}`}>
+                <div
+                  className={`max-w-[85%] px-4 py-3 ${
+                    line.speaker === 'native'
+                      ? 'kl-well rounded-[14px_14px_14px_4px]'
+                      : 'rounded-[14px_14px_4px_14px] text-white'
+                  }`}
+                  style={line.speaker === 'you' ? { background: ACC.light } : undefined}
+                >
                   {line.speaker === 'native' && line.role && (
-                    <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 mb-0.5">{line.role}</p>
+                    <p className="mb-1 text-[11.5px] font-semibold text-[#4A5566] dark:text-gray-500">{line.role}</p>
                   )}
-                  <p className={`text-sm font-bold ${line.speaker === 'native' ? 'text-gray-900 dark:text-white' : 'text-white'}`}>
+                  <p className={`font-korean text-[16px] font-semibold ${
+                    line.speaker === 'native' ? 'text-[#16202F] dark:text-white' : ''
+                  }`}>
                     {line.speaker === 'you' ? (chosenOpt?.korean ?? line.korean) : line.korean}
                   </p>
-                  <p className={`text-xs mt-0.5 ${line.speaker === 'native' ? 'text-gray-500 dark:text-gray-400' : 'text-white/70'}`}>
+                  <p className={`mt-1 text-[13px] ${
+                    line.speaker === 'native' ? 'text-[#4A5566] dark:text-gray-400' : 'text-white/80'
+                  }`}>
                     {line.speaker === 'you' ? (chosenOpt?.english ?? line.english) : line.english}
                   </p>
                   {line.speaker === 'you' && chosenOpt && !chosenOpt.isCorrect && (
-                    <p className="text-[11px] mt-1 text-yellow-200 font-semibold">✓ Correct: {line.korean}</p>
+                    <p className="mt-2 rounded-lg bg-white/20 px-2.5 py-1.5 text-[12.5px] font-medium">
+                      The natural reply: <span className="font-korean font-semibold">{line.korean}</span>
+                    </p>
                   )}
                 </div>
               </div>
@@ -481,15 +521,19 @@ const ScriptedConversation: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex gap-3">
-          <button onClick={() => start(scenario)}
-            className="flex-1 py-3 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-            style={{ background: 'var(--brand-gradient)' }}>
-            🔄 Try Again
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => start(scenario)}
+            className="flex h-12 items-center rounded-[10px] px-5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+            style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}3D` }}
+          >
+            Try it again →
           </button>
-          <button onClick={() => setScenario(null)}
-            className="flex-1 py-3 text-sm font-black rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-            ← All Scenarios
+          <button
+            onClick={() => setScenario(null)}
+            className="flex h-12 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+          >
+            All scenarios
           </button>
         </div>
       </div>
@@ -501,128 +545,168 @@ const ScriptedConversation: React.FC = () => {
   const progress = (lineIdx / scenario.lines.length) * 100;
   const displayOpts = getDisplayOpts(currentLine, lineIdx);
 
+  const bubble = (speaker: string) =>
+    speaker === 'native'
+      ? 'kl-well rounded-[14px_14px_14px_4px]'
+      : 'rounded-[14px_14px_4px_14px] text-white';
+
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto flex flex-col" style={{ minHeight: '70vh' }}>
-      {/* Top bar */}
-      <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => setScenario(null)}
-          className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm flex-shrink-0">
-          ←
-        </button>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-1 gap-2">
-            <span className="text-sm font-black text-gray-900 dark:text-white truncate">{scenario.emoji} {scenario.title}</span>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <button onClick={() => setShowEn(e => !e)}
-                className="text-[10px] font-bold px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                {showEn ? 'EN ✓' : 'EN ✗'}
-              </button>
-              <span className="text-xs text-gray-400 dark:text-gray-500">{lineIdx}/{scenario.lines.length}</span>
-            </div>
-          </div>
-          <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${progress}%`, background: 'var(--brand-gradient-h)' }} />
-          </div>
+    <div className="mx-auto flex max-w-3xl flex-col">
+      {/* Header */}
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+        <div className="min-w-0">
+          <h1 className="truncate font-display text-[24px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[26px] dark:text-white">
+            {scenario.title}
+            <span className="text-[#4A5566] dark:text-gray-500"> · {lineIdx} of {scenario.lines.length}</span>
+          </h1>
+        </div>
+        <div className="flex flex-none items-center gap-3">
+          <button
+            onClick={() => setShowEn(e => !e)}
+            className="flex h-10 items-center rounded-[9px] border border-[rgba(20,32,47,0.18)] px-3 text-[12.5px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200"
+          >
+            {showEn ? 'English on' : 'English off'}
+          </button>
+          <button
+            onClick={() => setScenario(null)}
+            className="flex h-10 items-center rounded-[9px] border border-[rgba(20,32,47,0.18)] px-3 text-[12.5px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200"
+          >
+            Exit
+          </button>
         </div>
       </div>
 
-      {/* Chat history + current line */}
-      <div className="flex-1 space-y-3 mb-4 overflow-y-auto">
-        {history.map(({ line, chosenOpt }, i) => (
-          <div key={i} className={`flex ${line.speaker === 'you' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl ${
-              line.speaker === 'native' ? 'bg-gray-100 dark:bg-gray-800 rounded-tl-sm' : 'rounded-tr-sm'
-            }`} style={line.speaker === 'you' ? { background: 'var(--brand-gradient)' } : {}}>
-              {line.speaker === 'native' && line.role && (
-                <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 mb-0.5">{line.role}</p>
-              )}
-              <p className={`text-sm font-bold ${line.speaker === 'native' ? 'text-gray-900 dark:text-white' : 'text-white'}`}>
-                {line.speaker === 'you' ? (chosenOpt?.korean ?? line.korean) : line.korean}
-              </p>
-              {showEn && (
-                <p className={`text-xs mt-0.5 ${line.speaker === 'native' ? 'text-gray-500 dark:text-gray-400' : 'text-white/70'}`}>
-                  {line.speaker === 'you' ? (chosenOpt?.english ?? line.english) : line.english}
-                </p>
-              )}
-            </div>
-          </div>
-        ))}
+      <div className="mb-5 h-1.5 overflow-hidden rounded-full bg-[rgba(20,32,47,0.10)] dark:bg-gray-800">
+        <div className="h-full rounded-full transition-all duration-500"
+             style={{ width: `${progress}%`, background: ACC.light }} />
+      </div>
 
-        {/* Current native line */}
-        {currentLine.speaker === 'native' && (
-          <div className="flex justify-start">
-            <div className="max-w-[80%] bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3">
-              {currentLine.role && (
-                <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 mb-0.5">{currentLine.role}</p>
-              )}
-              <div className="flex items-start gap-2">
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">{currentLine.korean}</p>
-                  {showEn && <>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 italic mt-0.5">{currentLine.romanization}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">{currentLine.english}</p>
-                  </>}
-                </div>
-                <button onClick={() => speak(currentLine.korean)}
+      <div className="kl-card p-5 sm:p-6">
+        {/* What has been said */}
+        <div className="flex flex-col gap-3">
+          {history.map(({ line, chosenOpt }, i) => (
+            <div key={i} className={`flex flex-col ${line.speaker === 'you' ? 'items-end' : 'items-start'}`}>
+              <div
+                className={`max-w-[85%] px-4 py-3 ${bubble(line.speaker)}`}
+                style={line.speaker === 'you' ? { background: ACC.light } : undefined}
+              >
+                {line.speaker === 'native' && line.role && (
+                  <p className="mb-1 text-[11.5px] font-semibold text-[#4A5566] dark:text-gray-500">{line.role}</p>
+                )}
+                <p className={`font-korean text-[16px] font-semibold ${
+                  line.speaker === 'native' ? 'text-[#16202F] dark:text-white' : ''
+                }`}>
+                  {line.speaker === 'you' ? (chosenOpt?.korean ?? line.korean) : line.korean}
+                </p>
+                {showEn && (
+                  <p className={`mt-1 text-[13px] ${
+                    line.speaker === 'native' ? 'text-[#4A5566] dark:text-gray-400' : 'text-white/80'
+                  }`}>
+                    {line.speaker === 'you' ? (chosenOpt?.english ?? line.english) : line.english}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* The line you are hearing now */}
+          {currentLine.speaker === 'native' && (
+            <div className="flex flex-col items-start">
+              <div className="kl-well max-w-[85%] rounded-[14px_14px_14px_4px] px-4 py-3">
+                {currentLine.role && (
+                  <p className="mb-1 text-[11.5px] font-semibold text-[#4A5566] dark:text-gray-500">{currentLine.role}</p>
+                )}
+                <p className="font-korean text-[17px] font-semibold text-[#16202F] dark:text-white">{currentLine.korean}</p>
+                {showEn && (
+                  <>
+                    <p className="mt-1 text-[12.5px] text-[#4A5566] dark:text-gray-500">{currentLine.romanization}</p>
+                    <p className="mt-0.5 text-[13.5px] text-[#3E4A5A] dark:text-gray-300">{currentLine.english}</p>
+                  </>
+                )}
+                <button
+                  onClick={() => speak(currentLine.korean)}
                   aria-label="Pronounce Korean text"
-                  className="flex-shrink-0 w-7 h-7 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-400 transition-colors">
-                  <Volume2 className="w-3.5 h-3.5" />
+                  className="mt-2.5 inline-flex items-center gap-2 text-[12.5px] font-semibold text-[#4A5566] transition-colors hover:text-[#16202F] dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  <span className="flex h-2.5 items-end gap-[2px]" aria-hidden="true">
+                    <span className="kl-bar w-[2.5px]" style={{ height: '100%', background: ACC.light }} />
+                    <span className="kl-bar w-[2.5px]" style={{ height: '100%', background: ACC.light, animationDelay: '0.15s' }} />
+                    <span className="kl-bar w-[2.5px]" style={{ height: '100%', background: ACC.light, animationDelay: '0.3s' }} />
+                  </span>
+                  Hear it
                 </button>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Current "you" turn */}
-        {currentLine.speaker === 'you' && (
-          <div className="space-y-2 pt-1">
-            <p className="text-xs text-center text-gray-400 dark:text-gray-500 font-bold tracking-wide">
-              YOUR TURN — choose the right response:
-            </p>
-            {displayOpts.map((opt, i) => {
-              const isChosen = chosen === i;
-              const showFeedback = chosen !== null;
-              let cls = 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-[#F5A183] dark:hover:border-[#A83619] cursor-pointer';
-              if (showFeedback) {
-                if (opt.isCorrect) cls = 'bg-green-50 dark:bg-green-900/20 border-2 border-green-400 text-gray-900 dark:text-white cursor-default';
-                else if (isChosen) cls = 'bg-red-50 dark:bg-red-900/20 border-2 border-red-400 text-gray-900 dark:text-white opacity-80 cursor-default';
-                else cls = 'opacity-40 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 cursor-default';
-              }
-              return (
-                <button key={i} onClick={() => pick(i)} disabled={chosen !== null}
-                  className={`w-full text-left px-4 py-3 rounded-xl transition-all text-sm ${cls}`}>
-                  <div className="flex items-start gap-2">
-                    <span className="font-black text-xs opacity-50 mt-0.5 flex-shrink-0">{String.fromCharCode(65 + i)}.</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold leading-snug">{opt.korean}</p>
-                      {showEn && <p className="text-xs opacity-70 mt-0.5">{opt.english}</p>}
-                      {showFeedback && opt.isCorrect && (
-                        <p className="text-xs italic opacity-60 mt-0.5">{opt.romanization}</p>
+          {/* Your turn */}
+          {currentLine.speaker === 'you' && (
+            <div className="mt-2 flex flex-col gap-2.5">
+              <p className="text-[13px] font-semibold text-[#16202F] dark:text-white">
+                Your turn — which reply fits?
+              </p>
+              {displayOpts.map((opt, i) => {
+                const isChosen = chosen === i;
+                const showFeedback = chosen !== null;
+                const correct = showFeedback && opt.isCorrect;
+                const wrong = showFeedback && isChosen && !opt.isCorrect;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => pick(i)}
+                    disabled={chosen !== null}
+                    className={`w-full rounded-xl border px-4 py-3 text-left transition-all ${
+                      showFeedback
+                        ? correct || wrong ? '' : 'border-[rgba(20,32,47,0.10)] opacity-40 dark:border-gray-800'
+                        : 'cursor-pointer border-[rgba(20,32,47,0.14)] hover:border-[rgba(20,32,47,0.3)] dark:border-gray-700 dark:hover:border-gray-500'
+                    }`}
+                    style={
+                      correct ? { borderColor: '#2E6B59', background: 'rgba(46,107,89,0.08)' }
+                      : wrong ? { borderColor: '#C13F22', background: 'rgba(193,63,34,0.07)' }
+                      : undefined
+                    }
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <span className="mt-0.5 flex-none text-[12px] font-semibold text-[#4A5566] dark:text-gray-500">
+                        {String.fromCharCode(65 + i)}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-korean text-[15px] font-semibold leading-snug text-[#16202F] dark:text-white">
+                          {opt.korean}
+                        </p>
+                        {showEn && <p className="mt-1 text-[12.5px] text-[#4A5566] dark:text-gray-400">{opt.english}</p>}
+                        {correct && (
+                          <p className="mt-1 text-[12.5px] text-[#4A5566] dark:text-gray-500">{opt.romanization}</p>
+                        )}
+                      </div>
+                      {(correct || wrong) && (
+                        <span
+                          className="flex-none text-[14px] font-semibold"
+                          style={{ color: correct ? '#2E6B59' : '#C13F22' }}
+                        >
+                          {correct ? '✓' : '✗'}
+                        </span>
                       )}
                     </div>
-                    {showFeedback && (
-                      <span className="flex-shrink-0 text-sm font-black">
-                        {opt.isCorrect ? '✓' : isChosen ? '✗' : ''}
-                      </span>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
-        <div ref={bottomRef} />
-      </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
 
-      {/* Continue button */}
-      {(currentLine.speaker === 'native' || chosen !== null) && (
-        <button onClick={advance}
-          className="w-full py-3 text-white text-sm font-black rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-          style={{ background: 'var(--brand-gradient)' }}>
-          {lineIdx + 1 >= scenario.lines.length ? '🏁 See Results' : 'Continue →'}
-        </button>
-      )}
+        {/* Continue */}
+        {(currentLine.speaker === 'native' || chosen !== null) && (
+          <button
+            onClick={advance}
+            className="mt-5 flex h-12 w-full items-center justify-center rounded-[10px] text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+            style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}3D` }}
+          >
+            {lineIdx + 1 >= scenario.lines.length ? 'See how you did →' : 'Continue →'}
+          </button>
+        )}
+      </div>
     </div>
   );
 };

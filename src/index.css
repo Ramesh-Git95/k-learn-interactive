@@ -285,6 +285,66 @@
   animation: klDraw 2.4s ease-in-out infinite alternate;
 }
 
+/* ── Travelling glow ─────────────────────────────────────────────────────────
+   A light that runs around the edge of a box — used on the chat input so the
+   place you type is obvious without a heavy border. Built from a conic gradient
+   rotated by an @property angle (animatable, unlike a plain gradient) and masked
+   to the border only, so the box's own background stays clean. */
+@property --kl-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes klRing {
+  to { --kl-angle: 360deg; }
+}
+.kl-glow-ring {
+  position: relative;
+  isolation: isolate;
+}
+.kl-glow-ring::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 2px;
+  /* A dim ring is present the whole way round, with a brighter comet passing
+     over it — otherwise the side the light has left reads as a missing border. */
+  background: conic-gradient(
+    from var(--kl-angle),
+    rgba(47, 93, 138, 0.30) 0deg,
+    rgba(47, 93, 138, 0.30) 20deg,
+    #2F5D8A 70deg,
+    #7FB0E0 110deg,
+    #3F8571 150deg,
+    rgba(47, 93, 138, 0.30) 210deg,
+    rgba(47, 93, 138, 0.30) 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: klRing 4s linear infinite;
+  pointer-events: none;
+}
+/* Brighter against ink, where a mid-tone slate would disappear. */
+.dark .kl-glow-ring::before {
+  background: conic-gradient(
+    from var(--kl-angle),
+    rgba(127, 176, 224, 0.32) 0deg,
+    rgba(127, 176, 224, 0.32) 20deg,
+    #7FB0E0 70deg,
+    #A9D4F5 110deg,
+    #5FB89B 150deg,
+    rgba(127, 176, 224, 0.32) 210deg,
+    rgba(127, 176, 224, 0.32) 360deg
+  );
+}
+@media (prefers-reduced-motion: reduce) {
+  .kl-glow-ring::before { animation: none; }
+}
+
 /* Wrong piece tapped — a short nudge, not a punishment. */
 @keyframes klShake {
   0%, 100% { transform: translateX(0); }
