@@ -352,6 +352,16 @@
   75%      { transform: translateX(4px); }
 }
 
+/* A small nudge upward — draws the eye to an affordance without a label. */
+@keyframes klBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+.kl-bob { animation: klBob 1.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .kl-bob { animation: none; }
+}
+
 /* A quiet "live" pulse — marks the set you are mid-way through. */
 @keyframes klPulse {
   0%, 100% { transform: scale(1);   opacity: 1; }
@@ -616,6 +626,13 @@ h1, h2, h3 {
 
 .dark :focus-visible {
   outline-color: #F07A55;
+}
+
+/* The chat box carries its own travelling glow, which already says "focus" more
+   clearly than an outline can — so the global one would just fight it. */
+.kl-glow-ring textarea:focus-visible,
+.kl-glow-ring input:focus-visible {
+  outline: none;
 }
 
 /* The spotlight search input auto-focuses when the modal opens; the modal is

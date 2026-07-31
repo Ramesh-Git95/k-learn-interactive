@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { translateText, getConversationResponse, AiError, ChatHistoryItem } from '../services/geminiService';
+import { Keyboard } from 'lucide-react';
 import { useToastContext } from '../contexts/ToastContext';
 import { commonPhrases } from '../data/koreanData';
 import { accentFor } from '../utils/moduleAccent';
+import HangulKeyboard from './HangulKeyboard';
+import { appendJamo, backspaceJamo } from '../utils/hangulCompose';
 
 declare global {
   interface Window {
@@ -252,6 +255,7 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
   }, [selectedTopic]);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [showKeyboard, setShowKeyboard] = useState(false);
   const useSuggestion = (korean: string) => {
     setInputText(korean);
     inputRef.current?.focus();
@@ -431,6 +435,37 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
                   />
                 </div>
 
+                {/* Most learners have no Korean IME — this is how they type Korean
+                    at all, so the button says what it is rather than relying on 한
+                    being recognised. */}
+                <div className="relative flex-none">
+                  {/* A bobbing keyboard mark says "you can type Korean here" in the
+                      space a word would have cost. The button keeps the words in its
+                      tooltip and aria-label for anyone who needs them. */}
+                  {!showKeyboard && (
+                    <span className="pointer-events-none absolute -top-5 left-1/2 -translate-x-1/2">
+                      <span className="kl-bob block" style={{ color: ACC.light }}>
+                        <Keyboard className="h-[17px] w-[17px]" />
+                      </span>
+                    </span>
+                  )}
+                  <button
+                    onClick={() => setShowKeyboard(v => !v)}
+                    className={`flex h-12 items-center justify-center rounded-[10px] border-[1.5px] px-3 font-korean text-[15px] font-bold transition-colors ${
+                      showKeyboard
+                        ? 'text-white'
+                        : 'text-[#16202F] dark:text-gray-200'
+                    }`}
+                    style={showKeyboard
+                      ? { background: ACC.light, borderColor: ACC.light }
+                      : { borderColor: `${ACC.light}80`, background: `${ACC.light}0F` }}
+                    title={L('Korean keyboard', '한글 자판')}
+                    aria-pressed={showKeyboard}
+                  >
+                    한
+                  </button>
+                </div>
+
                 {speechSupported && (voiceMode === 'input' || voiceMode === 'both') && (
                   isListening ? (
                     <button
@@ -472,9 +507,19 @@ const ConversationBot: React.FC<ConversationBotProps> = ({ onClose, dailyLimit =
                   →
                 </button>
               </div>
+              {showKeyboard && (
+                <HangulKeyboard
+                  value={inputText}
+                  onJamo={j => { setInputText(t => appendJamo(t, j)); inputRef.current?.focus(); }}
+                  onSpace={() => { setInputText(t => t + ' '); inputRef.current?.focus(); }}
+                  onBackspace={() => { setInputText(t => backspaceJamo(t)); inputRef.current?.focus(); }}
+                  onClose={() => setShowKeyboard(false)}
+                />
+              )}
+
               <p className="mt-2 text-[12px] text-[#4A5566] dark:text-gray-500">
-                {L('Answer in Korean or English — both are fine. Enter sends, Shift+Enter adds a line.',
-                   '한국어나 영어로 답해도 괜찮아요. Enter로 전송, Shift+Enter로 줄바꿈.')}
+                {L('Answer in Korean or English — both are fine. No Korean keyboard? Tap 한.',
+                   '한국어나 영어로 답해도 괜찮아요. 한글 자판이 없으면 한 을 누르세요.')}
               </p>
             </div>
           </div>
