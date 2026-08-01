@@ -372,6 +372,23 @@
   .kl-turn { animation: none; }
 }
 
+/* A sweeping clock hand — advertises the timer even while it is switched off,
+   the way a stopwatch on a shelf still ticks. transform-box/origin are set in
+   view-box units so the hand pivots on the clock's centre, not its own bounds. */
+@keyframes klSweep {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.kl-sweep {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+  animation: klSweep 3s linear infinite;
+}
+.kl-sweep-fast { animation-duration: 1.4s; }
+@media (prefers-reduced-motion: reduce) {
+  .kl-sweep { animation: none; }
+}
+
 /* A small nudge upward — draws the eye to an affordance without a label. */
 @keyframes klBob {
   0%, 100% { transform: translateY(0); }

@@ -636,7 +636,7 @@ const AppContent: React.FC = () => {
     // If activeSection is null or not a public section, show landing page
     if (activeSection === null || !publicSections.includes(activeSection)) {
       return (
-        <div className={`${theme === 'dark' ? 'dark' : ''}`}>
+        <div className={`flex min-h-screen flex-col ${theme === 'dark' ? 'dark' : ''}`}>
           <Header
             activeSection={activeSection}
             setActiveSection={handleSetActiveSection}
@@ -644,7 +644,9 @@ const AppContent: React.FC = () => {
             toggleTheme={toggleTheme}
           />
           <GuestFreeBanner onNavigate={handleSetActiveSection} />
-          <LandingPage onGetStarted={handleGetStarted} />
+          <div className="flex-1">
+            <LandingPage onGetStarted={handleGetStarted} />
+          </div>
           <Footer />
           <CookieConsent />
         </div>
@@ -661,7 +663,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen font-sans ${
+      className={`flex min-h-screen flex-col font-sans ${
         activeSection ? 'bg-[#F0EADC]' : 'bg-gray-50'
       } dark:bg-gray-950 text-gray-900 dark:text-white transition-all duration-300 ease-in-out ${
         isThemeTransitioning ? 'theme-transitioning' : ''
@@ -686,7 +688,7 @@ const AppContent: React.FC = () => {
     
     <main
       id="main-content"
-      className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8"
+      className="container mx-auto w-full flex-1 px-3 py-4 sm:px-4 sm:py-6 md:px-6 lg:px-8 lg:py-8"
       role="main"
       aria-live="polite"
       style={{ viewTransitionName: 'section-content' }}

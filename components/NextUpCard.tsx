@@ -1,4 +1,5 @@
 import React from 'react';
+import { accentFor } from '../utils/moduleAccent';
 import type { Section } from '../types';
 import { useProgress } from '../contexts/ProgressContext';
 import { canSkipHangul } from '../utils/topikEstimate';
@@ -40,6 +41,9 @@ export default function NextUpCard({ exclude, onNavigate, className = '' }: Next
 
   const { unit, completed, total } = next;
   const icon = SECTION_ICON[unit.section] ?? '📘';
+  // Coloured by where it is sending you, so the card already looks like the
+  // place it leads to.
+  const ACC = accentFor(unit.section);
 
   const go = () => {
     if (onNavigate) onNavigate(unit.section);
@@ -49,25 +53,29 @@ export default function NextUpCard({ exclude, onNavigate, className = '' }: Next
   return (
     <button
       onClick={go}
-      className={`w-full flex items-center gap-4 rounded-2xl p-4 text-left text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 ${className}`}
-      style={{ background: 'var(--brand-gradient)' }}
+      className={`kl-card group flex w-full items-center gap-4 p-4 text-left transition-transform duration-200 hover:-translate-y-0.5 ${className}`}
     >
       <div
-        className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-xl flex-shrink-0"
-        style={{ fontFamily: 'Pretendard Variable, sans-serif', fontWeight: 900 }}
+        className="flex h-11 w-11 flex-none items-center justify-center rounded-xl font-korean text-xl font-bold"
+        style={{ background: `${ACC.light}1F`, border: `1px solid ${ACC.light}4D`, color: ACC.light }}
       >
         {icon}
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-[10px] font-black uppercase tracking-widest text-white/70">
-          Next up · {unit.estMinutes} min
+      <div className="min-w-0 flex-1">
+        <div className="text-[12.5px] font-semibold" style={{ color: ACC.light }}>
+          NEXT UP · {unit.estMinutes} MIN
         </div>
-        <div className="text-base font-black truncate">{unit.title}</div>
-        <div className="text-[11px] text-white/70 truncate">
+        <div className="truncate text-[16px] font-semibold text-[#16202F] dark:text-white">{unit.title}</div>
+        <div className="truncate text-[12.5px] text-[#4A5566] dark:text-gray-400">
           {completed > 0 ? `${completed}/${total} done — pick up where you left off` : unit.subtitle}
         </div>
       </div>
-      <span className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-white text-[#C13F22] text-xs font-black">Go →</span>
+      <span
+        className="flex h-10 flex-none items-center gap-1.5 rounded-[9px] px-4 text-[13.5px] font-semibold text-white transition-transform duration-200 group-hover:translate-x-0.5"
+        style={{ background: ACC.light }}
+      >
+        Go →
+      </span>
     </button>
   );
 }

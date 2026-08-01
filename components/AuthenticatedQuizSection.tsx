@@ -3,6 +3,7 @@ import { vocabulary } from '../data/koreanData';
 import type { QuizQuestion } from '../types';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
+import { Lock } from 'lucide-react';
 import { PremiumLockBanner } from './PremiumLock';
 import NextUpCard from './NextUpCard';
 import { useDailyActivity } from '../hooks/useDailyActivity';
@@ -12,6 +13,10 @@ import { useUpgradeModal } from '../contexts/UpgradeModalContext';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
 import { celebrate } from '../utils/celebrate';
 import { QuizSkeleton } from './Skeleton';
+import { accentFor } from '../utils/moduleAccent';
+
+const ACC = accentFor('quiz');
+const PINE = '#2E6B59';
 
 type QuizMode = 'korean_to_english' | 'english_to_korean' | 'romanization_to_korean' | 'mixed';
 
@@ -29,42 +34,30 @@ const AuthenticationRequired: React.FC = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-md mx-auto">
-      {/* Hero */}
-      <div
-        className="relative rounded-3xl overflow-hidden mb-6 p-6 sm:p-8 text-center"
-        style={{ background: 'var(--brand-gradient-hero)' }}
-      >
-        <div className="text-5xl mb-3">🧠</div>
-        <h1 className="text-2xl sm:text-3xl font-black text-white mb-1">Sign in to take the quiz</h1>
-        <p className="text-white/80 text-sm">
-          Quiz scores and stats are saved to your account
+    <div className="mx-auto max-w-2xl">
+      <div className="kl-card p-8 text-center">
+        <h1 className="font-display text-[24px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+          Sign in to take the quiz
+        </h1>
+        <p className="mx-auto mt-2.5 max-w-sm text-[14.5px] leading-relaxed text-[#3E4A5A] dark:text-gray-400">
+          Scores, streaks and the words you get wrong are saved to your account, so the quiz
+          can follow you between devices.
         </p>
-      </div>
-
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 space-y-3">
-        <button
-          onClick={() => openAuth('register')}
-          className="w-full py-3 text-white font-black rounded-xl shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-sm"
-          style={{ background: 'var(--brand-gradient)' }}
-        >
-          🚀 Create a free account
-        </button>
-        <button
-          onClick={() => openAuth('login')}
-          className="w-full py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-sm"
-        >
-          Log in
-        </button>
-      </div>
-
-      <div className="mt-5 p-4 rounded-2xl bg-[#EEF5F1] dark:bg-[#153327]/20 border border-[#BFDACD] dark:border-[#1D4436]/40">
-        <p className="text-xs font-black text-[#265847] dark:text-[#93C2AE] mb-2 uppercase tracking-wider">Why sign up?</p>
-        <ul className="text-xs text-[#2E6B59] dark:text-[#6BA88F] space-y-1">
-          {['Save quiz scores & progress', 'Track your learning streaks', 'Sync across devices', 'Access detailed statistics'].map(b => (
-            <li key={b}>✅ {b}</li>
-          ))}
-        </ul>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <button
+            onClick={() => openAuth('register')}
+            className="flex h-12 items-center rounded-[10px] px-5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+            style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+          >
+            Create a free account →
+          </button>
+          <button
+            onClick={() => openAuth('login')}
+            className="flex h-12 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+          >
+            Log in
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -101,6 +94,9 @@ const QuizComponent: React.FC = () => {
   });
   const [showExplanation, setShowExplanation] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
+  // One entry per question: true right, false wrong, null not reached. Drives
+  // the question map in the rail — the score alone could not say WHICH ones.
+  const [results, setResults] = useState<(boolean | null)[]>([]);
 
   const currentDailyCount = dailyActivity.quizzesTaken;
   const dailyLimit = getLimit('quizzesPerDay') as number;
@@ -110,10 +106,8 @@ const QuizComponent: React.FC = () => {
   // render, so referencing it directly in deps causes an infinite render loop.
   const hasAdvancedQuizModes = canAccess('advancedQuizModes');
 
-  const generateQuestions = useCallback(() => {
+  const buildFrom = useCallback((quizItems: typeof allVocab) => {
     const shuffledVocab = [...allVocab].sort(() => 0.5 - Math.random());
-    const questionCount = maxQuestions;
-    const quizItems = shuffledVocab.slice(0, questionCount);
 
     const newQuestions: QuizQuestion[] = quizItems.map((item) => {
       let questionType: QuizQuestion['type'];
@@ -166,13 +160,27 @@ const QuizComponent: React.FC = () => {
     setTimeLeft(isTimedMode ? 30 : null);
     setShowExplanation(false);
     setQuizCompleted(false);
-  }, [allVocab, quizMode, isTimedMode, maxQuestions, hasAdvancedQuizModes]);
+    setResults(new Array(newQuestions.length).fill(null));
+  }, [allVocab, quizMode, isTimedMode, hasAdvancedQuizModes]);
+
+  const generateQuestions = useCallback(() => {
+    const shuffled = [...allVocab].sort(() => 0.5 - Math.random());
+    buildFrom(shuffled.slice(0, maxQuestions));
+  }, [allVocab, maxQuestions, buildFrom]);
+
+  // A short round made only of the words just missed. Turning a bad score into
+  // something small and winnable beats handing the learner a long list of
+  // failures and hoping they read it.
+  const retryMissed = useCallback((items: typeof allVocab) => {
+    if (items.length) buildFrom(items);
+  }, [buildFrom]);
 
   const handleAnswer = useCallback((option: string) => {
     if (selectedAnswer || timeLeft === 0) return;
     setSelectedAnswer(option);
     const correct = option === questions[currentQuestionIndex].answer;
     setIsCorrect(correct);
+    setResults(r => { const next = [...r]; next[currentQuestionIndex] = correct; return next; });
     if (correct) setScore(s => s + 1);
   }, [selectedAnswer, timeLeft, questions, currentQuestionIndex]);
 
@@ -230,9 +238,12 @@ const QuizComponent: React.FC = () => {
   useEffect(() => {
     if (timeLeft === null || timeLeft <= 0 || selectedAnswer) return;
     const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-    if (timeLeft === 1) { setSelectedAnswer(''); setIsCorrect(false); }
+    if (timeLeft === 1) {
+      setSelectedAnswer(''); setIsCorrect(false);
+      setResults(r => { const next = [...r]; next[currentQuestionIndex] = false; return next; });
+    }
     return () => clearTimeout(timer);
-  }, [timeLeft, selectedAnswer]);
+  }, [timeLeft, selectedAnswer, currentQuestionIndex]);
 
   useEffect(() => {
     if (currentQuestionIndex >= questions.length && questions.length > 0 && !quizCompleted) {
@@ -240,25 +251,47 @@ const QuizComponent: React.FC = () => {
     }
   }, [currentQuestionIndex, questions.length, quizCompleted, completeQuiz]);
 
+  // Keyboard: A–D pick an answer, Enter moves on. The screen tells the reader
+  // these work, so they must.
+  useEffect(() => {
+    const q = questions[currentQuestionIndex];
+    if (!q) return;
+    const onKey = (e: KeyboardEvent) => {
+      const el = document.activeElement;
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) return;
+      const answered = selectedAnswer !== null || timeLeft === 0;
+  const timerUrgent = isTimedMode && timeLeft !== null && timeLeft <= 10;
+      if (e.key === 'Enter') {
+        if (answered) { e.preventDefault(); handleNext(); }
+        return;
+      }
+      if (answered) return;
+      const i = 'abcd'.indexOf(e.key.toLowerCase());
+      if (i >= 0 && i < q.options.length) { e.preventDefault(); handleAnswer(q.options[i]); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [questions, currentQuestionIndex, selectedAnswer, timeLeft, handleAnswer, handleNext]);
+
   // Daily limit screen
   if (subscriptionTier === 'free' && hasReachedDailyLimit) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
-        <div
-          className="rounded-3xl overflow-hidden mb-6 p-6 text-center"
-          style={{ background: 'var(--brand-gradient-hero)' }}
-        >
-          <div className="text-4xl mb-2">⏰</div>
-          <h2 className="text-xl font-black text-white mb-1">Daily Limit Reached</h2>
-          <p className="text-white/80 text-sm">You've used {currentDailyCount}/{dailyLimit} quizzes today</p>
+      <div className="mx-auto max-w-2xl">
+        <div className="kl-card p-8 text-center">
+          <h2 className="font-display text-[22px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+            That is today&apos;s {dailyLimit} {dailyLimit === 1 ? 'quiz' : 'quizzes'}
+          </h2>
+          <p className="mx-auto mt-2.5 max-w-sm text-[14.5px] leading-relaxed text-[#3E4A5A] dark:text-gray-400">
+            It resets at midnight. Premium removes the daily cap and adds the English-to-Korean
+            and romanization modes.
+          </p>
         </div>
-        <div className="mb-5 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-          <div className="h-full rounded-full" style={{ width: '100%', background: 'linear-gradient(90deg, #EF4444, #DC2626)' }} />
+        <div className="mt-4">
+          <PremiumLockBanner
+            title="Unlimited quizzes with Premium"
+            description="No daily cap, longer sessions, every question mode, and the full word shown when you miss one."
+          />
         </div>
-        <PremiumLockBanner
-          title="Daily Quiz Limit Reached"
-          description="Upgrade to Premium for unlimited daily quizzes, advanced question modes, and longer sessions."
-        />
       </div>
     );
   }
@@ -271,62 +304,91 @@ const QuizComponent: React.FC = () => {
   // Completion screen
   if (currentQuestionIndex >= questions.length && questions.length > 0) {
     const percentage = (score / questions.length) * 100;
-    const resultEmoji = percentage === 100 ? '🏆' : percentage >= 80 ? '🎉' : percentage >= 60 ? '👏' : '📚';
-    const resultColor = percentage === 100 ? '#22C55E' : percentage >= 80 ? '#24476B' : percentage >= 60 ? '#F59E0B' : '#F97316';
-    const resultMsg = percentage === 100 ? 'Perfect score!' : percentage >= 80 ? 'Excellent work!' : percentage >= 60 ? 'Good job! Keep going!' : 'Keep studying!';
+    const resultMsg = percentage === 100 ? 'Every one right'
+      : percentage >= 80 ? 'Strong round'
+      : percentage >= 60 ? 'Solid round'
+      : 'Worth another go';
 
     // quizStats.averageScore is stored as a 0-1 fraction; convert to 0-100 to combine with percentage
     const newAvg = ((quizStats.averageScore * 100 * quizStats.totalQuizzes + percentage) / (quizStats.totalQuizzes + 1));
     const newStreak = percentage === 100 ? quizStats.streak + 1 : 0;
-
-    const stats = [
-      { label: 'Score', value: `${score}/${questions.length}`, color: resultColor },
-      { label: 'Percentage', value: `${percentage.toFixed(0)}%`, color: '#3F8571' },
-      { label: 'Total Quizzes', value: quizStats.totalQuizzes + 1, color: '#2F5D8A' },
-      { label: 'Avg Score', value: `${newAvg.toFixed(0)}%`, color: '#E4572E' },
-      { label: 'Perfect Scores', value: quizStats.perfectScores + (percentage === 100 ? 1 : 0), color: '#F59E0B' },
-      { label: 'Streak', value: newStreak, color: '#22C55E' },
-    ];
+    const missed = questions.filter((_, i) => results[i] === false);
 
     return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
-        {/* Result hero */}
-        <div
-          className="relative rounded-3xl overflow-hidden mb-8 p-8 text-center"
-          style={{ background: 'var(--brand-gradient-hero)' }}
-        >
-          <div className="text-6xl mb-3">{resultEmoji}</div>
-          <h1 className="text-3xl font-black text-white mb-1">Quiz Complete!</h1>
-          <p className="text-white/80 text-base font-bold">{resultMsg}</p>
-          {/* Big score */}
-          <div className="mt-4 inline-block bg-white/20 backdrop-blur-sm rounded-2xl px-8 py-3">
-            <span className="text-4xl font-black text-white">{score}/{questions.length}</span>
+      <div className="mx-auto max-w-3xl">
+        <div className="kl-card mb-4 flex flex-wrap items-center gap-5 p-6">
+          <div
+            className="flex h-[76px] w-[76px] flex-none flex-col items-center justify-center rounded-[14px]"
+            style={{ background: `${ACC.light}1F`, border: `1px solid ${ACC.light}4D` }}
+          >
+            <span className="text-[26px] font-bold leading-none" style={{ color: ACC.light }}>{score}</span>
+            <span className="mt-1 text-[11.5px] font-medium" style={{ color: ACC.light }}>of {questions.length}</span>
+          </div>
+          <div className="min-w-[200px] flex-1">
+            <div className="mb-1 text-[12.5px] font-semibold" style={{ color: ACC.light }}>QUIZ COMPLETE</div>
+            <h2 className="font-display text-[24px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+              {resultMsg}
+            </h2>
+            <p className="mt-1.5 text-[13.5px] text-[#3E4A5A] dark:text-gray-400">
+              {percentage.toFixed(0)}% this round · {newAvg.toFixed(0)}% average over {quizStats.totalQuizzes + 1}{' '}
+              {quizStats.totalQuizzes + 1 === 1 ? 'quiz' : 'quizzes'}
+              {newStreak > 0 && ` · ${newStreak} perfect in a row`}
+            </p>
           </div>
         </div>
 
-        {/* Stats grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
-          {stats.map(({ label, value, color }) => (
-            <div key={label} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 text-center">
-              <div className="text-2xl font-black mb-1" style={{ color }}>{value}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">{label}</div>
+        {missed.length > 0 && (
+          <div className="kl-card mb-4 p-5 sm:p-6">
+            <div className="mb-1 text-[12.5px] font-semibold" style={{ color: ACC.light }}>
+              {missed.length} TO TIDY UP
             </div>
-          ))}
-        </div>
+            <h3 className="font-display text-[19px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+              {missed.length === 1 ? 'One word slipped' : `${missed.length} words slipped`}
+            </h3>
+            <p className="mt-1.5 text-[13.5px] leading-relaxed text-[#3E4A5A] dark:text-gray-400">
+              {/* Scaled from the real count — "about a minute" is a lie at eighteen words. */}
+              A round of just these runs about {Math.max(1, Math.round(missed.length * 8 / 60))}{' '}
+              {Math.max(1, Math.round(missed.length * 8 / 60)) === 1 ? 'minute' : 'minutes'} — worth more
+              than reading them.
+            </p>
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            {/* Compact chips, not rows. A wall of failures is where people stop. */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              {missed.map((q, i) => (
+                <span
+                  key={i}
+                  className="kl-well inline-flex items-baseline gap-2 rounded-full px-3.5 py-2"
+                  title={q.item.romanization}
+                >
+                  <span className="font-korean text-[15px] font-semibold text-[#16202F] dark:text-white">
+                    {q.item.korean}
+                  </span>
+                  <span className="text-[12.5px] text-[#4A5566] dark:text-gray-400">{q.item.english}</span>
+                </span>
+              ))}
+            </div>
+
+            <button
+              onClick={() => retryMissed(missed.map(q => q.item))}
+              className="mt-5 flex h-12 items-center rounded-[10px] px-5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+              style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+            >
+              Practise just these {missed.length} →
+            </button>
+          </div>
+        )}
+
+        <div className="mb-4 flex flex-wrap gap-3">
           <button
             onClick={restartQuiz}
-            className="flex-1 py-3 font-black rounded-xl btn-brand"
+            className={`flex h-12 items-center rounded-[10px] px-5 text-[15px] font-semibold transition-colors ${
+              missed.length > 0
+                ? 'border-[1.5px] border-[rgba(20,32,47,0.22)] text-[#16202F] hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200'
+                : 'text-white'
+            }`}
+            style={missed.length === 0 ? { background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` } : undefined}
           >
-            🔄 Play Again
-          </button>
-          <button
-            onClick={() => setIsTimedMode(!isTimedMode)}
-            className="flex-1 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-          >
-            {isTimedMode ? '⏸ Disable Timer' : '⏱ Enable Timer'}
+            {missed.length > 0 ? 'A fresh quiz instead' : 'Another quiz →'}
           </button>
         </div>
 
@@ -339,224 +401,348 @@ const QuizComponent: React.FC = () => {
   const currentQuestion = questions[currentQuestionIndex];
   const optionsAreKorean = currentQuestion.type !== 'korean_to_english';
   const answerIsKorean = currentQuestion.type !== 'korean_to_english';
-  const progressPct = ((currentQuestionIndex) / questions.length) * 100;
+  const answered = selectedAnswer !== null || timeLeft === 0;
+  const timerUrgent = isTimedMode && timeLeft !== null && timeLeft <= 10;
+  const streak = (() => {
+    let n = 0;
+    for (let i = currentQuestionIndex - 1; i >= 0; i--) { if (results[i]) n++; else break; }
+    return n + (isCorrect ? 1 : 0);
+  })();
 
-  const QUIZ_MODES: { id: QuizMode; label: string; emoji: string; isPremium?: boolean }[] = [
-    { id: 'mixed', label: 'Mixed', emoji: '🔀' },
-    { id: 'korean_to_english', label: 'KO → EN', emoji: '🇰🇷' },
-    { id: 'english_to_korean', label: 'EN → KO', emoji: '🔤', isPremium: !hasAdvancedQuizModes },
-    { id: 'romanization_to_korean', label: 'Rom → KO', emoji: '🔡', isPremium: !hasAdvancedQuizModes },
+  const QUIZ_MODES: { id: QuizMode; label: string; isPremium?: boolean }[] = [
+    { id: 'mixed', label: 'Mixed' },
+    { id: 'korean_to_english', label: 'KO → EN' },
+    { id: 'english_to_korean', label: 'EN → KO', isPremium: !hasAdvancedQuizModes },
+    { id: 'romanization_to_korean', label: 'Rom → KO', isPremium: !hasAdvancedQuizModes },
   ];
 
+  // What is being asked, and the thing being asked ABOUT. The prompt used to be
+  // a full sentence with the word buried in quote marks; the word itself is what
+  // the learner needs to read, so it gets the size.
+  const prompt = currentQuestion.type === 'korean_to_english'
+    ? { label: 'CHOOSE THE ENGLISH MEANING', subject: currentQuestion.item.korean, sub: currentQuestion.item.romanization, korean: true }
+    : currentQuestion.type === 'english_to_korean'
+    ? { label: 'CHOOSE THE KOREAN', subject: currentQuestion.item.english, sub: null, korean: false }
+    : { label: 'WHICH WORD SOUNDS LIKE THIS', subject: currentQuestion.item.romanization, sub: null, korean: false };
+
+  const railCard = 'rounded-[14px] border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] px-5 py-4 dark:border-gray-800 dark:bg-gray-900';
+
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
-      {/* Hero */}
-      <div
-        className="relative rounded-3xl overflow-hidden mb-6 p-5 sm:p-6"
-        style={{ background: 'var(--brand-gradient-hero)' }}
-      >
-        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
-          {['퀴즈','한국어','점수','연습'].map((w, i) => (
-            <span key={i} className="absolute text-white/10 font-black" style={{ fontSize: `${1.2 + (i % 2) * 0.5}rem`, top: `${(i * 37) % 85}%`, left: `${(i * 43) % 80}%` }}>{w}</span>
-          ))}
-        </div>
-        <div className="relative z-10 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-3xl">🧠</span>
-              <h1 className="text-xl sm:text-2xl font-black text-white">Vocabulary Quiz</h1>
-            </div>
-            <p className="text-white/80 text-xs">
-              {subscriptionTier === 'free'
-                ? `Free Plan · ${maxQuestions} questions · ${dailyLimit - currentDailyCount} quizzes left today`
-                : `Premium · ${maxQuestions} questions · unlimited`}
-            </p>
-          </div>
-          <div className="bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2 text-center">
-            <div className="text-2xl font-black text-white">{score}/{questions.length}</div>
-            <div className="text-[10px] text-white/70">score</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mode selector */}
-      <div className="flex flex-wrap gap-2 mb-5">
-        {QUIZ_MODES.map(({ id, label, emoji, isPremium }) => {
-          const locked = isPremium;
-          const active = quizMode === id;
-          return (
-            <button
-              key={id}
-              onClick={() => !locked && setQuizMode(id)}
-              disabled={!!locked}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 ${
-                active
-                  ? 'tab-brand-active'
-                  : locked
-                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed opacity-60'
-                  : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:scale-105'
-              }`}
-            >
-              {emoji} {label} {locked && '🔒'}
-            </button>
-          );
-        })}
-        <button
-          onClick={() => setIsTimedMode(!isTimedMode)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 border ml-auto ${
-            isTimedMode
-              ? 'bg-orange-500 text-white border-transparent'
-              : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:scale-105'
-          }`}
-        >
-          ⏱ {isTimedMode ? 'Timed ON' : 'Timed OFF'}
-        </button>
-      </div>
-
-      {/* Progress bar */}
-      <div className="mb-5">
-        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
-          <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
-          <span>{Math.round(progressPct)}% complete</span>
-        </div>
-        <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${progressPct}%`, background: 'var(--brand-gradient-h)' }}
-          />
-        </div>
-      </div>
-
-      {/* Timer */}
-      {isTimedMode && timeLeft !== null && (
-        <div className="mb-4">
-          <div className="flex justify-between text-xs mb-1">
-            <span className="text-gray-500 dark:text-gray-400 font-medium">Time Left</span>
-            <span className={`font-black ${timeLeft <= 10 ? 'text-red-500' : 'text-[#E4572E]'}`}>{timeLeft}s</span>
-          </div>
-          <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-1000"
-              style={{
-                width: `${(timeLeft / 30) * 100}%`,
-                background: timeLeft <= 10 ? 'linear-gradient(90deg,#EF4444,#DC2626)' : 'linear-gradient(90deg,#F59E0B,#E4572E)',
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Question card */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mb-4">
-        {/* Type badge */}
-        <div className="px-5 pt-4 pb-2 border-b border-gray-50 dark:border-gray-800 flex items-center gap-2">
-          <span
-            className="text-[10px] font-black px-2.5 py-0.5 rounded-full badge-brand"
+    <div className="mx-auto max-w-6xl">
+      {/* ── Header ── */}
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+        <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+          Quiz
+          <span className="text-[#4A5566] dark:text-gray-500"> · question {currentQuestionIndex + 1} of {questions.length}</span>
+        </h1>
+        <div className="flex flex-none items-center gap-3.5">
+          {/* Motion here MEANS the clock is running: the hand only sweeps and the
+              ring only drains while the timer is on. A hand sweeping on a switched-off
+              timer would say time was passing when it was not. Off, the button is
+              still obvious — it is tinted and says so — but it holds still. */}
+          <button
+            onClick={() => setIsTimedMode(!isTimedMode)}
+            className={`flex h-11 items-center gap-2.5 rounded-[10px] border-[1.5px] px-4 text-[14px] font-semibold transition-colors ${
+              isTimedMode ? 'text-white' : 'text-[#16202F] dark:text-gray-100'
+            }`}
+            style={isTimedMode
+              ? { background: timerUrgent ? '#C13F22' : '#A8761F', borderColor: timerUrgent ? '#C13F22' : '#A8761F' }
+              : { borderColor: '#A8761F80', background: '#A8761F14' }}
+            title={isTimedMode ? 'Turn the timer off' : 'Turn the timer on'}
+            aria-pressed={isTimedMode}
           >
-            {currentQuestion.type === 'korean_to_english' ? '🇰🇷 Korean → English'
-              : currentQuestion.type === 'english_to_korean' ? '🔤 English → Korean'
-              : '🔡 Romanization → Korean'}
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+              {/* dial */}
+              <circle
+                cx="12" cy="12" r="9" fill="none" strokeWidth="2.2"
+                stroke={isTimedMode ? 'rgba(255,255,255,0.35)' : '#A8761F'}
+                strokeOpacity={isTimedMode ? 1 : 0.35}
+              />
+              {/* seconds remaining, draining */}
+              {isTimedMode && (
+                <circle
+                  cx="12" cy="12" r="9" fill="none" stroke="#fff" strokeWidth="2.6"
+                  strokeLinecap="round" transform="rotate(-90 12 12)"
+                  strokeDasharray={2 * Math.PI * 9}
+                  strokeDashoffset={2 * Math.PI * 9 * (1 - (timeLeft ?? 30) / 30)}
+                  style={{ transition: 'stroke-dashoffset 1s linear' }}
+                />
+              )}
+              {/* the sweeping hand */}
+              <line
+                x1="12" y1="12" x2="12" y2="6.4"
+                stroke={isTimedMode ? '#fff' : '#A8761F'}
+                strokeWidth="2.2" strokeLinecap="round"
+                className={isTimedMode ? 'kl-sweep kl-sweep-fast' : undefined}
+              />
+              <circle cx="12" cy="12" r="1.5" fill={isTimedMode ? '#fff' : '#A8761F'} />
+            </svg>
+            {isTimedMode ? `${timeLeft ?? 30}s` : 'Timer off'}
+          </button>
+
+          <span className="hidden items-center gap-2 sm:flex">
+            <span className="relative flex h-[7px] w-[7px]">
+              <span className="kl-pulse absolute inset-0 rounded-full" style={{ background: `${ACC.light}80` }} />
+              <span className="relative h-[7px] w-[7px] rounded-full" style={{ background: ACC.light }} />
+            </span>
+            <span className="text-[13.5px] font-semibold text-[#16202F] dark:text-gray-200">Session live</span>
+          </span>
+          <span className="text-[13.5px] text-[#4A5566] dark:text-gray-500">
+            {score}/{questions.length}
           </span>
         </div>
-
-        {/* Question text */}
-        <div className="px-5 py-6 text-center">
-          <p className={`text-2xl sm:text-3xl font-black text-gray-900 dark:text-white leading-snug ${
-            currentQuestion.type === 'korean_to_english' ? 'text-4xl' : ''
-          }`}>
-            {currentQuestion.question}
-          </p>
-        </div>
-
-        {/* Options */}
-        <div className="px-5 pb-5 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {currentQuestion.options.map((option, index) => {
-            const isSelected = selectedAnswer === option;
-            const isAnswerCorrect = currentQuestion.answer === option;
-            const answered = !!selectedAnswer || timeLeft === 0;
-
-            let bg = 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white';
-            let border = 'border border-gray-200 dark:border-gray-700';
-            let scale = 'hover:scale-[1.02]';
-
-            if (answered) {
-              if (isSelected && isCorrect) { bg = 'bg-green-500 text-white'; border = 'border border-green-500'; scale = 'scale-[1.02]'; }
-              else if (isSelected && !isCorrect) { bg = 'bg-red-500 text-white'; border = 'border border-red-500'; scale = 'scale-[1.02]'; }
-              else if (isAnswerCorrect) { bg = 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'; border = 'border-2 border-green-500'; scale = ''; }
-              else { bg = 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 opacity-50'; border = 'border border-gray-200 dark:border-gray-700'; scale = ''; }
-            }
-
-            return (
-              <button
-                key={`${currentQuestionIndex}-${index}`}
-                onClick={() => handleAnswer(option)}
-                disabled={answered}
-                className={`w-full p-3.5 rounded-xl text-sm font-bold transition-all duration-200 disabled:cursor-not-allowed ${bg} ${border} ${scale} ${optionsAreKorean ? 'text-base' : ''}`}
-              >
-                {option}
-                {answered && isAnswerCorrect && <span className="ml-2 font-black">✓</span>}
-                {answered && isSelected && !isAnswerCorrect && <span className="ml-2 font-black">✗</span>}
-              </button>
-            );
-          })}
-        </div>
       </div>
 
-      {/* Feedback */}
-      {(selectedAnswer !== null || timeLeft === 0) && (
-        <div className={`rounded-2xl border p-4 mb-4 ${
-          isCorrect
-            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-            : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-        }`}>
-          <p className={`text-base font-black mb-1 ${isCorrect ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
-            {isCorrect ? '✅ Correct!' : timeLeft === 0 ? "⏰ Time's up!" : '❌ Not quite!'}
-          </p>
+      {/* Modes sit up here with the timer — both change the whole round, so they
+          belong beside each other and out of the question's way. */}
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        <span className="mr-1 text-[12.5px] text-[#4A5566] dark:text-gray-500">Asking:</span>
+        {QUIZ_MODES.map(({ id, label, isPremium }) => (
+          <button
+            key={id}
+            onClick={() => !isPremium && setQuizMode(id)}
+            disabled={!!isPremium}
+            className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[9px] px-3.5 text-[12.5px] font-semibold leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+              quizMode === id
+                ? 'text-white'
+                : 'border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] text-[#4A5566] hover:border-[rgba(20,32,47,0.28)] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400'
+            }`}
+            style={quizMode === id ? { background: ACC.light } : undefined}
+          >
+            {label}
+            {isPremium && <Lock className="h-3 w-3" />}
+          </button>
+        ))}
+        {subscriptionTier === 'free' && (
+          <span className="ml-auto text-[12.5px] text-[#4A5566] dark:text-gray-500">
+            {Math.max(0, dailyLimit - currentDailyCount)} quizzes left today
+          </span>
+        )}
+      </div>
 
-          {!isCorrect && (
-            <div>
-              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
-                Correct answer:{' '}
-                <span className={`font-black ${answerIsKorean ? 'text-lg' : ''}`}>{currentQuestion.answer}</span>
-              </p>
-              {canAccess('detailedExplanations') ? (
-                <>
-                  <button
-                    onClick={() => setShowExplanation(!showExplanation)}
-                    className="text-xs font-bold text-[#E4572E] dark:text-[#F07A55] hover:underline"
-                  >
-                    {showExplanation ? '▲ Hide' : '▼ Show'} explanation
-                  </button>
-                  {showExplanation && (
-                    <div className="mt-2 p-3 bg-white/60 dark:bg-gray-900/60 rounded-xl text-xs space-y-1">
-                      <p><span className="font-bold text-gray-500">Korean:</span> <span className="font-black text-gray-900 dark:text-white text-sm">{currentQuestion.item.korean}</span></p>
-                      <p><span className="font-bold text-gray-500">Romanization:</span> {currentQuestion.item.romanization}</p>
-                      <p><span className="font-bold text-gray-500">English:</span> {currentQuestion.item.english}</p>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="mt-2 p-2.5 bg-[#EEF5F1] dark:bg-[#153327]/20 rounded-xl text-xs">
-                  <p className="text-[#265847] dark:text-[#93C2AE]">
-                    🔒 Detailed explanations available with{' '}
-                    <button onClick={openUpgradeModal} className="font-black underline">Premium</button>
-                  </p>
-                </div>
+      <div className="flex flex-col items-start gap-5 lg:flex-row">
+        {/* ── The question ── */}
+        <div className="order-1 w-full min-w-0 flex-1">
+          <div
+            className="mb-4 flex items-start gap-3 rounded-r-lg border-l-[3px] px-4 py-3 sm:items-center"
+            style={{ borderColor: ACC.light, background: `${ACC.light}14` }}
+          >
+            <span className="kl-accent flex-none whitespace-nowrap text-[12.5px] font-semibold"
+                  style={{ ['--kl-acc' as string]: ACC.light, ['--kl-acc-dk' as string]: ACC.dark }}>
+              DO THIS NEXT
+            </span>
+            <span className="text-[13.5px] leading-snug text-[#16202F] dark:text-gray-200">
+              {isTimedMode
+                ? `Answer before the timer runs out — ${timeLeft ?? 30}s left on this one.`
+                : 'Pick the answer you think is right. Nothing is timed and a wrong one costs you nothing.'}
+            </span>
+          </div>
+
+          <div className="kl-card p-6 sm:p-8">
+            <div className="mb-3.5 text-[12.5px] font-semibold" style={{ color: ACC.light }}>
+              {prompt.label}
+            </div>
+            <div className="flex flex-wrap items-baseline gap-x-5 gap-y-2">
+              <span className={`leading-none text-[#16202F] dark:text-white ${
+                prompt.korean ? 'font-korean text-[44px] font-bold sm:text-[54px]' : 'font-display text-[32px] font-semibold sm:text-[38px]'
+              }`}>
+                {prompt.subject}
+              </span>
+              {prompt.sub && (
+                <span className="text-[16px] text-[#4A5566] dark:text-gray-400">{prompt.sub}</span>
               )}
             </div>
-          )}
-        </div>
-      )}
 
-      {/* Next button */}
-      {(selectedAnswer !== null || timeLeft === 0) && (
-        <button
-          onClick={handleNext}
-          className="w-full py-3.5 font-black rounded-xl btn-brand"
-        >
-          {currentQuestionIndex + 1 >= questions.length ? '🏁 See Results' : 'Next Question →'}
-        </button>
-      )}
+            {/* Options, two columns, each with its letter */}
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+              {currentQuestion.options.map((option, index) => {
+                const isSelected = selectedAnswer === option;
+                const isAnswerCorrect = currentQuestion.answer === option;
+                const showRight = answered && isAnswerCorrect;
+                const showWrong = answered && isSelected && !isAnswerCorrect;
+                const dimmed = answered && !isAnswerCorrect && !isSelected;
+
+                return (
+                  <button
+                    key={`${currentQuestionIndex}-${index}`}
+                    onClick={() => handleAnswer(option)}
+                    disabled={answered}
+                    className={`flex min-h-[64px] items-center gap-3.5 rounded-xl border-[1.5px] px-4 py-3 text-left transition-all disabled:cursor-default ${
+                      showRight || showWrong ? '' : dimmed
+                        ? 'border-[rgba(20,32,47,0.12)] opacity-45 dark:border-gray-800'
+                        : 'border-[rgba(20,32,47,0.16)] hover:border-[rgba(20,32,47,0.32)] dark:border-gray-700 dark:hover:border-gray-500'
+                    }`}
+                    style={
+                      showRight ? { borderColor: PINE, background: 'rgba(46,107,89,0.08)' }
+                      : showWrong ? { borderColor: '#C13F22', background: 'rgba(193,63,34,0.07)' }
+                      : undefined
+                    }
+                  >
+                    <span
+                      className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-lg text-[13px] font-semibold"
+                      style={
+                        showRight ? { background: PINE, color: '#fff' }
+                        : showWrong ? { background: '#C13F22', color: '#fff' }
+                        : { background: 'rgba(20,32,47,0.07)', color: '#16202F' }
+                      }
+                    >
+                      {String.fromCharCode(65 + index)}
+                    </span>
+                    <span className={`min-w-0 flex-1 font-semibold text-[#16202F] dark:text-white ${
+                      optionsAreKorean ? 'font-korean text-[18px]' : 'text-[17px]'
+                    }`}>
+                      {option}
+                    </span>
+                    {showRight && <span className="flex-none text-[13.5px] font-semibold" style={{ color: PINE }}>Correct</span>}
+                    {showWrong && <span className="flex-none text-[13.5px] font-semibold text-[#C13F22]">Not this one</span>}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* What the answer was, and why */}
+            {answered && (
+              <div className="mt-5">
+                {isCorrect ? (
+                  <div
+                    className="rounded-r-lg border-l-[3px] px-4 py-3.5 text-[14.5px] font-semibold text-[#16202F] dark:text-gray-200"
+                    style={{ borderColor: PINE, background: 'rgba(46,107,89,0.08)' }}
+                  >
+                    Right — {currentQuestion.item.korean} is {currentQuestion.item.english}.
+                  </div>
+                ) : (
+                  <div
+                    className="rounded-r-lg border-l-[3px] px-4 py-3.5"
+                    style={{ borderColor: '#C13F22', background: 'rgba(193,63,34,0.07)' }}
+                  >
+                    <p className="text-[14.5px] text-[#16202F] dark:text-gray-200">
+                      {timeLeft === 0 ? 'Time ran out. ' : ''}
+                      The answer is{' '}
+                      <strong className={`font-semibold ${answerIsKorean ? 'font-korean text-[17px]' : ''}`}>
+                        {currentQuestion.answer}
+                      </strong>.
+                    </p>
+                    {canAccess('detailedExplanations') ? (
+                      <>
+                        <button
+                          onClick={() => setShowExplanation(!showExplanation)}
+                          className="mt-2 text-[13px] font-semibold hover:underline"
+                          style={{ color: ACC.light }}
+                        >
+                          {showExplanation ? 'Hide the word' : 'Show the whole word'}
+                        </button>
+                        {showExplanation && (
+                          <div className="kl-well mt-2.5 rounded-lg px-3.5 py-3 text-[13.5px] text-[#3E4A5A] dark:text-gray-300">
+                            <span className="font-korean text-[17px] font-bold text-[#16202F] dark:text-white">
+                              {currentQuestion.item.korean}
+                            </span>
+                            <span className="ml-2.5 text-[#4A5566] dark:text-gray-500">{currentQuestion.item.romanization}</span>
+                            <span className="ml-2.5">{currentQuestion.item.english}</span>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <p className="mt-2 text-[13px] text-[#4A5566] dark:text-gray-400">
+                        <button onClick={openUpgradeModal} className="font-semibold hover:underline" style={{ color: ACC.light }}>
+                          Premium
+                        </button>{' '}
+                        shows the full word with its romanization here.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* How far through — sits under the question, where the column used to
+              run out of content long before the rail did. */}
+          <div className="mt-4">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-[12.5px] font-semibold text-[#4A5566] dark:text-gray-500">
+                Question {currentQuestionIndex + 1} of {questions.length}
+              </span>
+              <span className="text-[12.5px] text-[#4A5566] dark:text-gray-500">
+                {Math.round((currentQuestionIndex / questions.length) * 100)}% through
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {questions.map((_, i) => {
+                const r = results[i];
+                const now = i === currentQuestionIndex;
+                return (
+                  <span
+                    key={i}
+                    className="flex h-8 min-w-[32px] flex-1 items-center justify-center rounded-lg text-[12px] font-semibold"
+                    style={
+                      r === true ? { background: PINE, color: '#fff' }
+                      : r === false ? { background: '#C13F22', color: '#fff' }
+                      : now ? { border: `1.5px solid ${ACC.light}`, background: `${ACC.light}24`, color: '#16202F' }
+                      : { background: 'rgba(20,32,47,0.05)', color: '#4A5566' }
+                    }
+                    title={r === true ? 'Right' : r === false ? 'Wrong' : now ? 'Current' : 'Not yet'}
+                  >
+                    <span className={now ? 'dark:text-white' : r === null ? 'dark:text-gray-400' : ''}>{i + 1}</span>
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Move on */}
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <span className="text-[13.5px] text-[#4A5566] dark:text-gray-500">
+              Press <strong className="font-semibold text-[#16202F] dark:text-gray-200">A–D</strong> to answer,{' '}
+              <strong className="font-semibold text-[#16202F] dark:text-gray-200">Enter</strong> for the next one.
+            </span>
+            {answered && (
+              <button
+                onClick={handleNext}
+                className="flex h-12 items-center rounded-[10px] px-5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+                style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+              >
+                {currentQuestionIndex + 1 >= questions.length ? 'See how you did →' : 'Next question →'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Rail ── */}
+        <div className="order-2 w-full flex-none lg:w-[290px]">
+          <div className={`${railCard} mb-3.5`}>
+            <div className="mb-3 text-[13.5px] font-semibold text-[#16202F] dark:text-white">Session</div>
+            <div className="flex gap-5 text-[13.5px] text-[#4A5566] dark:text-gray-400">
+              <span><strong className="font-semibold text-[#16202F] dark:text-white">{score}</strong> right</span>
+              <span><strong className="font-semibold text-[#16202F] dark:text-white">{results.filter(r => r === false).length}</strong> wrong</span>
+              <span><strong className="font-semibold" style={{ color: PINE }}>{streak}</strong> in a row</span>
+            </div>
+          </div>
+
+          <div className={railCard}>
+            <div className="mb-3 text-[13.5px] font-semibold text-[#16202F] dark:text-white">Words you have seen</div>
+            {currentQuestionIndex === 0 ? (
+              <p className="text-[13px] text-[#4A5566] dark:text-gray-500">
+                Each word appears here once you have answered it.
+              </p>
+            ) : (
+              <div className="flex max-h-[300px] flex-col gap-2.5 overflow-y-auto">
+                {questions.slice(0, currentQuestionIndex).map((q, i) => (
+                  <div key={i} className="flex items-baseline gap-2 text-[15px]">
+                    <span
+                      className="flex-none text-[12px] font-semibold"
+                      style={{ color: results[i] ? PINE : '#C13F22' }}
+                    >
+                      {results[i] ? '✓' : '✗'}
+                    </span>
+                    <span className="font-korean font-semibold text-[#16202F] dark:text-white">{q.item.korean}</span>
+                    <span className="text-[12.5px] text-[#4A5566] dark:text-gray-500">{q.item.english}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
