@@ -3,13 +3,15 @@ import { vocabulary } from '../data/koreanData';
 import type { QuizQuestion } from '../types';
 import useLocalStorage from '../hooks/useLocalStorage';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
-import { Lock } from 'lucide-react';
+import { Lock, Check } from 'lucide-react';
 import { PremiumLockBanner } from './PremiumLock';
 import NextUpCard from './NextUpCard';
 import { useDailyActivity } from '../hooks/useDailyActivity';
 import { useAuth } from '../contexts/AuthContext';
 import { useProgress } from '../contexts/ProgressContext';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
+import { useSRSContext } from '../contexts/SRSContext';
+import { useToastContext } from '../contexts/ToastContext';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
 import { celebrate } from '../utils/celebrate';
 import { QuizSkeleton } from './Skeleton';
@@ -79,7 +81,10 @@ const QuizComponent: React.FC = () => {
   const { canAccess, hasReachedLimit, getLimit, subscriptionTier } = useFeatureAccess();
   const { dailyActivity, trackActivity } = useDailyActivity();
   const { openUpgradeModal } = useUpgradeModal();
+  const { decks, actions: srsActions } = useSRSContext();
+  const { showToast } = useToastContext();
   const allVocab = useMemo(() => vocabulary.flatMap(cat => cat.items), []);
+  const [savedToDeck, setSavedToDeck] = useState(false);
 
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -161,6 +166,7 @@ const QuizComponent: React.FC = () => {
     setShowExplanation(false);
     setQuizCompleted(false);
     setResults(new Array(newQuestions.length).fill(null));
+    setSavedToDeck(false);
   }, [allVocab, quizMode, isTimedMode, hasAdvancedQuizModes]);
 
   const generateQuestions = useCallback(() => {
@@ -174,6 +180,42 @@ const QuizComponent: React.FC = () => {
   const retryMissed = useCallback((items: typeof allVocab) => {
     if (items.length) buildFrom(items);
   }, [buildFrom]);
+
+  // Send the missed words to spaced repetition, so they come back on their own
+  // schedule instead of living only on a results screen the learner is about to
+  // navigate away from. They all go to one standing deck, and words already in
+  // it are skipped rather than duplicated.
+  const MISSES_DECK = 'Quiz misses';
+  const saveMissedToDeck = useCallback((items: typeof allVocab) => {
+    if (!items.length) return;
+    const existingDeck = decks.find(d => d.name === MISSES_DECK);
+    const deckId = existingDeck?.id
+      ?? srsActions.createDeck(MISSES_DECK, 'Words you did not get in a quiz');
+    const already = new Set((existingDeck?.cards ?? []).map(c => c.content.korean));
+
+    let added = 0;
+    items.forEach(item => {
+      if (already.has(item.korean)) return;
+      srsActions.addCardToDeck(deckId, {
+        korean: item.korean,
+        english: item.english,
+        romanization: item.romanization,
+        type: 'vocabulary',
+        category: item.category,
+      });
+      added++;
+    });
+
+    setSavedToDeck(true);
+    const skipped = items.length - added;
+    showToast(
+      added === 0
+        ? `All ${items.length} are already in ${MISSES_DECK}`
+        : `${added} added to ${MISSES_DECK}${skipped ? ` · ${skipped} already there` : ''}`,
+      'success',
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [decks, srsActions]);
 
   const handleAnswer = useCallback((option: string) => {
     if (selectedAnswer || timeLeft === 0) return;
@@ -368,13 +410,29 @@ const QuizComponent: React.FC = () => {
               ))}
             </div>
 
-            <button
-              onClick={() => retryMissed(missed.map(q => q.item))}
-              className="mt-5 flex h-12 items-center rounded-[10px] px-5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
-              style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
-            >
-              Practise just these {missed.length} →
-            </button>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => retryMissed(missed.map(q => q.item))}
+                className="flex h-12 items-center rounded-[10px] px-5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+                style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+              >
+                Practise just these {missed.length} →
+              </button>
+              <button
+                onClick={() => saveMissedToDeck(missed.map(q => q.item))}
+                disabled={savedToDeck}
+                className="flex h-12 items-center gap-2 rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] disabled:opacity-50 dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+              >
+                {savedToDeck ? (
+                  <><Check className="h-4 w-4" style={{ color: PINE }} /> Saved for review</>
+                ) : (
+                  'Save them for review'
+                )}
+              </button>
+            </div>
+            <p className="mt-2.5 text-[12.5px] text-[#4A5566] dark:text-gray-500">
+              Saving puts them in a “{MISSES_DECK}” deck, so they come back on their own schedule.
+            </p>
           </div>
         )}
 
