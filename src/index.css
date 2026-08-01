@@ -672,6 +672,12 @@ h1, h2, h3 {
   outline: none;
 }
 
+/* Form fields that draw their own focus ring. Without this the global persimmon
+   outline lands on top of the ring and two colours fight over the same edge. */
+.kl-field:focus-visible {
+  outline: none;
+}
+
 /* The spotlight search input auto-focuses when the modal opens; the modal is
    the focus context, so suppress the global offset outline just on that input
    (it looked like a heavy violet box around the field). */

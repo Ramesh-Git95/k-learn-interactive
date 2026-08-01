@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { accentFor } from '../utils/moduleAccent';
 import { X } from 'lucide-react';
 import { vocabulary, commonPhrases, grammarPatterns, hangulCharacters } from '../data/koreanData';
 
@@ -81,6 +82,8 @@ function matches(item: PickerItem, q: string): boolean {
 
 // ── Word row / card shared component ─────────────────────────────────────────
 
+const ACC = accentFor('srs');
+
 function ItemRow({
   item, selected, inDeck, onToggle,
 }: { item: PickerItem; selected: boolean; inDeck: boolean; onToggle: () => void }) {
@@ -91,30 +94,30 @@ function ItemRow({
       disabled={inDeck}
       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border-2 transition-all text-left ${
         inDeck
-          ? 'border-gray-100 dark:border-gray-800 opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-800/40'
+          ? 'cursor-not-allowed border-[rgba(20,32,47,0.10)] opacity-45 dark:border-gray-800'
           : selected
-          ? 'border-[#F07A55] dark:border-[#C13F22] bg-[#FDEEE6] dark:bg-[#5F2010]/20'
-          : 'border-transparent hover:border-gray-200 dark:hover:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/60'
+          ? 'border-[#2E6B59] bg-[#2E6B59]/[0.08]'
+          : 'border-transparent hover:border-[rgba(20,32,47,0.16)] hover:bg-[rgba(20,32,47,0.03)] dark:hover:border-gray-700 dark:hover:bg-white/5'
       }`}
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className={`text-base font-black ${selected ? 'text-[#A83619] dark:text-[#F5A183]' : 'text-gray-900 dark:text-white'}`}>
+          <span className="font-korean text-[16px] font-semibold text-[#16202F] dark:text-white">
             {item.korean}
           </span>
           {item.romanization && (
-            <span className="text-xs text-gray-400 dark:text-gray-500 italic">{item.romanization}</span>
+            <span className="text-xs text-[#4A5566] dark:text-gray-500 italic">{item.romanization}</span>
           )}
         </div>
-        <span className="text-xs text-gray-500 dark:text-gray-400 block truncate">{item.english}</span>
+        <span className="text-xs text-[#4A5566] dark:text-gray-400 block truncate">{item.english}</span>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${badge.cls}`}>{badge.label}</span>
         {inDeck
           ? <span className="text-xs text-gray-400">✓ added</span>
           : selected
-          ? <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs text-white" style={{ background: 'var(--brand-gradient)' }}>✓</span>
-          : <span className="w-5 h-5 rounded-full border-2 border-gray-200 dark:border-gray-700" />
+          ? <span className="flex h-5 w-5 items-center justify-center rounded-full text-[11px] text-white" style={{ background: ACC.light }}>✓</span>
+          : <span className="h-5 w-5 rounded-full border-2 border-[rgba(20,32,47,0.16)] dark:border-gray-700" />
         }
       </div>
     </button>
@@ -163,13 +166,13 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 z-50" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col" style={{ maxHeight: '90vh' }}>
+      <div className="kl-card flex w-full max-w-2xl flex-col" style={{ maxHeight: '90vh' }}>
 
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
+        <div className="flex flex-none items-center justify-between border-b border-[rgba(20,32,47,0.12)] px-5 py-4 dark:border-gray-800">
           <div>
-            <h2 className="text-base font-black text-gray-900 dark:text-white">Add Cards</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">to "{deckName}"</p>
+            <h2 className="font-display text-[17px] font-semibold tracking-[-0.01em] text-[#16202F] dark:text-white">Add cards</h2>
+            <p className="text-xs text-[#4A5566] dark:text-gray-400">to "{deckName}"</p>
           </div>
           <button onClick={onClose} aria-label="Close card picker" className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-400 transition-colors">
             <X className="w-5 h-5" />
@@ -187,40 +190,47 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
                   ? 'text-white shadow-sm'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
-              style={tab === t.id ? { background: 'var(--brand-gradient)' } : {}}
+              style={tab === t.id ? { background: ACC.light } : {}}
             >
               <span>{t.emoji}</span> {t.label}
             </button>
           ))}
         </div>
 
+        {/* Search sits in the frame, not in the scroller, so it keeps the same
+            gutter as the tabs above it and stays put while results scroll. */}
+        {tab === 'search' && (
+          <div className="flex-none px-4 pb-3">
+            <input
+              ref={searchRef}
+              type="text"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Type any word in English, Korean or romanization…"
+              className="kl-field w-full rounded-[10px] border border-[rgba(20,32,47,0.18)] bg-[#FFFCF4] px-4 py-2.5 text-[14px] text-[#16202F] placeholder-[#4A5566]/60 focus:outline-none focus:ring-2 focus:ring-[#2E6B59]/40 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+            />
+          </div>
+        )}
+
         {/* ── Content ── */}
-        <div className="flex-1 overflow-y-auto px-4 pb-2 min-h-0">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-2">
 
           {/* Search tab */}
           {tab === 'search' && (
             <div className="space-y-2">
-              <input
-                ref={searchRef}
-                type="text"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="Type any word in English, Korean or romanization…"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F07A55] sticky top-0"
-              />
               {!query.trim() ? (
-                <div className="text-center py-12 text-gray-400 dark:text-gray-500">
+                <div className="text-center py-12 text-[#4A5566] dark:text-gray-500">
                   <div className="text-4xl mb-2">🔍</div>
                   <p className="text-sm">Try "family", "food", "hello"…</p>
                 </div>
               ) : searchResults.length === 0 ? (
-                <div className="text-center py-12 text-gray-400 dark:text-gray-500">
+                <div className="text-center py-12 text-[#4A5566] dark:text-gray-500">
                   <div className="text-4xl mb-2">🤷</div>
                   <p className="text-sm">No results for "{query}"</p>
                 </div>
               ) : (
                 <div className="space-y-1">
-                  <p className="text-xs text-gray-400 dark:text-gray-500 px-1">{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}</p>
+                  <p className="text-xs text-[#4A5566] dark:text-gray-500 px-1">{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}</p>
                   {searchResults.map(item => (
                     <ItemRow key={item.korean + item.type} item={item} selected={selected.has(item.korean)} inDeck={existingKorean.has(item.korean)} onToggle={() => toggle(item.korean)} />
                   ))}
@@ -234,7 +244,7 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
             <div>
               {!vocabCat ? (
                 <>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 px-1">Choose a category</p>
+                  <p className="text-xs text-[#4A5566] dark:text-gray-500 mb-3 px-1">Choose a category</p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {VOCAB_CATEGORIES.map(cat => {
                       const catItems = vocabulary.find(c => c.name === cat)?.items ?? [];
@@ -243,10 +253,10 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
                         <button
                           key={cat}
                           onClick={() => setVocabCat(cat)}
-                          className="flex flex-col items-start p-3 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700 transition-all text-left"
+                          className="kl-well flex flex-col items-start rounded-xl p-3 text-left transition-colors hover:border-[rgba(20,32,47,0.24)]"
                         >
-                          <span className="font-bold text-sm text-gray-900 dark:text-white">{cat}</span>
-                          <span className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{catItems.length} words · {available} available</span>
+                          <span className="font-bold text-sm text-[#16202F] dark:text-white">{cat}</span>
+                          <span className="text-xs text-[#4A5566] dark:text-gray-500 mt-0.5">{catItems.length} words · {available} available</span>
                         </button>
                       );
                     })}
@@ -257,7 +267,7 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
                   <button onClick={() => setVocabCat(null)} className="flex items-center gap-1 text-xs font-bold mb-3 px-1" style={{ color: '#E4572E' }}>
                     ← All categories
                   </button>
-                  <p className="text-sm font-black text-gray-900 dark:text-white mb-2 px-1">{vocabCat}</p>
+                  <p className="mb-2 px-1 text-[14px] font-semibold text-[#16202F] dark:text-white">{vocabCat}</p>
                   <div className="space-y-1">
                     {(vocabulary.find(c => c.name === vocabCat)?.items ?? []).map(item => (
                       <ItemRow key={item.korean} item={{ ...item, type: 'vocabulary', category: vocabCat }} selected={selected.has(item.korean)} inDeck={existingKorean.has(item.korean)} onToggle={() => toggle(item.korean)} />
@@ -273,15 +283,15 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
             <div>
               {!phraseCat ? (
                 <>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 px-1">Choose a context</p>
+                  <p className="text-xs text-[#4A5566] dark:text-gray-500 mb-3 px-1">Choose a context</p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {PHRASE_CONTEXTS.map(ctx => {
                       const count = commonPhrases.filter(p => (p.context || 'General') === ctx).length;
                       const available = commonPhrases.filter(p => (p.context || 'General') === ctx && !existingKorean.has(p.korean)).length;
                       return (
-                        <button key={ctx} onClick={() => setPhraseCat(ctx)} className="flex flex-col items-start p-3 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-100 dark:border-gray-700 transition-all text-left">
-                          <span className="font-bold text-sm text-gray-900 dark:text-white">{ctx}</span>
-                          <span className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{count} phrases · {available} available</span>
+                        <button key={ctx} onClick={() => setPhraseCat(ctx)} className="kl-well flex flex-col items-start rounded-xl p-3 text-left transition-colors hover:border-[rgba(20,32,47,0.24)]">
+                          <span className="font-bold text-sm text-[#16202F] dark:text-white">{ctx}</span>
+                          <span className="text-xs text-[#4A5566] dark:text-gray-500 mt-0.5">{count} phrases · {available} available</span>
                         </button>
                       );
                     })}
@@ -292,7 +302,7 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
                   <button onClick={() => setPhraseCat(null)} className="flex items-center gap-1 text-xs font-bold mb-3 px-1" style={{ color: '#E4572E' }}>
                     ← All contexts
                   </button>
-                  <p className="text-sm font-black text-gray-900 dark:text-white mb-2 px-1">{phraseCat}</p>
+                  <p className="mb-2 px-1 text-[14px] font-semibold text-[#16202F] dark:text-white">{phraseCat}</p>
                   <div className="space-y-1">
                     {commonPhrases.filter(p => (p.context || 'General') === phraseCat).map(item => (
                       <ItemRow key={item.korean} item={{ korean: item.korean, english: item.english, romanization: item.romanization, type: 'phrase', category: phraseCat }} selected={selected.has(item.korean)} inDeck={existingKorean.has(item.korean)} onToggle={() => toggle(item.korean)} />
@@ -306,7 +316,7 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
           {/* Grammar tab */}
           {tab === 'grammar' && (
             <div className="space-y-1">
-              <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 px-1">{grammarPatterns.length} patterns available</p>
+              <p className="text-xs text-[#4A5566] dark:text-gray-500 mb-3 px-1">{grammarPatterns.length} patterns available</p>
               {grammarPatterns.map(g => (
                 <ItemRow
                   key={g.pattern}
@@ -321,13 +331,13 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
 
           {/* Hangul tab */}
           {tab === 'hangul' && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {(['Consonants', 'Vowels'] as const).map(section => {
                 const items = hangulCharacters.filter(h => (h.type === 'consonant' ? 'Consonants' : 'Vowels') === section);
                 return (
                   <div key={section}>
-                    <p className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 px-1">{section}</p>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                    <p className="mb-2 px-1 text-[12.5px] font-semibold text-[#4A5566] dark:text-gray-400">{section}</p>
+                    <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-8">
                       {items.map(h => {
                         const inDeck = existingKorean.has(h.char);
                         const isSel  = selected.has(h.char);
@@ -336,15 +346,14 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
                             key={h.char}
                             onClick={inDeck ? undefined : () => toggle(h.char)}
                             disabled={inDeck}
-                            className={`p-3 rounded-xl border-2 flex flex-col items-center transition-all ${
-                              inDeck ? 'border-gray-100 dark:border-gray-800 opacity-50 cursor-not-allowed'
-                              : isSel ? 'border-[#F07A55] dark:border-[#C13F22] bg-[#FDEEE6] dark:bg-[#5F2010]/20'
-                              : 'border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 bg-gray-50 dark:bg-gray-800'
+                            className={`flex flex-col items-center rounded-lg border px-1 py-2 transition-all ${
+                              inDeck ? 'cursor-not-allowed border-[rgba(20,32,47,0.10)] opacity-45 dark:border-gray-800'
+                              : isSel ? 'border-[#2E6B59] bg-[#2E6B59]/[0.08]'
+                              : 'kl-well hover:border-[rgba(20,32,47,0.24)]'
                             }`}
                           >
-                            <span className={`text-2xl font-black ${isSel ? 'text-[#C13F22] dark:text-[#F07A55]' : 'text-gray-900 dark:text-white'}`}>{h.char}</span>
-                            <span className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{h.romanization}</span>
-                            {inDeck && <span className="text-[10px] text-gray-400 mt-0.5">added</span>}
+                            <span className={`font-korean text-[19px] font-bold leading-none ${isSel ? 'text-[#2E6B59] dark:text-[#5FB89B]' : 'text-[#16202F] dark:text-white'}`}>{h.char}</span>
+                            <span className="mt-1 text-[10px] leading-none text-[#4A5566] dark:text-gray-500">{h.romanization}</span>
                           </button>
                         );
                       })}
@@ -357,25 +366,25 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
         </div>
 
         {/* ── Footer ── */}
-        <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800 flex-shrink-0 flex items-center gap-3">
+        <div className="flex flex-none items-center gap-3 border-t border-[rgba(20,32,47,0.12)] px-4 py-3 dark:border-gray-800">
           {selected.size > 0 ? (
             <>
-              <span className="text-xs text-gray-500 dark:text-gray-400 flex-1">
-                <span className="font-black text-gray-900 dark:text-white">{selected.size}</span> card{selected.size !== 1 ? 's' : ''} selected
+              <span className="text-xs text-[#4A5566] dark:text-gray-400 flex-1">
+                <span className="font-semibold text-[#16202F] dark:text-white">{selected.size}</span> card{selected.size !== 1 ? 's' : ''} selected
               </span>
               <button onClick={() => setSelected(new Set())} className="text-xs font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                 Clear
               </button>
               <button
                 onClick={handleAdd}
-                className="px-5 py-2 rounded-xl text-white text-sm font-black transition-transform hover:scale-[1.03] active:scale-95 shadow-sm"
-                style={{ background: 'var(--brand-gradient)' }}
+                className="flex h-11 items-center rounded-[10px] px-5 text-[14px] font-semibold text-white transition-transform hover:scale-[1.02]"
+                style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}3D` }}
               >
                 Add {selected.size} card{selected.size !== 1 ? 's' : ''} →
               </button>
             </>
           ) : (
-            <p className="text-xs text-gray-400 dark:text-gray-500 flex-1 text-center">
+            <p className="text-xs text-[#4A5566] dark:text-gray-500 flex-1 text-center">
               Click any word to select it, then add to your deck
             </p>
           )}

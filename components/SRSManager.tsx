@@ -5,6 +5,9 @@ import Tooltip from './Tooltip';
 import { vocabulary, commonPhrases } from '../data/koreanData';
 import SRSCardPicker from './SRSCardPicker';
 import type { PickerItem } from './SRSCardPicker';
+import { accentFor } from '../utils/moduleAccent';
+
+const ACC = accentFor('srs');
 
 interface SRSManagerProps {
   onStartStudy: (deckId: string) => void;
@@ -14,21 +17,22 @@ const GradBtn = ({ onClick, disabled, className = '', children }: { onClick?: ()
   <button
     onClick={onClick}
     disabled={disabled}
-    className={`font-bold rounded-xl btn-brand ${className}`}
+    className={`rounded-[10px] font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-50 ${className}`}
+    style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}3D` }}
   >
     {children}
   </button>
 );
 
-const inputCls = 'w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#F07A55] dark:focus:ring-[#E4572E] text-sm transition-colors';
-const labelCls = 'block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide';
+const inputCls = 'kl-field w-full rounded-[10px] border border-[rgba(20,32,47,0.18)] bg-[#FFFCF4] px-3.5 py-2.5 text-[14px] text-[#16202F] placeholder-[#4A5566]/60 transition-colors focus:outline-none focus:ring-2 focus:ring-[#2E6B59]/40 dark:border-gray-700 dark:bg-gray-900 dark:text-white';
+const labelCls = 'mb-1.5 block text-[12.5px] font-semibold text-[#4A5566] dark:text-gray-400';
 
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
-          <h2 className="text-base font-bold text-gray-900 dark:text-white">{title}</h2>
+      <div className="kl-card max-h-[90vh] w-full max-w-md overflow-y-auto">
+        <div className="flex items-center justify-between border-b border-[rgba(20,32,47,0.12)] p-5 dark:border-gray-800">
+          <h2 className="font-display text-[17px] font-semibold tracking-[-0.01em] text-[#16202F] dark:text-white">{title}</h2>
           <button onClick={onClose} aria-label="Close" className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 transition-colors">
             <X className="w-5 h-5" />
           </button>
@@ -43,16 +47,16 @@ function DeckCard({ deck, dueCount, deckStats, onStartStudy, onAddCard, onEditDe
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
+    <div className="kl-card transition-transform duration-200 hover:-translate-y-0.5">
       <div className="p-5">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1 min-w-0 pr-3">
-            <h3 className="text-base font-bold text-gray-900 dark:text-white truncate">{deck.name}</h3>
+            <h3 className="truncate text-[16px] font-semibold text-[#16202F] dark:text-white">{deck.name}</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{deck.description || 'No description'}</p>
           </div>
           {dueCount > 0 && (
             <Tooltip content="Cards scheduled for review today by the SM-2 algorithm." position="top" maxWidth="max-w-xs">
-              <span className="flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-full badge-brand">
+              <span className="flex-none rounded-full px-2.5 py-1 text-[12px] font-semibold" style={{ background: `${ACC.light}1F`, color: ACC.light }}>
                 {dueCount} due
               </span>
             </Tooltip>
@@ -64,8 +68,8 @@ function DeckCard({ deck, dueCount, deckStats, onStartStudy, onAddCard, onEditDe
             { value: deckStats.totalCards, label: 'Cards', color: '#3F8571' },
             { value: `${Math.round(deckStats.accuracy || 0)}%`, label: 'Accuracy', color: '#E4572E' },
           ].map(({ value, label, color }) => (
-            <div key={label} className="text-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60">
-              <div className="text-xl font-black" style={{ color }}>{value}</div>
+            <div key={label} className="kl-well rounded-xl p-3 text-center">
+              <div className="text-[19px] font-bold text-[#16202F] dark:text-white">{value}</div>
               <div className="text-[11px] text-gray-500 dark:text-gray-400">{label}</div>
             </div>
           ))}
@@ -77,39 +81,39 @@ function DeckCard({ deck, dueCount, deckStats, onStartStudy, onAddCard, onEditDe
               Study ({dueCount})
             </GradBtn>
           ) : (
-            <div className="flex-1 py-2 rounded-xl text-center text-sm font-semibold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800">
-              All caught up ✓
+            <div className="kl-well flex-1 rounded-[10px] py-2 text-center text-[13.5px] font-medium text-[#4A5566] dark:text-gray-400">
+              Nothing due
             </div>
           )}
-          <button onClick={() => onAddCard(deck.id)} className="px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-lg transition-colors" title="Add Card">＋</button>
-          <button onClick={() => setIsExpanded(p => !p)} className="px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors" title="View Cards">
+          <button onClick={() => onAddCard(deck.id)} className="rounded-[10px] border border-[rgba(20,32,47,0.14)] px-3 py-2 text-lg text-[#4A5566] transition-colors hover:border-[rgba(20,32,47,0.3)] dark:border-gray-700 dark:text-gray-300" title="Add Card">＋</button>
+          <button onClick={() => setIsExpanded(p => !p)} className="rounded-[10px] border border-[rgba(20,32,47,0.14)] px-3 py-2 text-[#4A5566] transition-colors hover:border-[rgba(20,32,47,0.3)] dark:border-gray-700 dark:text-gray-300" title="View Cards">
             {isExpanded ? '▲' : '▼'}
           </button>
-          <button onClick={() => onEditDeck(deck)} className="px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors" title="Edit Deck">✏️</button>
-          <button onClick={() => onDeleteDeck(deck)} className="px-3 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-500 transition-colors" aria-label="Delete Deck">
+          <button onClick={() => onEditDeck(deck)} className="rounded-[10px] border border-[rgba(20,32,47,0.14)] px-3 py-2 text-[#4A5566] transition-colors hover:border-[rgba(20,32,47,0.3)] dark:border-gray-700 dark:text-gray-300" title="Edit Deck">✏️</button>
+          <button onClick={() => onDeleteDeck(deck)} className="rounded-[10px] border border-[#C13F22]/30 px-3 py-2 text-[#C13F22] transition-colors hover:border-[#C13F22]" aria-label="Delete Deck">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {isExpanded && (
-        <div className="border-t border-gray-100 dark:border-gray-800 p-4 bg-gray-50 dark:bg-gray-950/50 rounded-b-2xl">
+        <div className="rounded-b-[18px] border-t border-[rgba(20,32,47,0.12)] bg-[rgba(20,32,47,0.02)] p-4 dark:border-gray-800 dark:bg-white/[0.02]">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200">Cards ({deck.cards.length})</h4>
-            <button onClick={() => onAddCard(deck.id)} className="text-xs font-semibold" style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>+ Add Card</button>
+            <h4 className="text-[14px] font-semibold text-[#16202F] dark:text-white">Cards ({deck.cards.length})</h4>
+            <button onClick={() => onAddCard(deck.id)} className="text-[12.5px] font-semibold hover:underline" style={{ color: ACC.light }}>Add a card</button>
           </div>
           <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
             {deck.cards.length === 0 ? (
               <p className="text-gray-400 dark:text-gray-500 text-xs text-center py-4">No cards yet. Add some to start studying!</p>
             ) : (
               deck.cards.map((card: any) => (
-                <div key={card.id} className="bg-white dark:bg-gray-900 rounded-xl p-3 border border-gray-100 dark:border-gray-800">
+                <div key={card.id} className="rounded-xl border border-[rgba(20,32,47,0.12)] bg-[#FFFCF4] p-3.5 dark:border-gray-800 dark:bg-gray-900">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-gray-900 dark:text-white">{card.content.korean}</span>
+                        <span className="font-korean text-[15px] font-semibold text-[#16202F] dark:text-white">{card.content.korean}</span>
                         {card.srs?.nextReviewDate && new Date(card.srs.nextReviewDate) <= new Date() && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full badge-brand">Due</span>
+                          <span className="rounded-full px-1.5 py-0.5 text-[10.5px] font-semibold" style={{ background: `${ACC.light}1F`, color: ACC.light }}>due</span>
                         )}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">{card.content.english}</div>
@@ -245,25 +249,25 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
   );
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
+    <div className="mx-auto max-w-6xl">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 mb-6">
+      <div className="mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm" style={{ background: 'linear-gradient(135deg, #3F8571, #E4572E)' }}>🧠</div>
+            
             <div>
-              <h1 className="text-xl font-black text-gray-900 dark:text-white">Spaced Repetition</h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">SM-2 algorithm · review before you forget</p>
+              <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">Your decks</h1>
+              <p className="mt-1.5 text-[14px] text-[#3E4A5A] dark:text-gray-400">Cards come back just before you would forget them.</p>
             </div>
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => { setShowQuickImport(true); setQiImported(false); }}
-              className="px-4 py-2.5 text-sm font-bold rounded-xl border border-[#BFDACD] dark:border-[#265847] text-[#2E6B59] dark:text-[#6BA88F] hover:bg-[#EEF5F1] dark:hover:bg-[#153327]/20 transition-colors"
+              className="flex h-11 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-4 text-[14px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200"
             >
-              ⚡ Quick Import
+              Quick import
             </button>
-            <GradBtn onClick={() => setShowCreateDeck(true)} className="px-5 py-2.5 text-sm">+ New Deck</GradBtn>
+            <GradBtn onClick={() => setShowCreateDeck(true)} className="px-5 py-2.5 text-sm">New deck</GradBtn>
           </div>
         </div>
 
@@ -274,8 +278,8 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
             { value: stats.totalDue, label: 'Due for Review', color: '#E4572E' },
             { value: `${stats.streakDays}🔥`, label: 'Day Streak', color: '#F59E0B' },
           ].map(({ value, label, color }) => (
-            <div key={label} className="text-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60">
-              <div className="text-xl font-black" style={{ color }}>{value}</div>
+            <div key={label} className="kl-well rounded-xl p-3 text-center">
+              <div className="text-[19px] font-bold text-[#16202F] dark:text-white">{value}</div>
               <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{label}</div>
             </div>
           ))}
@@ -298,11 +302,11 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
 
       {/* Quick Import Modal */}
       {showQuickImport && (
-        <Modal title="⚡ Quick Import" onClose={() => setShowQuickImport(false)}>
+        <Modal title="Quick import" onClose={() => setShowQuickImport(false)}>
           {qiImported ? (
             <div className="text-center py-6">
               <div className="text-5xl mb-3">✅</div>
-              <p className="font-black text-gray-900 dark:text-white text-lg">Deck Created!</p>
+              <p className="font-display text-[18px] font-semibold text-[#16202F] dark:text-white">Deck created</p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Cards imported successfully.</p>
             </div>
           ) : (
@@ -319,7 +323,7 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
                           ? 'text-white shadow-sm'
                           : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
                       }`}
-                      style={qiSource === src ? { background: 'var(--brand-gradient)' } : {}}
+                      style={qiSource === src ? { background: ACC.light } : {}}
                     >
                       {src === 'vocabulary' ? '📖 Vocabulary' : '💬 Phrases'}
                     </button>
@@ -354,7 +358,7 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
                           ? 'text-white shadow-sm'
                           : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
                       }`}
-                      style={qiCount === n ? { background: 'var(--brand-gradient)' } : {}}
+                      style={qiCount === n ? { background: ACC.light } : {}}
                     >
                       {n === 0 ? 'All' : n}
                     </button>
@@ -431,7 +435,7 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
           <div className="text-center">
             <div className="text-4xl mb-3">🗑️</div>
             <p className="text-sm text-gray-700 dark:text-gray-300">Delete this {confirmDelete.type}?</p>
-            <p className="font-bold text-gray-900 dark:text-white mt-1 mb-2">"{confirmDelete.name}"</p>
+            <p className="mb-2 mt-1 font-semibold text-[#16202F] dark:text-white">"{confirmDelete.name}"</p>
             {confirmDelete.type === 'deck' && <p className="text-xs text-red-500 mb-4">All cards will be permanently deleted.</p>}
             <div className="flex gap-3 mt-4">
               <button onClick={() => setConfirmDelete(null)} className="flex-1 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-semibold text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Cancel</button>
@@ -447,7 +451,7 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
           <div className="text-center">
             <div className="text-4xl mb-3">🔄</div>
             <p className="text-sm text-gray-700 dark:text-gray-300">Reset progress for:</p>
-            <p className="font-bold text-gray-900 dark:text-white mt-1 mb-2">"{confirmReset.name}"</p>
+            <p className="mb-2 mt-1 font-semibold text-[#16202F] dark:text-white">"{confirmReset.name}"</p>
             <p className="text-xs text-blue-500 mb-4">Learning history will be cleared but card content stays.</p>
             <div className="flex gap-3 mt-4">
               <button onClick={() => setConfirmReset(null)} className="flex-1 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-semibold text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Cancel</button>
@@ -480,9 +484,9 @@ export default function SRSManager({ onStartStudy }: SRSManagerProps) {
         ))}
 
         {decks.length === 0 && (
-          <div className="col-span-full bg-white dark:bg-gray-900 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 p-12 text-center">
+          <div className="kl-card col-span-full p-12 text-center">
             <div className="text-5xl mb-4">📚</div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">No Study Decks Yet</h3>
+            <h3 className="mb-2 font-display text-[20px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">No decks yet</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">Create your first deck to start spaced repetition learning.</p>
             <GradBtn onClick={() => setShowCreateDeck(true)} className="px-6 py-2.5 text-sm">Create Your First Deck</GradBtn>
           </div>
