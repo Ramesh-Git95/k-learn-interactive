@@ -16,6 +16,7 @@ import { earnXP, markStudyToday } from '../utils/xpStreak';
 import { celebrate } from '../utils/celebrate';
 import { QuizSkeleton } from './Skeleton';
 import { accentFor } from '../utils/moduleAccent';
+import { unsavedWords } from '../utils/srsLookup';
 
 const ACC = accentFor('quiz');
 const PINE = '#2E6B59';
@@ -418,17 +419,22 @@ const QuizComponent: React.FC = () => {
               >
                 Practise just these {missed.length} →
               </button>
-              <button
-                onClick={() => saveMissedToDeck(missed.map(q => q.item))}
-                disabled={savedToDeck}
-                className="flex h-12 items-center gap-2 rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] disabled:opacity-50 dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
-              >
-                {savedToDeck ? (
-                  <><Check className="h-4 w-4" style={{ color: PINE }} /> Saved for review</>
-                ) : (
-                  'Save them for review'
-                )}
-              </button>
+              {(() => {
+                const fresh = unsavedWords(decks, missed.map(q => q.item));
+                return (
+                  <button
+                    onClick={() => saveMissedToDeck(fresh)}
+                    disabled={savedToDeck || fresh.length === 0}
+                    className="flex h-12 items-center gap-2 rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] disabled:opacity-60 dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+                  >
+                    {fresh.length === 0
+                      ? <><Check className="h-4 w-4" style={{ color: PINE }} /> Already in your decks</>
+                      : savedToDeck
+                      ? <><Check className="h-4 w-4" style={{ color: PINE }} /> Saved for review</>
+                      : `Save ${fresh.length} for review`}
+                  </button>
+                );
+              })()}
             </div>
             <p className="mt-2.5 text-[12.5px] text-[#4A5566] dark:text-gray-500">
               Saving puts them in a “{MISSES_DECK}” deck, so they come back on their own schedule.

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { isInAnyDeck } from '../utils/srsLookup';
 import { dramas } from '../data/kdramaData';
 import type { Drama, DramaWord } from '../data/kdramaData';
 import { useAuth } from '../contexts/AuthContext';
@@ -281,7 +282,9 @@ const KDramaSection: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredWords.map((word, idx) => {
               const cardKey = `${selectedDrama.id}-${word.korean}`;
-              const isAdded = addedCards.has(cardKey);
+              // Session state OR the decks themselves: without the deck check a word
+              // saved on an earlier visit offered "Add" again on reload.
+              const isAdded = addedCards.has(cardKey) || isInAnyDeck(decks, word.korean);
               return (
                 <div
                   key={word.korean}

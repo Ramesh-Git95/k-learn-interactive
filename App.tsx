@@ -221,9 +221,29 @@ const AppContent: React.FC = () => {
   
   // Custom setActiveSection that also updates URL hash
   const handleSetActiveSection = (section: Section) => {
+    // renderSection() short-circuits to the study overlay whenever isStudying is
+    // set, so navigating while a review is open changed the section underneath
+    // but never left the overlay — the header appeared dead. Leaving is safe:
+    // each grade is written as it is given, so only the session counters end.
+    if (isStudyingRef.current) {
+      srsActions.finishSession();
+      setIsStudying(false);
+      setStudyDeckId(null);
+    }
     setActiveSection(section);
     window.location.hash = section;
   };
+
+  // Belt and braces: anything that changes the section by another route — a
+  // hash change, the footer's navigation event — also ends the review.
+  useEffect(() => {
+    if (isStudying) {
+      srsActions.finishSession();
+      setIsStudying(false);
+      setStudyDeckId(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSection]);
 
   // Remember the last learning surface (any navigation path) for the
   // dashboard's "Continue where you left off" card.
@@ -249,6 +269,8 @@ const AppContent: React.FC = () => {
   // SRS State
   const [studyDeckId, setStudyDeckId] = useState<string | null>(null);
   const [isStudying, setIsStudying] = useState(false);
+  const isStudyingRef = React.useRef(false);
+  useEffect(() => { isStudyingRef.current = isStudying; }, [isStudying]);
 
   // Listen for footer navigation events
   useEffect(() => {

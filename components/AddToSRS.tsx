@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { findDeckWithWord } from '../utils/srsLookup';
 import { useSRSContext } from '../contexts/SRSContext';
 import Icon from './Icon';
 
@@ -44,6 +45,10 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
   const [customName, setCustomName] = useState('');
   const [done, setDone] = useState(false);
   const [doneDeckName, setDoneDeckName] = useState('');
+
+  // Already saved somewhere? Say so up front rather than letting the learner
+  // press Add and wonder whether a second copy just appeared.
+  const savedIn = findDeckWithWord(decks, content.korean);
 
   useEffect(() => {
     setSelectedDeckId(getInitialDeck());
@@ -104,6 +109,19 @@ export default function AddToSRS({ content, onClose, onSuccess }: AddToSRSProps)
             </div>
           </div>
         </div>
+
+        {/* Already saved — stated before any Add button is offered */}
+        {savedIn && !done && (
+          <div
+            className="mx-5 mb-4 flex items-center gap-2.5 rounded-xl px-3.5 py-3"
+            style={{ background: 'rgba(46,107,89,0.10)', border: '1px solid rgba(46,107,89,0.30)' }}
+          >
+            <span className="text-[13.5px] font-semibold text-[#2E6B59]">Already in your decks</span>
+            <span className="min-w-0 flex-1 truncate text-[12.5px] text-[#4A5566] dark:text-gray-400">
+              “{savedIn.name}”
+            </span>
+          </div>
+        )}
 
         {/* Success state */}
         {done ? (

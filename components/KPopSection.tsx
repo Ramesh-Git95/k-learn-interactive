@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useSRSContext as useSRSCtxForLookup } from '../contexts/SRSContext';
+import { isInAnyDeck } from '../utils/srsLookup';
 import { Volume2, X, Lock } from 'lucide-react';
 import { kpopArtists } from '../data/kpopData';
 import type { KPopArtist, KPopSong, KPopWord } from '../data/kpopData';
@@ -34,6 +36,10 @@ interface PopoverProps {
 }
 
 function WordPopover({ word, anchorRef, onClose, onAddSRS, onSoundItOut, isAuthenticated, isPremium }: PopoverProps) {
+  // Read the decks here so the button reflects what is actually saved, not
+  // just what was added during this visit.
+  const { decks: allDecks } = useSRSCtxForLookup();
+  const alreadySaved = isInAnyDeck(allDecks, word.korean);
   const popRef = useRef<HTMLDivElement>(null);
   const { startUpgrade } = useUpgrade();
 
@@ -82,13 +88,23 @@ function WordPopover({ word, anchorRef, onClose, onAddSRS, onSoundItOut, isAuthe
             {word.type}
           </span>
           {isPremium ? (
-            <button
-              onClick={() => onAddSRS(word)}
-              className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-white transition-transform hover:scale-105"
-              style={{ background: 'var(--brand-gradient)' }}
-            >
-              + SRS
-            </button>
+            alreadySaved ? (
+              <span
+                className="rounded-lg px-2.5 py-1 text-[11px] font-semibold"
+                style={{ background: 'rgba(46,107,89,0.12)', color: '#2E6B59' }}
+                title="Already in your decks"
+              >
+                ✓ saved
+              </span>
+            ) : (
+              <button
+                onClick={() => onAddSRS(word)}
+                className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-white transition-transform hover:scale-105"
+                style={{ background: 'var(--brand-gradient)' }}
+              >
+                + SRS
+              </button>
+            )
           ) : isAuthenticated ? (
             <button onClick={startUpgrade}
               className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 transition-colors flex items-center gap-1">
