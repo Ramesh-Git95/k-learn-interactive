@@ -180,15 +180,15 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
         </div>
 
         {/* ── Tabs ── */}
-        <div className="flex gap-1 px-4 pt-3 pb-2 overflow-x-auto flex-shrink-0">
+        <div className="flex min-w-0 flex-none gap-1.5 overflow-x-auto px-4 pb-3 pt-3">
           {TABS.map(t => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+              className={`inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[9px] px-3.5 text-[12.5px] font-semibold leading-none transition-colors ${
                 tab === t.id
-                  ? 'text-white shadow-sm'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  ? 'text-white'
+                  : 'border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] text-[#4A5566] hover:border-[rgba(20,32,47,0.28)] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400'
               }`}
               style={tab === t.id ? { background: ACC.light } : {}}
             >
@@ -200,7 +200,7 @@ export default function SRSCardPicker({ deckName, existingKorean, onAdd, onClose
         {/* Search sits in the frame, not in the scroller, so it keeps the same
             gutter as the tabs above it and stays put while results scroll. */}
         {tab === 'search' && (
-          <div className="flex-none px-4 pb-3">
+          <div className="flex-none px-4 pb-3 pt-1.5">
             <input
               ref={searchRef}
               type="text"

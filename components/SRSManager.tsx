@@ -85,12 +85,12 @@ function DeckCard({ deck, dueCount, deckStats, onStartStudy, onAddCard, onEditDe
               Nothing due
             </div>
           )}
-          <button onClick={() => onAddCard(deck.id)} className="rounded-[10px] border border-[rgba(20,32,47,0.14)] px-3 py-2 text-lg text-[#4A5566] transition-colors hover:border-[rgba(20,32,47,0.3)] dark:border-gray-700 dark:text-gray-300" title="Add Card">＋</button>
-          <button onClick={() => setIsExpanded(p => !p)} className="rounded-[10px] border border-[rgba(20,32,47,0.14)] px-3 py-2 text-[#4A5566] transition-colors hover:border-[rgba(20,32,47,0.3)] dark:border-gray-700 dark:text-gray-300" title="View Cards">
+          <button onClick={() => onAddCard(deck.id)} className="flex-none rounded-[10px] border border-[rgba(20,32,47,0.14)] px-3 py-2 text-lg leading-none text-[#4A5566] transition-colors hover:border-[rgba(20,32,47,0.3)] dark:border-gray-700 dark:text-gray-300" title="Add Card">＋</button>
+          <button onClick={() => setIsExpanded(p => !p)} className="flex-none rounded-[10px] border border-[rgba(20,32,47,0.14)] px-3 py-2 text-[#4A5566] transition-colors hover:border-[rgba(20,32,47,0.3)] dark:border-gray-700 dark:text-gray-300" title="View Cards">
             {isExpanded ? '▲' : '▼'}
           </button>
-          <button onClick={() => onEditDeck(deck)} className="rounded-[10px] border border-[rgba(20,32,47,0.14)] px-3 py-2 text-[#4A5566] transition-colors hover:border-[rgba(20,32,47,0.3)] dark:border-gray-700 dark:text-gray-300" title="Edit Deck">✏️</button>
-          <button onClick={() => onDeleteDeck(deck)} className="rounded-[10px] border border-[#C13F22]/30 px-3 py-2 text-[#C13F22] transition-colors hover:border-[#C13F22]" aria-label="Delete Deck">
+          <button onClick={() => onEditDeck(deck)} className="flex-none rounded-[10px] border border-[rgba(20,32,47,0.14)] px-3 py-2 text-[#4A5566] transition-colors hover:border-[rgba(20,32,47,0.3)] dark:border-gray-700 dark:text-gray-300" title="Edit Deck">✏️</button>
+          <button onClick={() => onDeleteDeck(deck)} className="flex-none rounded-[10px] border border-[#C13F22]/30 px-3 py-2 text-[#C13F22] transition-colors hover:border-[#C13F22]" aria-label="Delete Deck">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
