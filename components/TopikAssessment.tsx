@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthModal } from '../contexts/AuthModalContext';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
@@ -6,8 +6,11 @@ import { PremiumLockBanner } from './PremiumLock';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
 import { saveTopikEstimate } from '../utils/topikEstimate';
 import { useUpgrade } from '../hooks/useUpgrade';
+import { accentFor } from '../utils/moduleAccent';
 
 const OPTION_LABELS = ['①', '②', '③', '④'];
+const ACC = accentFor('topik-test');
+const PINE = '#2E6B59';
 
 interface Question {
   id: string;
@@ -256,8 +259,29 @@ const TopikAssessment: React.FC = () => {
   const [chosen, setChosen] = useState<number | null>(null);
   const [answers, setAnswers] = useState<(number | null)[]>(() => Array(QUESTIONS.length).fill(null));
   const [certName, setCertName] = useState(user?.name || '');
+  const [confirmExit, setConfirmExit] = useState(false);
+  // Bumped on restart so the option order is re-shuffled for a fresh attempt.
+  const [attempt, setAttempt] = useState(0);
 
-  const activeQs = isPremium ? QUESTIONS : QUESTIONS.slice(0, FREE_QUESTION_COUNT);
+  const baseQs = isPremium ? QUESTIONS : QUESTIONS.slice(0, FREE_QUESTION_COUNT);
+
+  // Re-shuffled each attempt (attempt bumps on restart). With only 20 questions
+  // a retake shows the same ones, so this stops position memory — "it was the
+  // second option" — from standing in for knowing the answer. It does not make
+  // the bank bigger; that needs more questions written.
+  const activeQs = useMemo(() => baseQs.map(question => {
+    const order = question.options.map((_, i) => i);
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    return {
+      ...question,
+      options: order.map(i => question.options[i]),
+      answer: order.indexOf(question.answer),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [isPremium, attempt]);
   const q = activeQs[qIdx];
   const totalQs = activeQs.length;
   const progressPct = ((qIdx + (chosen !== null ? 1 : 0)) / totalQs) * 100;
@@ -284,6 +308,8 @@ const TopikAssessment: React.FC = () => {
   };
 
   const restart = () => {
+    setConfirmExit(false);
+    setAttempt(a => a + 1);
     setScreen('intro');
     setQIdx(0);
     setChosen(null);
@@ -319,198 +345,217 @@ const TopikAssessment: React.FC = () => {
 
   const handlePrint = () => window.print();
 
+  const railCard = 'rounded-[14px] border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] px-5 py-4 dark:border-gray-800 dark:bg-gray-900';
+
   // ── Intro screen ────────────────────────────────────────────────────────────
   if (screen === 'intro') {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
-        <style>{`
-          @media print {
-            body > * { display: none !important; }
-            #topik-cert { display: flex !important; position: fixed; inset: 0; align-items: center; justify-content: center; background: white; }
-            #topik-cert * { display: block; }
-          }
-        `}</style>
+      <div className="mx-auto max-w-3xl">
+        <div className="mb-5 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+          <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+            Find your level
+          </h1>
+          <p className="mt-2 max-w-[60ch] text-[15px] leading-relaxed text-[#3E4A5A] dark:text-gray-400">
+            {totalQs} questions, roughly {Math.max(3, Math.round(totalQs * 0.5))} minutes. Answer what you
+            can and skip nothing — getting one wrong tells us as much as getting it right.
+          </p>
+        </div>
 
-        {/* Hero */}
-        <div className="relative rounded-3xl overflow-hidden mb-6 p-6 sm:p-8 text-center"
-          style={{ background: 'linear-gradient(135deg, #0D141F 0%, #16202F 40%, #1E3A5C 100%)' }}>
-          <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
-            {['읽기', '어휘', '문법', '쓰기', '듣기', 'TOPIK'].map((w, i) => (
-              <span key={i} className="absolute text-white/5 font-black"
-                style={{ fontSize: `${1.4 + (i % 3) * 0.4}rem`, top: `${(i * 37) % 90}%`, left: `${(i * 43) % 85}%` }}>{w}</span>
+        <div className="kl-card p-6 sm:p-8">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[
+              { n: `${totalQs}`, l: 'questions' },
+              { n: isPremium ? '1–6' : '1–3', l: 'levels covered' },
+              { n: 'No', l: 'time limit' },
+            ].map(({ n, l }) => (
+              <div key={l} className="kl-well rounded-xl px-4 py-3">
+                <div className="text-[19px] font-bold leading-none text-[#16202F] dark:text-white">{n}</div>
+                <div className="mt-1.5 text-[12.5px] text-[#4A5566] dark:text-gray-500">{l}</div>
+              </div>
             ))}
           </div>
-          <div className="relative z-10">
-            <div className="text-5xl mb-3">🎓</div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white mb-2">TOPIK Level Assessment</h1>
-            <p className="text-white/70 text-sm mb-1">한국어 실력을 측정해 보세요</p>
-            <p className="text-white/50 text-xs">Find your estimated TOPIK level (1–6)</p>
-          </div>
-        </div>
 
-        {/* What you get */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-          {[
-            { icon: '📊', title: 'Level Estimate', desc: isPremium ? 'Full TOPIK I & II (1–6)' : 'TOPIK I range (1–3)' },
-            { icon: '📋', title: 'Score Breakdown', desc: 'Per-level accuracy report' },
-            { icon: '🏆', title: 'Certificate', desc: isPremium ? 'Downloadable PDF' : 'Premium only' },
-          ].map(({ icon, title, desc }) => (
-            <div key={title} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 text-center">
-              <div className="text-2xl mb-2">{icon}</div>
-              <p className="text-sm font-black text-gray-900 dark:text-white">{title}</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{desc}</p>
-            </div>
-          ))}
-        </div>
+          <p className="mt-5 max-w-[60ch] text-[14px] leading-relaxed text-[#3E4A5A] dark:text-gray-400">
+            Your result sets where the app starts you: test at level 2 or above and the learning path
+            stops pointing you back at the alphabet. It is saved to your account, so it follows you
+            between devices, and you can retake it whenever you like.
+          </p>
 
-        {/* Free vs Premium */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 mb-6">
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="font-black text-gray-400 dark:text-gray-500 text-xs uppercase tracking-wider mb-2">🆓 Free</p>
-              <ul className="space-y-1 text-gray-600 dark:text-gray-400">
-                <li>✓ 10 questions</li>
-                <li>✓ TOPIK I levels 1–3</li>
-                <li>✓ Score breakdown</li>
-                <li className="text-gray-300 dark:text-gray-600">✗ Certificate</li>
-                <li className="text-gray-300 dark:text-gray-600">✗ Full 1–6 estimate</li>
-              </ul>
-            </div>
-            <div>
-              <p className="font-black text-xs uppercase tracking-wider mb-2" style={{ background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>⭐ Premium</p>
-              <ul className="space-y-1 text-gray-600 dark:text-gray-400">
-                <li>✓ 20 questions</li>
-                <li>✓ Full TOPIK I & II (1–6)</li>
-                <li>✓ Score breakdown</li>
-                <li>✓ Certificate (print/PDF)</li>
-                <li>✓ Personalised study plan</li>
-              </ul>
-            </div>
-          </div>
-          {!isPremium && (
-            <button onClick={startUpgrade}
-              className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 text-white text-xs font-black rounded-xl hover:opacity-90 transition-opacity"
-              style={{ background: 'var(--brand-gradient)' }}>
-              ⭐ Get Premium — $4/month →
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setScreen('quiz')}
+              className="flex h-12 items-center rounded-[10px] px-6 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+              style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+            >
+              Start the test →
             </button>
+            {!isAuthenticated && (
+              <button
+                onClick={openRegister}
+                className="text-[13.5px] font-semibold hover:underline"
+                style={{ color: ACC.light }}
+              >
+                Sign in first so the result is saved
+              </button>
+            )}
+          </div>
+
+          {!isPremium && (
+            <p className="mt-4 text-[12.5px] text-[#4A5566] dark:text-gray-500">
+              The free test covers TOPIK levels 1–3.{' '}
+              <button onClick={startUpgrade} className="font-semibold hover:underline" style={{ color: ACC.light }}>
+                Premium adds levels 4–6
+              </button>{' '}
+              and a printable certificate.
+            </p>
           )}
         </div>
-
-        {/* Start */}
-        <div className="text-center text-xs text-gray-400 dark:text-gray-500 mb-3">
-          ~{isPremium ? '15' : '8'} minutes · {totalQs} multiple-choice questions · All answered, no skipping
-        </div>
-        <button
-          onClick={() => setScreen('quiz')}
-          className="w-full py-4 text-white font-black rounded-2xl text-base hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg"
-          style={{ background: 'linear-gradient(135deg, #0D141F, #1E3A5C)' }}>
-          Start Assessment 시작하기 →
-        </button>
       </div>
     );
   }
 
-  // ── Quiz screen ──────────────────────────────────────────────────────────────
+  // ── Quiz screen ─────────────────────────────────────────────────────────────
   if (screen === 'quiz') {
-    const levelColors: Record<number, string> = { 1: '#10B981', 2: '#24476B', 3: '#3F8571', 4: '#F59E0B', 5: '#EF4444', 6: '#E4572E' };
     return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
-
-        {/* Header bar */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, #0D141F, #1E3A5C)' }} />
+      <div className="mx-auto max-w-3xl">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+          <h1 className="font-display text-[24px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[26px] dark:text-white">
+            Level test
+            <span className="text-[#4A5566] dark:text-gray-500"> · question {qIdx + 1} of {totalQs}</span>
+          </h1>
+          <div className="flex flex-none items-center gap-3.5">
+            <span className="hidden text-[13.5px] text-[#4A5566] sm:inline dark:text-gray-500">
+              Level {q.level} · {q.level <= 2 ? 'TOPIK I' : 'TOPIK II'}
+            </span>
+            {/* Leaving mid-test throws the answers away, so it asks once rather
+                than acting on a mis-tap. */}
+            {confirmExit ? (
+              <span className="flex items-center gap-2">
+                <span className="text-[13px] text-[#4A5566] dark:text-gray-400">Lose your answers?</span>
+                <button
+                  onClick={restart}
+                  className="flex h-11 items-center rounded-[10px] px-4 text-[14px] font-semibold text-white"
+                  style={{ background: '#C13F22' }}
+                >
+                  Exit
+                </button>
+                <button
+                  onClick={() => setConfirmExit(false)}
+                  className="flex h-11 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-4 text-[14px] font-semibold text-[#16202F] dark:border-gray-700 dark:text-gray-200"
+                >
+                  Keep going
+                </button>
+              </span>
+            ) : (
+              <button
+                onClick={() => (qIdx === 0 && chosen === null ? restart() : setConfirmExit(true))}
+                className="flex h-11 items-center gap-2 rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-4 text-[14px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+              >
+                ← Exit test
+              </button>
+            )}
           </div>
-          <span className="text-xs font-black text-gray-400 dark:text-gray-500 flex-shrink-0">
-            {qIdx + 1} / {totalQs}
-          </span>
         </div>
 
-        {/* Question card */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden mb-4">
-          {/* Card header */}
-          <div className="px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-            <span className="text-xs font-black px-2.5 py-0.5 rounded-full text-white"
-              style={{ background: levelColors[q.level] }}>
-              Level {q.level}
-            </span>
-            <span className="text-xs text-gray-400 dark:text-gray-500 font-semibold">
-              {q.level <= 2 ? 'TOPIK I' : 'TOPIK II'}
-            </span>
+        <div className="mb-5 h-1.5 overflow-hidden rounded-full bg-[rgba(20,32,47,0.10)] dark:bg-gray-800">
+          <div className="h-full rounded-full transition-all duration-500"
+               style={{ width: `${progressPct}%`, background: ACC.light }} />
+        </div>
+
+        <div className="rounded-[14px] border border-[rgba(20,32,47,0.16)] bg-[#FFFCF4] p-6 sm:p-8 dark:border-gray-800 dark:bg-gray-900">
+          <div className="mb-4 text-[12.5px] font-semibold text-[#4A5566] dark:text-gray-400">{q.instruction}</div>
+
+          {q.sentence && (
+            <p className="max-w-[60ch] font-korean text-[20px] leading-[1.75] text-[#16202F] sm:text-[24px] dark:text-white">
+              {q.sentence}
+            </p>
+          )}
+
+          <div className="mt-6 flex max-w-[640px] flex-col gap-2.5">
+            {q.options.map((opt, i) => {
+              const isChosen = chosen === i;
+              const answered = chosen !== null;
+              const right = answered && i === q.answer;
+              const wrong = answered && isChosen && i !== q.answer;
+              const dim = answered && !right && !isChosen;
+              return (
+                <button
+                  key={i}
+                  onClick={() => pick(i)}
+                  disabled={answered}
+                  className={`flex min-h-[56px] items-center gap-3.5 rounded-[10px] border-[1.5px] px-4 py-3 text-left transition-all disabled:cursor-default ${
+                    right || wrong ? '' : dim
+                      ? 'border-[rgba(20,32,47,0.12)] opacity-45 dark:border-gray-800'
+                      : 'border-[rgba(20,32,47,0.18)] hover:border-[rgba(20,32,47,0.34)] dark:border-gray-700 dark:hover:border-gray-500'
+                  }`}
+                  style={
+                    right ? { borderColor: PINE, background: 'rgba(46,107,89,0.08)' }
+                    : wrong ? { borderColor: '#C13F22', background: 'rgba(193,63,34,0.07)' }
+                    : undefined
+                  }
+                >
+                  <span
+                    className="flex h-7 w-7 flex-none items-center justify-center rounded-full border-[1.5px] text-[13px] font-semibold"
+                    style={
+                      right ? { borderColor: PINE, background: PINE, color: '#fff' }
+                      : wrong ? { borderColor: '#C13F22', background: '#C13F22', color: '#fff' }
+                      : { borderColor: 'rgba(20,32,47,0.3)', color: '#16202F' }
+                    }
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="min-w-0 flex-1 font-korean text-[17px] font-medium text-[#16202F] sm:text-[19px] dark:text-white">
+                    {opt}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          <div className="p-5">
-            {/* Instruction */}
-            <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3">{q.instruction}</p>
-
-            {/* Sentence */}
-            {q.sentence && (
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-5 py-4 mb-5 border-l-4"
-                style={{ borderLeftColor: levelColors[q.level] }}>
-                <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-relaxed">{q.sentence}</p>
-              </div>
-            )}
-
-            {/* Options */}
-            <div className="space-y-2.5">
-              {q.options.map((opt, i) => {
-                const isChosen = chosen === i;
-                const showFeedback = chosen !== null;
-                let cls = 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-blue-300 dark:hover:border-blue-700 cursor-pointer';
-                if (showFeedback) {
-                  if (i === q.answer) cls = 'bg-green-50 dark:bg-green-900/20 border-2 border-green-400 text-gray-900 dark:text-white cursor-default';
-                  else if (isChosen) cls = 'bg-red-50 dark:bg-red-900/20 border-2 border-red-400 text-gray-900 dark:text-white opacity-80 cursor-default';
-                  else cls = 'opacity-40 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 cursor-default';
-                }
-                return (
-                  <button key={i} onClick={() => pick(i)} disabled={chosen !== null}
-                    className={`w-full text-left px-4 py-3 rounded-xl transition-all text-sm ${cls}`}>
-                    <div className="flex items-center gap-3">
-                      <span className="font-black text-base flex-shrink-0"
-                        style={!showFeedback ? { color: levelColors[q.level] } : {}}>
-                        {OPTION_LABELS[i]}
-                      </span>
-                      <span className="font-semibold flex-1">{opt}</span>
-                      {showFeedback && i === q.answer && <span className="text-green-500 font-black">✓</span>}
-                      {showFeedback && isChosen && i !== q.answer && <span className="text-red-500 font-black">✗</span>}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Explanation */}
-            {chosen !== null && (
-              <div className={`mt-4 p-4 rounded-xl border-l-4 ${chosen === q.answer ? 'bg-green-50 dark:bg-green-900/10 border-l-green-400' : 'bg-red-50 dark:bg-red-900/10 border-l-red-400'}`}>
-                <p className={`text-xs font-black mb-1 ${chosen === q.answer ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
-                  {chosen === q.answer ? '✓ Correct! 정답!' : `✗ Incorrect — Answer: ${OPTION_LABELS[q.answer]} ${q.options[q.answer]}`}
+          {chosen !== null && (
+            <>
+              <div
+                className="mt-5 rounded-r-lg border-l-[3px] px-4 py-3.5"
+                style={chosen === q.answer
+                  ? { borderColor: PINE, background: 'rgba(46,107,89,0.08)' }
+                  : { borderColor: '#C13F22', background: 'rgba(193,63,34,0.07)' }}
+              >
+                <p className="text-[13.5px] font-semibold text-[#16202F] dark:text-gray-200">
+                  {chosen === q.answer ? '정답 — correct' : `The answer is ${OPTION_LABELS[q.answer]} ${q.options[q.answer]}`}
                 </p>
-                <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">{q.explanation}</p>
+                <p className="mt-1.5 text-[13.5px] leading-relaxed text-[#3E4A5A] dark:text-gray-300">{q.explanation}</p>
               </div>
-            )}
-          </div>
-        </div>
 
-        {/* Next button */}
-        {chosen !== null && (
-          <button onClick={advance}
-            className="w-full py-3 text-white text-sm font-black rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
-            style={{ background: 'linear-gradient(135deg, #0D141F, #1E3A5C)' }}>
-            {qIdx + 1 >= totalQs ? '🏁 See My Results' : 'Next Question →'}
-          </button>
-        )}
+              <button
+                onClick={advance}
+                className="mt-6 flex h-12 items-center rounded-[10px] px-5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+                style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+              >
+                {qIdx + 1 >= totalQs ? 'See my level →' : 'Next question →'}
+              </button>
+            </>
+          )}
+        </div>
       </div>
     );
   }
 
-  // ── Results screen ───────────────────────────────────────────────────────────
-  const levelInfo = LEVEL_INFO[estimatedLevel];
-  const scorePct = Math.round((totalCorrect / totalQs) * 100);
+  // ── Results ─────────────────────────────────────────────────────────────────
+  const levelInfo = LEVEL_INFO[estimatedLevel] ?? LEVEL_INFO[1];
+  const scorePct = totalQs ? Math.round((totalCorrect / totalQs) * 100) : 0;
+
+  // Progress toward the next level, from accuracy on that level's questions —
+  // the same numbers computeLevel() uses, not a decorative figure.
+  const nextLevel = estimatedLevel + 1;
+  const nextBand = levelBreakdown.find(b => b.level === nextLevel);
+  const maxLevel = isPremium ? 6 : 3;
+  const ringPct = estimatedLevel >= maxLevel ? 100 : (nextBand?.pct ?? 0);
+
+  const R = 70;
+  const CIRC = 2 * Math.PI * R;
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
-
+    <div className="mx-auto max-w-6xl">
       {/* Print-only certificate styles */}
       <style>{`
         @media print {
@@ -520,140 +565,190 @@ const TopikAssessment: React.FC = () => {
         }
       `}</style>
 
-      {/* Result hero */}
-      <div className="relative rounded-3xl overflow-hidden mb-5 p-6 text-center"
-        style={{ background: `linear-gradient(135deg, ${levelInfo.color}22 0%, ${levelInfo.color}44 100%)`, border: `2px solid ${levelInfo.color}66` }}>
-        <div className="text-5xl mb-3">🎓</div>
-        <p className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Estimated Level</p>
-        <h2 className="text-2xl sm:text-3xl font-black mb-1" style={{ color: levelInfo.color }}>{levelInfo.name}</h2>
-        <p className="text-sm text-gray-600 dark:text-gray-300 max-w-xs mx-auto">{levelInfo.desc}</p>
-        <div className="mt-4 inline-flex items-center gap-3 bg-white/60 dark:bg-gray-900/60 rounded-2xl px-5 py-2.5">
-          <span className="text-2xl font-black text-gray-900 dark:text-white">{totalCorrect}/{totalQs}</span>
-          <div className="text-left">
-            <p className="text-sm font-black" style={{ color: levelInfo.color }}>{scorePct}%</p>
-            <p className="text-xs text-gray-400">correct</p>
-          </div>
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+        <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+          Level test result
+        </h1>
+        <div className="flex flex-none items-center gap-3.5">
+          <span className="text-[13.5px] text-[#4A5566] dark:text-gray-500">Taken today</span>
+          <button
+            onClick={restart}
+            className="flex h-12 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+          >
+            Take it again
+          </button>
         </div>
       </div>
 
-      {/* Level breakdown */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 mb-4">
-        <p className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Score by Level</p>
-        <div className="space-y-3">
-          {levelBreakdown.map(({ level, correct, total, pct }) => {
-            const color = LEVEL_INFO[level].color;
-            return (
-              <div key={level} className="flex items-center gap-3">
-                <span className="text-xs font-black w-14 flex-shrink-0" style={{ color }}>Lv {level}</span>
-                <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full transition-all duration-700"
-                    style={{ width: `${pct}%`, background: color }} />
+      <div className="flex flex-col items-start gap-5 lg:flex-row">
+        <div className="order-1 w-full min-w-0 flex-1">
+          <div className="kl-card p-6 sm:p-8">
+            <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-center sm:gap-9">
+              {/* The ring */}
+              <div className="relative h-[160px] w-[160px] flex-none">
+                <svg width="160" height="160" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="80" cy="80" r={R} fill="none" strokeWidth="12" className="stroke-[rgba(20,32,47,0.10)] dark:stroke-white/10" />
+                  <circle
+                    cx="80" cy="80" r={R} fill="none" strokeWidth="12" strokeLinecap="round"
+                    stroke={ACC.light}
+                    strokeDasharray={`${(ringPct / 100) * CIRC} ${CIRC}`}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="font-display text-[38px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+                    {estimatedLevel}
+                  </span>
+                  <span className="mt-0.5 text-[12.5px] text-[#4A5566] dark:text-gray-500">
+                    {estimatedLevel >= maxLevel ? 'top level here' : `${ringPct}% to level ${nextLevel}`}
+                  </span>
                 </div>
-                <span className="text-xs font-black text-gray-500 dark:text-gray-400 w-16 text-right flex-shrink-0">
-                  {correct}/{total} ({pct}%)
-                </span>
               </div>
-            );
-          })}
-        </div>
-        {!isPremium && (
-          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-            <div className="flex items-center gap-2 text-xs text-gray-400">
-              <span>🔒</span>
-              <span>Levels 4–6 hidden</span>
-              <button onClick={startUpgrade}
-                className="font-black text-[#3F8571] hover:underline">Get Premium →</button>
+
+              <div className="min-w-0 flex-1 text-center sm:text-left">
+                <div className="mb-2 text-[12.5px] font-semibold" style={{ color: ACC.light }}>
+                  {levelInfo.name.toUpperCase()}
+                </div>
+                <h2 className="font-display text-[24px] font-semibold leading-[1.2] tracking-[-0.03em] text-[#16202F] sm:text-[30px] dark:text-white">
+                  {levelInfo.desc}
+                </h2>
+                <p className="mt-3 max-w-[60ch] text-[15px] leading-[1.6] text-[#3E4A5A] sm:text-[17px] dark:text-gray-400">
+                  {levelInfo.tip}
+                </p>
+                <div className="mt-5 flex flex-wrap justify-center gap-3 sm:justify-start">
+                  <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('navigate-to-section', { detail: 'dashboard' }))}
+                    className="flex h-12 items-center rounded-[10px] px-5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+                    style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+                  >
+                    Start my plan
+                  </button>
+                  <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('navigate-to-section', { detail: 'topik' }))}
+                    className="flex h-12 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+                  >
+                    Practise TOPIK questions
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Where you stand — by LEVEL, which is what was actually tested.
+                The mockup shows reading / listening / speaking / writing bars, but
+                this assessment only asks reading-style questions banded by level;
+                inventing four skill scores would claim measurements never taken. */}
+            <div className="mt-8 border-t border-[rgba(20,32,47,0.12)] pt-6 dark:border-gray-800">
+              <div className="mb-4 text-[14px] font-semibold text-[#16202F] dark:text-white">
+                Where you stand, level by level
+              </div>
+              <div className="flex flex-col gap-3.5">
+                {levelBreakdown.map(({ level, correct, total, pct }) => {
+                  const tone = pct >= 70 ? PINE : pct >= 40 ? ACC.light : '#C13F22';
+                  const verdict = pct >= 70 ? 'solid' : pct >= 40 ? 'getting there' : 'start here';
+                  return (
+                    <div key={level} className="flex items-center gap-4">
+                      <span className="w-[92px] flex-none text-[14.5px] text-[#16202F] dark:text-gray-200">
+                        Level {level}
+                      </span>
+                      <span className="h-2.5 flex-1 overflow-hidden rounded-full bg-[rgba(20,32,47,0.09)] dark:bg-gray-800">
+                        <span className="block h-full rounded-full transition-all duration-700"
+                              style={{ width: `${pct}%`, background: tone }} />
+                      </span>
+                      <span className="w-[104px] flex-none text-right text-[13.5px]" style={{ color: tone }}>
+                        {correct}/{total} · {verdict}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="mt-4 text-[12.5px] text-[#4A5566] dark:text-gray-500">
+                Scored {totalCorrect} of {totalQs} overall ({scorePct}%). A level counts as reached at 60%.
+              </p>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Study tip */}
-      <div className="rounded-2xl border p-4 mb-4"
-        style={{ borderColor: `${levelInfo.color}44`, background: `${levelInfo.color}0d` }}>
-        <p className="text-xs font-black mb-1" style={{ color: levelInfo.color }}>📚 What to study next</p>
-        <p className="text-sm text-gray-700 dark:text-gray-300">{levelInfo.tip}</p>
-      </div>
+          {/* Certificate */}
+          {isPremium ? (
+            <div className="kl-card mt-5 p-6">
+              <div className="mb-3 text-[14px] font-semibold text-[#16202F] dark:text-white">Your certificate</div>
+              <input
+                value={certName}
+                onChange={e => setCertName(e.target.value)}
+                placeholder="Name for the certificate"
+                className="kl-field mb-4 w-full rounded-[10px] border border-[rgba(20,32,47,0.18)] bg-[#FFFCF4] px-3.5 py-2.5 text-[14px] text-[#16202F] focus:outline-none focus:ring-2 focus:ring-[#2F5D8A]/40 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+              />
+              <div
+                id="topik-cert"
+                className="rounded-[14px] p-8 text-center"
+                style={{ background: 'linear-gradient(135deg, #0D141F, #16202F 60%, #1E3A5C)' }}
+              >
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">K-Learn Interactive</p>
+                <p className="mt-1 text-[12px] text-white/70">Certificate of achievement</p>
+                <p className="mt-5 text-[22px] font-semibold text-white">{certName || 'Korean Learner'}</p>
+                <p className="mt-1.5 text-[12px] text-white/60">has demonstrated Korean proficiency at</p>
+                <div
+                  className="mt-3 inline-block rounded-xl px-5 py-2 text-[16px] font-semibold text-white"
+                  style={{ background: ACC.light }}
+                >
+                  {levelInfo.name}
+                </div>
+                <div className="mt-5 flex justify-center gap-5 text-[10.5px] text-white/50">
+                  <span>{totalCorrect}/{totalQs} · {scorePct}%</span>
+                  <span>{new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                </div>
+              </div>
+              <button
+                onClick={handlePrint}
+                className="mt-4 flex h-12 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200"
+              >
+                Print or save as PDF
+              </button>
+            </div>
+          ) : (
+            <div className="mt-5">
+              <PremiumLockBanner
+                title="Certificate and levels 4–6 — Premium"
+                description="The free test places you within TOPIK levels 1–3. Premium runs the full range and adds a printable certificate."
+              />
+            </div>
+          )}
+        </div>
 
-      {/* Certificate — premium only */}
-      {isPremium ? (
-        <>
-          {/* Name input */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 mb-4">
-            <label className="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">
-              Your name for the certificate
-            </label>
-            <input
-              value={certName}
-              onChange={e => setCertName(e.target.value)}
-              placeholder="Enter your name…"
-              className="w-full px-4 py-2.5 text-sm font-semibold rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#6BA88F]"
-            />
+        {/* ── Rail ── */}
+        <div className="order-2 w-full flex-none lg:w-[290px]">
+          <div className={`${railCard} mb-3.5`}>
+            <div className="mb-2.5 text-[13.5px] font-semibold text-[#16202F] dark:text-white">
+              What level {estimatedLevel} means
+            </div>
+            <p className="text-[13.5px] leading-[1.6] text-[#3E4A5A] dark:text-gray-400">{levelInfo.desc}</p>
           </div>
 
-          {/* Certificate card */}
-          <div id="topik-cert"
-            className="rounded-3xl overflow-hidden mb-4 p-6 sm:p-8 text-center relative"
-            style={{ background: 'linear-gradient(135deg, #0D141F 0%, #16202F 40%, #1E3A5C 100%)', border: `3px solid ${levelInfo.color}` }}>
-            <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none opacity-10">
-              {['한국어', '한', '국', '어', '🇰🇷', '인증'].map((w, i) => (
-                <span key={i} className="absolute font-black text-white"
-                  style={{ fontSize: `${2 + (i % 3)}rem`, top: `${(i * 41) % 85}%`, left: `${(i * 53) % 80}%` }}>{w}</span>
+          <div className={`${railCard} mb-3.5`}>
+            <div className="mb-2.5 text-[13.5px] font-semibold text-[#16202F] dark:text-white">Where to start</div>
+            <div className="flex flex-col gap-2">
+              {([
+                ['grammar', 'Grammar rules'],
+                ['vocabulary', 'Vocabulary sets'],
+                ['phrases', 'Everyday phrases'],
+              ] as [string, string][]).map(([id, label]) => (
+                <button
+                  key={id}
+                  onClick={() => window.dispatchEvent(new CustomEvent('navigate-to-section', { detail: id }))}
+                  className="text-left text-[14px] font-medium text-[#16202F] transition-colors hover:text-[#2F5D8A] dark:text-gray-200 dark:hover:text-[#7FB0E0]"
+                >
+                  {label} →
+                </button>
               ))}
             </div>
-            <div className="relative z-10">
-              <div className="text-3xl mb-2">🎓</div>
-              <p className="text-white/50 text-[10px] font-black uppercase tracking-[0.2em] mb-1">K-Learn Interactive</p>
-              <p className="text-white/70 text-xs font-semibold mb-4">Certificate of Achievement</p>
-              <p className="text-white/60 text-xs mb-1">This certifies that</p>
-              <p className="text-xl sm:text-2xl font-black text-white mb-3"
-                style={{ textShadow: `0 0 20px ${levelInfo.color}88` }}>
-                {certName || 'Korean Learner'}
-              </p>
-              <p className="text-white/60 text-xs mb-3">has demonstrated Korean language proficiency at</p>
-              <div className="inline-block px-6 py-2.5 rounded-2xl font-black text-white text-lg mb-3"
-                style={{ background: levelInfo.color, boxShadow: `0 4px 20px ${levelInfo.color}66` }}>
-                {levelInfo.name}
-              </div>
-              <div className="flex justify-center gap-6 mb-4 text-white/50 text-[10px]">
-                <span>Score: {totalCorrect}/{totalQs} ({scorePct}%)</span>
-                <span>·</span>
-                <span>Date: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-              </div>
-              <p className="text-white/30 text-[9px] uppercase tracking-widest">한국어 학습을 응원합니다 🇰🇷</p>
-            </div>
           </div>
 
-          <button onClick={handlePrint}
-            className="w-full py-3 text-white text-sm font-black rounded-xl mb-3 hover:scale-[1.02] active:scale-[0.98] transition-all"
-            style={{ background: 'var(--brand-gradient)' }}>
-            🖨 Print / Save as PDF
-          </button>
-        </>
-      ) : (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden mb-4">
-          <PremiumLockBanner
-            title="Certificate — Premium"
-            description="Upgrade to get a printable certificate and unlock the full TOPIK I + II assessment (levels 1–6)."
-          />
+          <div className={railCard}>
+            <div className="mb-2.5 text-[13.5px] font-semibold text-[#16202F] dark:text-white">Retaking it</div>
+            <p className="text-[13.5px] leading-[1.55] text-[#3E4A5A] dark:text-gray-400">
+              Take it again whenever you like — the newest result is the one kept, and nothing else
+              resets. Your level is saved to your account, so it follows you between devices.
+            </p>
+          </div>
         </div>
-      )}
-
-      {/* Action row */}
-      <div className="grid grid-cols-2 gap-3">
-        <button onClick={restart}
-          className="py-3 text-sm font-black rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-          🔄 Try Again
-        </button>
-        <button
-          onClick={() => {
-            const event = new CustomEvent('navigate-to-section', { detail: 'topik' });
-            window.dispatchEvent(event);
-          }}
-          className="py-3 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-          style={{ background: 'linear-gradient(135deg, #0D141F, #1E3A5C)' }}>
-          📋 Practice TOPIK →
-        </button>
       </div>
     </div>
   );
