@@ -3,6 +3,7 @@ import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { PremiumLockBanner } from './PremiumLock';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
+import { accentFor } from '../utils/moduleAccent';
 
 // Free users get 3 sample questions: TOPIK I vocab[0], TOPIK I grammar[0], TOPIK II vocab[0]
 const FREE_QUESTION_LIMIT = 3;
@@ -291,6 +292,9 @@ type Level = 'I' | 'II';
 type Category = 'vocabulary' | 'grammar';
 
 const OPTION_LABELS = ['①', '②', '③', '④'];
+const ACC = accentFor('topik');
+const PINE = '#2E6B59';
+const OCHRE = '#A8761F';
 
 const TopikPrepSection: React.FC = () => {
   const { subscriptionTier } = useFeatureAccess();
@@ -302,13 +306,16 @@ const TopikPrepSection: React.FC = () => {
   const [chosen, setChosen] = useState<number | null>(null);
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [done, setDone] = useState(false);
+  // Per-question outcome, so the palette in the rail can say WHICH ones went
+  // wrong rather than only how many.
+  const [results, setResults] = useState<(boolean | null)[]>([]);
+  const [flagged, setFlagged] = useState<Set<number>>(new Set());
 
   // Track total answered across the free session (across level/category switches)
   const [totalAnswered, setTotalAnswered] = useState(0);
 
   const questions = QUESTIONS[level][category];
   const q = questions[qIdx];
-  const progress = (qIdx / questions.length) * 100;
   const freeLimitHit = isFree && totalAnswered >= FREE_QUESTION_LIMIT;
 
   const resetQuiz = (newLevel?: Level, newCategory?: Category) => {
@@ -317,14 +324,22 @@ const TopikPrepSection: React.FC = () => {
     setLevel(l); setCategory(c);
     setQIdx(0); setChosen(null);
     setScore({ correct: 0, total: 0 }); setDone(false);
+    setResults(new Array(QUESTIONS[l][c].length).fill(null));
+    setFlagged(new Set());
   };
 
   const pick = (idx: number) => {
     if (chosen !== null) return;
+    const right = idx === q.answer;
     setChosen(idx);
-    setScore(s => ({ correct: s.correct + (idx === q.answer ? 1 : 0), total: s.total + 1 }));
+    setScore(s => ({ correct: s.correct + (right ? 1 : 0), total: s.total + 1 }));
+    setResults(r => {
+      const next = r.length ? [...r] : new Array(questions.length).fill(null);
+      next[qIdx] = right;
+      return next;
+    });
     setTotalAnswered(n => n + 1);
-    if (idx === q.answer) earnXP(5);
+    if (right) earnXP(5);
     markStudyToday();
   };
 
@@ -334,203 +349,333 @@ const TopikPrepSection: React.FC = () => {
     else setQIdx(i => i + 1);
   };
 
+  // Set it aside without answering — it stays unanswered and the palette marks it.
+  const flagAndSkip = () => {
+    setFlagged(f => new Set(f).add(qIdx));
+    setChosen(null);
+    if (qIdx + 1 >= questions.length) setDone(true);
+    else setQIdx(i => i + 1);
+  };
+
+  const goTo = (i: number) => {
+    if (i === qIdx) return;
+    setQIdx(i);
+    setChosen(null);
+  };
+
+  const answeredCount = results.filter(r => r !== null).length;
+  const railCard = 'rounded-[14px] border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] px-5 py-4 dark:border-gray-800 dark:bg-gray-900';
+  const catLabel = category === 'vocabulary' ? 'Vocabulary 어휘' : 'Grammar 문법';
+
   // ── Completion screen ───────────────────────────────────────────────────────
   if (done) {
-    const pct = Math.round((score.correct / score.total) * 100);
-    const emoji = pct >= 80 ? '🏆' : pct >= 60 ? '👍' : '💪';
-    const msg = pct >= 80 ? '합격 수준!' : pct >= 60 ? '잘 했어요!' : '계속 연습하세요!';
+    const pct = score.total ? Math.round((score.correct / score.total) * 100) : 0;
+    const msg = pct >= 80 ? '합격 수준 — exam-ready for this level'
+      : pct >= 60 ? '잘 했어요 — worth reviewing the misses'
+      : '계속 연습하세요 — keep going';
+    const missed = questions.filter((_, i) => results[i] === false);
+
     return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
-        <div className="relative rounded-3xl overflow-hidden mb-6 p-6 text-center"
-          style={{ background: 'var(--brand-gradient-hero-rev)' }}>
-          <div className="text-5xl mb-2">{emoji}</div>
-          <h2 className="text-2xl font-black text-white mb-1">{msg}</h2>
-          <p className="text-white/80 text-sm">TOPIK {level} · {category === 'vocabulary' ? 'Vocabulary 어휘' : 'Grammar 문법'}</p>
-          <div className="mt-4 inline-flex items-center gap-3 bg-white/20 rounded-2xl px-6 py-3">
-            <span className="text-3xl font-black text-white">{score.correct}/{score.total}</span>
-            <div className="text-left">
-              <p className="text-white text-sm font-black">{pct}%</p>
-              <p className="text-white/70 text-xs">correct</p>
+      <div className="mx-auto max-w-3xl">
+        <div className="kl-card mb-4 flex flex-wrap items-center gap-5 p-6">
+          <div
+            className="flex h-[76px] w-[76px] flex-none flex-col items-center justify-center rounded-[14px]"
+            style={{ background: `${ACC.light}1F`, border: `1px solid ${ACC.light}4D` }}
+          >
+            <span className="text-[26px] font-bold leading-none" style={{ color: ACC.light }}>{score.correct}</span>
+            <span className="mt-1 text-[11.5px] font-medium" style={{ color: ACC.light }}>of {score.total}</span>
+          </div>
+          <div className="min-w-[200px] flex-1">
+            <div className="mb-1 text-[12.5px] font-semibold" style={{ color: ACC.light }}>
+              TOPIK {level} · {catLabel.toUpperCase()}
+            </div>
+            <h2 className="font-display text-[24px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+              {msg}
+            </h2>
+            <p className="mt-1.5 text-[13.5px] text-[#3E4A5A] dark:text-gray-400">
+              {pct}% on this set{flagged.size > 0 && ` · ${flagged.size} flagged for another look`}
+            </p>
+          </div>
+        </div>
+
+        {missed.length > 0 && (
+          <div className="kl-card mb-4 p-5 sm:p-6">
+            <div className="mb-3.5 text-[14px] font-semibold text-[#16202F] dark:text-white">
+              The {missed.length} you missed
+            </div>
+            <div className="flex flex-col gap-3">
+              {missed.map((mq, i) => (
+                <div key={i} className="kl-well rounded-xl p-4">
+                  {mq.sentence && (
+                    <p className="font-korean text-[16px] font-semibold text-[#16202F] dark:text-white">{mq.sentence}</p>
+                  )}
+                  <p className="mt-1.5 text-[13.5px]" style={{ color: PINE }}>
+                    {OPTION_LABELS[mq.answer]} {mq.options[mq.answer]}
+                  </p>
+                  <p className="mt-1.5 text-[13px] leading-relaxed text-[#3E4A5A] dark:text-gray-300">{mq.explanation}</p>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
+        )}
 
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5 mb-4">
-          <p className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Score guide</p>
-          <div className="space-y-2">
-            {[['80–100%', '🏆', 'Exam-ready for this level', 'text-green-600 dark:text-green-400'], ['60–79%', '👍', 'Good — review missed questions', 'text-yellow-600 dark:text-yellow-400'], ['0–59%', '💪', 'Keep studying — try again!', 'text-red-600 dark:text-red-400']].map(([range, em, desc, color]) => (
-              <div key={range} className="flex items-center gap-3 text-sm">
-                <span>{em}</span>
-                <span className={`font-black ${color} w-20`}>{range}</span>
-                <span className="text-gray-500 dark:text-gray-400">{desc}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <button onClick={() => resetQuiz()}
-            className="py-3 text-white text-sm font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-            style={{ background: 'var(--brand-gradient)' }}>
-            🔄 Try Again
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => resetQuiz()}
+            className="flex h-12 items-center rounded-[10px] px-5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+            style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+          >
+            Try this set again →
           </button>
-          <button onClick={() => resetQuiz(level, category === 'vocabulary' ? 'grammar' : 'vocabulary')}
-            className="py-3 text-sm font-black rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-            Switch Section
+          <button
+            onClick={() => resetQuiz(level, category === 'vocabulary' ? 'grammar' : 'vocabulary')}
+            className="flex h-12 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+          >
+            Switch to {category === 'vocabulary' ? 'Grammar' : 'Vocabulary'}
           </button>
         </div>
       </div>
     );
   }
 
-  // ── Active quiz ─────────────────────────────────────────────────────────────
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto">
-      {/* Hero */}
-      <div className="relative rounded-3xl overflow-hidden mb-6 p-5 sm:p-6"
-        style={{ background: 'var(--brand-gradient-hero-rev)' }}>
-        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
-          {['읽기','어휘','문법','TOPIK','시험'].map((w, i) => (
-            <span key={i} className="absolute text-white/10 font-black"
-              style={{ fontSize: `${1.1 + (i % 2) * 0.5}rem`, top: `${(i * 37) % 85}%`, left: `${(i * 43) % 80}%` }}>{w}</span>
-          ))}
-        </div>
-        <div className="relative z-10 text-center">
-          <div className="text-4xl mb-2">📋</div>
-          <h1 className="text-xl sm:text-2xl font-black text-white mb-1">TOPIK Prep 시험 준비</h1>
-          <p className="text-white/80 text-xs">Practice with official-style TOPIK questions</p>
-        </div>
-      </div>
-
-      {/* Level + Category selectors */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        {/* Level tabs */}
-        <div className="flex rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm flex-1">
-          {(['I', 'II'] as Level[]).map(l => (
-            <button key={l} onClick={() => resetQuiz(l, category)}
-              className={`flex-1 py-2.5 text-sm font-black transition-all ${level === l ? 'tab-brand-active' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
-              TOPIK {l}
-              <span className={`ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${level === l ? 'badge-brand' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
-                {l === 'I' ? 'Beginner' : 'Intermediate'}
-              </span>
-            </button>
-          ))}
-        </div>
-        {/* Category tabs */}
-        <div className="flex rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm flex-1">
-          {([['vocabulary', '어휘', '📖'], ['grammar', '문법', '✏️']] as [Category, string, string][]).map(([c, ko, em]) => (
-            <button key={c} onClick={() => resetQuiz(level, c)}
-              className={`flex-1 py-2.5 text-sm font-black transition-all flex items-center justify-center gap-1.5 ${category === c ? 'tab-brand-active' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
-              {em} {ko}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      <div className="flex items-center gap-3 mb-5">
-        <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-          <div className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${progress}%`, background: 'var(--brand-gradient-h)' }} />
-        </div>
-        <span className="text-xs font-black text-gray-400 dark:text-gray-500 flex-shrink-0">
-          {qIdx + 1} / {questions.length}
+    <div className="mx-auto max-w-6xl">
+      {/* ── Header ── */}
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+        <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+          TOPIK {level}
+          <span className="text-[#4A5566] dark:text-gray-500">
+            {' · '}{category === 'vocabulary' ? 'Vocabulary' : 'Grammar'} · question {qIdx + 1} of {questions.length}
+          </span>
+        </h1>
+        <span className="text-[13.5px] text-[#4A5566] dark:text-gray-500">
+          {score.correct} right of {score.total} answered
         </span>
       </div>
 
-      {/* Question card — stays visible (with feedback) even once the free limit
-          is hit, so the last answered question's explanation is readable. The
-          upgrade wall is shown below instead of abruptly replacing the card. */}
-      {(!freeLimitHit || chosen !== null) && (
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden mb-4">
-        {/* Question header */}
-        <div className="px-5 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-black px-2 py-0.5 rounded-full badge-brand">
-              {qIdx + 1}번
+      {/* ── Level and section ──
+             Labelled in English with the Korean beside it: these are navigation,
+             and the design rule is that chrome is English while Korean is kept
+             for where it is actually the content. 어휘 alone told a beginner
+             nothing about what the button did. */}
+      <div className="mb-5 flex flex-wrap items-center gap-x-2 gap-y-3">
+        <span className="text-[12.5px] text-[#4A5566] dark:text-gray-500">Level:</span>
+        {(['I', 'II'] as Level[]).map(l => (
+          <button
+            key={l}
+            onClick={() => resetQuiz(l, category)}
+            className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-[9px] px-3.5 text-[12.5px] font-semibold leading-none transition-colors ${
+              level === l ? 'text-white'
+                : 'border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] text-[#4A5566] hover:border-[rgba(20,32,47,0.28)] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400'
+            }`}
+            style={level === l ? { background: ACC.light } : undefined}
+          >
+            TOPIK {l}
+            <span className={level === l ? 'text-white/70' : 'text-[#4A5566] dark:text-gray-500'}>
+              {l === 'I' ? 'beginner' : 'intermediate'}
             </span>
-            <span className="text-xs font-bold text-gray-400 dark:text-gray-500">
-              TOPIK {level} · {category === 'vocabulary' ? '어휘' : '문법'}
-            </span>
-          </div>
-          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${level === 'I' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'}`}>
-            {level === 'I' ? 'Beginner' : 'Intermediate'}
-          </span>
+          </button>
+        ))}
+
+        <span className="ml-3 text-[12.5px] text-[#4A5566] dark:text-gray-500">Section:</span>
+        {([['vocabulary', 'Vocabulary', '어휘'], ['grammar', 'Grammar', '문법']] as [Category, string, string][]).map(([c, en, ko]) => (
+          <button
+            key={c}
+            onClick={() => resetQuiz(level, c)}
+            className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[9px] px-3.5 text-[12.5px] font-semibold leading-none transition-colors ${
+              category === c ? 'text-white'
+                : 'border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] text-[#4A5566] hover:border-[rgba(20,32,47,0.28)] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400'
+            }`}
+            style={category === c ? { background: ACC.light } : undefined}
+            title={c === 'vocabulary' ? 'Word-meaning questions' : 'Grammar and particle questions'}
+          >
+            {en}
+            <span className={`font-korean ${category === c ? 'text-white/70' : 'text-[#4A5566] dark:text-gray-500'}`}>{ko}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-col items-start gap-5 lg:flex-row">
+        {/* ── The question ── */}
+        <div className="order-1 w-full min-w-0 flex-1">
+          {(!freeLimitHit || chosen !== null) && (
+            <div className="rounded-[14px] border border-[rgba(20,32,47,0.16)] bg-[#FFFCF4] p-6 sm:p-8 dark:border-gray-800 dark:bg-gray-900">
+              <div className="mb-4 text-[12.5px] font-semibold text-[#4A5566] dark:text-gray-400">
+                {q.instruction}
+              </div>
+
+              {q.sentence && (
+                <p className="max-w-[60ch] font-korean text-[20px] leading-[1.75] text-[#16202F] sm:text-[24px] dark:text-white">
+                  {q.sentence}
+                </p>
+              )}
+
+              {/* Options, numbered as the exam numbers them */}
+              <div className="mt-6 flex max-w-[640px] flex-col gap-2.5">
+                {q.options.map((opt, i) => {
+                  const isChosen = chosen === i;
+                  const answered = chosen !== null;
+                  const right = answered && i === q.answer;
+                  const wrong = answered && isChosen && i !== q.answer;
+                  const dim = answered && !right && !isChosen;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => pick(i)}
+                      disabled={answered}
+                      className={`flex min-h-[56px] items-center gap-3.5 rounded-[10px] border-[1.5px] px-4 py-3 text-left transition-all disabled:cursor-default ${
+                        right || wrong ? '' : dim
+                          ? 'border-[rgba(20,32,47,0.12)] opacity-45 dark:border-gray-800'
+                          : 'border-[rgba(20,32,47,0.18)] hover:border-[rgba(20,32,47,0.34)] dark:border-gray-700 dark:hover:border-gray-500'
+                      }`}
+                      style={
+                        right ? { borderColor: PINE, background: 'rgba(46,107,89,0.08)' }
+                        : wrong ? { borderColor: '#C13F22', background: 'rgba(193,63,34,0.07)' }
+                        : undefined
+                      }
+                    >
+                      <span
+                        className="flex h-7 w-7 flex-none items-center justify-center rounded-full border-[1.5px] text-[13px] font-semibold"
+                        style={
+                          right ? { borderColor: PINE, background: PINE, color: '#fff' }
+                          : wrong ? { borderColor: '#C13F22', background: '#C13F22', color: '#fff' }
+                          : { borderColor: 'rgba(20,32,47,0.3)', color: '#16202F' }
+                        }
+                      >
+                        {i + 1}
+                      </span>
+                      <span className="min-w-0 flex-1 font-korean text-[17px] font-medium text-[#16202F] sm:text-[19px] dark:text-white">
+                        {opt}
+                      </span>
+                      {right && <span className="flex-none text-[13.5px] font-semibold" style={{ color: PINE }}>correct</span>}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Why */}
+              {chosen !== null && (
+                <div
+                  className="mt-5 rounded-r-lg border-l-[3px] px-4 py-3.5"
+                  style={chosen === q.answer
+                    ? { borderColor: PINE, background: 'rgba(46,107,89,0.08)' }
+                    : { borderColor: '#C13F22', background: 'rgba(193,63,34,0.07)' }}
+                >
+                  <p className="text-[13.5px] font-semibold text-[#16202F] dark:text-gray-200">
+                    {chosen === q.answer
+                      ? '정답 — correct'
+                      : `The answer is ${OPTION_LABELS[q.answer]} ${q.options[q.answer]}`}
+                  </p>
+                  <p className="mt-1.5 text-[13.5px] leading-relaxed text-[#3E4A5A] dark:text-gray-300">
+                    {q.explanation}
+                  </p>
+                </div>
+              )}
+
+              {/* Move on */}
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[rgba(20,32,47,0.12)] pt-5 dark:border-gray-800">
+                <button
+                  onClick={flagAndSkip}
+                  disabled={freeLimitHit}
+                  className="flex h-12 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] disabled:opacity-40 dark:border-gray-700 dark:text-gray-200"
+                >
+                  Flag and skip
+                </button>
+                <div className="flex items-center gap-4">
+                  <span className="text-[13.5px] text-[#4A5566] dark:text-gray-500">
+                    {answeredCount} answered{flagged.size > 0 && ` · ${flagged.size} flagged`}
+                  </span>
+                  {chosen !== null && !freeLimitHit && (
+                    <button
+                      onClick={advance}
+                      className="flex h-12 items-center rounded-[10px] px-5 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+                      style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+                    >
+                      {qIdx + 1 >= questions.length ? 'See how you did →' : 'Next →'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {freeLimitHit && (
+            <div className="mt-4">
+              <PremiumLockBanner
+                title="TOPIK prep — Premium"
+                description={`That is all ${FREE_QUESTION_LIMIT} sample questions. Premium opens every official-style question across TOPIK I and TOPIK II.`}
+              />
+            </div>
+          )}
         </div>
 
-        <div className="p-5">
-          {/* Instruction */}
-          <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3">{q.instruction}</p>
-
-          {/* Sentence */}
-          {q.sentence && (
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-5 py-4 mb-5 border-l-4 border-l-[#6BA88F]">
-              <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-relaxed">{q.sentence}</p>
+        {/* ── Rail ── */}
+        <div className="order-2 w-full flex-none lg:w-[290px]">
+          <div className={`${railCard} mb-3.5`}>
+            <div className="mb-3 text-[13.5px] font-semibold text-[#16202F] dark:text-white">Questions</div>
+            <div className="grid grid-cols-8 gap-1.5">
+              {questions.map((_, i) => {
+                const r = results[i];
+                const now = i === qIdx;
+                const isFlagged = flagged.has(i);
+                return (
+                  <button
+                    key={i}
+                    onClick={() => goTo(i)}
+                    className="flex h-7 items-center justify-center rounded-md text-[11.5px] font-semibold transition-transform hover:scale-105"
+                    style={
+                      now ? { border: `1.5px solid ${ACC.light}`, background: `${ACC.light}24`, color: '#16202F' }
+                      : isFlagged ? { background: OCHRE, color: '#fff' }
+                      : r === true ? { background: PINE, color: '#fff' }
+                      : r === false ? { background: '#C13F22', color: '#fff' }
+                      : { background: 'rgba(20,32,47,0.05)', color: '#16202F' }
+                    }
+                    title={
+                      r === true ? 'Right' : r === false ? 'Wrong'
+                      : isFlagged ? 'Flagged' : now ? 'Current' : 'Not answered'
+                    }
+                  >
+                    <span className={now || r === null && !isFlagged ? 'dark:text-gray-300' : ''}>{i + 1}</span>
+                  </button>
+                );
+              })}
             </div>
-          )}
-
-          {/* Options */}
-          <div className="space-y-2.5">
-            {q.options.map((opt, i) => {
-              const isChosen = chosen === i;
-              const showFeedback = chosen !== null;
-              let cls = 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 hover:border-[#F5A183] dark:hover:border-[#A83619] cursor-pointer';
-              if (showFeedback) {
-                if (i === q.answer) cls = 'bg-green-50 dark:bg-green-900/20 border-2 border-green-400 text-gray-900 dark:text-white cursor-default';
-                else if (isChosen) cls = 'bg-red-50 dark:bg-red-900/20 border-2 border-red-400 text-gray-900 dark:text-white opacity-80 cursor-default';
-                else cls = 'opacity-40 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 cursor-default';
-              }
-              return (
-                <button key={i} onClick={() => pick(i)} disabled={chosen !== null}
-                  className={`w-full text-left px-4 py-3 rounded-xl transition-all text-sm ${cls}`}>
-                  <div className="flex items-center gap-3">
-                    <span className="font-black text-base flex-shrink-0" style={
-                      !showFeedback ? { background: 'var(--brand-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } : {}
-                    }>{OPTION_LABELS[i]}</span>
-                    <span className="font-semibold flex-1">{opt}</span>
-                    {showFeedback && i === q.answer && <span className="text-green-500 font-black">✓</span>}
-                    {showFeedback && isChosen && i !== q.answer && <span className="text-red-500 font-black">✗</span>}
-                  </div>
-                </button>
-              );
-            })}
+            <div className="mt-3 flex flex-wrap gap-3 text-[12.5px] text-[#4A5566] dark:text-gray-500">
+              <span style={{ color: PINE }}>right</span>
+              <span style={{ color: '#C13F22' }}>wrong</span>
+              <span style={{ color: OCHRE }}>flagged</span>
+              <span>left</span>
+            </div>
           </div>
 
-          {/* Explanation */}
-          {chosen !== null && (
-            <div className={`mt-4 p-4 rounded-xl border-l-4 ${chosen === q.answer ? 'bg-green-50 dark:bg-green-900/10 border-l-green-400' : 'bg-red-50 dark:bg-red-900/10 border-l-red-400'}`}>
-              <p className={`text-xs font-black mb-1 ${chosen === q.answer ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
-                {chosen === q.answer ? '✓ Correct! 정답!' : `✗ Incorrect — Answer: ${OPTION_LABELS[q.answer]} ${q.options[q.answer]}`}
-              </p>
-              <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">{q.explanation}</p>
+          <div className={`${railCard} mb-3.5`}>
+            <div className="mb-3 text-[13.5px] font-semibold text-[#16202F] dark:text-white">This set</div>
+            <div className="flex gap-5 text-[13.5px] text-[#4A5566] dark:text-gray-400">
+              <span><strong className="font-semibold text-[#16202F] dark:text-white">{score.correct}</strong> right</span>
+              <span><strong className="font-semibold text-[#16202F] dark:text-white">{score.total - score.correct}</strong> wrong</span>
+              <span><strong className="font-semibold text-[#16202F] dark:text-white">{questions.length - answeredCount}</strong> left</span>
             </div>
-          )}
+          </div>
+
+          <div className={railCard}>
+            <div className="mb-2.5 text-[13.5px] font-semibold text-[#16202F] dark:text-white">How this differs from the exam</div>
+            <p className="text-[13.5px] leading-[1.55] text-[#3E4A5A] dark:text-gray-400">
+              These are practice questions in the official style, answered one at a time with the
+              reasoning shown. There is no clock here — the real TOPIK is timed, so work quickly
+              when you sit it.
+            </p>
+            {isFree && (
+              <p className="mt-3 text-[12.5px] text-[#4A5566] dark:text-gray-500">
+                {Math.max(0, FREE_QUESTION_LIMIT - totalAnswered)} sample{' '}
+                {FREE_QUESTION_LIMIT - totalAnswered === 1 ? 'question' : 'questions'} left ·{' '}
+                <button onClick={openUpgradeModal} className="font-semibold hover:underline" style={{ color: ACC.light }}>
+                  unlock all
+                </button>
+              </p>
+            )}
+          </div>
         </div>
       </div>
-      )}
-
-      {/* Next / Finish button */}
-      {!freeLimitHit && chosen !== null && (
-        <button onClick={advance}
-          className="w-full py-3 text-sm font-black rounded-xl btn-brand">
-          {qIdx + 1 >= questions.length ? '🏁 See Results' : 'Next Question →'}
-        </button>
-      )}
-
-      {/* Free limit wall — shown after the last answered question's feedback */}
-      {freeLimitHit && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden mb-4">
-          <PremiumLockBanner
-            title="TOPIK Prep — Premium"
-            description={`You've tried all ${FREE_QUESTION_LIMIT} sample questions! Upgrade to unlock all 36 official-style questions across TOPIK I and TOPIK II.`}
-          />
-        </div>
-      )}
-      {isFree && (
-        <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
-          {FREE_QUESTION_LIMIT - Math.min(totalAnswered, FREE_QUESTION_LIMIT)} sample question{FREE_QUESTION_LIMIT - Math.min(totalAnswered, FREE_QUESTION_LIMIT) !== 1 ? 's' : ''} remaining · <button onClick={openUpgradeModal} className="text-[#3F8571] font-black hover:underline">Unlock all 36 →</button>
-        </p>
-      )}
     </div>
   );
 };
