@@ -80,6 +80,23 @@ const userSchema = new mongoose.Schema({
     }
   },
   
+  // TOPIK placement — the level the learner tested at. Small, but it does real
+  // work: the dashboard reads it, and canSkipHangul() uses it to stop pointing an
+  // intermediate learner back at the alphabet. It lived in localStorage only,
+  // which meant signing in on a second device silently un-placed the user.
+  topik: {
+    level: {
+      type: Number,
+      min: 1,
+      max: 6,
+      default: null
+    },
+    testedAt: {
+      type: String,
+      default: ''
+    }
+  },
+
   // Cross-device gamification — the authoritative store for XP, streak and the
   // study heatmap. The client mirrors this into localStorage for instant UI, but
   // this is the source of truth so the numbers follow the account, not the browser.

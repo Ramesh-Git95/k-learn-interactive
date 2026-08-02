@@ -3,6 +3,7 @@ import { useAuth } from './AuthContext';
 import { progressService } from '../services/progressService';
 import { useToastContext } from './ToastContext';
 import { markStudyToday, syncGamification, earnXP } from '../utils/xpStreak';
+import { syncTopikEstimate } from '../utils/topikEstimate';
 import { xpForProgressKey } from '../utils/xpAwards';
 import { LEARNING_UNITS } from '../utils/learningUnits';
 import { celebrate } from '../utils/celebrate';
@@ -76,6 +77,9 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // fetch-and-replace so this device's pre-sync localStorage is donated to
     // the account instead of being overwritten by it.
     syncGamification();
+    // The TOPIK placement is account data for the same reason: it decides
+    // whether the learning path still points at the alphabet.
+    syncTopikEstimate();
 
     setIsLoading(true);
     try {

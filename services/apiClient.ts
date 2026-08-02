@@ -287,6 +287,21 @@ class ApiClient {
       body: JSON.stringify({ today }),
     });
   }
+
+  // ── TOPIK placement ────────────────────────────────────────────────────────
+  // Also account-scoped: it decides whether path suggestions still point at the
+  // alphabet, so it must not depend on which browser the learner is using.
+
+  async getTopikLevel() {
+    return this.request<{ level: number | null; testedAt: string }>('/progress/topik');
+  }
+
+  async saveTopikLevel(level: number) {
+    return this.request<{ level: number; testedAt: string }>('/progress/topik', {
+      method: 'POST',
+      body: JSON.stringify({ level }),
+    });
+  }
 }
 
 export interface Gamification {

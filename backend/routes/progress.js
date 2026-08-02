@@ -352,6 +352,44 @@ router.post('/gamification/merge', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   GET /api/progress/topik
+// @desc    Read the account's TOPIK placement
+// @access  Private
+router.get('/topik', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('topik');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ level: user.topik?.level ?? null, testedAt: user.topik?.testedAt || '' });
+  } catch (error) {
+    console.error('Error fetching TOPIK placement:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   POST /api/progress/topik
+// @desc    Save the level the learner just tested at
+// @access  Private
+// Latest result wins rather than the highest: a retest that places you lower is
+// still the most accurate thing we know, and quietly keeping an old higher score
+// would leave the learner staring at material they have told us is too hard.
+router.post('/topik', authenticateToken, async (req, res) => {
+  try {
+    const level = Number(req.body?.level);
+    if (!Number.isInteger(level) || level < 1 || level > 6) {
+      return res.status(400).json({ message: 'level must be an integer 1-6' });
+    }
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.topik = { level, testedAt: new Date().toISOString() };
+    await user.save();
+    res.json({ level: user.topik.level, testedAt: user.topik.testedAt });
+  } catch (error) {
+    console.error('Error saving TOPIK placement:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // @route   POST /api/progress/gamification/xp
 // @desc    Award XP atomically
 // @access  Private
