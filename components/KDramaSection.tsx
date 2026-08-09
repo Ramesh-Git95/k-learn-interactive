@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { isInAnyDeck } from '../utils/srsLookup';
+import React, { useState, useMemo } from 'react';
+import { Check, Lock } from 'lucide-react';
+import { isInAnyDeck, unsavedWords } from '../utils/srsLookup';
+import { accentFor } from '../utils/moduleAccent';
 import { dramas } from '../data/kdramaData';
 import type { Drama, DramaWord } from '../data/kdramaData';
 import { useAuth } from '../contexts/AuthContext';
@@ -11,168 +13,407 @@ import SoundItOutModal from './SoundItOutModal';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
 import { useUpgrade } from '../hooks/useUpgrade';
 
+const ACC = accentFor('kdrama');
 
-const difficultyStyle: Record<string, string> = {
-  beginner: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-  intermediate: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  advanced: 'bg-[#DDEBE4] text-[#265847] dark:bg-[#153327]/30 dark:text-[#6BA88F]',
-};
-
+const DECK_NAME = 'K-Drama Vocabulary';
 
 type DifficultyFilter = 'all' | 'beginner' | 'intermediate' | 'advanced';
 
-const KDramaSection: React.FC = () => {
-  const { hasPremiumAccess, isAuthenticated } = useAuth();
-  const { openRegister } = useAuthModal();
-  const { showToast } = useToastContext();
-  const { decks, actions: srsActions } = useSRSContext();
-  const { startUpgrade } = useUpgrade();
-  const isPremium = hasPremiumAccess();
+const DIFF_LABEL: Record<string, string> = {
+  beginner: 'easy',
+  intermediate: 'medium',
+  advanced: 'hard',
+};
 
-  const [selectedDrama, setSelectedDrama] = useState<Drama | null>(null);
-  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>('all');
-  const [addedCards, setAddedCards] = useState<Set<string>>(new Set());
-  const [soundOut, setSoundOut] = useState<DramaWord | null>(null);
+// Every context line in the data is written as "한국어 문장. (English translation.)".
+// Split it so the Korean can be set as a line to read and the English can sit
+// under it as support, rather than both being crushed into one italic footnote.
+function splitContext(context: string): { korean: string; english: string } {
+  const m = context.match(/^(.*?)\s*\(([^()]*)\)\s*$/);
+  if (!m) return { korean: context.trim(), english: '' };
+  return { korean: m[1].trim(), english: m[2].trim() };
+}
 
-  const handleAddToSRS = (word: DramaWord, drama: Drama) => {
-    const cardKey = `${drama.id}-${word.korean}`;
-    if (addedCards.has(cardKey)) return;
-
-    // Always use (or create) the dedicated K-Drama deck — never fall back to an
-    // arbitrary existing deck, which would dump K-drama words into an unrelated one.
-    const kdramaDeck = decks.find(d => d.name === 'K-Drama Vocabulary');
-    const deckId = kdramaDeck
-      ? kdramaDeck.id
-      : srsActions.createDeck('K-Drama Vocabulary', 'Words from your favourite K-dramas');
-
-    srsActions.addCardToDeck(deckId, {
-      korean: word.korean,
-      romanization: word.romanization,
-      english: word.english,
-      type: 'vocabulary',
-      category: `K-Drama: ${drama.titleEnglish}`,
-    });
-
-    setAddedCards(prev => new Set(prev).add(cardKey));
-    showToast(`Added "${word.korean}" to SRS`, 'success');
-    earnXP(3);
-    markStudyToday();
-  };
-
-  // Not logged in
-  if (!isAuthenticated) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <div className="text-6xl mb-4">🎬</div>
-        <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-3">K-Drama Vocabulary Packs</h1>
-        <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto">
-          Learn Korean through your favourite K-dramas. Sign up to explore 60+ words from 5 iconic shows.
-        </p>
-        <button
-          onClick={openRegister}
-          className="px-8 py-4 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-px"
-          style={{ background: 'var(--brand-gradient)' }}
-        >
-          Get Started Free
-        </button>
-      </div>
-    );
+// Where the headword sits inside its sentence, so it can be marked in place.
+// Verbs and adjectives are listed in dictionary form (살아남다) but appear
+// conjugated (살아남아야), so fall back to the stem before giving up.
+//
+// Returning null simply means no highlight, which is the right answer whenever
+// the ending contracts too far to recognise (이기다 → 이길): a partial mark like
+// "이" would teach a word boundary that does not exist. Six of the sixty land
+// there, and the word is printed beside the sentence regardless.
+function findHeadword(sentence: string, korean: string): [number, number] | null {
+  const candidates = [korean];
+  if (korean.endsWith('하다') && korean.length > 2) candidates.push(korean.slice(0, -2));
+  if (korean.endsWith('다') && korean.length > 2) candidates.push(korean.slice(0, -1));
+  for (const c of candidates) {
+    if (!c) continue;
+    const i = sentence.indexOf(c);
+    if (i < 0) continue;
+    // A one-syllable noun (돈, 칼, 꿈) is only itself when it starts a word —
+    // otherwise it could be any syllable inside a longer one.
+    if (c.length === 1 && i > 0 && sentence[i - 1] !== ' ') continue;
+    return [i, i + c.length];
   }
+  return null;
+}
 
-  // Logged in but free — upgrade teaser
-  if (!isPremium) {
-    return (
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-4 text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400">
-            ⭐ Premium Feature
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-3">
-            🎬 K-Drama Vocabulary Packs
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-            Learn Korean through your favourite dramas. 60+ words curated from 5 iconic shows,
-            with context sentences straight from the script.
-          </p>
-        </div>
+const speak = (text: string) => {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ko-KR';
+  u.rate = 0.8;
+  window.speechSynthesis.speak(u);
+};
 
-        {/* Blurred teaser + lock overlay */}
-        <div className="relative mb-8">
-          <div aria-hidden="true" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pointer-events-none select-none blur-sm opacity-60">
-            {dramas.slice(0, 3).map(drama => (
-              <div
-                key={drama.id}
-                className="relative rounded-2xl overflow-hidden h-44 shadow-md"
-                style={{ background: drama.gradient }}
-              >
-                <div className="absolute inset-0 flex flex-col justify-end p-5">
-                  <div className="text-4xl mb-1">{drama.emoji}</div>
-                  <h3 className="text-white font-black text-lg leading-tight">{drama.titleEnglish}</h3>
-                  <p className="text-white/70 text-sm">{drama.title} · {drama.year}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* Lock card */}
-          <div className="absolute inset-0 flex items-center justify-center px-4">
-            <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 text-center w-full max-w-sm">
-              <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 shadow-md"
-                style={{ background: 'var(--brand-gradient)' }}
-              >
-                🔒
-              </div>
-              <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">Premium Only</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
-                Unlock K-Drama Vocabulary Packs + all premium features for $4/month. Cancel anytime.
-              </p>
-              <p className="text-xs text-gray-400 line-through mb-4">Duolingo: $7+/month</p>
-              <button
-                onClick={startUpgrade}
-                className="block w-full py-3.5 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-px text-sm"
-                style={{ background: 'var(--brand-gradient)' }}
-              >
-                Get Premium — $4/month
-              </button>
-            </div>
-          </div>
-        </div>
+const railCard =
+  'rounded-[14px] border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] px-5 py-4 dark:border-gray-800 dark:bg-gray-900';
 
-        {/* Feature highlights */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { icon: '🎬', label: '5 iconic dramas', sub: 'Squid Game, CLOY, Goblin & more' },
-            { icon: '📚', label: '60+ curated words', sub: 'Context sentences from real scripts' },
-            { icon: '🔄', label: 'SRS integration', sub: 'Add any word to your study deck' },
-          ].map(f => (
-            <div
-              key={f.label}
-              className="flex items-start gap-3 p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm"
-            >
-              <span className="text-2xl">{f.icon}</span>
-              <div>
-                <div className="font-bold text-gray-900 dark:text-white text-sm">{f.label}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">{f.sub}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+// ── One word, presented as a line you could actually say ─────────────────────
 
-  // Premium — full experience
-  const filteredWords: DramaWord[] = selectedDrama
-    ? (difficultyFilter === 'all'
-        ? selectedDrama.words
-        : selectedDrama.words.filter(w => w.difficulty === difficultyFilter))
-    : [];
+interface LineProps {
+  word: DramaWord;
+  index: number;
+  isSaved: boolean;
+  isFirst: boolean;
+  onAdd: () => void;
+  onSoundOut: () => void;
+}
 
-  const totalWords = dramas.reduce((a, d) => a + d.words.length, 0);
+const WordLine: React.FC<LineProps> = ({ word, index, isSaved, isFirst, onAdd, onSoundOut }) => {
+  const { korean, english } = splitContext(word.context);
+  const span = findHeadword(korean, word.korean);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      {/* Sound-it-out (syllable player) modal */}
+    <div className="flex gap-4 border-b border-[rgba(20,32,47,0.10)] py-5 last:border-0 dark:border-gray-800">
+      {/* Left gutter — the word itself, the way a script names its speaker */}
+      <div className="w-[86px] flex-none pt-1 sm:w-[104px]">
+        <div className="font-korean text-[17px] font-bold leading-tight text-[#16202F] dark:text-white">
+          {word.korean}
+        </div>
+        <div className="mt-1 text-[11.5px] leading-tight text-[#4A5566] dark:text-gray-500">
+          {word.romanization}
+        </div>
+        <div className="mt-1.5 text-[11px] font-semibold uppercase tracking-wide" style={{ color: ACC.light }}>
+          {DIFF_LABEL[word.difficulty]}
+        </div>
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="text-[14px] font-semibold text-[#16202F] dark:text-gray-100">{word.english}</div>
+
+        {/* The sentence, with the headword marked where it actually falls */}
+        <div className="mt-2 font-korean text-[19px] leading-[1.7] text-[#16202F] sm:text-[21px] dark:text-white">
+          {span ? (
+            <>
+              {korean.slice(0, span[0])}
+              <mark
+                className="rounded bg-transparent px-0.5 font-bold"
+                style={{ background: `${ACC.light}26`, color: 'inherit' }}
+              >
+                {korean.slice(span[0], span[1])}
+              </mark>
+              {korean.slice(span[1])}
+            </>
+          ) : (
+            korean
+          )}
+        </div>
+        {english && (
+          <div className="mt-1.5 text-[13.5px] text-[#4A5566] dark:text-gray-400">{english}</div>
+        )}
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => speak(korean)}
+            className="flex h-9 shrink-0 items-center gap-2 rounded-[9px] border border-[rgba(20,32,47,0.18)] px-3 text-[12.5px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+          >
+            <span className="flex h-3 items-end gap-[2px]" aria-hidden="true">
+              <span className="w-[2.5px] bg-current" style={{ height: '60%' }} />
+              <span className="w-[2.5px] bg-current" style={{ height: '100%' }} />
+              <span className="w-[2.5px] bg-current" style={{ height: '75%' }} />
+            </span>
+            Play line
+          </button>
+          <button
+            onClick={onSoundOut}
+            className="flex h-9 shrink-0 items-center rounded-[9px] border border-[rgba(20,32,47,0.18)] px-3 text-[12.5px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+            title="Sound it out — syllable by syllable"
+          >
+            Sound it out
+          </button>
+          <div className="shrink-0">
+            <PronunciationButton
+              korean={word.korean}
+              romanization={word.romanization}
+              size="sm"
+              hintKey={isFirst ? 'kdrama' : undefined}
+            />
+          </div>
+          {isSaved ? (
+            <span
+              className="flex h-9 shrink-0 items-center gap-1.5 rounded-[9px] px-3 text-[12.5px] font-semibold"
+              style={{ background: `${ACC.light}1A`, color: ACC.light }}
+              title={`Already in "${DECK_NAME}"`}
+            >
+              <Check className="h-3.5 w-3.5" /> In your deck
+            </span>
+          ) : (
+            <button
+              onClick={onAdd}
+              className="flex h-9 shrink-0 items-center rounded-[9px] px-3.5 text-[12.5px] font-semibold text-white transition-transform hover:scale-[1.03]"
+              style={{ background: ACC.light }}
+            >
+              Add to deck
+            </button>
+          )}
+          <span className="text-[11.5px] text-[#4A5566] dark:text-gray-600">#{index + 1}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── One drama's word pack ─────────────────────────────────────────────────────
+
+const DramaPack: React.FC<{ drama: Drama; onBack: () => void }> = ({ drama, onBack }) => {
+  const { decks, actions: srsActions } = useSRSContext();
+  const { showToast } = useToastContext();
+  const [filter, setFilter] = useState<DifficultyFilter>('all');
+  const [soundOut, setSoundOut] = useState<DramaWord | null>(null);
+  const [justSaved, setJustSaved] = useState<Set<string>>(new Set());
+
+  const visible = filter === 'all' ? drama.words : drama.words.filter(w => w.difficulty === filter);
+
+  const isSaved = (w: DramaWord) => justSaved.has(w.korean) || isInAnyDeck(decks, w.korean);
+
+  // Only the words that would actually be written — so the bulk button never
+  // offers work it will silently skip.
+  const newWords = useMemo(
+    () => unsavedWords(decks, drama.words).filter(w => !justSaved.has(w.korean)),
+    [decks, drama.words, justSaved],
+  );
+  const savedCount = drama.words.length - newWords.length;
+
+  const addWords = (words: DramaWord[]) => {
+    if (!words.length) return;
+    // Always the dedicated deck — never an arbitrary existing one, which would
+    // dump K-drama words somewhere unrelated.
+    const existing = decks.find(d => d.name === DECK_NAME);
+    const deckId = existing
+      ? existing.id
+      : srsActions.createDeck(DECK_NAME, 'Words from your favourite K-dramas');
+    const already = new Set((existing?.cards ?? []).map(c => c.content.korean));
+
+    let added = 0;
+    words.forEach(w => {
+      if (already.has(w.korean)) return;
+      srsActions.addCardToDeck(deckId, {
+        korean: w.korean,
+        romanization: w.romanization,
+        english: w.english,
+        type: 'vocabulary',
+        category: `K-Drama: ${drama.titleEnglish}`,
+      });
+      added++;
+    });
+
+    setJustSaved(prev => {
+      const next = new Set(prev);
+      words.forEach(w => next.add(w.korean));
+      return next;
+    });
+    earnXP(3);
+    markStudyToday();
+    const skipped = words.length - added;
+    showToast(
+      added === 0
+        ? `Already in ${DECK_NAME}`
+        : `${added} added to ${DECK_NAME}${skipped ? ` · ${skipped} already there` : ''}`,
+      'success',
+    );
+  };
+
+  const counts: Record<DifficultyFilter, number> = {
+    all: drama.words.length,
+    beginner: drama.words.filter(w => w.difficulty === 'beginner').length,
+    intermediate: drama.words.filter(w => w.difficulty === 'intermediate').length,
+    advanced: drama.words.filter(w => w.difficulty === 'advanced').length,
+  };
+
+  return (
+    <div className="mx-auto max-w-6xl">
+      {/* ── Header ── */}
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+        <div className="min-w-0">
+          <div className="mb-2 flex items-center gap-2 text-[12.5px]">
+            <button
+              onClick={onBack}
+              className="font-medium text-[#4A5566] transition-colors hover:text-[#16202F] dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              K-Drama
+            </button>
+            <span className="text-[#4A5566] dark:text-gray-600">/</span>
+            <span className="font-semibold" style={{ color: ACC.light }}>{drama.titleEnglish}</span>
+          </div>
+          <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+            {drama.titleEnglish}
+          </h1>
+          <p className="mt-1 font-korean text-[15px] text-[#4A5566] dark:text-gray-400">
+            {drama.title} · {drama.year}
+          </p>
+        </div>
+        <div className="flex flex-none items-center gap-3.5">
+          <span className="text-[13.5px] text-[#4A5566] dark:text-gray-500">
+            {drama.words.length} words · one sentence each
+          </span>
+          <button
+            onClick={onBack}
+            className="flex h-12 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+          >
+            Change drama
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-start gap-5 lg:flex-row">
+        {/* ── The pack ── */}
+        <div className="order-1 w-full min-w-0 flex-1">
+          <div
+            className="mb-4 flex items-start gap-3 rounded-r-lg border-l-[3px] px-4 py-3 sm:items-center"
+            style={{ borderColor: ACC.light, background: `${ACC.light}14` }}
+          >
+            <span
+              className="kl-accent flex-none whitespace-nowrap text-[12.5px] font-semibold"
+              style={{ ['--kl-acc' as string]: ACC.light, ['--kl-acc-dk' as string]: ACC.dark }}
+            >
+              HOW TO USE THIS
+            </span>
+            <span className="text-[13.5px] leading-snug text-[#16202F] dark:text-gray-200">
+              Say the whole sentence, not just the word. The highlighted part is the word you are
+              learning — the rest is there to hold it up.
+            </span>
+          </div>
+
+          {/* Difficulty filter */}
+          <div className="mb-1 flex flex-wrap items-center gap-2">
+            <span className="mr-1 text-[12.5px] text-[#4A5566] dark:text-gray-500">Show:</span>
+            {(['all', 'beginner', 'intermediate', 'advanced'] as DifficultyFilter[]).map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`inline-flex h-9 shrink-0 items-center rounded-[9px] px-3.5 text-[12.5px] font-semibold capitalize leading-none transition-colors ${
+                  filter === f
+                    ? 'text-white'
+                    : 'border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] text-[#4A5566] hover:border-[rgba(20,32,47,0.28)] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400'
+                }`}
+                style={filter === f ? { background: ACC.light } : undefined}
+              >
+                {f} ({counts[f]})
+              </button>
+            ))}
+          </div>
+
+          <div className="kl-card mt-4 px-5 py-1 sm:px-7">
+            {visible.map((word, i) => (
+              <WordLine
+                key={word.korean}
+                word={word}
+                index={drama.words.indexOf(word)}
+                isFirst={i === 0}
+                isSaved={isSaved(word)}
+                onAdd={() => addWords([word])}
+                onSoundOut={() => setSoundOut(word)}
+              />
+            ))}
+
+            {visible.length === 0 && (
+              <div className="py-14 text-center text-[13.5px] text-[#4A5566] dark:text-gray-500">
+                No words at that level in this pack.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── Rail ── */}
+        <div className="order-2 w-full flex-none lg:w-[290px]">
+          <div className={`${railCard} mb-3.5`}>
+            <div className="mb-1 text-[13.5px] font-semibold text-[#16202F] dark:text-white">
+              Words in this pack
+            </div>
+            <p className="mb-3.5 text-[12px] text-[#4A5566] dark:text-gray-500">
+              {savedCount} of {drama.words.length} already in a review deck.
+            </p>
+            <div className="mb-3.5 h-1.5 overflow-hidden rounded-full bg-[rgba(20,32,47,0.10)] dark:bg-gray-800">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${(savedCount / drama.words.length) * 100}%`, background: ACC.light }}
+              />
+            </div>
+            <div className="flex max-h-[300px] flex-col gap-3 overflow-y-auto">
+              {drama.words.map(w => (
+                <div key={w.korean} className="flex items-baseline justify-between gap-2">
+                  <span className="font-korean text-[16px] font-semibold text-[#16202F] dark:text-white">
+                    {w.korean}
+                  </span>
+                  <span className="min-w-0 truncate text-right text-[12px] text-[#4A5566] dark:text-gray-500">
+                    {w.english}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => addWords(newWords)}
+              disabled={newWords.length === 0}
+              className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-[9px] border border-[rgba(20,32,47,0.2)] text-[13.5px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] disabled:opacity-60 dark:border-gray-700 dark:text-gray-200"
+            >
+              {newWords.length === 0 ? (
+                <>
+                  <Check className="h-4 w-4" style={{ color: ACC.light }} /> All {drama.words.length} saved
+                </>
+              ) : (
+                `Add ${newWords.length} to review`
+              )}
+            </button>
+          </div>
+
+          <div className={`${railCard} mb-3.5`}>
+            <div className="mb-2 text-[13.5px] font-semibold text-[#16202F] dark:text-white">
+              About this drama
+            </div>
+            <p className="text-[13.5px] leading-[1.55] text-[#3E4A5A] dark:text-gray-400">
+              {drama.description}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {drama.genres.map(g => (
+                <span
+                  key={g}
+                  className="rounded-full px-2.5 py-0.5 text-[11.5px] font-semibold"
+                  style={{ background: `${ACC.light}1A`, color: ACC.light }}
+                >
+                  {g}
+                </span>
+              ))}
+              <span className="rounded-full bg-[rgba(20,32,47,0.06)] px-2.5 py-0.5 text-[11.5px] font-semibold text-[#4A5566] dark:bg-gray-800 dark:text-gray-400">
+                {drama.year}
+              </span>
+            </div>
+          </div>
+
+          <div className={railCard}>
+            <div className="mb-2 text-[13.5px] font-semibold text-[#16202F] dark:text-white">
+              Where these came from
+            </div>
+            <p className="text-[13.5px] leading-[1.55] text-[#3E4A5A] dark:text-gray-400">
+              The words are the ones this drama leans on. The sentences are written for study — short,
+              polite and safe to say out loud — rather than lifted from the script, which is often
+              faster and blunter than you want your first Korean to be.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {soundOut && (
         <SoundItOutModal
           korean={soundOut.korean}
@@ -181,191 +422,194 @@ const KDramaSection: React.FC = () => {
           onClose={() => setSoundOut(null)}
         />
       )}
+    </div>
+  );
+};
 
-      {/* Header */}
-      <div className="mb-8">
-        {selectedDrama && (
+// ── Section ───────────────────────────────────────────────────────────────────
+
+const KDramaSection: React.FC = () => {
+  const { hasPremiumAccess, isAuthenticated } = useAuth();
+  const { openRegister } = useAuthModal();
+  const { decks } = useSRSContext();
+  const { startUpgrade } = useUpgrade();
+  const isPremium = hasPremiumAccess();
+
+  const [selected, setSelected] = useState<Drama | null>(null);
+
+  const totalWords = dramas.reduce((a, d) => a + d.words.length, 0);
+
+  // ── Guest ──
+  if (!isAuthenticated) {
+    return (
+      <div className="mx-auto max-w-3xl py-10 text-center">
+        <h1 className="font-display text-[28px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[32px] dark:text-white">
+          K-Drama word packs
+        </h1>
+        <p className="mx-auto mt-3 max-w-[52ch] text-[15px] leading-relaxed text-[#3E4A5A] dark:text-gray-400">
+          The words {dramas.length} well-known dramas lean on, each with a sentence you can say out
+          loud. {totalWords} words in all.
+        </p>
+        <button
+          onClick={openRegister}
+          className="mt-6 inline-flex h-12 items-center rounded-[10px] px-6 text-[15px] font-semibold text-white transition-transform hover:scale-[1.02]"
+          style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+        >
+          Sign up free →
+        </button>
+      </div>
+    );
+  }
+
+  // ── Free — the packs are a premium feature ──
+  if (!isPremium) {
+    return (
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-5 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+          <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+            K-Drama word packs
+          </h1>
+          <p className="mt-2 max-w-[60ch] text-[15px] text-[#3E4A5A] dark:text-gray-400">
+            The words {dramas.length} well-known dramas lean on — {totalWords} of them — each with a
+            sentence you can say out loud and send straight to a review deck.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {dramas.map((d, i) => (
+            <button
+              key={d.id}
+              onClick={startUpgrade}
+              className="kl-premium kl-cascade flex flex-col items-start rounded-[18px] p-5 text-left"
+              style={{ animationDelay: `${i * 60}ms` }}
+            >
+              <span
+                className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl text-[19px]"
+                style={{ background: `${ACC.light}1F`, border: `1px solid ${ACC.light}4D` }}
+              >
+                {d.emoji}
+              </span>
+              <span className="text-[15px] font-semibold text-[#16202F] dark:text-white">
+                {d.titleEnglish}
+              </span>
+              <span className="mt-0.5 font-korean text-[13px] text-[#4A5566] dark:text-gray-400">
+                {d.title} · {d.year}
+              </span>
+              <span className="mt-3 flex items-center gap-1.5 text-[12.5px] text-[#4A5566] dark:text-gray-500">
+                <Lock className="h-3.5 w-3.5" /> {d.words.length} words
+              </span>
+              <span className="mt-3 text-[13px] font-semibold text-[#C13F22] dark:text-[#F07A55]">
+                Unlock · $4/mo →
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="kl-card mt-5 flex flex-wrap items-center justify-between gap-4 p-5">
+          <p className="min-w-[240px] flex-1 text-[14px] leading-relaxed text-[#3E4A5A] dark:text-gray-400">
+            Premium opens all {dramas.length} packs, and every word can go into spaced repetition so
+            it comes back to you at the right time. $4/month, cancel anytime — less than a coffee ☕
+          </p>
           <button
-            onClick={() => { setSelectedDrama(null); setDifficultyFilter('all'); }}
-            className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-[#E4572E] dark:hover:text-[#F07A55] transition-colors mb-4 group"
+            onClick={startUpgrade}
+            className="flex h-11 flex-none items-center rounded-[10px] px-5 text-sm font-semibold text-white transition-transform hover:scale-[1.02]"
+            style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
           >
-            <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            All Dramas
+            Get Premium →
           </button>
-        )}
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-md flex-shrink-0"
-            style={{ background: 'var(--brand-gradient)' }}
-          >
-            🎬
+        </div>
+      </div>
+    );
+  }
+
+  // ── Premium — the pack itself ──
+  if (selected) {
+    return <DramaPack drama={selected} onBack={() => setSelected(null)} />;
+  }
+
+  const savedTotal = dramas.reduce(
+    (a, d) => a + d.words.filter(w => isInAnyDeck(decks, w.korean)).length,
+    0,
+  );
+
+  return (
+    <div className="mx-auto max-w-6xl">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-6 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+        <div>
+          <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+            K-Drama
+          </h1>
+          <p className="mt-2 max-w-[60ch] text-[15px] text-[#3E4A5A] dark:text-gray-400">
+            One pack per drama: the words it leans on, each inside a sentence you can say. Pick the
+            show you have actually watched — you already know what the words are doing.
+          </p>
+        </div>
+        <div className="flex-none">
+          <div className="mb-2 text-[13.5px] font-semibold text-[#16202F] dark:text-white">
+            {savedTotal} of {totalWords} saved
           </div>
-          <div>
-            <h1 className="text-2xl font-black text-gray-900 dark:text-white">
-              {selectedDrama ? selectedDrama.titleEnglish : 'K-Drama Vocabulary'}
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {selectedDrama
-                ? `${selectedDrama.title} · ${selectedDrama.year}`
-                : `${dramas.length} dramas · ${totalWords} words`}
-            </p>
+          <div className="h-1.5 w-[200px] overflow-hidden rounded-full bg-[rgba(20,32,47,0.10)] dark:bg-gray-800">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${(savedTotal / totalWords) * 100}%`, background: ACC.light }}
+            />
           </div>
         </div>
       </div>
 
-      {!selectedDrama ? (
-        /* ── Drama selection grid ── */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {dramas.map(drama => (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {dramas.map((d, i) => {
+          const saved = d.words.filter(w => isInAnyDeck(decks, w.korean)).length;
+          return (
             <button
-              key={drama.id}
-              onClick={() => setSelectedDrama(drama)}
-              className="relative rounded-2xl overflow-hidden h-52 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left group"
-              style={{ background: drama.gradient }}
+              key={d.id}
+              onClick={() => setSelected(d)}
+              className="kl-card kl-cascade flex flex-col p-5 text-left transition-transform duration-200 hover:-translate-y-1"
+              style={{ animationDelay: `${i * 60}ms` }}
             >
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-              <div className="absolute inset-0 flex flex-col justify-between p-5">
-                <div className="flex items-start justify-between">
-                  <div className="flex flex-wrap gap-1.5">
-                    {drama.genres.map(g => (
-                      <span key={g} className="px-2 py-0.5 rounded-full text-xs font-semibold bg-white/20 text-white backdrop-blur-sm">
-                        {g}
-                      </span>
-                    ))}
-                  </div>
-                  <span className="text-3xl">{drama.emoji}</span>
-                </div>
-                <div>
-                  <h3 className="text-white font-black text-xl leading-tight mb-0.5">{drama.titleEnglish}</h3>
-                  <p className="text-white/70 text-sm mb-3">{drama.title} · {drama.year}</p>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-white/20 text-white backdrop-blur-sm">
-                      {drama.words.length} words
-                    </span>
-                    <span className="text-white/60 text-xs">Tap to learn →</span>
-                  </div>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      ) : (
-        /* ── Vocabulary cards view ── */
-        <div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-6 max-w-2xl leading-relaxed">
-            {selectedDrama.description}
-          </p>
-
-          {/* Difficulty filter */}
-          <div className="flex flex-wrap items-center gap-2 mb-6">
-            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mr-1">Filter:</span>
-            {(['all', 'beginner', 'intermediate', 'advanced'] as DifficultyFilter[]).map(d => (
-              <button
-                key={d}
-                onClick={() => setDifficultyFilter(d)}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 capitalize ${
-                  difficultyFilter === d
-                    ? 'tab-brand-active'
-                    : 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-              >
-                {d === 'all'
-                  ? `All (${selectedDrama.words.length})`
-                  : `${d} (${selectedDrama.words.filter(w => w.difficulty === d).length})`}
-              </button>
-            ))}
-          </div>
-
-          {/* Word grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredWords.map((word, idx) => {
-              const cardKey = `${selectedDrama.id}-${word.korean}`;
-              // Session state OR the decks themselves: without the deck check a word
-              // saved on an earlier visit offered "Add" again on reload.
-              const isAdded = addedCards.has(cardKey) || isInAnyDeck(decks, word.korean);
-              return (
-                <div
-                  key={word.korean}
-                  className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col gap-3"
+              <div className="flex items-start justify-between gap-3">
+                <span
+                  className="flex h-11 w-11 flex-none items-center justify-center rounded-xl text-[20px]"
+                  style={{ background: `${ACC.light}1F`, border: `1px solid ${ACC.light}4D` }}
                 >
-                  {/* Korean + difficulty */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="text-2xl font-black text-gray-900 dark:text-white leading-tight">{word.korean}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-0.5">{word.romanization}</div>
-                    </div>
-                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 capitalize ${difficultyStyle[word.difficulty]}`}>
-                      {word.difficulty}
-                    </span>
-                  </div>
+                  {d.emoji}
+                </span>
+                {saved > 0 && (
+                  <span className="flex items-center gap-1.5 text-[12.5px] font-semibold" style={{ color: ACC.light }}>
+                    <Check className="h-3.5 w-3.5" /> {saved} saved
+                  </span>
+                )}
+              </div>
 
-                  {/* English meaning */}
-                  <div className="text-base font-bold text-gray-800 dark:text-gray-100">{word.english}</div>
+              <div className="mt-4 text-[16px] font-semibold text-[#16202F] dark:text-white">
+                {d.titleEnglish}
+              </div>
+              <div className="mt-0.5 font-korean text-[13.5px] text-[#4A5566] dark:text-gray-400">
+                {d.title} · {d.year}
+              </div>
 
-                  {/* Context sentence */}
-                  <div className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed border-l-2 border-[#F8C4AE] dark:border-[#7E2A15] pl-3 italic flex-1">
-                    {word.context}
-                  </div>
+              <p className="mt-2.5 flex-1 text-[13px] leading-[1.5] text-[#4A5566] dark:text-gray-500">
+                {d.description}
+              </p>
 
-                  {/* Action buttons */}
-                  <div className="flex gap-2 mt-auto pt-1">
-                    {/* Speak (TTS) */}
-                    <button
-                      onClick={() => setSoundOut(word)}
-                      className="flex items-center gap-1 px-2.5 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
-                      title="Sound it out — syllable by syllable"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
-                      </svg>
-                      <span>Hear</span>
-                    </button>
-                    <div className="flex-1">
-                      <PronunciationButton korean={word.korean} romanization={word.romanization} size="sm" hintKey={idx === 0 ? 'kdrama' : undefined} />
-                    </div>
-                    <button
-                      onClick={() => handleAddToSRS(word, selectedDrama)}
-                      disabled={isAdded}
-                      className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 flex-1 justify-center ${
-                        isAdded
-                          ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 cursor-default'
-                          : 'text-white hover:shadow-md hover:-translate-y-px'
-                      }`}
-                      style={!isAdded ? { background: 'var(--brand-gradient)' } : {}}
-                      title={isAdded ? 'Already added to SRS' : 'Add to Spaced Repetition'}
-                    >
-                      {isAdded ? (
-                        <>
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                          </svg>
-                          Added
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                          </svg>
-                          + SRS
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {d.genres.map(g => (
+                  <span
+                    key={g}
+                    className="rounded-full bg-[rgba(20,32,47,0.06)] px-2.5 py-0.5 text-[11.5px] font-semibold text-[#4A5566] dark:bg-gray-800 dark:text-gray-400"
+                  >
+                    {g}
+                  </span>
+                ))}
+              </div>
 
-          {filteredWords.length === 0 && (
-            <div className="text-center py-16 text-gray-400 dark:text-gray-600">
-              <div className="text-4xl mb-3">🔍</div>
-              <p className="font-medium">No words at this difficulty level.</p>
-            </div>
-          )}
-        </div>
-      )}
+              <span className="mt-3.5 text-[13px] font-semibold" style={{ color: ACC.light }}>
+                {d.words.length} words →
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };

@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useSRSContext as useSRSCtxForLookup } from '../contexts/SRSContext';
-import { isInAnyDeck } from '../utils/srsLookup';
-import { Volume2, X, Lock } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Check, Lock, Volume2, X } from 'lucide-react';
+import { isInAnyDeck, unsavedWords } from '../utils/srsLookup';
+import { accentFor } from '../utils/moduleAccent';
 import { kpopArtists } from '../data/kpopData';
 import type { KPopArtist, KPopSong, KPopWord } from '../data/kpopData';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,17 +13,44 @@ import SoundItOutModal from './SoundItOutModal';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
 import { useUpgrade } from '../hooks/useUpgrade';
 
+const ACC = accentFor('kpop');
+
+const DECK_NAME = 'K-Pop Vocabulary';
+
+const railCard =
+  'rounded-[14px] border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] px-5 py-4 dark:border-gray-800 dark:bg-gray-900';
+
+// The active line is built from its word list so each word can be tapped; every
+// other line is printed as written. Re-joining the words with spaces loses the
+// punctuation between them ("있어, 믿어" → "있어 믿어"), so the line would
+// visibly rewrite itself the moment you clicked it. Walk the real line instead
+// and hand back the gaps untouched.
+type Segment = { text: string; word?: KPopWord };
+
+function segmentLine(korean: string, words: KPopWord[]): Segment[] {
+  const out: Segment[] = [];
+  let pos = 0;
+  words.forEach(w => {
+    const i = korean.indexOf(w.korean, pos);
+    if (i < 0) return; // not found where expected — leave the text alone
+    if (i > pos) out.push({ text: korean.slice(pos, i) });
+    out.push({ text: w.korean, word: w });
+    pos = i + w.korean.length;
+  });
+  if (pos < korean.length) out.push({ text: korean.slice(pos) });
+  return out;
+}
+
+const TYPE_LABEL: Record<string, string> = {
+  noun: 'noun',
+  verb: 'verb',
+  adjective: 'adjective',
+  adverb: 'adverb',
+  particle: 'particle',
+  expression: 'expression',
+};
 
 // ── Word popover ──────────────────────────────────────────────────────────────
-
-const TYPE_COLOR: Record<string, string> = {
-  noun:       'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-400',
-  verb:       'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-  adjective:  'bg-[#DDEBE4] text-[#265847] dark:bg-[#153327]/30 dark:text-[#6BA88F]',
-  adverb:     'bg-amber-100  text-amber-700  dark:bg-amber-900/30  dark:text-amber-400',
-  particle:   'bg-gray-100   text-gray-600   dark:bg-gray-800      dark:text-gray-400',
-  expression: 'bg-[#FBDCCB]   text-[#A83619]   dark:bg-[#5F2010]/30   dark:text-[#F07A55]',
-};
 
 interface PopoverProps {
   word: KPopWord;
@@ -33,13 +60,12 @@ interface PopoverProps {
   onSoundItOut: (word: KPopWord) => void;
   isAuthenticated: boolean;
   isPremium: boolean;
+  isSaved: boolean;
 }
 
-function WordPopover({ word, anchorRef, onClose, onAddSRS, onSoundItOut, isAuthenticated, isPremium }: PopoverProps) {
-  // Read the decks here so the button reflects what is actually saved, not
-  // just what was added during this visit.
-  const { decks: allDecks } = useSRSCtxForLookup();
-  const alreadySaved = isInAnyDeck(allDecks, word.korean);
+function WordPopover({
+  word, anchorRef, onClose, onAddSRS, onSoundItOut, isAuthenticated, isPremium, isSaved,
+}: PopoverProps) {
   const popRef = useRef<HTMLDivElement>(null);
   const { startUpgrade } = useUpgrade();
 
@@ -57,68 +83,79 @@ function WordPopover({ word, anchorRef, onClose, onAddSRS, onSoundItOut, isAuthe
   return (
     <div
       ref={popRef}
-      className="absolute z-50 bottom-full left-1/2 mb-2 w-56"
+      className="absolute bottom-full left-1/2 z-50 mb-2 w-60"
       style={{ transform: 'translateX(-50%)' }}
       onClick={e => e.stopPropagation()}
     >
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-3">
-        {/* Arrow */}
-        <div className="absolute left-1/2 bottom-[-7px] -translate-x-1/2 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[7px] border-t-gray-200 dark:border-t-gray-800" />
-        <div className="absolute left-1/2 bottom-[-6px] -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white dark:border-t-gray-900" />
-
-        <div className="flex items-start justify-between mb-2">
-          <div>
-            <div className="text-xl font-black text-gray-900 dark:text-white">{word.korean}</div>
-            <div className="text-xs text-gray-400 dark:text-gray-500 italic">{word.romanization}</div>
+      <div className="rounded-[14px] border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] p-3.5 shadow-xl dark:border-gray-700 dark:bg-gray-900">
+        <div className="mb-2 flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <div className="font-korean text-[20px] font-bold text-[#16202F] dark:text-white">{word.korean}</div>
+            <div className="mt-0.5 text-[12px] text-[#4A5566] dark:text-gray-500">{word.romanization}</div>
           </div>
-          <div className="flex items-center gap-1">
-            <button onClick={() => onSoundItOut(word)} title="Sound it out — syllable by syllable" aria-label={`Sound out ${word.korean}`} className="p-1 rounded-lg text-gray-400 hover:text-[#E4572E] hover:bg-[#FDEEE6] dark:hover:bg-[#5F2010]/20 transition-colors">
-              <Volume2 className="w-4 h-4" />
+          <div className="flex flex-none items-center gap-1">
+            <button
+              onClick={() => onSoundItOut(word)}
+              title="Sound it out — syllable by syllable"
+              aria-label={`Sound out ${word.korean}`}
+              className="rounded-lg p-1 text-[#4A5566] transition-colors hover:text-[#16202F] dark:text-gray-500 dark:hover:text-gray-300"
+            >
+              <Volume2 className="h-4 w-4" />
             </button>
-            <button onClick={onClose} aria-label="Close popover" className="p-1 rounded-lg text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 transition-colors">
-              <X className="w-4 h-4" />
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="rounded-lg p-1 text-[#4A5566] transition-colors hover:text-[#16202F] dark:text-gray-600 dark:hover:text-gray-400"
+            >
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
 
-        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{word.english}</div>
+        <div className="text-[14px] font-semibold text-[#16202F] dark:text-gray-100">{word.english}</div>
+        <div className="mt-0.5 text-[12px] text-[#4A5566] dark:text-gray-500">
+          {TYPE_LABEL[word.type] ?? word.type}
+        </div>
 
-        <div className="flex items-center justify-between">
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${TYPE_COLOR[word.type] ?? TYPE_COLOR.expression}`}>
-            {word.type}
-          </span>
-          {isPremium ? (
-            alreadySaved ? (
-              <span
-                className="rounded-lg px-2.5 py-1 text-[11px] font-semibold"
-                style={{ background: 'rgba(46,107,89,0.12)', color: '#2E6B59' }}
-                title="Already in your decks"
-              >
-                ✓ saved
-              </span>
-            ) : (
-              <button
-                onClick={() => onAddSRS(word)}
-                className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-white transition-transform hover:scale-105"
-                style={{ background: 'var(--brand-gradient)' }}
-              >
-                + SRS
-              </button>
-            )
-          ) : isAuthenticated ? (
-            <button onClick={startUpgrade}
-              className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 transition-colors flex items-center gap-1">
-              <Lock className="w-3 h-3" />
-              Premium
+        <div className="mt-3">
+          {!isAuthenticated ? (
+            <button
+              onClick={() => {
+                onClose();
+                window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' }));
+              }}
+              className="flex h-10 w-full items-center justify-center rounded-[9px] text-[13px] font-semibold text-white"
+              style={{ background: ACC.light }}
+            >
+              Sign up to save it
             </button>
+          ) : !isPremium ? (
+            <button
+              onClick={startUpgrade}
+              className="flex h-10 w-full items-center justify-center gap-1.5 rounded-[9px] border border-[rgba(20,32,47,0.2)] text-[13px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200"
+            >
+              <Lock className="h-3.5 w-3.5" /> Saving is Premium
+            </button>
+          ) : isSaved ? (
+            <span
+              className="flex h-10 w-full items-center justify-center gap-1.5 rounded-[9px] text-[13px] font-semibold"
+              style={{ background: `${ACC.light}1A`, color: ACC.light }}
+              title="Already in your decks"
+            >
+              <Check className="h-3.5 w-3.5" /> In your deck
+            </span>
           ) : (
-            <button onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' })); }}
-              className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-[#C13F22] dark:text-[#F07A55] bg-[#FDEEE6] dark:bg-[#5F2010]/20 hover:bg-[#FBDCCB] transition-colors">
-              Sign up
+            <button
+              onClick={() => onAddSRS(word)}
+              className="flex h-10 w-full items-center justify-center rounded-[9px] text-[13px] font-semibold text-white transition-transform hover:scale-[1.02]"
+              style={{ background: ACC.light }}
+            >
+              Add to deck
             </button>
           )}
         </div>
-        <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+
+        <div className="mt-2.5 border-t border-[rgba(20,32,47,0.12)] pt-2.5 dark:border-gray-800">
           <PronunciationButton korean={word.korean} romanization={word.romanization} size="sm" />
         </div>
       </div>
@@ -126,12 +163,13 @@ function WordPopover({ word, anchorRef, onClose, onAddSRS, onSoundItOut, isAuthe
   );
 }
 
-// ── Tappable word chip ────────────────────────────────────────────────────────
+// ── Tappable word inside the active line ─────────────────────────────────────
 
-function WordChip({ word, isAuthenticated, isPremium, onAddSRS, onSoundItOut }: {
+function WordChip({ word, isAuthenticated, isPremium, isSaved, onAddSRS, onSoundItOut }: {
   word: KPopWord;
   isAuthenticated: boolean;
   isPremium: boolean;
+  isSaved: boolean;
   onAddSRS: (word: KPopWord) => void;
   onSoundItOut: (word: KPopWord) => void;
 }) {
@@ -150,11 +188,15 @@ function WordChip({ word, isAuthenticated, isPremium, onAddSRS, onSoundItOut }: 
       <button
         ref={btnRef}
         onClick={handleClick}
-        className={`px-1.5 py-0.5 rounded-lg text-base sm:text-lg font-bold transition-all ${
+        className="rounded px-0.5 font-korean transition-colors"
+        style={
           open
-            ? 'bg-[#FBDCCB] dark:bg-[#5F2010]/30 text-[#A83619] dark:text-[#F5A183] scale-110'
-            : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-white hover:scale-105'
-        }`}
+            ? { background: `${ACC.light}2E`, color: 'inherit' }
+            : isSaved
+            ? { boxShadow: `inset 0 -2px 0 ${ACC.light}66` }
+            : undefined
+        }
+        title={isSaved ? 'Already in your deck' : undefined}
       >
         {word.korean}
       </button>
@@ -167,44 +209,10 @@ function WordChip({ word, isAuthenticated, isPremium, onAddSRS, onSoundItOut }: 
           onSoundItOut={w => { onSoundItOut(w); setOpen(false); }}
           isAuthenticated={isAuthenticated}
           isPremium={isPremium}
+          isSaved={isSaved}
         />
       )}
     </span>
-  );
-}
-
-// ── Lyrics line ───────────────────────────────────────────────────────────────
-
-function LyricsLine({ line, isAuthenticated, isPremium, onAddSRS, onSoundItOut, showHint }: {
-  line: { korean: string; romanization: string; english: string; words: KPopWord[] };
-  isAuthenticated: boolean;
-  isPremium: boolean;
-  onAddSRS: (word: KPopWord) => void;
-  onSoundItOut: (word: KPopWord) => void;
-  showHint: boolean;
-}) {
-  return (
-    <div className="py-3 border-b border-gray-100 dark:border-gray-800 last:border-0 group">
-      <div className="flex flex-wrap gap-0.5 mb-1">
-        {line.words.map((word, i) => (
-          <WordChip
-            key={word.korean + i}
-            word={word}
-            isAuthenticated={isAuthenticated}
-            isPremium={isPremium}
-            onAddSRS={onAddSRS}
-            onSoundItOut={onSoundItOut}
-          />
-        ))}
-        {showHint && (
-          <span className="ml-2 text-[10px] font-semibold text-[#F07A55] dark:text-[#E4572E] self-center animate-pulse">
-            ← tap a word
-          </span>
-        )}
-      </div>
-      <div className="text-xs text-gray-400 dark:text-gray-500 italic mt-0.5">{line.romanization}</div>
-      <div className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">{line.english}</div>
-    </div>
   );
 }
 
@@ -220,66 +228,309 @@ function SongView({ song, artist, isPremium, isAuthenticated, onBack }: {
   const { decks, actions: srsActions } = useSRSContext();
   const { showToast } = useToastContext();
   const { startUpgrade } = useUpgrade();
-  const [addedWords, setAddedWords] = useState<Set<string>>(new Set());
-  // Held here (not in the popover) so the modal survives the popover closing.
-  const [soundOut, setSoundOut] = useState<KPopWord | null>(null);
 
-  const handleAddSRS = (word: KPopWord) => {
-    const deckName = 'K-Pop Vocabulary';
-    const existing = decks.find(d => d.name === deckName);
-    const deckId = existing ? existing.id : srsActions.createDeck(deckName, 'Words from K-Pop lyrics');
-    srsActions.addCardToDeck(deckId, {
-      korean: word.korean,
-      romanization: word.romanization,
-      english: word.english,
-      type: 'vocabulary',
-      category: `K-Pop: ${artist.name}`,
+  const [active, setActive] = useState(0);
+  const [showEnglish, setShowEnglish] = useState(true);
+  const [halfSpeed, setHalfSpeed] = useState(false);
+  const [soundOut, setSoundOut] = useState<KPopWord | null>(null);
+  const [justSaved, setJustSaved] = useState<Set<string>>(new Set());
+
+  // Every distinct word in the song, in the order it is sung.
+  const allWords = useMemo(() => {
+    const seen = new Set<string>();
+    const out: KPopWord[] = [];
+    song.lines.forEach(l => l.words.forEach(w => {
+      if (!seen.has(w.korean)) { seen.add(w.korean); out.push(w); }
+    }));
+    return out;
+  }, [song]);
+
+  const isSaved = (w: KPopWord) => justSaved.has(w.korean) || isInAnyDeck(decks, w.korean);
+
+  const savedHere = useMemo(
+    () => allWords.filter(w => justSaved.has(w.korean) || isInAnyDeck(decks, w.korean)),
+    [allWords, decks, justSaved],
+  );
+  const newWords = useMemo(
+    () => unsavedWords(decks, allWords).filter(w => !justSaved.has(w.korean)),
+    [decks, allWords, justSaved],
+  );
+
+  const addWords = (words: KPopWord[]) => {
+    if (!words.length) return;
+    const existing = decks.find(d => d.name === DECK_NAME);
+    const deckId = existing ? existing.id : srsActions.createDeck(DECK_NAME, 'Words from song lyrics');
+    const already = new Set((existing?.cards ?? []).map(c => c.content.korean));
+
+    let added = 0;
+    words.forEach(w => {
+      if (already.has(w.korean)) return;
+      srsActions.addCardToDeck(deckId, {
+        korean: w.korean,
+        romanization: w.romanization,
+        english: w.english,
+        type: 'vocabulary',
+        category: `K-Pop: ${artist.name}`,
+      });
+      added++;
     });
-    setAddedWords(prev => new Set(prev).add(word.korean));
-    showToast(`Added "${word.korean}" to K-Pop Vocabulary!`, 'success');
+
+    setJustSaved(prev => {
+      const next = new Set(prev);
+      words.forEach(w => next.add(w.korean));
+      return next;
+    });
     earnXP(3);
     markStudyToday();
+    const skipped = words.length - added;
+    showToast(
+      added === 0
+        ? `Already in ${DECK_NAME}`
+        : `${added} added to ${DECK_NAME}${skipped ? ` · ${skipped} already there` : ''}`,
+      'success',
+    );
+  };
+
+  const speakLine = (i: number) => {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(song.lines[i].korean);
+    u.lang = 'ko-KR';
+    u.rate = halfSpeed ? 0.5 : 0.85;
+    window.speechSynthesis.speak(u);
   };
 
   return (
-    <div>
-      {/* Back + song header */}
-      <button onClick={onBack} className="flex items-center gap-1.5 text-sm font-bold mb-5 transition-opacity hover:opacity-70" style={{ color: artist.accentColor }}>
-        ← {artist.name} songs
-      </button>
-
-      <div className="rounded-2xl overflow-hidden mb-6" style={{ background: artist.gradient }}>
-        <div className="p-5 sm:p-6">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-2xl">{artist.emoji}</span>
-            <span className="text-xs font-bold text-white/70 uppercase tracking-widest">{artist.name}</span>
-            {song.isFree
-              ? <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">FREE</span>
-              : <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">PREMIUM</span>
-            }
+    <div className="mx-auto max-w-6xl">
+      {/* ── Header ── */}
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+        <div className="min-w-0">
+          <div className="mb-2 flex items-center gap-2 text-[12.5px]">
+            <button
+              onClick={onBack}
+              className="font-medium text-[#4A5566] transition-colors hover:text-[#16202F] dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              {artist.name}
+            </button>
+            <span className="text-[#4A5566] dark:text-gray-600">/</span>
+            <span className="font-semibold" style={{ color: ACC.light }}>{song.title}</span>
           </div>
-          <h2 className="text-2xl font-black text-white">{song.titleKorean}</h2>
-          <p className="text-white/60 text-sm">{song.title} · {song.theme}</p>
-          <p className="text-white/50 text-xs mt-2">Tap any word to see its meaning and romanization</p>
+          <h1 className="font-korean text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+            {song.titleKorean}
+            <span className="text-[#4A5566] dark:text-gray-500"> · {song.title}</span>
+          </h1>
+          <p className="mt-1 text-[15px] text-[#4A5566] dark:text-gray-400">{song.theme}</p>
+        </div>
+        <div className="flex flex-none items-center gap-3.5">
+          <span className="text-[13.5px] text-[#4A5566] dark:text-gray-500">
+            line {active + 1} of {song.lines.length}
+          </span>
+          <button
+            onClick={onBack}
+            className="flex h-12 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500"
+          >
+            Change song
+          </button>
         </div>
       </div>
 
-      {/* Lyrics */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6">
-        {song.lines.map((line, i) => (
-          <LyricsLine
-            key={i}
-            line={line}
-            isAuthenticated={isAuthenticated}
-            isPremium={isPremium}
-            onAddSRS={handleAddSRS}
-            onSoundItOut={setSoundOut}
-            showHint={i === 0}
-          />
-        ))}
+      <div className="flex flex-col items-start gap-5 lg:flex-row">
+        {/* ── The lyric column ── */}
+        <div className="order-1 w-full min-w-0 flex-1">
+          <div
+            className="mb-4 flex items-start gap-3 rounded-r-lg border-l-[3px] px-4 py-3 sm:items-center"
+            style={{ borderColor: ACC.light, background: `${ACC.light}14` }}
+          >
+            <span
+              className="kl-accent flex-none whitespace-nowrap text-[12.5px] font-semibold"
+              style={{ ['--kl-acc' as string]: ACC.light, ['--kl-acc-dk' as string]: ACC.dark }}
+            >
+              HOW TO USE THIS
+            </span>
+            <span className="text-[13.5px] leading-snug text-[#16202F] dark:text-gray-200">
+              Read along once. Tap any word to save it — you do not need to understand the whole line
+              to get value from it.
+            </span>
+          </div>
+
+          <div className="kl-card p-5 sm:p-7">
+            <div className="flex flex-col gap-1">
+              {song.lines.map((line, i) => {
+                const isActive = i === active;
+                if (!isActive) {
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setActive(i)}
+                      className="rounded-lg px-3 py-2 text-left font-korean text-[17px] leading-[1.6] text-[#4A5566] transition-colors hover:bg-[rgba(20,32,47,0.04)] hover:text-[#16202F] sm:text-[19px] dark:text-gray-500 dark:hover:bg-gray-800/60 dark:hover:text-gray-300"
+                    >
+                      {line.korean}
+                    </button>
+                  );
+                }
+                return (
+                  <div
+                    key={i}
+                    className="rounded-r-lg border-l-[3px] px-3.5 py-3"
+                    style={{ borderColor: ACC.light, background: `${ACC.light}14` }}
+                  >
+                    <div className="font-korean text-[21px] font-semibold leading-[1.65] text-[#16202F] sm:text-[24px] dark:text-white">
+                      {segmentLine(line.korean, line.words).map((seg, si) =>
+                        seg.word ? (
+                          <WordChip
+                            key={si}
+                            word={seg.word}
+                            isAuthenticated={isAuthenticated}
+                            isPremium={isPremium}
+                            isSaved={isSaved(seg.word)}
+                            onAddSRS={word => addWords([word])}
+                            onSoundItOut={setSoundOut}
+                          />
+                        ) : (
+                          <span key={si}>{seg.text}</span>
+                        ),
+                      )}
+                    </div>
+                    <div className="mt-2 text-[13px] text-[#4A5566] dark:text-gray-500">
+                      {line.romanization}
+                    </div>
+                    {showEnglish && (
+                      <div className="mt-1 text-[14px] text-[#3E4A5A] dark:text-gray-400">
+                        {line.english}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ── Controls, under the column as in the design ── */}
+            <div className="mt-6 flex flex-wrap items-center gap-2.5 border-t border-[rgba(20,32,47,0.12)] pt-5 dark:border-gray-800">
+              <button
+                onClick={() => speakLine(active)}
+                className="flex h-11 shrink-0 items-center gap-2.5 rounded-[10px] px-4.5 text-[14px] font-semibold text-white transition-transform hover:scale-[1.02]"
+                style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+              >
+                <span className="flex h-3.5 items-end gap-[2.5px]" aria-hidden="true">
+                  <span className="kl-bar w-[3px] bg-white" style={{ height: '100%' }} />
+                  <span className="kl-bar w-[3px] bg-white" style={{ height: '100%', animationDelay: '0.15s' }} />
+                  <span className="kl-bar w-[3px] bg-white" style={{ height: '100%', animationDelay: '0.3s' }} />
+                </span>
+                Repeat this line
+              </button>
+              <button
+                onClick={() => setHalfSpeed(v => !v)}
+                className={`flex h-11 shrink-0 items-center rounded-[10px] border-[1.5px] px-4 text-[13.5px] font-semibold transition-colors ${
+                  halfSpeed
+                    ? 'text-white'
+                    : 'border-[rgba(20,32,47,0.22)] text-[#16202F] hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200'
+                }`}
+                style={halfSpeed ? { background: ACC.light, borderColor: ACC.light } : undefined}
+              >
+                Half speed
+              </button>
+              <button
+                onClick={() => setShowEnglish(v => !v)}
+                className="flex h-11 shrink-0 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-4 text-[13.5px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200"
+              >
+                {showEnglish ? 'Hide translation' : 'Show translation'}
+              </button>
+              <button
+                onClick={() => setActive(i => Math.min(i + 1, song.lines.length - 1))}
+                disabled={active >= song.lines.length - 1}
+                className="flex h-11 shrink-0 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-4 text-[13.5px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] disabled:opacity-40 dark:border-gray-700 dark:text-gray-200"
+              >
+                Next line →
+              </button>
+              <span className="text-[12.5px] text-[#4A5566] dark:text-gray-500">
+                {isAuthenticated ? 'Tap any word to save it.' : 'Sign in to save words.'}
+              </span>
+            </div>
+          </div>
+
+          {!isPremium && !song.isFree && (
+            <div className="kl-card mt-4 flex flex-wrap items-center justify-between gap-4 p-5">
+              <p className="min-w-[240px] flex-1 text-[14px] text-[#3E4A5A] dark:text-gray-400">
+                This song is part of Premium. $4/month, cancel anytime.
+              </p>
+              <button
+                onClick={startUpgrade}
+                className="flex h-11 flex-none items-center rounded-[10px] px-5 text-sm font-semibold text-white"
+                style={{ background: ACC.light }}
+              >
+                Get Premium →
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* ── Rail ── */}
+        <div className="order-2 w-full flex-none lg:w-[290px]">
+          <div className={`${railCard} mb-3.5`}>
+            <div className="mb-1 text-[13.5px] font-semibold text-[#16202F] dark:text-white">
+              Saved from this song
+            </div>
+            <p className="mb-3.5 text-[12px] text-[#4A5566] dark:text-gray-500">
+              {savedHere.length} of {allWords.length} words are in a review deck.
+            </p>
+
+            {savedHere.length > 0 ? (
+              <div className="flex max-h-[240px] flex-col gap-3 overflow-y-auto">
+                {savedHere.map(w => (
+                  <div key={w.korean}>
+                    <div className="font-korean text-[17px] font-semibold text-[#16202F] dark:text-white">
+                      {w.korean}
+                    </div>
+                    <div className="mt-0.5 text-[12px] text-[#4A5566] dark:text-gray-500">
+                      {w.romanization} · {w.english}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[13px] leading-[1.5] text-[#4A5566] dark:text-gray-500">
+                Nothing yet. Tap a word in the highlighted line and it will appear here.
+              </p>
+            )}
+
+            {isPremium && (
+              <button
+                onClick={() => addWords(newWords)}
+                disabled={newWords.length === 0}
+                className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-[9px] border border-[rgba(20,32,47,0.2)] text-[13.5px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] disabled:opacity-60 dark:border-gray-700 dark:text-gray-200"
+              >
+                {newWords.length === 0 ? (
+                  <><Check className="h-4 w-4" style={{ color: ACC.light }} /> All {allWords.length} saved</>
+                ) : (
+                  `Add all ${newWords.length} to review`
+                )}
+              </button>
+            )}
+          </div>
+
+          <div className={`${railCard} mb-3.5`}>
+            <div className="mb-2 text-[13.5px] font-semibold text-[#16202F] dark:text-white">
+              Why this song
+            </div>
+            <p className="text-[13.5px] leading-[1.55] text-[#3E4A5A] dark:text-gray-400">
+              {song.theme}. {song.lines.length} short lines and {allWords.length} words — few enough
+              that you can hold the whole thing in your head by the end.
+            </p>
+          </div>
+
+          <div className={railCard}>
+            <div className="mb-2 text-[13.5px] font-semibold text-[#16202F] dark:text-white">
+              About these lyrics
+            </div>
+            <p className="text-[13.5px] leading-[1.55] text-[#3E4A5A] dark:text-gray-400">
+              Written for learners in the style of {artist.name} — plain, singable Korean rather than
+              the real released lyrics, which run fast and lean on slang. The words are the ones that
+              genuinely recur in {artist.genre.toLowerCase()}.
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Sound-it-out (syllable player) modal */}
       {soundOut && (
         <SoundItOutModal
           korean={soundOut.korean}
@@ -288,105 +539,86 @@ function SongView({ song, artist, isPremium, isAuthenticated, onBack }: {
           onClose={() => setSoundOut(null)}
         />
       )}
-
-      {/* Added words summary */}
-      {addedWords.size > 0 && (
-        <div className="mt-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 flex items-center gap-2">
-          <span className="text-emerald-600 dark:text-emerald-400 text-sm font-bold">✓</span>
-          <span className="text-sm text-emerald-700 dark:text-emerald-300">
-            {addedWords.size} word{addedWords.size !== 1 ? 's' : ''} added to your K-Pop Vocabulary deck
-          </span>
-        </div>
-      )}
-
-      {/* Upsell for free users in premium song — shouldn't normally reach here */}
-      {!isPremium && !song.isFree && (
-        <div className="mt-4 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 text-center">
-          <p className="text-sm font-bold text-amber-700 dark:text-amber-300 mb-2">Unlock all songs with Premium</p>
-          <button onClick={startUpgrade}
-            className="inline-block px-5 py-2 rounded-xl text-white text-sm font-bold"
-            style={{ background: 'var(--brand-gradient)' }}>
-            Upgrade → $4/month
-          </button>
-        </div>
-      )}
     </div>
   );
 }
 
-// ── Song list for an artist ───────────────────────────────────────────────────
+// ── An artist's songs ─────────────────────────────────────────────────────────
 
-function ArtistSongs({ artist, isPremium, isAuthenticated, onSelectSong, onBack }: {
+function ArtistSongs({ artist, isPremium, onSelectSong, onBack }: {
   artist: KPopArtist;
   isPremium: boolean;
-  isAuthenticated: boolean;
   onSelectSong: (song: KPopSong) => void;
   onBack: () => void;
 }) {
   const { startUpgrade } = useUpgrade();
-  return (
-    <div>
-      <button onClick={onBack} className="flex items-center gap-1.5 text-sm font-bold mb-5 transition-opacity hover:opacity-70" style={{ color: artist.accentColor }}>
-        ← All artists
-      </button>
 
-      {/* Artist header */}
-      <div className="rounded-2xl overflow-hidden mb-6" style={{ background: artist.gradient }}>
-        <div className="p-5 sm:p-6 flex items-center gap-4">
-          <span className="text-5xl">{artist.emoji}</span>
-          <div>
-            <h2 className="text-2xl font-black text-white">{artist.name}</h2>
-            <p className="text-white/60 text-sm">{artist.genre}</p>
-            <p className="text-white/50 text-xs mt-1">{artist.songs.length} songs · {artist.songs.filter(s => s.isFree).length} free</p>
+  return (
+    <div className="mx-auto max-w-4xl">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+        <div>
+          <div className="mb-2 flex items-center gap-2 text-[12.5px]">
+            <button
+              onClick={onBack}
+              className="font-medium text-[#4A5566] transition-colors hover:text-[#16202F] dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              K-Pop
+            </button>
+            <span className="text-[#4A5566] dark:text-gray-600">/</span>
+            <span className="font-semibold" style={{ color: ACC.light }}>{artist.name}</span>
           </div>
+          <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+            {artist.name}
+          </h1>
+          <p className="mt-1 text-[15px] text-[#4A5566] dark:text-gray-400">{artist.genre}</p>
         </div>
+        <button
+          onClick={onBack}
+          className="flex h-12 flex-none items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[15px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200"
+        >
+          All artists
+        </button>
       </div>
 
-      {/* Song list */}
-      <div className="space-y-3">
-        {artist.songs.map(song => {
+      <div className="flex flex-col gap-3">
+        {artist.songs.map((song, i) => {
           const locked = !isPremium && !song.isFree;
+          const words = song.lines.reduce((a, l) => a + l.words.length, 0);
+
           return (
             <button
               key={song.id}
-              onClick={() => !locked && onSelectSong(song)}
-              className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
+              onClick={() => (locked ? startUpgrade() : onSelectSong(song))}
+              className={`kl-cascade flex items-center gap-4 rounded-[14px] border p-4 text-left transition-colors ${
                 locked
-                  ? 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40 cursor-not-allowed'
-                  : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-[#F8C4AE] dark:hover:border-[#7E2A15] hover:shadow-md'
+                  ? 'border-[rgba(20,32,47,0.14)] bg-[rgba(20,32,47,0.03)] dark:border-gray-800 dark:bg-gray-900/50'
+                  : 'border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] hover:border-[rgba(20,32,47,0.3)] dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-600'
               }`}
+              style={{ animationDelay: `${i * 60}ms` }}
             >
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style={{ background: artist.gradient }}>
-                {locked ? '🔒' : '🎵'}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`font-black text-base ${locked ? 'text-gray-400 dark:text-gray-600' : 'text-gray-900 dark:text-white'}`}>
-                    {song.titleKorean}
-                  </span>
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                    song.isFree
-                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                      : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                  }`}>
-                    {song.isFree ? 'FREE' : 'PREMIUM'}
+              <span
+                className="flex h-11 w-11 flex-none items-center justify-center rounded-xl font-korean text-[17px] font-bold"
+                style={{ background: `${ACC.light}1F`, border: `1px solid ${ACC.light}4D`, color: ACC.light }}
+              >
+                {locked ? <Lock className="h-4 w-4" /> : song.titleKorean.charAt(0)}
+              </span>
+
+              <div className="min-w-0 flex-1">
+                <div className="font-korean text-[16px] font-semibold text-[#16202F] dark:text-white">
+                  {song.titleKorean}
+                  <span className="font-sans text-[13.5px] font-normal text-[#4A5566] dark:text-gray-400">
+                    {' '}· {song.title}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{song.title} · {song.theme}</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{song.lines.length} lines · {song.lines.reduce((a, l) => a + l.words.length, 0)} words</p>
+                <div className="mt-0.5 truncate text-[13px] text-[#4A5566] dark:text-gray-500">{song.theme}</div>
+                <div className="mt-1 text-[12px] text-[#4A5566] dark:text-gray-600">
+                  {song.lines.length} lines · {words} words
+                </div>
               </div>
-              {!locked && <span className="text-gray-300 dark:text-gray-600 text-lg flex-shrink-0">›</span>}
-              {locked && (
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={e => { e.stopPropagation(); startUpgrade(); }}
-                  className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl text-white cursor-pointer"
-                  style={{ background: 'var(--brand-gradient)' }}
-                >
-                  Unlock
-                </span>
-              )}
+
+              <span className="flex-none text-[13px] font-semibold" style={{ color: locked ? '#C13F22' : ACC.light }}>
+                {locked ? 'Unlock →' : 'Open →'}
+              </span>
             </button>
           );
         })}
@@ -395,7 +627,7 @@ function ArtistSongs({ artist, isPremium, isAuthenticated, onSelectSong, onBack 
   );
 }
 
-// ── Main section ──────────────────────────────────────────────────────────────
+// ── Section ───────────────────────────────────────────────────────────────────
 
 const KPopSection: React.FC = () => {
   const { hasPremiumAccess, isAuthenticated } = useAuth();
@@ -403,148 +635,118 @@ const KPopSection: React.FC = () => {
   const { startUpgrade } = useUpgrade();
   const isPremium = hasPremiumAccess();
 
-  const [selectedArtist, setSelectedArtist] = useState<KPopArtist | null>(null);
-  const [selectedSong, setSelectedSong] = useState<KPopSong | null>(null);
+  const [artist, setArtist] = useState<KPopArtist | null>(null);
+  const [song, setSong] = useState<KPopSong | null>(null);
 
-  const totalSongs   = kpopArtists.reduce((a, ar) => a + ar.songs.length, 0);
-  const freeSongs    = kpopArtists.reduce((a, ar) => a + ar.songs.filter(s => s.isFree).length, 0);
-  const totalWords   = kpopArtists.reduce((a, ar) => a + ar.songs.reduce((b, s) => b + s.lines.reduce((c, l) => c + l.words.length, 0), 0), 0);
+  const totalSongs = kpopArtists.reduce((a, ar) => a + ar.songs.length, 0);
+  const freeSongs = kpopArtists.reduce((a, ar) => a + ar.songs.filter(s => s.isFree).length, 0);
 
-  // If viewing a specific song
-  if (selectedArtist && selectedSong) {
+  if (artist && song) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto">
-        <SongView
-          song={selectedSong}
-          artist={selectedArtist}
-          isPremium={isPremium}
-          isAuthenticated={isAuthenticated}
-          onBack={() => setSelectedSong(null)}
-        />
-      </div>
+      <SongView
+        song={song}
+        artist={artist}
+        isPremium={isPremium}
+        isAuthenticated={isAuthenticated}
+        onBack={() => setSong(null)}
+      />
     );
   }
 
-  // If viewing an artist's songs
-  if (selectedArtist) {
+  if (artist) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto">
-        <ArtistSongs
-          artist={selectedArtist}
-          isPremium={isPremium}
-          isAuthenticated={isAuthenticated}
-          onSelectSong={song => setSelectedSong(song)}
-          onBack={() => setSelectedArtist(null)}
-        />
-      </div>
+      <ArtistSongs
+        artist={artist}
+        isPremium={isPremium}
+        onSelectSong={setSong}
+        onBack={() => setArtist(null)}
+      />
     );
   }
 
-  // Artist grid (landing)
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
-
-      {/* Hero */}
-      <div
-        className="relative rounded-3xl overflow-hidden mb-8 p-6 sm:p-8"
-        style={{ background: 'linear-gradient(135deg, #8E3B54 0%, #C13F22 55%, #3F8571 100%)' }}
-      >
-        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
-          {['BTS','BLACKPINK','NewJeans','aespa','K-POP','한국어'].map((w, i) => (
-            <span key={i} className="absolute font-black text-white/10" style={{ fontSize: `${1.2 + (i % 3) * 0.5}rem`, top: `${(i * 29) % 85}%`, left: `${(i * 43) % 85}%` }}>{w}</span>
-          ))}
+    <div className="mx-auto max-w-6xl">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-6 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+        <div>
+          <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+            K-Pop
+          </h1>
+          <p className="mt-2 max-w-[62ch] text-[15px] text-[#3E4A5A] dark:text-gray-400">
+            Song-length Korean, one line at a time. Tap any word in the line you are on and it goes
+            into your review deck.
+          </p>
         </div>
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-4xl">🎵</span>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-black text-white">K-Pop Lyrics Mode</h1>
-                <p className="text-[#DDEBE4] text-sm">Learn Korean through music · {totalWords}+ words</p>
-              </div>
-            </div>
-            <p className="text-white/80 text-sm max-w-lg">
-              Tap any word in the lyrics to see its meaning, romanization, and add it to your SRS deck.
-            </p>
-          </div>
-          <div className="flex-shrink-0 bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center min-w-[120px]">
-            <div className="text-3xl font-black text-white">{freeSongs}</div>
-            <div className="text-xs text-white/70">free songs</div>
-            <div className="text-xs text-white/50 mt-1">{totalSongs - freeSongs} more with Premium</div>
-          </div>
+        <div className="flex-none text-[13.5px] text-[#4A5566] dark:text-gray-500">
+          {freeSongs} free · {totalSongs - freeSongs} with Premium
         </div>
       </div>
 
-      {/* Guest banner */}
-      {!isAuthenticated && (
-        <div className="mb-6 p-4 rounded-2xl border border-[#BFDACD] dark:border-[#1D4436]/40 bg-[#EEF5F1] dark:bg-[#153327]/10 flex items-start gap-3">
-          <span className="text-2xl">🎵</span>
-          <div className="flex-1">
-            <h3 className="font-bold text-[#1D4436] dark:text-[#BFDACD] mb-0.5">Tap words to learn!</h3>
-            <p className="text-sm text-[#2E6B59] dark:text-[#93C2AE] mb-2">
-              Sign in to see word meanings, romanization, and add words to your SRS deck.
-            </p>
-            <button
-              onClick={openRegister}
-              className="text-sm font-bold text-white px-4 py-1.5 rounded-xl transition-transform hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #8E3B54, #E4572E)' }}
-            >
-              Sign up free 🚀
-            </button>
-          </div>
-        </div>
-      )}
+      {/* The lyrics are ours, not the artists' — say so once, plainly, up front. */}
+      <div className="kl-well mb-5 rounded-xl px-4 py-3">
+        <p className="text-[13px] leading-[1.55] text-[#3E4A5A] dark:text-gray-400">
+          <strong className="font-semibold text-[#16202F] dark:text-gray-200">These are practice lyrics.</strong>{' '}
+          Each set is written for learners in the style of the group named — slower and plainer than
+          the real songs. Nothing here is the released lyric.
+        </p>
+      </div>
 
-      {/* Free vs premium info banner for free users */}
-      {isAuthenticated && !isPremium && (
-        <div className="mb-6 p-4 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-900/10 flex items-start gap-3">
-          <span className="text-xl">💡</span>
-          <div className="flex-1">
-            <p className="text-sm text-amber-700 dark:text-amber-300">
-              <span className="font-bold">Free plan:</span> 1 song per artist, tap words to see meanings. Upgrade to unlock all songs and add words to SRS.
-            </p>
-          </div>
+      {!isAuthenticated && (
+        <div className="kl-card mb-5 flex flex-wrap items-center justify-between gap-4 p-5">
+          <p className="min-w-[240px] flex-1 text-[14px] text-[#3E4A5A] dark:text-gray-400">
+            Sign up free to see what each word means and send it to a review deck.
+          </p>
           <button
-            onClick={startUpgrade}
-            className="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl text-white whitespace-nowrap"
-            style={{ background: 'var(--brand-gradient)' }}
+            onClick={openRegister}
+            className="flex h-11 flex-none items-center rounded-[10px] px-5 text-sm font-semibold text-white transition-transform hover:scale-[1.02]"
+            style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
           >
-            Upgrade
+            Sign up free →
           </button>
         </div>
       )}
 
-      {/* Artist grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        {kpopArtists.map(artist => {
-          const freeSongCount    = artist.songs.filter(s => s.isFree).length;
-          const premiumSongCount = artist.songs.filter(s => !s.isFree).length;
-          const artistWords      = artist.songs.reduce((a, s) => a + s.lines.reduce((b, l) => b + l.words.length, 0), 0);
+      {isAuthenticated && !isPremium && (
+        <div className="kl-card mb-5 flex flex-wrap items-center justify-between gap-4 p-5">
+          <p className="min-w-[240px] flex-1 text-[14px] text-[#3E4A5A] dark:text-gray-400">
+            On the free plan you can read {freeSongs} songs and look up every word. Premium opens the
+            other {totalSongs - freeSongs} and lets you save words for review. $4/month, cancel anytime.
+          </p>
+          <button
+            onClick={startUpgrade}
+            className="flex h-11 flex-none items-center rounded-[10px] px-5 text-sm font-semibold text-white"
+            style={{ background: ACC.light }}
+          >
+            Get Premium →
+          </button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {kpopArtists.map((a, i) => {
+          const free = a.songs.filter(s => s.isFree).length;
+          const words = a.songs.reduce((x, s) => x + s.lines.reduce((y, l) => y + l.words.length, 0), 0);
 
           return (
             <button
-              key={artist.id}
-              onClick={() => setSelectedArtist(artist)}
-              className="rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 text-left group"
+              key={a.id}
+              onClick={() => setArtist(a)}
+              className="kl-card kl-cascade flex flex-col p-5 text-left transition-transform duration-200 hover:-translate-y-1"
+              style={{ animationDelay: `${i * 60}ms` }}
             >
-              {/* Coloured header */}
-              <div className="p-5 relative overflow-hidden" style={{ background: artist.gradient }}>
-                <div className="absolute right-4 top-3 text-6xl opacity-20 group-hover:opacity-30 transition-opacity select-none">{artist.emoji}</div>
-                <div className="relative z-10">
-                  <div className="text-3xl mb-1">{artist.emoji}</div>
-                  <h3 className="text-xl font-black text-white">{artist.name}</h3>
-                  <p className="text-white/60 text-xs mt-0.5">{artist.genre}</p>
-                </div>
+              <span
+                className="flex h-11 w-11 items-center justify-center rounded-xl text-[20px]"
+                style={{ background: `${ACC.light}1F`, border: `1px solid ${ACC.light}4D` }}
+              >
+                {a.emoji}
+              </span>
+              <div className="mt-4 text-[16px] font-semibold text-[#16202F] dark:text-white">{a.name}</div>
+              <div className="mt-0.5 flex-1 text-[13.5px] text-[#4A5566] dark:text-gray-400">{a.genre}</div>
+              <div className="mt-3 text-[12.5px] text-[#4A5566] dark:text-gray-500">
+                {a.songs.length} song{a.songs.length === 1 ? '' : 's'} · {free} free · {words} words
               </div>
-              {/* Stats footer */}
-              <div className="bg-white dark:bg-gray-900 border border-t-0 border-gray-100 dark:border-gray-800 px-4 py-3 flex items-center justify-between">
-                <div className="flex gap-3 text-xs">
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">{freeSongCount} free</span>
-                  {premiumSongCount > 0 && <span className="text-amber-600 dark:text-amber-400">{premiumSongCount} premium</span>}
-                  <span className="text-gray-400 dark:text-gray-500">{artistWords} words</span>
-                </div>
-                <span className="text-gray-300 dark:text-gray-600 text-lg group-hover:text-gray-500 dark:group-hover:text-gray-400 transition-colors">›</span>
-              </div>
+              <span className="mt-3.5 text-[13px] font-semibold" style={{ color: ACC.light }}>
+                Open →
+              </span>
             </button>
           );
         })}
