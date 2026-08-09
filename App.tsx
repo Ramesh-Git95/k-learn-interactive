@@ -600,7 +600,7 @@ const AppContent: React.FC = () => {
       case 'srs':
         return <SRSManager onStartStudy={handleStartStudy} />;
       case 'profile':
-        return <UserProfile />;
+        return <UserProfile setActiveSection={handleSetActiveSection} />;
       default:
         return <Dashboard 
           setActiveSection={setActiveSection} 
