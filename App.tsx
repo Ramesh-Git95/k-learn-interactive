@@ -586,7 +586,7 @@ const AppContent: React.FC = () => {
       case 'writing':
         return <WritingSection />;
       case 'honorifics':
-        return <HonorificEngine />;
+        return <HonorificEngine setActiveSection={handleSetActiveSection} />;
       case 'culture-cards':
         return <CultureCards setActiveSection={setActiveSection} />;
       case 'typing':

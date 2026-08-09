@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { accentFor } from '../utils/moduleAccent';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { PeekOverlay } from './PremiumLock';
 import SoundItOutModal from './SoundItOutModal';
+import type { Section } from '../types';
+
+const ACC = accentFor('honorifics');
 
 const FREE_CATEGORY_IDS = ['greetings', 'requests'];
 
@@ -330,47 +335,46 @@ const CATEGORIES: HonorificCategory[] = [
   },
 ];
 
-const LEVEL_COLORS = {
-  formal: {
-    bg: 'bg-blue-50 dark:bg-blue-900/20',
-    border: 'border-blue-200 dark:border-blue-700',
-    badge: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
-    label: '합쇼체',
-    sublabel: 'Formal',
-    dot: 'bg-blue-500',
+type Level = 'casual' | 'polite' | 'formal';
+
+// Ordered casual → formal, so the recommended level sits in the middle of the
+// scale rather than at one end of a list.
+const LEVELS: { id: Level; name: string; korean: string; roman: string; when: string; recommended?: boolean }[] = [
+  {
+    id: 'casual', name: 'Casual', korean: '반말', roman: 'ban-mal',
+    when: 'Close friends your own age. Using it too early sounds rude.',
   },
-  polite: {
-    bg: 'bg-[#EEF5F1] dark:bg-[#153327]/20',
-    border: 'border-[#BFDACD] dark:border-[#265847]',
-    badge: 'bg-[#DDEBE4] dark:bg-[#153327]/40 text-[#265847] dark:text-[#93C2AE]',
-    label: '해요체',
-    sublabel: 'Polite',
-    dot: 'bg-[#3F8571]',
+  {
+    id: 'polite', name: 'Polite', korean: '해요체', roman: 'hae-yo-che', recommended: true,
+    when: 'Everyone else. Safe in shops, at work, with strangers — your default.',
   },
-  casual: {
-    bg: 'bg-[#FDEEE6] dark:bg-[#5F2010]/20',
-    border: 'border-[#F8C4AE] dark:border-[#A83619]',
-    badge: 'bg-[#FBDCCB] dark:bg-[#5F2010]/40 text-[#A83619] dark:text-[#F5A183]',
-    label: '반말',
-    sublabel: 'Casual',
-    dot: 'bg-[#E4572E]',
+  {
+    id: 'formal', name: 'Formal', korean: '합쇼체', roman: 'hap-syo-che',
+    when: 'Announcements, interviews, anyone much older. Never wrong, sometimes stiff.',
   },
+];
+
+const LEVEL_TINT: Record<Level, string> = {
+  casual: '#A8761F',
+  polite: '#2E6B59',
+  formal: '#2F5D8A',
 };
 
-const SpeakBtn: React.FC<{ text: string; color: string; onPlay: () => void }> = ({ text, color, onPlay }) => (
-  <button
-    onClick={onPlay}
-    className={`p-1.5 rounded-lg transition-all hover:scale-110 active:scale-95 ${color}`}
-    title="Sound it out — syllable by syllable"
-    aria-label={`Sound out ${text}`}
-  >
-    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-      <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" />
-    </svg>
-  </button>
-);
+const ALL_ENTRIES = CATEGORIES.flatMap(c => c.entries);
+const findEntry = (base: string) => ALL_ENTRIES.find(e => e.base === base) ?? null;
 
-const HonorificEngine: React.FC = () => {
+// The two examples the comparison table is built from. Looked up by name so the
+// table cannot drift away from the entries below it.
+const HEADLINE = [findEntry('Thank you'), findEntry('Hello')].filter(Boolean) as HonorificEntry[];
+
+const railCard =
+  'rounded-[14px] border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] px-5 py-4 dark:border-gray-800 dark:bg-gray-900';
+
+interface Props {
+  setActiveSection?: (s: Section) => void;
+}
+
+const HonorificEngine: React.FC<Props> = ({ setActiveSection }) => {
   const { subscriptionTier } = useFeatureAccess();
   const isFree = subscriptionTier === 'free';
   const [activeCat, setActiveCat] = useState(CATEGORIES[0].id);
@@ -380,11 +384,13 @@ const HonorificEngine: React.FC = () => {
   const cat = CATEGORIES.find(c => c.id === activeCat)!;
   const isActiveLocked = isFree && !FREE_CATEGORY_IDS.includes(activeCat);
 
-  const toggle = (key: string) => setExpanded(prev => prev === key ? null : key);
+  const toggle = (key: string) => setExpanded(prev => (prev === key ? null : key));
+
+  const say = (korean: string, romanization: string, english: string) =>
+    setSoundOut({ korean, romanization, english });
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
-      {/* Sound-it-out (syllable player) modal */}
+    <div className="mx-auto max-w-6xl">
       {soundOut && (
         <SoundItOutModal
           korean={soundOut.korean}
@@ -394,171 +400,275 @@ const HonorificEngine: React.FC = () => {
         />
       )}
 
-      {/* Hero */}
-      <div
-        className="rounded-2xl p-6 sm:p-8 mb-8 text-white relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #24476B 0%, #3F8571 60%, #E4572E 100%)' }}
-      >
-        {['존댓말', '반말', '경어', '합쇼체', '해요체'].map((w, i) => (
-          <span
-            key={i}
-            className="absolute text-white/10 font-black select-none pointer-events-none"
-            style={{ fontSize: `${1.5 + (i % 3) * 0.5}rem`, top: `${(i * 37) % 85}%`, left: `${(i * 53) % 90}%` }}
-          >
-            {w}
-          </span>
-        ))}
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-4xl">🎭</span>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-black">Honorific Engine</h1>
-              <p className="text-white/80 text-sm">존댓말 · 반말 · 경어</p>
+      {/* ── Header ── */}
+      <div className="mb-5 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+        <div className="mb-2 flex items-center gap-2 text-[12.5px]">
+          <span className="font-medium text-[#4A5566] dark:text-gray-400">Learn</span>
+          <span className="text-[#4A5566] dark:text-gray-600">/</span>
+          <span className="font-semibold" style={{ color: ACC.light }}>Honorifics</span>
+        </div>
+        <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+          Three ways to say the same thing
+        </h1>
+        <p className="mt-2 max-w-[64ch] text-[15px] text-[#3E4A5A] dark:text-gray-400">
+          As a beginner you only need the middle one. The other two are here so you recognise them
+          when you hear them.
+        </p>
+      </div>
+
+      <div className="flex flex-col items-start gap-5 lg:flex-row">
+        <div className="order-1 w-full min-w-0 flex-1">
+          {/* ── The comparison, full width, with one row recommended ── */}
+          <div className="kl-card overflow-hidden">
+            <div className="overflow-x-auto">
+              <div className="min-w-[620px]">
+                <div
+                  className="grid gap-4 border-b border-[rgba(20,32,47,0.12)] px-5 py-3 text-[11.5px] font-semibold uppercase tracking-wide text-[#4A5566] dark:border-gray-800 dark:text-gray-500"
+                  style={{ gridTemplateColumns: `170px repeat(${HEADLINE.length}, 1fr) 1.4fr` }}
+                >
+                  <span>Level</span>
+                  {HEADLINE.map(e => <span key={e.base}>“{e.base}”</span>)}
+                  <span>When to use it</span>
+                </div>
+
+                {LEVELS.map(lv => (
+                  <div
+                    key={lv.id}
+                    className="grid items-center gap-4 border-b border-[rgba(20,32,47,0.08)] px-5 py-4 last:border-0 dark:border-gray-800"
+                    style={{
+                      gridTemplateColumns: `170px repeat(${HEADLINE.length}, 1fr) 1.4fr`,
+                      background: lv.recommended ? `${LEVEL_TINT.polite}0F` : undefined,
+                      boxShadow: lv.recommended ? `inset 3px 0 0 ${LEVEL_TINT.polite}` : undefined,
+                    }}
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[15px] font-semibold text-[#16202F] dark:text-white">{lv.name}</span>
+                        {lv.recommended && (
+                          <span
+                            className="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white"
+                            style={{ background: LEVEL_TINT.polite }}
+                          >
+                            Start here
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-0.5 text-[12.5px] text-[#4A5566] dark:text-gray-500">
+                        <span className="font-korean">{lv.korean}</span> {lv.roman}
+                      </div>
+                    </div>
+
+                    {HEADLINE.map(e => (
+                      <button
+                        key={e.base}
+                        onClick={() => say(e[lv.id].korean, e[lv.id].romanization, `${e.english} · ${lv.name}`)}
+                        className="min-w-0 text-left transition-opacity hover:opacity-70"
+                        title={`Sound out ${e[lv.id].korean}`}
+                      >
+                        <div className="font-korean text-[17px] font-semibold text-[#16202F] dark:text-white">
+                          {e[lv.id].korean}
+                        </div>
+                        <div className="mt-0.5 text-[12px] text-[#4A5566] dark:text-gray-500">
+                          {e[lv.id].romanization.toLowerCase()}
+                        </div>
+                      </button>
+                    ))}
+
+                    <div className="text-[13px] leading-[1.5] text-[#3E4A5A] dark:text-gray-400">{lv.when}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3.5 border-t border-[rgba(20,32,47,0.12)] px-5 py-4 dark:border-gray-800">
+              <button
+                onClick={() => setActiveSection?.('conversation')}
+                className="flex h-11 items-center rounded-[10px] px-5 text-[14px] font-semibold text-white transition-transform hover:scale-[1.02]"
+                style={{ background: ACC.light, boxShadow: `0 5px 16px ${ACC.light}4D` }}
+              >
+                Practise the polite level →
+              </button>
+              <span className="text-[12.5px] text-[#4A5566] dark:text-gray-500">
+                On its beginner setting the tutor is told to answer in 존댓말.
+              </span>
             </div>
           </div>
-          <p className="text-white/85 text-sm sm:text-base max-w-lg">
-            Korean has three distinct speech levels. Master all three to communicate naturally in any situation — from job interviews to text messages with friends.
-          </p>
-          <div className="flex flex-wrap gap-3 mt-4">
-            {Object.entries(LEVEL_COLORS).map(([k, v]) => (
-              <div key={k} className="flex items-center gap-1.5 bg-white/15 rounded-full px-3 py-1">
-                <span className={`w-2 h-2 rounded-full ${v.dot}`} />
-                <span className="text-xs font-bold">{v.sublabel} — {v.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      {/* Category tabs */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {CATEGORIES.map(c => {
-          const locked = isFree && !FREE_CATEGORY_IDS.includes(c.id);
-          return (
-            <button
-              key={c.id}
-              onClick={() => { setActiveCat(c.id); setExpanded(null); }}
-              className={`px-4 py-2 rounded-xl text-sm font-black transition-all flex items-center gap-1.5 ${
-                activeCat === c.id
-                  ? 'text-white shadow-md'
-                  : locked
-                  ? 'bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500'
-                  : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-[#93C2AE] dark:hover:border-[#2E6B59]'
-              }`}
-              style={activeCat === c.id ? { background: locked ? 'linear-gradient(135deg, #9CA3AF, #6B7280)' : 'linear-gradient(135deg, #24476B, #3F8571)' } : {}}
-            >
-              {c.emoji} {c.label}
-              {locked && <span className="text-[9px]">⭐</span>}
-            </button>
-          );
-        })}
-      </div>
+          {/* ── Every pair we have ── */}
+          <div className="mt-7">
+            <h2 className="text-[17px] font-semibold text-[#16202F] dark:text-white">
+              The same three forms, for {ALL_ENTRIES.length} everyday phrases
+            </h2>
+            <p className="mt-1.5 max-w-[64ch] text-[13.5px] text-[#4A5566] dark:text-gray-400">
+              Read the polite column and move on. The other two are worth opening only when you
+              wonder why someone said it differently.
+            </p>
 
-      {/* Entries — when the category is locked, the real entries render blurred
-          inside a capped peek window with a frosted upgrade CTA (blur + peek). */}
-      <div className={isActiveLocked ? 'relative max-h-[440px] overflow-hidden rounded-2xl' : ''}>
-      <div
-        className={`space-y-3 ${isActiveLocked ? 'pointer-events-none select-none blur-[5px]' : ''}`}
-        aria-hidden={isActiveLocked || undefined}
-        inert={isActiveLocked || undefined}
-      >
-        {cat.entries.map((entry, idx) => {
-          const key = `${activeCat}-${idx}`;
-          const isOpen = expanded === key;
+            <div className="mt-4 mb-4 flex flex-wrap items-center gap-2">
+              {CATEGORIES.map(c => {
+                const lockedCat = isFree && !FREE_CATEGORY_IDS.includes(c.id);
+                const isOn = activeCat === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => { setActiveCat(c.id); setExpanded(null); }}
+                    className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[9px] px-3.5 text-[12.5px] font-semibold leading-none transition-colors ${
+                      isOn
+                        ? 'text-white'
+                        : 'border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] text-[#4A5566] hover:border-[rgba(20,32,47,0.28)] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400'
+                    }`}
+                    style={isOn ? { background: ACC.light } : undefined}
+                  >
+                    {c.label}
+                    <span className={isOn ? 'text-white/70' : 'text-[#8A93A0] dark:text-gray-600'}>
+                      {c.entries.length}
+                    </span>
+                    {lockedCat && <span className={isOn ? 'text-white/70' : 'text-[#8A93A0]'}>·</span>}
+                    {lockedCat && (
+                      <span className={`text-[10px] ${isOn ? 'text-white/80' : 'text-[#C13F22]'}`}>premium</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
 
-          return (
-            <div key={key} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-              {/* Header row — always visible */}
-              <button
-                className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                onClick={() => toggle(key)}
+            {/* When the category is locked the real entries render blurred inside a
+                capped peek window with a frosted upgrade CTA. */}
+            <div className={isActiveLocked ? 'relative max-h-[440px] overflow-hidden rounded-[18px]' : ''}>
+              <div
+                className={`flex flex-col gap-3 ${isActiveLocked ? 'pointer-events-none select-none blur-[5px]' : ''}`}
+                aria-hidden={isActiveLocked || undefined}
+                inert={isActiveLocked || undefined}
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="text-lg font-black text-gray-900 dark:text-white truncate">{entry.base}</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 truncate hidden sm:block">{entry.english}</span>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-xs text-gray-400 dark:text-gray-500 hidden sm:block">{isOpen ? 'less' : 'see all forms'}</span>
-                  <svg className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </button>
+                {cat.entries.map((entry, idx) => {
+                  const key = `${activeCat}-${idx}`;
+                  const isOpen = expanded === key;
 
-              {/* Three-column speech level cards */}
-              <div className={`grid grid-cols-1 sm:grid-cols-3 gap-3 px-4 pb-4 ${isOpen ? 'block' : 'hidden'}`}>
-                {(['formal', 'polite', 'casual'] as const).map(level => {
-                  const form = entry[level];
-                  const col = LEVEL_COLORS[level];
                   return (
-                    <div key={level} className={`${col.bg} border ${col.border} rounded-xl p-3`}>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${col.badge}`}>
-                          {col.sublabel} · {col.label}
-                        </span>
-                        <SpeakBtn
-                          text={form.korean}
-                          color={col.badge}
-                          onPlay={() => setSoundOut({ korean: form.korean, romanization: form.romanization, english: `${entry.english} · ${col.label}` })}
-                        />
-                      </div>
-                      <p className="text-base font-black text-gray-900 dark:text-white mb-0.5">{form.korean}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{form.romanization}</p>
+                    <div key={key} className="kl-card overflow-hidden">
+                      <button
+                        onClick={() => toggle(key)}
+                        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-[rgba(20,32,47,0.02)] dark:hover:bg-gray-800/40"
+                      >
+                        <div className="min-w-0">
+                          <div className="text-[15px] font-semibold text-[#16202F] dark:text-white">{entry.base}</div>
+                          <div className="mt-0.5 truncate text-[12.5px] text-[#4A5566] dark:text-gray-500">
+                            {entry.english}
+                          </div>
+                        </div>
+                        <div className="flex flex-none items-center gap-3">
+                          {!isOpen && (
+                            <div className="hidden text-right sm:block">
+                              <div className="font-korean text-[16px] font-semibold text-[#16202F] dark:text-white">
+                                {entry.polite.korean}
+                              </div>
+                              <div className="text-[11.5px]" style={{ color: LEVEL_TINT.polite }}>polite</div>
+                            </div>
+                          )}
+                          <ChevronDown
+                            className={`h-4 w-4 text-[#4A5566] transition-transform dark:text-gray-500 ${isOpen ? 'rotate-180' : ''}`}
+                          />
+                        </div>
+                      </button>
+
+                      {isOpen && (
+                        <div className="border-t border-[rgba(20,32,47,0.12)] px-5 py-4 dark:border-gray-800">
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            {LEVELS.map(lv => (
+                              <button
+                                key={lv.id}
+                                onClick={() => say(entry[lv.id].korean, entry[lv.id].romanization, `${entry.english} · ${lv.name}`)}
+                                className="rounded-xl border px-4 py-3 text-left transition-colors"
+                                style={{
+                                  borderColor: lv.recommended ? `${LEVEL_TINT.polite}59` : 'rgba(20,32,47,0.14)',
+                                  background: lv.recommended ? `${LEVEL_TINT.polite}0F` : undefined,
+                                }}
+                                title={`Sound out ${entry[lv.id].korean}`}
+                              >
+                                <div className="flex items-center gap-1.5 text-[11.5px] font-semibold" style={{ color: LEVEL_TINT[lv.id] }}>
+                                  {lv.name}
+                                  <span className="font-korean font-normal text-[#4A5566] dark:text-gray-500">{lv.korean}</span>
+                                </div>
+                                <div className="mt-1.5 font-korean text-[17px] font-semibold text-[#16202F] dark:text-white">
+                                  {entry[lv.id].korean}
+                                </div>
+                                <div className="mt-0.5 text-[12px] text-[#4A5566] dark:text-gray-500">
+                                  {entry[lv.id].romanization.toLowerCase()}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+
+                          <p className="kl-well mt-3 rounded-xl px-4 py-3 text-[13px] leading-[1.55] text-[#3E4A5A] dark:text-gray-400">
+                            {entry.note}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
-
-                {/* Cultural note */}
-                <div className="sm:col-span-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 flex gap-3">
-                  <span className="text-base flex-shrink-0 mt-0.5">💡</span>
-                  <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">{entry.note}</p>
-                </div>
               </div>
 
-              {/* Collapsed preview — show polite form only */}
-              {!isOpen && (
-                <div className="flex items-center gap-3 px-5 pb-4">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${LEVEL_COLORS.polite.badge}`}>
-                    Polite · 해요체
-                  </span>
-                  <span className="text-sm font-bold text-gray-900 dark:text-white">{entry.polite.korean}</span>
-                  <span className="text-xs text-gray-400 dark:text-gray-500">{entry.polite.romanization}</span>
-                  <SpeakBtn
-                    text={entry.polite.korean}
-                    color={LEVEL_COLORS.polite.badge}
-                    onPlay={() => setSoundOut({ korean: entry.polite.korean, romanization: entry.polite.romanization, english: `${entry.english} · Polite` })}
-                  />
-                </div>
+              {isActiveLocked && (
+                <PeekOverlay
+                  title={`${cat.emoji} ${cat.label} — Premium`}
+                  description={`All ${cat.entries.length} ${cat.label.toLowerCase()} speech-level pairs — formal, polite & casual forms with cultural notes.`}
+                />
               )}
             </div>
-          );
-        })}
-      </div>
-      {isActiveLocked && (
-        <PeekOverlay
-          title={`${cat.emoji} ${cat.label} — Premium`}
-          description={`All ${cat.entries.length} ${cat.label.toLowerCase()} speech-level pairs — formal, polite & casual forms with cultural notes.`}
-        />
-      )}
-      </div>
+          </div>
+        </div>
 
-      {/* Footer tip */}
-      <div className="mt-8 bg-gradient-to-r from-blue-50 to-[#EEF5F1] dark:from-blue-900/20 dark:to-[#153327]/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-5">
-        <h3 className="font-black text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-          <span>📖</span> When to use each level
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-gray-600 dark:text-gray-400">
-          <div className="flex gap-2">
-            <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1" />
-            <span><strong className="text-blue-700 dark:text-blue-300">Formal (합쇼체)</strong> — Military, news broadcasts, formal speeches, strict corporate settings.</span>
+        {/* ── Rail ── */}
+        <div className="order-2 w-full flex-none lg:w-[290px]">
+          <div className={`${railCard} mb-3.5`}>
+            <div className="mb-2 text-[13.5px] font-semibold text-[#16202F] dark:text-white">When in doubt</div>
+            <p className="text-[13.5px] leading-[1.55] text-[#3E4A5A] dark:text-gray-400">
+              Use the polite level. Koreans do not expect a learner to switch registers, and -요 is
+              never offensive.
+            </p>
           </div>
-          <div className="flex gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#3F8571] flex-shrink-0 mt-1" />
-            <span><strong className="text-[#265847] dark:text-[#93C2AE]">Polite (해요체)</strong> — Everyday default for strangers, elders, workplaces, shops, and service interactions.</span>
+
+          <div className={`${railCard} mb-3.5`}>
+            <div className="mb-2.5 text-[13.5px] font-semibold text-[#16202F] dark:text-white">
+              How to tell them apart
+            </div>
+            <div className="flex flex-col gap-2.5 text-[13.5px] text-[#3E4A5A] dark:text-gray-400">
+              {[
+                ['-요', 'polite', LEVEL_TINT.polite],
+                ['-니다', 'formal', LEVEL_TINT.formal],
+                ['nothing on the end', 'casual', LEVEL_TINT.casual],
+              ].map(([end, level, colour]) => (
+                <div key={level} className="flex items-baseline gap-2">
+                  <span className="font-korean font-semibold text-[#16202F] dark:text-white">{end}</span>
+                  <span className="text-[#8A93A0]">→</span>
+                  <span className="font-semibold" style={{ color: colour }}>{level}</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-[12px] leading-[1.5] text-[#4A5566] dark:text-gray-500">
+              A rule of thumb for the endings on this page, not a law — but it will carry you a long way.
+            </p>
           </div>
-          <div className="flex gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#E4572E] flex-shrink-0 mt-1" />
-            <span><strong className="text-[#A83619] dark:text-[#F5A183]">Casual (반말)</strong> — Close friends, romantic partners, children, and peers who mutually agree to drop formality.</span>
+
+          <div className={railCard}>
+            <div className="mb-2.5 text-[13.5px] font-semibold text-[#16202F] dark:text-white">Related</div>
+            <div className="flex flex-col gap-2">
+              {([
+                ['culture', 'Culture — where the levels come from'],
+                ['grammar', 'Grammar — the endings themselves'],
+                ['phrases', 'Phrases — the polite forms in use'],
+              ] as [Section, string][]).map(([s, label]) => (
+                <button
+                  key={s}
+                  onClick={() => setActiveSection?.(s)}
+                  className="text-left text-[13.5px] font-medium transition-opacity hover:opacity-70"
+                  style={{ color: ACC.light }}
+                >
+                  {label} →
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
