@@ -596,7 +596,7 @@ const AppContent: React.FC = () => {
       case 'kpop':
         return <KPopSection />;
       case 'bookmarks':
-        return <BookmarkList bookmarks={bookmarks} toggleBookmark={toggleBookmark} />;
+        return <BookmarkList bookmarks={bookmarks} toggleBookmark={toggleBookmark} setActiveSection={handleSetActiveSection} />;
       case 'srs':
         return <SRSManager onStartStudy={handleStartStudy} />;
       case 'profile':
