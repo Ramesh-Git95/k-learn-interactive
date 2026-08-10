@@ -373,7 +373,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
               </p>
               <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-4 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                 The only Korean learning app built for K-drama fans.
-                AI conversations, 800+ words &amp; phrases, real grammar — not tourist phrases.
+                AI conversations, 500+ words &amp; phrases, real grammar — not tourist phrases.
               </p>
               <p className="text-sm sm:text-base font-black mb-8 max-w-lg mx-auto lg:mx-0" style={{ color: 'var(--kl-celadon)' }}>
                 Just $4/month. Cancel anytime. Less than a coffee ☕

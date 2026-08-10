@@ -157,6 +157,99 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* The specimen stage inside the Try-It inset. Light mode tints the hanji cream
+   with the accent of whichever section is showing, so the panel picks up the
+   colour of its content instead of dropping a dark slab into a warm page — the
+   rule everywhere here is no dark surfaces in light mode. Dark mode keeps the
+   ink navy, where the Korean reads brightest. --kl-acc is set per section. */
+.kl-specimen {
+  --kl-acc: #E4572E;
+  /* The comet only lights a fraction of the circle at a time, so the edge is
+     held by a real border rather than by the ring. */
+  border: 1px solid color-mix(in srgb, var(--kl-acc) 26%, transparent);
+  /* Nearly white, NOT an accent tint. The page behind this is already a warm
+     cream-to-peach gradient, so tinting the card warm too left the two the same
+     colour and the card stopped reading as a surface at all. The accent belongs
+     on the border and the comet; the stage itself is the paper under them. A
+     soft shadow does the separating. */
+  background: linear-gradient(160deg, #FFFFFF 0%, color-mix(in srgb, var(--kl-acc) 4%, #FFFDF8) 100%);
+  box-shadow: 0 6px 22px -14px rgba(20, 32, 47, 0.45);
+}
+.dark .kl-specimen {
+  border-color: color-mix(in srgb, var(--kl-acc) 34%, transparent);
+  background: linear-gradient(160deg, rgba(22, 32, 47, 0.96), rgba(22, 32, 47, 0.88));
+  box-shadow: none;
+}
+
+/* A lit border for the specimen stage, coloured by whichever section is showing.
+   Same comet technique as .kl-glow-ring, but driven by --kl-acc so one rule
+   serves all three sections — that one is hard-wired to the chat colours and is
+   used elsewhere, so it is left alone.
+
+   The base ring stays lit the whole way round with the comet passing over it.
+   A conic gradient that fades to transparent leaves the side the light has just
+   left looking like a missing border, which is the mistake the hero card made
+   before it was fixed. The ::after is a tight halo hugging the edge, not a wash
+   behind the card — the glow should read as the border being lit. */
+.kl-specimen-ring {
+  position: relative;
+  isolation: isolate;
+}
+/* Two copies of the same comet: a crisp one on the edge, and a blurred one
+   behind it so the glow travels WITH the spot instead of sitting still. */
+.kl-specimen-ring::before,
+.kl-specimen-ring::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  /* A hot head, then roughly a quarter-turn of tail fading out behind it. The
+     rest of the circle is genuinely transparent — the card's own 1px border
+     holds the edge, so nothing needs to be faked in to keep the shape read. */
+  background: conic-gradient(
+    from var(--kl-angle),
+    color-mix(in srgb, var(--kl-acc) 30%, #FFFFFF) 0deg,
+    var(--kl-acc) 7deg,
+    color-mix(in srgb, var(--kl-acc) 55%, transparent) 30deg,
+    color-mix(in srgb, var(--kl-acc) 14%, transparent) 62deg,
+    transparent 95deg,
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: klRing 4s linear infinite;
+  pointer-events: none;
+}
+.kl-specimen-ring::before { z-index: -1; }
+.kl-specimen-ring::after {
+  z-index: -2;
+  filter: blur(7px);
+  /* Restrained on paper, where a strong blur reads as a smear rather than a
+     light; free to burn against ink. */
+  opacity: 0.45;
+}
+.dark .kl-specimen-ring::after { opacity: 1; }
+/* Nothing should orbit if the visitor asked for stillness — park the head at
+   the top-left corner and drop the halo. */
+@media (prefers-reduced-motion: reduce) {
+  .kl-specimen-ring::before { animation: none; }
+  .kl-specimen-ring::after { display: none; }
+}
+
+/* Icon tiles on the Try-It cards. The selected section's tile bobs slowly so it
+   is obvious which one the stage is showing; the other two turn once on hover.
+   Written here rather than as a Tailwind variant because klTurn is our own
+   keyframe, and `group-hover:` can only compose with real utilities. */
+.group:hover .kl-icon-turn {
+  animation: klTurn 460ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .group:hover .kl-icon-turn { animation: none; }
+}
+
 /* Stat numbers on the Try-It inset. The default brand gradient ends in plum,
    which is too dark to read on the navy card, so dark mode swaps to a warm
    coral→gold gradient that stays bright on ink. */
