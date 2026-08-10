@@ -7,204 +7,19 @@ import { earnXP, markStudyToday } from '../utils/xpStreak';
 import { saveTopikEstimate } from '../utils/topikEstimate';
 import { useUpgrade } from '../hooks/useUpgrade';
 import { accentFor } from '../utils/moduleAccent';
+import { sampleAttempt } from '../data/topikQuestions';
 
 const OPTION_LABELS = ['①', '②', '③', '④'];
 const ACC = accentFor('topik-test');
 const PINE = '#2E6B59';
 
-interface Question {
-  id: string;
-  level: 1 | 2 | 3 | 4 | 5 | 6;
-  instruction: string;
-  sentence?: string;
-  options: string[];
-  answer: number;
-  explanation: string;
-}
 
-const QUESTIONS: Question[] = [
-  // ── Level 1 ── basic Hangul, survival vocabulary, subject/topic particles
-  {
-    id: 'l1-1', level: 1,
-    instruction: '다음 ( )에 알맞은 것을 고르십시오.',
-    sentence: '제 이름( ) 김민준이에요.',
-    options: ['은', '는', '이', '가'],
-    answer: 0,
-    explanation: '이름 ends in a consonant (ㅁ), so the topic marker 은 is used. 는 follows vowels.',
-  },
-  {
-    id: 'l1-2', level: 1,
-    instruction: '다음 ( )에 알맞은 것을 고르십시오.',
-    sentence: '저는 학생( ) 아니에요.',
-    options: ['이', '가', '을', '에'],
-    answer: 0,
-    explanation: '학생이 아니에요 = "I am not a student." 이/가 is the subject particle; 학생 ends in a consonant so 이 is used.',
-  },
-  {
-    id: 'l1-3', level: 1,
-    instruction: '다음 중 날씨를 나타내는 단어가 아닌 것을 고르십시오.',
-    options: ['맑다 (clear)', '춥다 (cold)', '배고프다 (hungry)', '덥다 (hot)'],
-    answer: 2,
-    explanation: '배고프다 means "hungry" — a physical state, not weather. 맑다, 춥다, 덥다 are all weather words.',
-  },
-  // ── Level 2 ── basic daily conversation, tense, common connectors
-  {
-    id: 'l2-1', level: 2,
-    instruction: '다음 ( )에 알맞은 것을 고르십시오.',
-    sentence: '내일 친구( ) 같이 영화를 볼 거예요.',
-    options: ['에게', '와', '에서', '로'],
-    answer: 1,
-    explanation: '친구와 같이 = "together with a friend." -와/과 marks accompaniment; 친구 ends in a vowel so 와 is used.',
-  },
-  {
-    id: 'l2-2', level: 2,
-    instruction: '다음 ( )에 알맞은 것을 고르십시오.',
-    sentence: '저는 매일 아침 커피( ) 마셔요.',
-    options: ['이', '가', '을', '를'],
-    answer: 3,
-    explanation: '커피 ends in a vowel, so the object particle 를 is used. 을 follows consonants.',
-  },
-  {
-    id: 'l2-3', level: 2,
-    instruction: '다음 ( )에 알맞은 것을 고르십시오.',
-    sentence: '오늘 날씨가 좋아서 공원에 ( ).',
-    options: ['갔어요', '갈 거예요', '가고 싶어요', '가서'],
-    answer: 0,
-    explanation: '좋아서 provides the reason for a completed action. "Because the weather was nice, I went to the park." Past tense 갔어요 fits.',
-  },
-  {
-    id: 'l2-4', level: 2,
-    instruction: '다음 ( )에 알맞은 것을 고르십시오.',
-    sentence: '어제 영화를 봤( ) 정말 재미있었어요.',
-    options: ['으면', '는데', '어서', '지만'],
-    answer: 1,
-    explanation: 'V-는데 connects background context to a following statement. "I watched a movie yesterday, and it was really interesting."',
-  },
-  // ── Level 3 ── intermediate grammar patterns, -려면, -기 위해서, -지 않다
-  {
-    id: 'l3-1', level: 3,
-    instruction: '다음 ( )에 알맞은 것을 고르십시오.',
-    sentence: '시험에 합격하( ) 열심히 공부해야 해요.',
-    options: ['-아서', '-려면', '-는데', '-더라도'],
-    answer: 1,
-    explanation: 'V-려면 = "in order to / if you want to." "In order to pass the exam, you have to study hard."',
-  },
-  {
-    id: 'l3-2', level: 3,
-    instruction: '밑줄 친 부분과 의미가 가장 비슷한 것을 고르십시오.',
-    sentence: '"그 문제는 생각보다 쉽지 않았어요."',
-    options: ['어려웠어요', '간단했어요', '복잡하지 않았어요', '쉬웠어요'],
-    answer: 0,
-    explanation: '쉽지 않았어요 = "was not easy" ≈ 어려웠어요 (was difficult). The meaning is equivalent.',
-  },
-  {
-    id: 'l3-3', level: 3,
-    instruction: '다음 ( )에 알맞은 것을 고르십시오.',
-    sentence: '한국어를 잘 하( ) 위해서 매일 연습해요.',
-    options: ['기', '는', '을', '면'],
-    answer: 0,
-    explanation: 'V-기 위해서 = "in order to do." 잘 하기 위해서 = "in order to do well." -기 nominalises the verb before 위해서.',
-  },
-  // ── Level 4 ── upper-intermediate: formal vocabulary, complex connectors
-  {
-    id: 'l4-1', level: 4,
-    instruction: '다음 ( )에 가장 알맞은 것을 고르십시오.',
-    sentence: '경제 성장과 환경 보호는 서로 ( ) 관계에 있다.',
-    options: ['대립적인', '유사한', '종속적인', '동등한'],
-    answer: 0,
-    explanation: '대립적 = contradictory/opposing. Economic growth and environmental protection are often in tension. 유사한=similar, 종속적=subordinate, 동등한=equal.',
-  },
-  {
-    id: 'l4-2', level: 4,
-    instruction: '다음 ( )에 알맞은 것을 고르십시오.',
-    sentence: '아무리 바쁘( ) 건강은 챙겨야 한다.',
-    options: ['-더라도', '-지만', '-아서', '-으면'],
-    answer: 0,
-    explanation: '아무리 -더라도 = "no matter how." "No matter how busy you are, you must take care of your health."',
-  },
-  {
-    id: 'l4-3', level: 4,
-    instruction: '다음 밑줄 친 단어와 바꿔 쓸 수 없는 것을 고르십시오.',
-    sentence: '"현대인들은 스마트폰 없이는 생활하기 어렵다."',
-    options: ['힘들다', '곤란하다', '불가능하다', '쉽지 않다'],
-    answer: 2,
-    explanation: '어렵다 = difficult (not impossible). 불가능하다 = impossible — too extreme, changes the meaning. 힘들다, 곤란하다, 쉽지 않다 all mean "difficult."',
-  },
-  {
-    id: 'l4-4', level: 4,
-    instruction: '다음 ( )에 가장 알맞은 것을 고르십시오.',
-    sentence: '그는 여러 가지 일을 동시에 처리하는 ( )이/가 뛰어나다.',
-    options: ['능력', '노력', '방식', '결과'],
-    answer: 0,
-    explanation: '능력이 뛰어나다 = to have outstanding ability. "He has outstanding ability to handle multiple things simultaneously."',
-  },
-  // ── Level 5 ── advanced: formal register, abstract vocabulary, reading
-  {
-    id: 'l5-1', level: 5,
-    instruction: '다음 글의 ( )에 알맞은 것을 고르십시오.',
-    sentence: '최근 연구에 따르면, 규칙적인 운동이 정신 건강에 ( ) 영향을 미친다는 사실이 밝혀졌다.',
-    options: ['긍정적인', '부정적인', '미미한', '일시적인'],
-    answer: 0,
-    explanation: '규칙적인 운동이 정신 건강에 긍정적인 영향을 미친다 = regular exercise has a positive effect on mental health — the established finding.',
-  },
-  {
-    id: 'l5-2', level: 5,
-    instruction: '다음 ( )에 문맥상 가장 알맞은 것을 고르십시오.',
-    sentence: '그 기업은 수익성보다 사회적 ( )을 우선시하는 경영 철학으로 유명하다.',
-    options: ['책임', '이익', '경쟁', '성장'],
-    answer: 0,
-    explanation: '사회적 책임 (social responsibility / CSR) is the key concept — prioritising it over profitability is a well-known business philosophy.',
-  },
-  {
-    id: 'l5-3', level: 5,
-    instruction: '다음 문장에서 어색한 것을 고르십시오.',
-    options: [
-      '일찍 일어났기 때문에 피곤해요.',
-      '열심히 공부해서 성적이 올랐어요.',
-      '비가 오는데도 불구하고 나갔어요.',
-      '그는 적극적으로 자신의 의견을 피력했다.',
-    ],
-    answer: 2,
-    explanation: '비가 오는데도 불구하고 — "불구하고" requires a noun or nominalised form: 비가 옴에도 불구하고 or simply 비가 오는데도. ③ is unnatural.',
-  },
-  // ── Level 6 ── near-mastery: idioms, discourse, subtle grammar
-  {
-    id: 'l6-1', level: 6,
-    instruction: '밑줄 친 표현의 의미로 가장 적절한 것을 고르십시오.',
-    sentence: '"그는 말은 앞서지만 행동은 뒤처지는 편이다."',
-    options: [
-      '언행이 일치하지 않는다',
-      '말을 못 하지만 행동은 잘한다',
-      '말과 행동이 모두 빠르다',
-      '행동보다 말이 느리다',
-    ],
-    answer: 0,
-    explanation: '말은 앞서지만 행동은 뒤처진다 = words go ahead but actions fall behind → 언행불일치 (words and actions don\'t match). A Korean idiomatic expression.',
-  },
-  {
-    id: 'l6-2', level: 6,
-    instruction: '다음 글의 주제로 가장 알맞은 것을 고르십시오.',
-    sentence: '"고령화 사회에서는 노인 인구의 증가로 인해 의료비 부담이 커지고 사회 복지 재원이 부족해지는 문제가 발생한다. 이를 해결하기 위해서는 세대 간 연대를 강화하고 지속 가능한 사회 보장 제도를 마련하는 것이 필요하다."',
-    options: [
-      '고령화 사회의 문제와 해결 방안',
-      '노인 복지 정책의 역사',
-      '의료비 절감 방법',
-      '세대 간 갈등의 원인',
-    ],
-    answer: 0,
-    explanation: 'The passage addresses both problems (medical costs, funding gaps) and solutions (generational solidarity, sustainable systems) in an aging society.',
-  },
-  {
-    id: 'l6-3', level: 6,
-    instruction: '다음 ( )에 들어갈 가장 알맞은 연결 표현을 고르십시오.',
-    sentence: '개인의 자유는 존중받아야 한다. ( ), 그 자유가 타인에게 해를 끼쳐서는 안 된다.',
-    options: ['그러나', '따라서', '그러므로', '왜냐하면'],
-    answer: 0,
-    explanation: '그러나 (however/but) introduces a contrast: freedom should be respected, BUT it shouldn\'t harm others. 따라서/그러므로 = therefore; 왜냐하면 = because.',
-  },
-];
 
-const FREE_QUESTION_COUNT = 10; // levels 1–3
+// Four questions drawn from each level's pool of ten. Free covers levels 1–3
+// (12 questions), Premium all six (24) — the same reach as before, but each
+// attempt is a different draw rather than the whole bank in a fixed order.
+const PER_LEVEL = 4;
+const FREE_MAX_LEVEL = 3;
 
 const LEVEL_INFO: Record<number, { name: string; desc: string; color: string; tip: string }> = {
   1: {
@@ -257,19 +72,18 @@ const TopikAssessment: React.FC = () => {
   const [screen, setScreen] = useState<Screen>('intro');
   const [qIdx, setQIdx] = useState(0);
   const [chosen, setChosen] = useState<number | null>(null);
-  const [answers, setAnswers] = useState<(number | null)[]>(() => Array(QUESTIONS.length).fill(null));
   const [certName, setCertName] = useState(user?.name || '');
   const [confirmExit, setConfirmExit] = useState(false);
-  // Bumped on restart so the option order is re-shuffled for a fresh attempt.
+  // Bumped on restart so a fresh attempt draws new questions.
   const [attempt, setAttempt] = useState(0);
 
-  const baseQs = isPremium ? QUESTIONS : QUESTIONS.slice(0, FREE_QUESTION_COUNT);
+  const maxLevel = isPremium ? 6 : FREE_MAX_LEVEL;
 
-  // Re-shuffled each attempt (attempt bumps on restart). With only 20 questions
-  // a retake shows the same ones, so this stops position memory — "it was the
-  // second option" — from standing in for knowing the answer. It does not make
-  // the bank bigger; that needs more questions written.
-  const activeQs = useMemo(() => baseQs.map(question => {
+  // Each attempt draws PER_LEVEL questions from each level's pool of ten, then
+  // shuffles the options within them. Sampling is what makes a retake a new
+  // test; the option shuffle only stops "it was the second one" standing in for
+  // knowing the answer.
+  const activeQs = useMemo(() => sampleAttempt(PER_LEVEL, maxLevel).map(question => {
     const order = question.options.map((_, i) => i);
     for (let i = order.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -281,7 +95,10 @@ const TopikAssessment: React.FC = () => {
       answer: order.indexOf(question.answer),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [isPremium, attempt]);
+  }), [maxLevel, attempt]);
+
+  // Sized from the drawn attempt, not the whole bank.
+  const [answers, setAnswers] = useState<(number | null)[]>(() => Array(activeQs.length).fill(null));
   const q = activeQs[qIdx];
   const totalQs = activeQs.length;
   const progressPct = ((qIdx + (chosen !== null ? 1 : 0)) / totalQs) * 100;
@@ -313,12 +130,11 @@ const TopikAssessment: React.FC = () => {
     setScreen('intro');
     setQIdx(0);
     setChosen(null);
-    setAnswers(Array(QUESTIONS.length).fill(null));
+    setAnswers(Array(activeQs.length).fill(null));
   };
 
   // Compute TOPIK level estimate based on cumulative accuracy
   const computeLevel = (): number => {
-    const maxLevel = isPremium ? 6 : 3;
     for (let L = maxLevel; L >= 1; L--) {
       const indices = activeQs.reduce<number[]>((acc, q, i) => { if (q.level <= L) acc.push(i); return acc; }, []);
       const correct = indices.filter(i => answers[i] === activeQs[i].answer).length;
@@ -548,7 +364,6 @@ const TopikAssessment: React.FC = () => {
   // the same numbers computeLevel() uses, not a decorative figure.
   const nextLevel = estimatedLevel + 1;
   const nextBand = levelBreakdown.find(b => b.level === nextLevel);
-  const maxLevel = isPremium ? 6 : 3;
   const ringPct = estimatedLevel >= maxLevel ? 100 : (nextBand?.pct ?? 0);
 
   const R = 70;
