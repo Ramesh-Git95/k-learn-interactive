@@ -600,6 +600,64 @@
 }
 
 /* Drawer content reveal — the mockup's klFade. */
+/* ── Word strip ───────────────────────────────────────────────────────────────
+   Each syllable of the leading word is uncovered left to right, in the order
+   Hangul is written, so the word reads as brushed in rather than faded in. One
+   span per syllable, each with its own delay, set by the component. */
+@keyframes klInkWipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+.kl-ink-syl {
+  display: inline-block;
+  animation: klInkWipe 340ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kl-ink-syl { animation: none; clip-path: none; }
+}
+
+/* Word cards. The border was an inline rgba(20,32,47,…) — ink, which disappears
+   on a dark ground, the same fault the platform slats had. Both themes are set
+   here instead. The border stays 2px in every state so the lead's heavier edge
+   does not shift the layout by a pixel as the strip steps. */
+.kl-word-card {
+  --kl-acc: #E4572E;
+  /* 23% ink and 20% white are the points where the edge clears 1.6:1 against
+     the card's own fill in each theme — the fill itself sits barely above the
+     page (1.06:1), so the border is doing all the separating and has to hold. */
+  border: 2px solid rgba(20, 32, 47, 0.23);
+  background: #FFFCF4;
+}
+.dark .kl-word-card {
+  border-color: rgba(255, 255, 255, 0.20);
+  background: rgba(255, 255, 255, 0.045);
+}
+.kl-word-card[data-lead='true'] {
+  border-color: var(--kl-acc);
+  background: color-mix(in srgb, var(--kl-acc) 6%, #FFFCF4);
+  box-shadow: 0 14px 34px -26px var(--kl-acc);
+}
+.dark .kl-word-card[data-lead='true'] {
+  border-color: var(--kl-acc);
+  background: color-mix(in srgb, var(--kl-acc) 17%, #1B2637);
+  box-shadow: 0 0 26px -10px color-mix(in srgb, var(--kl-acc) 70%, transparent);
+}
+
+/* The strip slides by exactly one card per step. Four cards are held in the
+   track and each is a quarter of it, so one step is always -25% of the track
+   whatever the breakpoint — only the track's width and its resting offset
+   change. A phone shows one card, wider screens show three. */
+.kl-strip-track {
+  --kl-rest: -25%;
+  width: 400%;
+}
+@media (min-width: 640px) {
+  .kl-strip-track {
+    --kl-rest: 0%;
+    width: 133.3333%;
+  }
+}
+
 @keyframes klFade {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: none; }

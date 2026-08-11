@@ -6,6 +6,7 @@ import HangulMixer from './HangulMixer';
 import FeatureShowcase from './FeatureShowcase';
 import TryItShowcase from './TryItShowcase';
 import JourneyPath from './JourneyPath';
+import WordStrip from './WordStrip';
 import type { Section } from '../types';
 
 
@@ -16,19 +17,6 @@ interface LandingPageProps {
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 
-const marqueeWords = [
-  '안녕하세요', 'Hello', '감사합니다', 'Thank you', '사랑해', 'I love you',
-  '한국어', 'Korean', '공부하다', 'To study', '맛있다', 'Delicious',
-  '드라마', 'K-Drama', '아이돌', 'Idol', '화이팅', 'Fighting!',
-  '괜찮아요', "It's okay", '진짜요?', 'Really?', '대박', 'Awesome',
-  '어디예요?', 'Where is it?', '얼마예요?', 'How much?', '멋있다', 'Cool!',
-];
-
-// Korean/English pairs for the marquee chips (marqueeWords alternates ko/en).
-const marqueePairs = Array.from({ length: Math.floor(marqueeWords.length / 2) }, (_, i) => ({
-  ko: marqueeWords[i * 2],
-  en: marqueeWords[i * 2 + 1],
-}));
 
 // Rotating hero badge lines — cycle with a small fade/rise animation.
 const HERO_BADGES = [
@@ -72,15 +60,6 @@ const FAQ = [
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const speakKorean = (text: string) => {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ko-KR';
-    u.rate = 0.75;
-    window.speechSynthesis.speak(u);
-  }
-};
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -224,22 +203,13 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
 
   return (
     <div className="kl-landing min-h-screen bg-white dark:bg-gray-950 overflow-hidden">
-      <style>{`
-        @keyframes marquee    { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+      <style>{` 100% { transform: translateX(-50%); } }
         @keyframes floatA     { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-18px) rotate(5deg); } }
         @keyframes floatB     { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-12px) rotate(-4deg); } }
         @keyframes floatC     { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-22px); } }
         @keyframes fadeUp     { from { opacity:0; transform:translateY(32px); } to { opacity:1; transform:translateY(0); } }
         @keyframes blobPulse  { 0%,100% { border-radius:60% 40% 30% 70%/60% 30% 70% 40%; } 50% { border-radius:30% 60% 70% 40%/50% 60% 30% 60%; } }
         @keyframes shimmer    { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
-
-        .marquee-track { animation: marquee 30s linear infinite; }
-        .marquee-hover:hover .marquee-track { animation-play-state: paused; }
-        @media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
-        .marquee-mask {
-          mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-          -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-        }
         .float-a       { animation: floatA 7s ease-in-out infinite; }
         .float-b       { animation: floatB 9s ease-in-out infinite; }
         .float-c       { animation: floatC 6s ease-in-out infinite; }
@@ -455,32 +425,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         </div>
       </section>
 
-      {/* ── MARQUEE — soft chips on the page background, faded at both edges,
-             static label in front. Hover to pause, tap a chip to hear it. ── */}
-      <div className="px-4 py-8">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center gap-3 sm:gap-5">
-          <span className="flex-shrink-0 text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-            🔊 Tap a word to hear it
-          </span>
-          <div className="marquee-hover marquee-mask flex-1 w-full overflow-hidden">
-            <div className="marquee-track flex items-center gap-3 pr-3 py-1 w-max">
-              {[...marqueePairs, ...marqueePairs].map((p, i) => (
-                <button
-                  key={i}
-                  onClick={() => speakKorean(p.ko)}
-                  title="Tap to hear the pronunciation"
-                  aria-label={`Hear ${p.ko} (${p.en}) pronounced`}
-                  className="kl-chip-glow inline-flex items-center gap-2 px-4 py-1.5 rounded-full shadow-sm hover:shadow hover:-translate-y-0.5 transition-all duration-150 whitespace-nowrap"
-                >
-                  <span aria-hidden="true" className="text-xs text-[#E4572E]">🔊</span>
-                  <span className="text-sm font-bold text-gray-800 dark:text-gray-200" style={{ fontFamily: 'Pretendard Variable,sans-serif' }}>{p.ko}</span>
-                  <span className="text-xs text-gray-400 dark:text-gray-500">{p.en}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      <WordStrip />
 
       {/* ── TRY IT + PROGRESS (rings left, open sections right) ── */}
       <TryItShowcase onNavigate={handleNavigate} />

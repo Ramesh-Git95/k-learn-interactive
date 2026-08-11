@@ -39,20 +39,34 @@ export function useScrollReveal(): void {
 
     targets.forEach(el => observer.observe(el));
 
-    // Anything already on screen at mount (short viewports, a restored scroll
-    // position) reveals immediately rather than waiting for a scroll that may
-    // never come.
-    requestAnimationFrame(() => {
-      targets.forEach(el => {
-        const box = el.getBoundingClientRect();
-        if (box.top < window.innerHeight && box.bottom > 0) {
-          el.classList.add('is-visible');
-          observer.unobserve(el);
-        }
+    // Anything already on screen at mount (above the fold on a normal load, a
+    // short viewport, a restored scroll position) reveals immediately rather
+    // than waiting for a scroll that may never come.
+    //
+    // TWO frames, not one. A single requestAnimationFrame runs before the
+    // browser has painted the starting opacity:0, so the transition has no
+    // value to animate from and the element simply appears — which is why
+    // anything above the fold looked stuck in place while everything further
+    // down faded in properly. Waiting a second frame guarantees the initial
+    // state is on screen before the class lands.
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        targets.forEach(el => {
+          const box = el.getBoundingClientRect();
+          if (box.top < window.innerHeight && box.bottom > 0) {
+            el.classList.add('is-visible');
+            observer.unobserve(el);
+          }
+        });
       });
     });
 
-    return () => observer.disconnect();
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      observer.disconnect();
+    };
   }, []);
 }
 
