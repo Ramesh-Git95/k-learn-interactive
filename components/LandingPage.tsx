@@ -6,6 +6,7 @@ import HangulMixer from './HangulMixer';
 import FeatureShowcase from './FeatureShowcase';
 import TryItShowcase from './TryItShowcase';
 import JourneyPath from './JourneyPath';
+import type { Section } from '../types';
 
 
 interface LandingPageProps {
@@ -66,7 +67,7 @@ const FAQ = [
   { q: 'Do I need any prior Korean knowledge?',          a: 'None at all. The Hangul module teaches the entire alphabet from scratch. Most learners can read Korean in under a week.' },
   { q: 'How long until I can have a real conversation?', a: 'With daily 20-minute sessions, most learners can handle basic conversations in 2–3 months. The AI tutor accelerates this significantly.' },
   { q: 'Is the payment secure?',                         a: 'Payment is processed securely by Stripe — the payments platform trusted by millions of businesses worldwide. You can cancel anytime from your profile.' },
-  { q: 'Will I get future features?',                    a: 'Yes — your Premium subscription includes everything we build. Stroke Canvas shipped recently at no extra charge, K-Drama Shadowing is next, and the same goes for everything after it.' },
+  { q: 'Will I get future features?',                    a: 'Yes — your Premium subscription includes everything we build. All seventeen tools are live today, and Writing, Reading and the Korean typing drill were all added at no extra charge after launch. The same goes for whatever comes next.' },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -208,8 +209,17 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
     else window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' }));
   };
 
-  const handleNavigate = (section: 'vocabulary' | 'grammar' | 'culture') =>
+  // Any section, not just the three public ones the Try It block offers.
+  //
+  // A guest can only reach vocabulary, grammar and culture — App resets
+  // anything else back to null. Navigating there regardless would drop them on
+  // the landing page with nothing having happened, which reads as a broken
+  // link, so a gated tool asks them to sign up instead.
+  const PUBLIC_SECTIONS: Section[] = ['vocabulary', 'grammar', 'culture'];
+  const handleNavigate = (section: Section) => {
+    if (!user && !PUBLIC_SECTIONS.includes(section)) { handleStart(); return; }
     window.dispatchEvent(new CustomEvent('navigate-to-section', { detail: section }));
+  };
 
 
   return (
@@ -476,7 +486,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       <TryItShowcase onNavigate={handleNavigate} />
 
       {/* ── FEATURES ─────────────────────────────────────────────── */}
-      <FeatureShowcase />
+      <FeatureShowcase onOpen={handleNavigate} />
 
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────── */}

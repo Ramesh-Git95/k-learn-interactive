@@ -101,7 +101,9 @@ const STATS = [
   { n: 500, suffix: '+', label: 'Words & Phrases' },
   { n: 40,  suffix: '',  label: 'Hangul Characters' },
   { n: 24,  suffix: '',  label: 'Culture Cards' },
-  { n: 10,  suffix: '',  label: 'Learning Tools' },
+  // Seventeen sections route in App.tsx and all of them are live. The old "10"
+  // was carried over from the platform section's copy, which was itself wrong.
+  { n: 17,  suffix: '',  label: 'Learning Tools' },
 ];
 
 // Counts up when `run` turns true — driven by the same in-view trigger as the

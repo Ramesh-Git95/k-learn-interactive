@@ -181,6 +181,80 @@
   box-shadow: none;
 }
 
+/* Platform-wall slats. The growing-panel behaviour belongs to the wide layout
+   only: in the stacked mobile list the container has no fixed height, so a
+   flex-basis of 0 gives every slat a hypothetical height of zero and the whole
+   wall collapses. Below the breakpoint each slat is simply an accordion row. */
+.kl-slat {
+  --kl-acc: #E4572E;
+  flex: 0 0 auto;
+  /* Each slat is edged and washed in its OWN colour, so the wall reads as a run
+     of seventeen tools rather than a grid of grey boxes. Both values live here
+     rather than inline because they need a per-theme figure: the old inline
+     rgba(20,32,47,.12) is ink at 12%, which simply vanishes on a dark ground and
+     left the slats with no visible separation at all. */
+  /* Full accent at high alpha rather than a weaker tint. Weakening the colour
+     does not help the pale accents — gold sits close to cream in luminance, so
+     no low alpha ever separates it. Raising the alpha and keeping the hue puts
+     the worst of the nine (gold) at 1.61:1 against its own fill, and keeps the
+     border unmistakably the tool's colour. */
+  border-color: color-mix(in srgb, var(--kl-acc) 70%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--kl-acc) 8%, #FFFCF4),
+    color-mix(in srgb, var(--kl-acc) 3%, #FFFDF8)
+  );
+}
+.kl-slat[data-open='true'] {
+  border-color: color-mix(in srgb, var(--kl-acc) 62%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--kl-acc) 15%, #FFFCF4),
+    color-mix(in srgb, var(--kl-acc) 6%, #FFFDF8)
+  );
+  box-shadow: 0 12px 30px -22px var(--kl-acc);
+}
+/* On ink the accent has to carry more weight to register at all, and the slat
+   needs to sit slightly above the section behind it to read as a card. */
+.dark .kl-slat {
+  /* Worst of the nine on ink is plum at 1.59:1. The fill is also lifted off the
+     section ground so the slat reads as a card, which is what was missing —
+     the old border was ink at 12% alpha, invisible on a dark background. */
+  border-color: color-mix(in srgb, var(--kl-acc) 72%, transparent);
+  background: color-mix(in srgb, var(--kl-acc) 11%, #1A2434);
+}
+.dark .kl-slat[data-open='true'] {
+  border-color: color-mix(in srgb, var(--kl-acc) 85%, transparent);
+  background: color-mix(in srgb, var(--kl-acc) 20%, #1A2434);
+  box-shadow: 0 0 22px -8px color-mix(in srgb, var(--kl-acc) 60%, transparent);
+}
+@media (min-width: 1024px) {
+  .kl-slat {
+    flex-grow: var(--kl-grow, 1);
+    flex-basis: 0;
+  }
+}
+
+/* Nine slats to a row leaves each one wide enough for a horizontal name, which
+   is the whole reason the wall is split in two. But opening one squeezes its
+   neighbours to about 80px, and a name truncated to "Spaced Repet…" is worse
+   than no name at all — so the shrinking slats drop cleanly to their glyph and
+   the names come back when the pointer leaves. */
+@media (min-width: 1024px) {
+  .kl-slat-name {
+    max-height: 3.2em;
+    opacity: 1;
+    transition: opacity .25s ease, max-height .35s ease;
+  }
+  .kl-row[data-busy="true"] .kl-slat:not([data-open="true"]) .kl-slat-name {
+    max-height: 0;
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kl-slat-name { transition: none; }
+}
+
 /* A lit border for the specimen stage, coloured by whichever section is showing.
    Same comet technique as .kl-glow-ring, but driven by --kl-acc so one rule
    serves all three sections — that one is hard-wired to the chat colours and is
