@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { vocabulary, grammarPatterns, cultureTips } from '../data/koreanData';
 import { trackCard, resetCard } from '../utils/cardTilt';
+import { FREE_GRAMMAR_COUNT, TOTAL_GRAMMAR_COUNT } from '../constants';
 
 // "Try It Right Now" — the free sections, shown rather than described.
 //
@@ -82,7 +83,7 @@ const ROWS: {
   },
   {
     id: 'grammar', n: '02', title: 'Grammar', emoji: '✏️',
-    tag: `all ${grammarPatterns.length} free`,
+    tag: `${FREE_GRAMMAR_COUNT} of ${TOTAL_GRAMMAR_COUNT} free`,
     meta: 'Particles to verb endings, colour-coded.',
     color: '#3F8571', gradient: 'from-[#4E9B85] to-[#3F8571]', specimens: GRAMMAR_SPECIMENS,
   },

@@ -12,7 +12,8 @@ interface UpgradeModalProps {
 
 const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, description, benefits }) => {
   const { isAuthenticated } = useAuth();
-  const { startUpgrade } = useUpgrade();
+  // This modal is itself a paywall, so its button goes straight to payment.
+  const { checkout } = useUpgrade();
   if (!isOpen) return null;
 
   return (
@@ -65,7 +66,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose, feature, d
             <button
               onClick={() => {
                 if (isAuthenticated) {
-                  startUpgrade();
+                  checkout();
                 } else {
                   onClose();
                   window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' }));

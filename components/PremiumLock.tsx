@@ -69,6 +69,13 @@ interface PremiumPeekProps extends PeekOverlayProps {
 /** Blur + peek gate: renders the REAL premium content blurred and inert inside
  *  a capped window, with a frosted upgrade CTA on top. Seeing genuine content
  *  behind the frost converts better than a hard lock wall. */
+// The overlay's own stack — badge, heading, description, button — needs about
+// this much room. The window's height otherwise comes from whatever is blurred
+// behind it, and when that is short (a single grammar rule, say) the overlay is
+// taller than the box holding it; because it is bottom-aligned, the excess ran
+// off the TOP and overflow-hidden sliced the "Premium preview" badge in half.
+const OVERLAY_MIN_HEIGHT = 264;
+
 export const PremiumPeek: React.FC<PremiumPeekProps> = ({
   title,
   description,
@@ -76,7 +83,10 @@ export const PremiumPeek: React.FC<PremiumPeekProps> = ({
   maxHeight = 440,
   className = '',
 }) => (
-  <div className={`relative overflow-hidden rounded-2xl ${className}`} style={{ maxHeight }}>
+  <div
+    className={`relative overflow-hidden rounded-2xl ${className}`}
+    style={{ maxHeight, minHeight: Math.min(maxHeight, OVERLAY_MIN_HEIGHT) }}
+  >
     <div className="pointer-events-none select-none blur-[5px]" aria-hidden="true" inert>
       {children}
     </div>

@@ -278,11 +278,25 @@ const TypingDojo: React.FC = () => {
       <div className="mx-auto max-w-4xl">
         {header('Typing')}
 
-        <p className="mb-5 max-w-[62ch] text-[15px] text-[#3E4A5A] dark:text-gray-400">
-          {isFree
-            ? 'Both drills run for 15 seconds on the free plan. Premium gives you the full minute.'
-            : 'Both drills run for one minute.'}
-        </p>
+        {/* The limit was stated here as a flat sentence, with the only way to
+            act on it buried in the results screen — so a free player had to
+            finish a drill before the app ever offered them the full minute. */}
+        <div className="mb-5 flex max-w-[62ch] flex-wrap items-center gap-x-3 gap-y-2">
+          <p className="text-[15px] text-[#3E4A5A] dark:text-gray-400">
+            {isFree
+              ? 'Both drills run for 15 seconds on the free plan. Premium gives you the full minute.'
+              : 'Both drills run for one minute.'}
+          </p>
+          {isFree && (
+            <button
+              onClick={openUpgradeModal}
+              className="flex h-9 shrink-0 items-center rounded-[9px] px-3.5 text-[13px] font-semibold text-white transition-transform hover:scale-[1.02]"
+              style={{ background: ACC.light }}
+            >
+              See Premium
+            </button>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <button

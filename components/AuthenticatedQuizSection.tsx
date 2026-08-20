@@ -564,11 +564,16 @@ const QuizComponent: React.FC = () => {
         {QUIZ_MODES.map(({ id, label, isPremium }) => (
           <button
             key={id}
-            onClick={() => !isPremium && setQuizMode(id)}
-            disabled={!!isPremium}
-            className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[9px] px-3.5 text-[12.5px] font-semibold leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+            // A locked mode opens the paywall. It used to be `disabled`, so the
+            // click never fired and the padlock explained nothing — you could
+            // see the mode existed and get no way to find out how to have it.
+            onClick={() => (isPremium ? openUpgradeModal() : setQuizMode(id))}
+            title={isPremium ? `${label} is a Premium mode — see what Premium includes` : undefined}
+            className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[9px] px-3.5 text-[12.5px] font-semibold leading-none transition-colors ${
               quizMode === id
                 ? 'text-white'
+                : isPremium
+                ? 'border border-dashed border-[rgba(20,32,47,0.24)] bg-transparent text-[#4A5566] hover:border-[#C13F22] hover:text-[#C13F22] dark:border-gray-600 dark:text-gray-400'
                 : 'border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] text-[#4A5566] hover:border-[rgba(20,32,47,0.28)] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400'
             }`}
             style={quizMode === id ? { background: ACC.light } : undefined}

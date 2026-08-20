@@ -29,7 +29,9 @@ interface Props {
 
 const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const { isAuthenticated } = useAuth();
-  const { startUpgrade } = useUpgrade();
+  // checkout, not startUpgrade — this IS the paywall, so its button goes to
+  // payment. Calling startUpgrade here would just reopen this modal.
+  const { checkout } = useUpgrade();
   if (!isOpen) return null;
 
   return (
@@ -120,7 +122,7 @@ const PremiumComparisonModal: React.FC<Props> = ({ isOpen, onClose }) => {
           {isAuthenticated ? (
             <>
               <button
-                onClick={startUpgrade}
+                onClick={checkout}
                 className="w-full py-3.5 rounded-2xl font-black text-base btn-brand"
               >
                 Subscribe — $4/month →

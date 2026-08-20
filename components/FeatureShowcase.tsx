@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { FREE_GRAMMAR_COUNT, TOTAL_GRAMMAR_COUNT } from '../constants';
 import type { Section } from '../types';
 
 // "Everything You Need to Master Korean" — the platform section, as a slat wall.
@@ -44,7 +45,7 @@ const TOOLS: Tool[] = [
     fact: '94 words · 10 categories',
     desc: 'Everyday words grouped by where you would use them. Tap any one to hear it spoken.', color: '#C13F22' },
   { n: '03', section: 'grammar', name: 'Grammar Patterns', glyph: '문', word: '문법', wordRom: 'munbeop', wordMeans: 'grammar',
-    fact: '7 patterns · all free',
+    fact: `${TOTAL_GRAMMAR_COUNT} patterns · ${FREE_GRAMMAR_COUNT} free`,
     desc: 'Sentence structure from particles to verb endings, with the parts colour-coded.', color: '#2E6B59' },
   { n: '04', section: 'phrases', name: 'Phrases', glyph: '표', word: '표현', wordRom: 'pyohyeon', wordMeans: 'expression',
     fact: '16 phrases · by situation',

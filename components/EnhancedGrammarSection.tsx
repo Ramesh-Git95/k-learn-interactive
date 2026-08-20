@@ -4,6 +4,7 @@ import { grammarPatterns } from '../data/koreanData';
 import { noteFor, type GrammarNote } from '../data/grammarNotes';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { PremiumPeek } from './PremiumLock';
+import { FREE_GRAMMAR_COUNT } from '../constants';
 import SoftNudge from './SoftNudge';
 import { useAuth } from '../contexts/AuthContext';
 import GuestSignUpGate from './GuestSignUpGate';
@@ -241,9 +242,10 @@ const EnhancedGrammarSection: React.FC<Props> = ({ progress, toggleProgress, set
   const total = grammarPatterns.length;
   const completedCount = grammarPatterns.filter((_, i) => isCompleted(i)).length;
 
-  // The last 40% are the Premium tier, as they have always been.
-  const basicCount = Math.ceil(total * 0.6);
-  const isAdvanced = (i: number) => i >= basicCount;
+  // The last 40% are the Premium tier, as they have always been. The count is
+  // shared from constants.ts so the landing page can state it instead of
+  // guessing at it.
+  const isAdvanced = (i: number) => i >= FREE_GRAMMAR_COUNT;
   const canSeeAdvanced = canAccess('advancedGrammar');
 
   // Guests read the first three rules.
@@ -338,7 +340,7 @@ const EnhancedGrammarSection: React.FC<Props> = ({ progress, toggleProgress, set
           {locked ? (
             <PremiumPeek
               title="Advanced grammar — Premium"
-              description={`Unlock ${total - basicCount} advanced patterns, including this one.`}
+              description={`Unlock ${total - FREE_GRAMMAR_COUNT} advanced patterns, including this one.`}
               maxHeight={420}
             >
               <div className="kl-card p-7">

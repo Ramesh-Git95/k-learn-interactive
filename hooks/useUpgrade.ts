@@ -29,16 +29,43 @@ function hideRedirectOverlay() {
 }
 
 /**
+ * Raised by startUpgrade, listened for by UpgradeModalProvider.
+ *
+ * An event rather than a direct call because the hook would otherwise have to
+ * import the modal context, which imports the modal, which imports this hook —
+ * a cycle. The app already signals across that boundary this way for
+ * 'open-auth-modal'.
+ */
+export const UPGRADE_MODAL_EVENT = 'kl-open-upgrade';
+
+/**
  * Single entry point for "Upgrade to Premium" across the whole app.
- * Starts a Stripe Checkout subscription. Payment is tied to the account, so a
- * logged-out visitor is prompted to register first, then upgrades.
+ *
+ * `startUpgrade` is what every premium button calls. It shows the paywall, so
+ * nobody is dropped onto a Stripe payment page without first seeing what
+ * Premium is and what it costs — which is what used to happen from Reading,
+ * Writing, K-Drama, K-Pop, the Level Test and the header, while Quiz, Typing,
+ * Phrases and Culture Cards showed the comparison first. Same button, two
+ * different experiences, depending on which file you were in.
+ *
+ * `checkout` is the payment step itself, and only the paywall's own call to
+ * action should use it. Payment is tied to the account, so a logged-out
+ * visitor registers first.
  */
 export function useUpgrade() {
   const { isAuthenticated } = useAuth();
   const { openRegister } = useAuthModal();
   const { showToast } = useToastContext();
 
-  const startUpgrade = async () => {
+  const startUpgrade = () => {
+    if (!isAuthenticated) {
+      openRegister();
+      return;
+    }
+    window.dispatchEvent(new CustomEvent(UPGRADE_MODAL_EVENT));
+  };
+
+  const checkout = async () => {
     // Stripe ties the payment to the account, so the user must be signed in.
     if (!isAuthenticated) {
       openRegister();
@@ -67,5 +94,5 @@ export function useUpgrade() {
     }
   };
 
-  return { startUpgrade };
+  return { startUpgrade, checkout };
 }
