@@ -13,38 +13,32 @@ import { useUpgrade } from '../hooks/useUpgrade';
 
 interface HeaderProps {
   activeSection: Section | null;
-  setActiveSection: (section: Section) => void;
+  /** null returns to the landing page — what the logo does for a guest. */
+  setActiveSection: (section: Section | null) => void;
   theme: 'dark' | 'light';
   toggleTheme: () => void;
 }
 
 const primarySections = SECTIONS.filter(s => ['dashboard', 'hangul', 'vocabulary', 'conversation'].includes(s.id));
 
-const megaMenuGroups = [
-  {
-    label: 'LEARN',
-    items: [
-      ...SECTIONS.filter(s => ['grammar', 'phrases', 'topik', 'honorifics'].includes(s.id)),
-      { ...SECTIONS.find(s => s.id === 'topik-test')!, _isNew: true },
-    ],
-  },
-  {
-    label: 'PRACTICE',
-    items: [
-      ...SECTIONS.filter(s => ['quiz', 'typing', 'srs', 'bookmarks'].includes(s.id)),
-      { ...SECTIONS.find(s => s.id === 'reading')!, _isNew: true },
-      { ...SECTIONS.find(s => s.id === 'writing')!, _isNew: true },
-    ],
-  },
-  {
-    label: 'CULTURE',
-    items: [
-      ...SECTIONS.filter(s => ['culture', 'culture-cards'].includes(s.id)),
-      { ...SECTIONS.find(s => s.id === 'kdrama')!, _isNew: false },
-      { ...SECTIONS.find(s => s.id === 'kpop')!,   _isNew: true  },
-    ],
-  },
-] as { label: string; items: (typeof SECTIONS[number] & { _isNew?: boolean })[] }[];
+type MenuItem = typeof SECTIONS[number] & { _isNew?: boolean };
+
+/** Sections in the order given, rather than the order they sit in SECTIONS. */
+const pick = (...ids: Section[]): MenuItem[] =>
+  ids.map(id => SECTIONS.find(s => s.id === id)!).filter(Boolean);
+
+// No NEW pills. Level Test, Reading, Writing and K-Pop all carried one, but
+// every tool in this menu has been live for a while now — a badge that never
+// expires stops being information, and it spends the signal that ought to be
+// saved for something genuinely just shipped. K-Drama already sat unbadged
+// beside a badged K-Pop, which was the inconsistency showing.
+//
+// The mechanism stays: add `_isNew: true` to an item and its pill returns.
+const megaMenuGroups: { label: string; items: MenuItem[] }[] = [
+  { label: 'LEARN',    items: pick('grammar', 'phrases', 'topik', 'honorifics', 'topik-test') },
+  { label: 'PRACTICE', items: pick('quiz', 'typing', 'srs', 'bookmarks', 'reading', 'writing') },
+  { label: 'CULTURE',  items: pick('culture', 'culture-cards', 'kdrama', 'kpop') },
+];
 
 // Shorter, English-led nav labels for the calm header — display only, the
 // underlying Section ids and titles elsewhere are untouched.
@@ -56,6 +50,12 @@ const NAV_LABEL: Partial<Record<Section, string>> = {
   typing: 'Typing',
 };
 const navLabel = (id: Section, fallback: string) => NAV_LABEL[id] ?? fallback;
+
+// The name to put in front of a person. Toasts used to interpolate the raw
+// Section id, so guests were told "Sign up to access Topik-test" and
+// "Navigating to culture-cards" — ids are routing keys, not English.
+const sectionName = (id: Section): string =>
+  navLabel(id, SECTIONS.find(s => s.id === id)?.title ?? id);
 
 // Sections a logged-out guest can open without an account. Used to badge the
 // nav items with a small "Free" pill so guests see what's explorable.
@@ -122,22 +122,17 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
         setActiveSection(section);
         setIsMenuOpen(false);
         setShowMoreMenu(false);
-        showToast(`Exploring ${section}! Sign up to save your progress.`, 'info');
+        showToast(`Exploring ${sectionName(section)} — sign up to save your progress.`, 'info');
       } else {
         setIntendedDest(section);
-        showToast(`Sign up to access ${section.charAt(0).toUpperCase() + section.slice(1)}`, 'info');
+        showToast(`Sign up to open ${sectionName(section)}`, 'info');
         openRegister();
       }
     }
   };
 
   const handleLogo = () => {
-    if (isAuthenticated) {
-      setActiveSection('dashboard');
-    } else {
-      // @ts-ignore – null is valid for the landing page state
-      setActiveSection(null);
-    }
+    setActiveSection(isAuthenticated ? 'dashboard' : null);
   };
 
   const handleSync = async () => {
@@ -161,7 +156,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
     if (isAuthenticated && intendedDest) {
       setActiveSection(intendedDest);
       setIntendedDest(null);
-      showToast(`Welcome! Navigating to ${intendedDest}`, 'success');
+      showToast(`Welcome! Opening ${sectionName(intendedDest)}`, 'success');
     }
   }, [isAuthenticated, intendedDest]);
 
@@ -248,6 +243,8 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
               <div ref={moreMenuRef} className="relative">
                 <button
                   onClick={() => setShowMoreMenu(v => !v)}
+                  aria-expanded={showMoreMenu}
+                  aria-haspopup="true"
                   className={`flex items-center gap-1.5 h-9 px-3.5 rounded-[10px] text-[13.5px] transition-colors duration-200 ${
                     activeInMega
                       ? 'text-white font-semibold shadow-sm'

@@ -220,7 +220,11 @@ const AppContent: React.FC = () => {
   }, [user, activeSection]);
   
   // Custom setActiveSection that also updates URL hash
-  const handleSetActiveSection = (section: Section) => {
+  // null means "back to the landing page" — the header's logo does this for a
+  // logged-out visitor. It used to be forced through with a @ts-ignore, and the
+  // hash assignment below then coerced it to the string "null", leaving anyone
+  // who clicked the logo on korean-learn.com/#null.
+  const handleSetActiveSection = (section: Section | null) => {
     // renderSection() short-circuits to the study overlay whenever isStudying is
     // set, so navigating while a review is open changed the section underneath
     // but never left the overlay — the header appeared dead. Leaving is safe:
@@ -231,7 +235,13 @@ const AppContent: React.FC = () => {
       setStudyDeckId(null);
     }
     setActiveSection(section);
-    window.location.hash = section;
+    if (section) {
+      window.location.hash = section;
+    } else {
+      // Strip the hash rather than writing an empty one, which would leave a
+      // bare "#" in the address bar and push a history entry.
+      window.history.replaceState({}, '', window.location.pathname + window.location.search);
+    }
   };
 
   // Belt and braces: anything that changes the section by another route — a
