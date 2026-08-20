@@ -1,90 +1,114 @@
 import React, { useState } from 'react';
+import { Mail, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import Icon from './Icon';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5001/api';
+
+// Shown on every page until the address is confirmed.
+//
+// The owner's design brief for this screen is "states the one thing to do and
+// what still works meanwhile, so nobody is stuck on a dead end", and the second
+// half is the part that was missing. A standing amber bar with no statement of
+// consequence reads as a warning, and a warning with no stated cost is worse
+// than none — people assume the worst and go looking for what they have lost.
+//
+// Two things in that design are not repeated here. It says only cloud sync and
+// bookmarks past fifteen are paused; nothing is, in fact — emailVerified is
+// checked in exactly one place in the whole frontend, which is this component
+// deciding whether to render. And it offers to change the address, which
+// PUT /auth/profile cannot do: it accepts a name and preferences only.
+//
+// The 24-hour expiry is real — User.js sets emailVerificationExpires to
+// Date.now() + 24 * 60 * 60 * 1000.
+
+type Status = null | { kind: 'sent' | 'error'; text: string };
 
 const EmailVerificationBanner: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const [isResending, setIsResending] = useState(false);
-  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState<Status>(null);
   const [isDismissed, setIsDismissed] = useState(false);
 
-  // Don't show if user is not authenticated, email is verified, or banner is dismissed
-  if (!isAuthenticated || !user || user.emailVerified || isDismissed) {
-    return null;
-  }
+  if (!isAuthenticated || !user || user.emailVerified || isDismissed) return null;
 
   const resendVerification = async () => {
+    setIsResending(true);
+    setStatus(null);
     try {
-      setIsResending(true);
-      setMessage('');
-      
       const response = await fetch(`${API_BASE}/auth/resend-verification`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email }),
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage('✅ Verification email sent! Please check your email.');
-      } else {
-        setMessage('❌ Failed to send email. Please try again.');
-      }
-    } catch (error) {
-      console.error('Resend error:', error);
-      setMessage('❌ Network error. Please try again.');
+      const data = await response.json().catch(() => ({}));
+      setStatus(
+        response.ok
+          ? { kind: 'sent', text: 'Sent. It should arrive within a minute.' }
+          : { kind: 'error', text: data.message || 'Could not send it. Please try again shortly.' },
+      );
+    } catch {
+      setStatus({ kind: 'error', text: 'Could not reach the server. Please try again.' });
     } finally {
       setIsResending(false);
-      // Auto-hide message after 5 seconds
-      setTimeout(() => setMessage(''), 5000);
+      window.setTimeout(() => setStatus(null), 6000);
     }
   };
 
   return (
-    <div className="mb-4 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 overflow-hidden">
-      <div className="flex items-center gap-3 px-4 py-3">
-        {/* Icon */}
-        <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center flex-shrink-0">
-          <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-        </div>
+    <div
+      className="mb-4 overflow-hidden rounded-[14px] border px-4 py-3.5"
+      style={{ borderColor: 'rgba(168,118,31,0.35)', background: 'rgba(168,118,31,0.07)' }}
+    >
+      <div className="flex flex-wrap items-start gap-3">
+        <span
+          className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px]"
+          style={{ background: 'rgba(168,118,31,0.14)' }}
+        >
+          <Mail className="h-4 w-4" style={{ color: '#A8761F' }} />
+        </span>
 
-        {/* Text */}
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-black text-amber-800 dark:text-amber-200 leading-tight">Verify your email</p>
-          <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-tight mt-0.5">
-            Check <strong>{user.email}</strong> for your verification link
+        <div className="min-w-0 flex-1">
+          <p className="text-[13.5px] font-semibold text-[#16202F] dark:text-white">
+            Confirm your email to finish setting up
           </p>
-          {message && (
-            <p className="text-[11px] font-bold text-amber-800 dark:text-amber-200 mt-1">{message}</p>
+          <p className="mt-0.5 text-[13px] leading-[1.55] text-[#3E4A5A] dark:text-gray-300">
+            We sent a link to{' '}
+            <strong className="font-semibold text-[#16202F] dark:text-white">{user.email}</strong>.
+            Open it and you are done — there is nothing else to fill in.
+          </p>
+          {/* The reassurance, which is the whole point of the banner saying
+              anything at all rather than just glowing amber. */}
+          <p className="mt-1.5 text-[12.5px] leading-[1.5] text-[#4A5566] dark:text-gray-400">
+            Nothing is paused meanwhile — every part of the app keeps working. The link lasts 24
+            hours, and resending is always safe.
+          </p>
+
+          {status && (
+            <p
+              className="mt-2 text-[12.5px] font-semibold"
+              role="status"
+              style={{ color: status.kind === 'sent' ? '#2E6B59' : '#C13F22' }}
+            >
+              {status.text}
+            </p>
           )}
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="ml-auto flex flex-none items-center gap-2">
           <button
             onClick={resendVerification}
             disabled={isResending}
-            className="inline-flex items-center gap-1.5 text-[11px] font-black px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="flex h-9 items-center rounded-[9px] px-3.5 text-[12.5px] font-semibold text-white transition-opacity disabled:opacity-50"
+            style={{ background: '#A8761F' }}
           >
-            {isResending ? (
-              <><div className="w-3 h-3 rounded-full border-2 border-white border-t-transparent animate-spin" />Sending…</>
-            ) : (
-              <><Icon icon="refresh" className="w-3 h-3" />Resend</>
-            )}
+            {isResending ? 'Sending…' : 'Resend the link'}
           </button>
           <button
             onClick={() => setIsDismissed(true)}
-            className="w-7 h-7 flex items-center justify-center rounded-xl text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-800/40 transition-colors"
-            aria-label="Dismiss"
+            className="flex h-9 w-9 items-center justify-center rounded-[9px] text-[#4A5566] transition-colors hover:bg-[rgba(20,32,47,0.06)] hover:text-[#16202F] dark:text-gray-400 dark:hover:bg-gray-800"
+            aria-label="Dismiss until next visit"
           >
-            <Icon icon="x" className="w-3.5 h-3.5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
       </div>
