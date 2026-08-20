@@ -170,7 +170,12 @@ export default function WordStrip() {
               <span aria-hidden>🔊</span> Hear it
             </button>
 
-            <div className="flex flex-wrap items-center gap-1.5 sm:max-w-[168px] sm:justify-end">
+            {/* Pointer-only. index.css gives every button a 44px minimum below
+                640px so taps land, which is right — but it turns fifteen 6px
+                dots into fifteen 44px circles that wrap into a block. Fifteen
+                proper tap targets do not fit a phone anyway, so the counter at
+                the top carries the position there instead. */}
+            <div className="hidden flex-wrap items-center gap-1.5 sm:flex sm:max-w-[168px] sm:justify-end">
               {PAIRS.map((p, i) => (
                 <button
                   key={p.ko}
@@ -190,14 +195,16 @@ export default function WordStrip() {
               ))}
             </div>
 
-            {reduced && (
-              <button
-                onClick={() => go(index + 1)}
-                className="flex-none text-[11px] font-bold uppercase tracking-wider text-[#C13F22] transition-opacity hover:opacity-70 dark:text-[#F5825E]"
-              >
-                Next word →
-              </button>
-            )}
+            {/* Takes the dots' place on a phone, and is the only way forward
+                under reduced motion, where nothing advances on its own. */}
+            <button
+              onClick={() => go(index + 1)}
+              className={`flex h-11 flex-none items-center rounded-[11px] px-4 text-[13.5px] font-semibold text-[#4A5566] transition-colors hover:text-[#16202F] dark:text-gray-400 dark:hover:text-gray-200 ${
+                reduced ? '' : 'sm:hidden'
+              }`}
+            >
+              Next →
+            </button>
           </div>
         </div>
       </div>
