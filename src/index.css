@@ -642,20 +642,29 @@
   background: color-mix(in srgb, var(--kl-acc) 17%, #1B2637);
   box-shadow: 0 0 26px -10px color-mix(in srgb, var(--kl-acc) 70%, transparent);
 }
-
-/* The strip slides by exactly one card per step. Four cards are held in the
-   track and each is a quarter of it, so one step is always -25% of the track
-   whatever the breakpoint — only the track's width and its resting offset
-   change. A phone shows one card, wider screens show three. */
-.kl-strip-track {
-  --kl-rest: -25%;
-  width: 400%;
+/* One large card rather than one of three small ones. The lead wash was set for
+   a card the size of a word; spread across a whole block it shouts, so the tint
+   drops and the accent moves to the edge. */
+.kl-word-card[data-feature='true'] {
+  border-color: var(--kl-acc);
+  background: color-mix(in srgb, var(--kl-acc) 4%, #FFFCF4);
+  box-shadow: 0 16px 42px -32px var(--kl-acc);
 }
-@media (min-width: 640px) {
-  .kl-strip-track {
-    --kl-rest: 0%;
-    width: 133.3333%;
-  }
+.dark .kl-word-card[data-feature='true'] {
+  border-color: color-mix(in srgb, var(--kl-acc) 78%, transparent);
+  background: color-mix(in srgb, var(--kl-acc) 9%, #1B2637);
+  box-shadow: 0 0 30px -14px color-mix(in srgb, var(--kl-acc) 55%, transparent);
+}
+
+/* The romanisation and meaning arrive just after the word has finished being
+   written, so the block settles in one movement rather than three. */
+@keyframes klWordRise {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: none; }
+}
+.kl-word-rise { animation: klWordRise 400ms ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .kl-word-rise { animation: none; }
 }
 
 @keyframes klFade {
