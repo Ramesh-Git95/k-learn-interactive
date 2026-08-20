@@ -22,8 +22,10 @@ export function ResetPasswordForm({ token, onSuccess }: Props) {
       setError('Passwords do not match.');
       return;
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+    // Mirrors passwordProblem() in backend/routes/auth.js — a reset goes
+    // through the same rule as a sign-up, so this form must state the same one.
+    if (password.length < 8 || !/\d/.test(password)) {
+      setError('Password must be at least 8 characters and include a number.');
       return;
     }
 
@@ -94,7 +96,7 @@ export function ResetPasswordForm({ token, onSuccess }: Props) {
                       placeholder="••••••••"
                       required
                       disabled={loading}
-                      minLength={6}
+                      minLength={8}
                       autoFocus
                     />
                     <button
@@ -106,8 +108,12 @@ export function ResetPasswordForm({ token, onSuccess }: Props) {
                     </button>
                   </div>
                   {password.length > 0 && (
-                    <p className={`text-xs mt-1 ${password.length >= 6 ? 'text-emerald-500' : 'text-red-400'}`}>
-                      {password.length >= 6 ? '✓ Good length' : `${6 - password.length} more characters needed`}
+                    <p className={`text-xs mt-1 ${password.length >= 8 && /\d/.test(password) ? 'text-emerald-500' : 'text-red-400'}`}>
+                      {password.length < 8
+                        ? `${8 - password.length} more character${8 - password.length === 1 ? '' : 's'} needed`
+                        : !/\d/.test(password)
+                        ? 'Add at least one number'
+                        : '✓ Good password'}
                     </p>
                   )}
                 </div>

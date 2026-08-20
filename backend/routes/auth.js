@@ -7,6 +7,23 @@ const emailService = require('../services/emailService');
 
 const router = express.Router();
 
+// Password policy, in one place because it is checked on register, on change and
+// on reset, and those three drifting apart is how a rule quietly stops applying.
+//
+// Raised from six characters and no composition rule — weak for an account that
+// carries a subscription. Existing passwords are untouched: this runs on new
+// ones only, so nobody is locked out of an account they already have.
+const PASSWORD_MIN = 8;
+const passwordProblem = (password) => {
+  if (!password || password.length < PASSWORD_MIN) {
+    return `Password must be at least ${PASSWORD_MIN} characters`;
+  }
+  if (!/\d/.test(password)) {
+    return 'Password must include at least one number';
+  }
+  return null;
+};
+
 // Helper function to generate JWT token
 const generateToken = (userId) => {
   return jwt.sign(
@@ -61,10 +78,11 @@ router.post('/register', authRateLimit, async (req, res) => {
       });
     }
     
-    if (password.length < 6) {
+    const pwProblem = passwordProblem(password);
+    if (pwProblem) {
       return res.status(400).json({
-        message: 'Password must be at least 6 characters',
-        error: 'PASSWORD_TOO_SHORT'
+        message: pwProblem,
+        error: 'PASSWORD_TOO_WEAK'
       });
     }
     
@@ -303,10 +321,11 @@ router.post('/change-password', authenticateToken, authRateLimit, async (req, re
       });
     }
     
-    if (newPassword.length < 6) {
+    const newPwProblem = passwordProblem(newPassword);
+    if (newPwProblem) {
       return res.status(400).json({
-        message: 'New password must be at least 6 characters',
-        error: 'PASSWORD_TOO_SHORT'
+        message: newPwProblem.replace('Password', 'New password'),
+        error: 'PASSWORD_TOO_WEAK'
       });
     }
     
@@ -592,8 +611,9 @@ router.post('/reset-password/:token', authRateLimit, async (req, res) => {
     const { token } = req.params;
     const { password } = req.body;
 
-    if (!password || password.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters', error: 'PASSWORD_TOO_SHORT' });
+    const resetPwProblem = passwordProblem(password);
+    if (resetPwProblem) {
+      return res.status(400).json({ message: resetPwProblem, error: 'PASSWORD_TOO_WEAK' });
     }
 
     const crypto = require('crypto');

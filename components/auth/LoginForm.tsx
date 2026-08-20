@@ -1,12 +1,22 @@
-import { useState, FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToastContext } from '../../contexts/ToastContext';
 import { ForgotPasswordForm } from './ForgotPasswordForm';
+
+// Sign-in. Bare form rather than its own card: AuthModal supplies the surface
+// and the tabs now, and a card inside a card was two borders around one thing.
 
 interface LoginFormProps {
   onToggleMode?: () => void;
   onSuccess?: () => void;
 }
+
+const FIELD =
+  'kl-field h-11 w-full rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.18)] bg-[#FFFCF4] px-3.5 ' +
+  'text-[15px] text-[#16202F] placeholder:text-[#8A93A0] focus:border-[#16202F] ' +
+  'dark:border-gray-700 dark:bg-gray-900 dark:text-white';
+
+const LABEL = 'mb-1.5 block text-[12.5px] font-semibold text-[#3E4A5A] dark:text-gray-300';
 
 export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
   const [email, setEmail] = useState('');
@@ -21,118 +31,97 @@ export function LoginForm({ onToggleMode, onSuccess }: LoginFormProps) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     clearError();
-    if (!email || !password) { showToast('Please fill in all fields', 'warning'); return; }
+    if (!email || !password) { showToast('Please fill in both fields', 'warning'); return; }
+
     const result = await login(email, password);
     if (result.success) {
-      showToast('Welcome back! 🎉', 'success');
+      showToast('Welcome back', 'success');
       onSuccess?.();
     } else {
-      showToast(result.error || 'Login failed. Please try again.', 'error');
+      showToast(result.error || 'Could not sign you in. Please try again.', 'error');
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
-        {/* Gradient header */}
-        <div
-          className="px-6 py-6 text-center"
-          style={{ background: 'var(--brand-gradient-hero)' }}
-        >
-          <div className="text-4xl mb-2">👋</div>
-          <h2 className="text-2xl font-black text-white">Welcome Back!</h2>
-          <p className="text-white/70 text-sm mt-1">Continue your Korean learning journey</p>
-        </div>
-
-        <div className="px-6 py-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3">
-                <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
-              </div>
-            )}
-
-            <div>
-              <label className="block text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#F07A55] focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
-                placeholder="you@email.com"
-                required
-                disabled={isLoading}
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Password
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setShowForgot(true)}
-                  className="text-xs text-[#E4572E] dark:text-[#F07A55] hover:underline font-semibold"
-                  disabled={isLoading}
-                >
-                  Forgot password?
-                </button>
-              </div>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 pr-10 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#F07A55] focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
-                  placeholder="••••••••"
-                  required
-                  disabled={isLoading}
-                  minLength={6}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-base"
-                  disabled={isLoading}
-                >
-                  {showPassword ? '🙈' : '👁️'}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading || !email || !password}
-              className="w-full py-3 text-white font-black rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 text-sm"
-              style={{ background: 'var(--brand-gradient)' }}
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Signing In…
-                </span>
-              ) : '🎯 Sign In'}
-            </button>
-          </form>
-
-          {onToggleMode && (
-            <p className="mt-4 text-sm text-center text-gray-500 dark:text-gray-400">
-              Don't have an account?{' '}
-              <button
-                onClick={onToggleMode}
-                className="font-black text-[#E4572E] dark:text-[#F07A55] hover:underline"
-                disabled={isLoading}
-              >
-                Sign up here
-              </button>
-            </p>
-          )}
-
-        </div>
+    <div className="w-full">
+      <div className="mb-5">
+        <h2 className="font-display text-[22px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+          Welcome back
+        </h2>
+        <p className="mt-1.5 text-[13.5px] leading-[1.55] text-[#4A5566] dark:text-gray-400">
+          Your streak, decks and progress are where you left them.
+        </p>
       </div>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {error && (
+          <div
+            className="rounded-[10px] border px-3.5 py-2.5 text-[13px]"
+            style={{ borderColor: 'rgba(193,63,34,0.35)', background: 'rgba(193,63,34,0.08)', color: '#C13F22' }}
+          >
+            {error}
+          </div>
+        )}
+
+        <div>
+          <label className={LABEL} htmlFor="login-email">Email</label>
+          <input
+            id="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)}
+            className={FIELD} placeholder="you@example.com"
+            required disabled={isLoading} autoComplete="email"
+          />
+        </div>
+
+        <div>
+          <div className="flex items-baseline justify-between gap-3">
+            <label className={LABEL} htmlFor="login-password">Password</label>
+            <button
+              type="button" onClick={() => setShowPassword(v => !v)} disabled={isLoading}
+              className="mb-1.5 text-[12.5px] font-semibold text-[#4A5566] transition-colors hover:text-[#16202F] dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          <input
+            id="login-password" type={showPassword ? 'text' : 'password'} value={password}
+            onChange={e => setPassword(e.target.value)}
+            className={FIELD} placeholder="Your password"
+            required disabled={isLoading} autoComplete="current-password"
+          />
+          <button
+            type="button" onClick={() => setShowForgot(true)} disabled={isLoading}
+            className="mt-2 text-[12.5px] font-semibold text-[#C13F22] hover:underline dark:text-[#F5825E]"
+          >
+            Forgot your password?
+          </button>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="flex h-12 w-full items-center justify-center rounded-[11px] text-[15px] font-bold text-white transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100"
+          style={{ background: '#C13F22', boxShadow: '0 8px 24px -14px #C13F22' }}
+        >
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              Signing you in…
+            </span>
+          ) : 'Sign in'}
+        </button>
+      </form>
+
+      {onToggleMode && (
+        <p className="mt-4 text-center text-[13px] text-[#4A5566] dark:text-gray-400">
+          New here?{' '}
+          <button
+            onClick={onToggleMode} disabled={isLoading}
+            className="font-semibold text-[#C13F22] hover:underline dark:text-[#F5825E]"
+          >
+            Create an account
+          </button>
+        </p>
+      )}
     </div>
   );
 }

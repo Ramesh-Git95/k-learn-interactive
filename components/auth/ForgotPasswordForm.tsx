@@ -1,9 +1,19 @@
-import { useState, FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { apiClient } from '../../services/apiClient';
+
+// Password reset request. Bare form rather than its own card: AuthModal supplies
+// the surface, and the old gradient header sat inside it as a card within a card.
 
 interface Props {
   onBack: () => void;
 }
+
+const FIELD =
+  'kl-field h-11 w-full rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.18)] bg-[#FFFCF4] px-3.5 ' +
+  'text-[15px] text-[#16202F] placeholder:text-[#8A93A0] focus:border-[#16202F] ' +
+  'dark:border-gray-700 dark:bg-gray-900 dark:text-white';
+
+const LABEL = 'mb-1.5 block text-[12.5px] font-semibold text-[#3E4A5A] dark:text-gray-300';
 
 export function ForgotPasswordForm({ onBack }: Props) {
   const [email, setEmail] = useState('');
@@ -23,94 +33,87 @@ export function ForgotPasswordForm({ onBack }: Props) {
         setSent(true);
       }
     } catch {
-      setError('Could not connect to server. Please try again.');
+      setError('Could not reach the server. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
-        <div
-          className="px-6 py-6 text-center"
-          style={{ background: 'var(--brand-gradient-hero)' }}
+  if (sent) {
+    return (
+      <div className="w-full">
+        <h2 className="font-display text-[22px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+          Check your email
+        </h2>
+        <p className="mt-2 text-[13.5px] leading-[1.6] text-[#3E4A5A] dark:text-gray-400">
+          If an account exists for <strong className="font-semibold text-[#16202F] dark:text-white">{email}</strong>,
+          a reset link is on its way. It is good for one hour.
+        </p>
+        <p className="mt-3 text-[12.5px] leading-[1.55] text-[#4A5566] dark:text-gray-500">
+          Nothing after a minute or two? Check the spam folder — and that the address above is the
+          one you signed up with.
+        </p>
+        <button
+          onClick={onBack}
+          className="mt-5 flex h-11 w-full items-center justify-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] text-[14px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200"
         >
-          <div className="text-4xl mb-2">{sent ? '📬' : '🔐'}</div>
-          <h2 className="text-2xl font-black text-white">
-            {sent ? 'Check Your Email' : 'Forgot Password?'}
-          </h2>
-          <p className="text-white/70 text-sm mt-1">
-            {sent ? 'We sent you a reset link' : "No worries, we'll send you a reset link"}
-          </p>
-        </div>
-
-        <div className="px-6 py-6">
-          {sent ? (
-            <div className="text-center space-y-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                If <strong>{email}</strong> is registered, a password reset link has been sent. Check your inbox and spam folder.
-              </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">
-                The link expires in 1 hour.
-              </p>
-              <button
-                onClick={onBack}
-                className="w-full py-3 text-white font-black rounded-xl text-sm hover:scale-[1.02] active:scale-[0.98] transition-all"
-                style={{ background: 'var(--brand-gradient)' }}
-              >
-                Back to Sign In
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3">
-                  <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-[#F07A55] focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
-                  placeholder="you@email.com"
-                  required
-                  disabled={loading}
-                  autoFocus
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading || !email}
-                className="w-full py-3 text-white font-black rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] transition-all text-sm"
-                style={{ background: 'var(--brand-gradient)' }}
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Sending…
-                  </span>
-                ) : '📧 Send Reset Link'}
-              </button>
-
-              <button
-                type="button"
-                onClick={onBack}
-                className="w-full py-2 text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-              >
-                ← Back to Sign In
-              </button>
-            </form>
-          )}
-        </div>
+          Back to sign in
+        </button>
       </div>
+    );
+  }
+
+  return (
+    <div className="w-full">
+      <div className="mb-5">
+        <h2 className="font-display text-[22px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+          Reset your password
+        </h2>
+        <p className="mt-1.5 text-[13.5px] leading-[1.55] text-[#4A5566] dark:text-gray-400">
+          Tell us the email you signed up with and we will send you a link.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {error && (
+          <div
+            className="rounded-[10px] border px-3.5 py-2.5 text-[13px]"
+            style={{ borderColor: 'rgba(193,63,34,0.35)', background: 'rgba(193,63,34,0.08)', color: '#C13F22' }}
+          >
+            {error}
+          </div>
+        )}
+
+        <div>
+          <label className={LABEL} htmlFor="forgot-email">Email</label>
+          <input
+            id="forgot-email" type="email" value={email} onChange={e => setEmail(e.target.value)}
+            className={FIELD} placeholder="you@example.com"
+            required disabled={loading} autoComplete="email" autoFocus
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading || !email}
+          className="flex h-12 w-full items-center justify-center rounded-[11px] text-[15px] font-bold text-white transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100"
+          style={{ background: '#C13F22', boxShadow: '0 8px 24px -14px #C13F22' }}
+        >
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              Sending…
+            </span>
+          ) : 'Send the reset link'}
+        </button>
+      </form>
+
+      <button
+        onClick={onBack}
+        className="mt-4 w-full text-center text-[13px] font-semibold text-[#4A5566] transition-colors hover:text-[#16202F] dark:text-gray-400 dark:hover:text-gray-200"
+      >
+        Back to sign in
+      </button>
     </div>
   );
 }
