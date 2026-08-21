@@ -279,7 +279,7 @@ export default function HangulMixer() {
       <div className="flex items-center justify-between gap-2">
         {/* Consonants */}
         <div className="flex flex-col items-center gap-2">
-          <span className="mb-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#9FCBBB]">
+          <span className="mb-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-white/70">
             Consonant
           </span>
           {CHO.map((c, i) => {
@@ -298,8 +298,12 @@ export default function HangulMixer() {
                   // Pine, not persimmon. The panel is a mesh of muted colour
                   // now, and a hot orange chip sat on top of it rather than in
                   // it.
-                  background: sel ? 'linear-gradient(135deg,#3F8571,#2E6B59)' : 'rgba(255,255,255,.06)',
-                  boxShadow: sel ? '0 0 0 3px rgba(46,107,89,.30), 0 6px 16px -6px rgba(0,0,0,.55)' : 'none',
+                  // Ink, not a brand hue. The panel behind these now runs from
+                  // orange through plum to blue, so any coloured chip clashes
+                  // with part of it wherever it lands — a dark chip with a white
+                  // rim reads cleanly against every inch of the field.
+                  background: sel ? 'rgba(18,14,20,0.82)' : 'rgba(255,255,255,.06)',
+                  boxShadow: sel ? '0 0 0 3px rgba(255,255,255,.55), 0 6px 16px -6px rgba(0,0,0,.6)' : 'none',
                 }}
               >
                 {c.ch}
@@ -369,7 +373,7 @@ export default function HangulMixer() {
 
         {/* Vowels */}
         <div className="flex flex-col items-center gap-2">
-          <span className="mb-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#A7BEDA]">
+          <span className="mb-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-white/70">
             Vowel
           </span>
           {JUNG.map((v, i) => {
@@ -385,8 +389,8 @@ export default function HangulMixer() {
                   marginLeft: arc(i, JUNG.length),
                   fontFamily: 'Pretendard Variable, sans-serif',
                   border: `1px solid rgba(255,255,255,${sel ? 0.6 : 0.16})`,
-                  background: sel ? 'linear-gradient(135deg,#4A7BB0,#2F5D8A)' : 'rgba(255,255,255,.06)',
-                  boxShadow: sel ? '0 0 0 4px rgba(47,93,138,.3), 0 6px 16px -4px rgba(0,0,0,.5)' : 'none',
+                  background: sel ? 'rgba(18,14,20,0.82)' : 'rgba(255,255,255,.06)',
+                  boxShadow: sel ? '0 0 0 3px rgba(255,255,255,.55), 0 6px 16px -6px rgba(0,0,0,.6)' : 'none',
                 }}
               >
                 {v.ch}
@@ -432,7 +436,7 @@ export default function HangulMixer() {
             className="h-full rounded-full transition-[width] duration-500"
             style={{
               width: `${(tried.size / TOTAL_COMBOS) * 100}%`,
-              background: 'linear-gradient(90deg,#3F8571,#2F5D8A)',
+              background: 'linear-gradient(90deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6))',
             }}
           />
         </div>

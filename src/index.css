@@ -659,14 +659,24 @@
    instead of holding the demo.
    The blooms are placed off-centre and at different radii so no two meet
    symmetrically, which is what keeps it from reading as a plain vignette. */
+/* The owner picked this off a render where the card was momentarily
+   transparent and its rotating border gradient showed through the whole panel.
+   It is the same five brand hues the border runs — persimmon, gold, pine,
+   slate, plum — but read as one warm sweep: orange at the top-left, through red
+   and plum down the left, into blue at the bottom-right.
+   Rebuilt as a static mesh rather than left as an accident. The border keeps
+   rotating over the top, and since both draw from the same palette the rim now
+   reads as part of the panel instead of a ring around it.
+   One surface for both themes: it is a fully saturated field either way, so
+   there is nothing for the page behind it to change. */
 .kl-mesh {
-  background-color: #131A26;
+  background-color: #B8484A;
   background-image:
-    radial-gradient(at 16% 20%, rgba(46, 107, 89, 0.46) 0px, transparent 56%),
-    radial-gradient(at 84% 14%, rgba(47, 93, 138, 0.44) 0px, transparent 52%),
-    radial-gradient(at 74% 84%, rgba(142, 59, 84, 0.40) 0px, transparent 55%),
-    radial-gradient(at 22% 80%, rgba(168, 118, 31, 0.24) 0px, transparent 48%),
-    radial-gradient(at 52% 48%, rgba(19, 26, 38, 0.62) 0px, transparent 72%);
+    radial-gradient(at 10% 4%, #E4703F 0px, transparent 58%),
+    radial-gradient(at 90% 14%, #CB4B3C 0px, transparent 56%),
+    radial-gradient(at 6% 92%, #9A4A82 0px, transparent 60%),
+    radial-gradient(at 96% 96%, #3F63A6 0px, transparent 58%),
+    radial-gradient(at 54% 52%, rgba(178, 68, 72, 0.45) 0px, transparent 72%);
 }
 
 /* ── Word strip ───────────────────────────────────────────────────────────────
