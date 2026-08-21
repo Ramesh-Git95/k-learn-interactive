@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 
 export type FooterPage = 'help' | 'study-guide' | 'community' | 'about' | 'privacy' | 'terms' | 'changelog';
@@ -57,7 +57,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
         ))}
         <div className="rounded-2xl p-5 text-center" style={{ background: 'linear-gradient(135deg, rgba(228,87,46,0.06), rgba(63,133,113,0.06))' }}>
           <p className="text-sm text-gray-600 dark:text-gray-400">Still need help?</p>
-          <a href="mailto:support@k-learn.app" className="font-black text-[#E4572E] hover:underline text-sm">support@k-learn.app</a>
+          <a href="mailto:noreply@korean-learn.com" className="font-black text-[#E4572E] hover:underline text-sm">noreply@korean-learn.com</a>
         </div>
       </div>
     ),
@@ -255,7 +255,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
 
         <div className="rounded-2xl p-5 text-center border border-gray-100 dark:border-gray-800">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Questions or feedback?</p>
-          <a href="mailto:hello@k-learn.app" className="font-black text-[#E4572E] hover:underline text-sm">hello@k-learn.app</a>
+          <a href="mailto:noreply@korean-learn.com" className="font-black text-[#E4572E] hover:underline text-sm">noreply@korean-learn.com</a>
         </div>
       </div>
     ),
@@ -267,12 +267,22 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
     emoji: '🔒',
     content: (
       <div className="space-y-6 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-        <p className="text-xs text-gray-400">Last updated: May 2025</p>
+        {/* The plain-language summary the design asks for, before the clauses.
+            Every line here is checked against the code, not aspirational. */}
+        <div className="kl-well rounded-xl px-5 py-4">
+          <div className="mb-2.5 text-[13px] font-semibold text-[#16202F] dark:text-white">The short version</div>
+          <ul className="space-y-1.5 text-[13px] leading-[1.6]">
+            <li>We store your email, a hashed password, your progress and your review cards.</li>
+            <li>Payment is handled by Stripe. We never see your card number.</li>
+            <li>No analytics, no advertising, no third-party profiling — none of it is running.</li>
+            <li>You can delete your account and everything attached to it yourself, at any time.</li>
+          </ul>
+        </div>
 
         {[
           {
             title: '1. Who We Are',
-            body: 'K-Learn Interactive ("K-Learn", "we", "us", "our") operates the K-Learn Korean language learning platform. Our contact email is privacy@k-learn.app.',
+            body: 'K-Learn Interactive ("K-Learn", "we", "us", "our") operates the K-Learn Korean language learning platform. Our contact email is noreply@korean-learn.com.',
           },
           {
             title: '2. Data We Collect',
@@ -280,7 +290,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
               <ul className="space-y-1 list-disc list-inside">
                 <li><strong>Account data:</strong> Name, email address, hashed password</li>
                 <li><strong>Learning data:</strong> Progress, quiz scores, SRS card reviews, bookmarks, study streaks</li>
-                <li><strong>Technical data:</strong> Browser type, IP address (for security only), device type</li>
+                <li><strong>Technical data:</strong> Your IP address, used to rate-limit sign-in attempts. We do not build a profile from it</li>
                 <li><strong>Cookie data:</strong> Only categories you consent to (see Section 6)</li>
               </ul>
             ),
@@ -302,20 +312,31 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
           },
           {
             title: '5. Data Sharing',
-            body: 'We do not sell your personal data. We share data only with essential service providers: MongoDB Atlas (database hosting, EU region), Google (Gemini AI — messages only, not account data), and Stripe (payment processing — handles your card details and subscription; we never see or store your card number).',
+            // "EU region" removed: the hosting region is not something this
+            // codebase can evidence, and it is a GDPR-relevant claim.
+            body: 'We do not sell your personal data. We share data only with essential service providers: MongoDB Atlas (database hosting), Google (Gemini AI — your chat messages only, never your account data), Stripe (payment processing — Stripe handles your card details; we never see or store your card number), and Resend (sending account emails).',
           },
           {
             title: '6. Cookies',
-            body: 'We use essential cookies for authentication and security. Analytics, marketing, and preference cookies are only set with your explicit consent. You can change your preferences at any time via the "Manage Cookies" link in the footer.',
+            // Rewritten to what is actually true. The consent machinery has
+            // analytics and marketing categories, but nothing is wired to them
+            // — CookieConsent.tsx logs to the console and nothing more, and
+            // there is no tracking script anywhere in the app. A policy that
+            // describes cookies we do not set is a claim we cannot support.
+            body: 'We store what keeps you signed in, and what you have asked us to remember — your theme and your progress. We run no analytics, no advertising, and no third-party profiling: there are no tracking scripts in this app at all. If that ever changes, we will ask before it does.',
           },
           {
             title: '7. Your Rights (GDPR)',
             body: (
               <ul className="space-y-1 list-disc list-inside">
-                <li><strong>Access:</strong> Request a copy of your personal data</li>
-                <li><strong>Rectification:</strong> Correct inaccurate data</li>
-                <li><strong>Erasure:</strong> Delete your account and all associated data</li>
-                <li><strong>Portability:</strong> Export your learning data in JSON format</li>
+                {/* The self-serve JSON export this used to promise does not
+                    exist — there is no export route in the API — so the claim
+                    is gone rather than left standing. Access and portability
+                    are handled by writing to us, which is a right we can
+                    actually honour today. Erasure genuinely is self-serve. */}
+                <li><strong>Erasure:</strong> Delete your account and everything attached to it, yourself, from your Profile</li>
+                <li><strong>Access and portability:</strong> Ask us for a copy of your data and we will send it</li>
+                <li><strong>Rectification:</strong> Correct anything inaccurate</li>
                 <li><strong>Objection:</strong> Object to processing based on legitimate interests</li>
                 <li><strong>Withdraw consent:</strong> Change cookie preferences any time</li>
               </ul>
@@ -327,7 +348,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
           },
           {
             title: '9. Contact & Complaints',
-            body: 'For any privacy requests, contact us at privacy@k-learn.app. If you are in the EU and believe we have not handled your data lawfully, you have the right to lodge a complaint with your local Data Protection Authority.',
+            body: 'For any privacy requests, contact us at noreply@korean-learn.com. If you are in the EU and believe we have not handled your data lawfully, you have the right to lodge a complaint with your local Data Protection Authority.',
           },
         ].map(({ title, body }) => (
           <div key={title}>
@@ -345,7 +366,15 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
     emoji: '📋',
     content: (
       <div className="space-y-6 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-        <p className="text-xs text-gray-400">Last updated: May 2025</p>
+        <div className="kl-well rounded-xl px-5 py-4">
+          <div className="mb-2.5 text-[13px] font-semibold text-[#16202F] dark:text-white">The short version</div>
+          <ul className="space-y-1.5 text-[13px] leading-[1.6]">
+            <li>Premium is $4 a month. Cancel from your Profile whenever you like.</li>
+            <li>Cancelling keeps your access until the end of the month you have paid for.</li>
+            <li>The free plan stays free — the alphabet, spaced repetition and your progress are never taken away.</li>
+            <li>Keep your password to yourself, and do not resell the content.</li>
+          </ul>
+        </div>
 
         {[
           {
@@ -362,7 +391,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
           },
           {
             title: '4. Cancellation',
-            body: 'You can cancel your Premium subscription at any time from your Profile. Your access continues until the end of the current billing month, after which the account returns to the free plan. For billing questions, contact us at support@k-learn.app.',
+            body: 'You can cancel your Premium subscription at any time from your Profile. Your access continues until the end of the current billing month, after which the account returns to the free plan. For billing questions, contact us at noreply@korean-learn.com.',
           },
           {
             title: '5. Acceptable Use',
@@ -401,7 +430,7 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
           },
           {
             title: '11. Contact',
-            body: 'For terms-related questions, contact legal@k-learn.app.',
+            body: 'For terms-related questions, contact noreply@korean-learn.com.',
           },
         ].map(({ title, body }) => (
           <div key={title}>
@@ -465,15 +494,25 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
 
         <div className="rounded-2xl p-5 text-center" style={{ background: 'linear-gradient(135deg, rgba(228,87,46,0.06), rgba(63,133,113,0.06))' }}>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Have a feature request?</p>
-          <a href="mailto:hello@k-learn.app" className="font-black text-[#E4572E] hover:underline text-sm">hello@k-learn.app</a>
+          <a href="mailto:noreply@korean-learn.com" className="font-black text-[#E4572E] hover:underline text-sm">noreply@korean-learn.com</a>
         </div>
       </div>
     ),
   },
 };
 
+// Ordered for the page list: the two people arrive at deliberately first, then
+// the reference pages.
+const PAGE_ORDER: FooterPage[] = ['privacy', 'terms', 'help', 'study-guide', 'about', 'community', 'changelog'];
+
 const FooterPageModal: React.FC<Props> = ({ page, onClose }) => {
-  const { title, emoji, content } = PAGES[page];
+  // Held locally so the list on the left can move between pages. Arriving from
+  // the footer or from sign-up still opens whichever page was asked for; from
+  // there a reader can get to the others without closing and starting again.
+  const [current, setCurrent] = useState<FooterPage>(page);
+  useEffect(() => { setCurrent(page); }, [page]);
+
+  const { title, content } = PAGES[current];
 
   // Close on Escape key
   useEffect(() => {
@@ -493,28 +532,79 @@ const FooterPageModal: React.FC<Props> = ({ page, onClose }) => {
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       onClick={e => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-        {/* Header */}
-        <div
-          className="px-6 py-5 flex items-center justify-between flex-shrink-0"
-          style={{ background: 'var(--brand-gradient-hero)' }}
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">{emoji}</span>
-            <h2 className="text-xl font-black text-white">{title}</h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors"
-            aria-label="Close modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+      {/* A reading surface rather than a scrolling modal: the page list stays
+          put on the left, so these read as a set of documents you can move
+          between instead of one long scroll you have to close and reopen. */}
+      <div className="kl-card flex max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[20px] shadow-2xl">
 
-        {/* Content */}
-        <div className="overflow-y-auto flex-1 p-6">
-          {content}
+        {/* Page list */}
+        <nav
+          className="hidden w-[196px] flex-none flex-col gap-0.5 border-r border-[rgba(20,32,47,0.12)] p-4 sm:flex dark:border-gray-800"
+          aria-label="Legal and help pages"
+        >
+          <div className="mb-2 px-2.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#4A5566] dark:text-gray-500">
+            Pages
+          </div>
+          {PAGE_ORDER.map(id => {
+            const on = id === current;
+            return (
+              <button
+                key={id}
+                onClick={() => setCurrent(id)}
+                aria-current={on ? 'page' : undefined}
+                className={`rounded-[9px] px-2.5 py-2 text-left text-[13px] transition-colors ${
+                  on
+                    ? 'font-semibold text-[#16202F] dark:text-white'
+                    : 'text-[#4A5566] hover:bg-[rgba(20,32,47,0.04)] hover:text-[#16202F] dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200'
+                }`}
+                style={on ? { background: 'rgba(193,63,34,0.10)' } : undefined}
+              >
+                {PAGES[id].title}
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex flex-none items-start justify-between gap-4 border-b border-[rgba(20,32,47,0.12)] px-6 py-5 dark:border-gray-800">
+            <div className="min-w-0">
+              <div className="text-[10.5px] font-black uppercase tracking-[0.14em] text-[#4A5566] dark:text-gray-500">
+                Updated August 2026
+              </div>
+              <h2 className="mt-1 font-display text-[23px] font-semibold tracking-[-0.02em] text-[#16202F] dark:text-white">
+                {title}
+              </h2>
+            </div>
+            <button
+              onClick={onClose}
+              className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] text-[#4A5566] transition-colors hover:bg-[rgba(20,32,47,0.06)] hover:text-[#16202F] dark:text-gray-400 dark:hover:bg-gray-800"
+              aria-label="Close"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* Narrow screens get the list as a scrolling row instead. */}
+          <div className="flex flex-none gap-1.5 overflow-x-auto border-b border-[rgba(20,32,47,0.12)] px-4 py-2.5 sm:hidden dark:border-gray-800">
+            {PAGE_ORDER.map(id => (
+              <button
+                key={id}
+                onClick={() => setCurrent(id)}
+                className={`shrink-0 rounded-[9px] px-3 py-1.5 text-[12.5px] transition-colors ${
+                  id === current
+                    ? 'font-semibold text-[#16202F] dark:text-white'
+                    : 'text-[#4A5566] dark:text-gray-400'
+                }`}
+                style={id === current ? { background: 'rgba(193,63,34,0.10)' } : undefined}
+              >
+                {PAGES[id].title}
+              </button>
+            ))}
+          </div>
+
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+            {content}
+          </div>
         </div>
       </div>
     </div>
