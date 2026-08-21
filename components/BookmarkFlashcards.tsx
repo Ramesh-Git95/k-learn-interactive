@@ -1,30 +1,54 @@
 import React, { useState, useCallback } from 'react';
-import { X } from 'lucide-react';
+import { X, Volume2 } from 'lucide-react';
 import type { Bookmark } from '../types';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
+
+// A run through your saved words.
+//
+// Adopted from the owner's design: one card, an explicit reveal, and the deck
+// position where the tap-to-flip guessing used to be. Its brief is that this is
+// NOT spaced repetition, and saying so plainly matters — two study surfaces that
+// look alike and behave differently is how people end up trusting neither.
+//
+// Where the design and the build disagree, the build wins: it says nothing here
+// is scored, but this awards XP and tracks what you knew, and dropping that
+// would be removing something that works. What is true is that nothing is
+// SCHEDULED — no intervals, no due dates — so that is what the note says.
+//
+// Not built: its "saved from a song · 3 weeks ago" line. A bookmark records no
+// source and no timestamp, so both halves would be invented.
 
 interface BookmarkFlashcardsProps {
   bookmarks: Bookmark[];
   onClose: () => void;
 }
 
-type CardState = 'front' | 'back';
+/** PhraseItem carries `context`; VocabItem does not. Both have `romanization`,
+ *  which is what the old check tested — so it was true for everything and the
+ *  context line never once rendered. */
+const isPhrase = (b: Bookmark): b is Extract<Bookmark, { context: string }> =>
+  'context' in b && typeof (b as { context?: unknown }).context === 'string';
 
-function isVocab(b: Bookmark): b is Extract<Bookmark, { romanization: string }> {
-  return 'romanization' in b;
-}
+const speak = (text: string) => {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel(); // required before every speak() in this app
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ko-KR';
+  u.rate = 0.8;
+  window.speechSynthesis.speak(u);
+};
+
+const SHELL = 'fixed inset-0 z-[100] flex items-center justify-center bg-black/65 backdrop-blur-sm px-4';
 
 export default function BookmarkFlashcards({ bookmarks, onClose }: BookmarkFlashcardsProps) {
-  const [idx, setIdx]           = useState(0);
-  const [cardState, setCardState] = useState<CardState>('front');
-  const [knownIds, setKnownIds]  = useState<Set<string>>(new Set());
+  const [idx, setIdx] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+  const [knownIds, setKnownIds] = useState<Set<string>>(new Set());
   const [unknownIds, setUnknownIds] = useState<Set<string>>(new Set());
-  const [done, setDone]          = useState(false);
+  const [done, setDone] = useState(false);
 
   const cards = bookmarks;
-  const card  = cards[idx];
-
-  const flip = () => setCardState(s => s === 'front' ? 'back' : 'front');
+  const card = cards[idx];
 
   const advance = useCallback((knew: boolean) => {
     const id = card.korean;
@@ -41,18 +65,34 @@ export default function BookmarkFlashcards({ bookmarks, onClose }: BookmarkFlash
       setDone(true);
     } else {
       setIdx(next);
-      setCardState('front');
+      setRevealed(false);
     }
   }, [card, idx, cards.length]);
 
+  // Going back is for the card you answered too quickly. It does not unpick the
+  // grade already given — the run is not scored against you, so re-seeing a card
+  // costs nothing.
+  const goBack = () => {
+    if (idx === 0) return;
+    setIdx(idx - 1);
+    setRevealed(false);
+  };
+
   if (cards.length === 0) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-        <div className="bg-white dark:bg-gray-900 rounded-3xl p-10 max-w-sm w-full text-center shadow-2xl">
-          <div className="text-5xl mb-4">📚</div>
-          <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2">No bookmarks yet</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Bookmark vocabulary words while studying to review them here.</p>
-          <button onClick={onClose} className="w-full py-3 rounded-2xl font-bold text-white text-sm" style={{ background: 'var(--brand-gradient)' }}>
+      <div className={SHELL}>
+        <div className="kl-card w-full max-w-sm rounded-[20px] px-7 py-8 text-center shadow-2xl">
+          <h2 className="font-display text-[21px] font-semibold text-[#16202F] dark:text-white">
+            Nothing saved yet
+          </h2>
+          <p className="mt-2 text-[13.5px] leading-[1.6] text-[#4A5566] dark:text-gray-400">
+            The heart on any word or phrase saves it, and everything you save turns up here as a card.
+          </p>
+          <button
+            onClick={onClose}
+            className="mt-5 flex h-11 w-full items-center justify-center rounded-[10px] text-[14px] font-bold text-white"
+            style={{ background: '#C13F22' }}
+          >
             Got it
           </button>
         </div>
@@ -61,48 +101,41 @@ export default function BookmarkFlashcards({ bookmarks, onClose }: BookmarkFlash
   }
 
   if (done) {
-    const total   = cards.length;
-    const knew    = knownIds.size;
-    const pct     = Math.round((knew / total) * 100);
+    const total = cards.length;
+    const knew = knownIds.size;
 
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-        <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl">
-          <div className="text-5xl mb-4">{pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📖'}</div>
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-1">Session Complete!</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
-            {knew}/{total} cards known · {pct}% accuracy
+      <div className={SHELL}>
+        <div className="kl-card w-full max-w-sm rounded-[20px] px-7 py-7 shadow-2xl">
+          <h2 className="font-display text-[22px] font-semibold text-[#16202F] dark:text-white">
+            That is the deck
+          </h2>
+          <p className="mt-1.5 text-[13.5px] text-[#4A5566] dark:text-gray-400">
+            {knew} of {total} came back to you.
           </p>
 
-          {/* Score ring */}
-          <div className="relative w-20 h-20 mx-auto mb-6">
-            <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r="34" fill="none" stroke="#F3F4F6" strokeWidth="8" />
-              <circle cx="40" cy="40" r="34" fill="none" stroke="url(#bfg)" strokeWidth="8" strokeLinecap="round"
-                strokeDasharray={`${(pct / 100) * 213.6} 213.6`} />
-              <defs>
-                <linearGradient id="bfg" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#E4572E" />
-                  <stop offset="100%" stopColor="#3F8571" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <span className="absolute inset-0 flex items-center justify-center font-black text-gray-900 dark:text-white">{pct}%</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3">
-              <div className="text-2xl font-black text-green-600 dark:text-green-400">{knew}</div>
-              <div className="text-xs text-green-600 dark:text-green-400 font-semibold">Got it ✓</div>
+          <div className="mt-5 flex gap-3">
+            <div className="flex-1 rounded-xl px-4 py-3" style={{ background: 'rgba(46,107,89,0.10)' }}>
+              <div className="font-display text-[26px] font-semibold" style={{ color: '#2E6B59' }}>{knew}</div>
+              <div className="text-[12px] font-medium" style={{ color: '#2E6B59' }}>knew it</div>
             </div>
-            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-3">
-              <div className="text-2xl font-black text-orange-500 dark:text-orange-400">{unknownIds.size}</div>
-              <div className="text-xs text-orange-500 dark:text-orange-400 font-semibold">Still learning 🔄</div>
+            <div className="flex-1 rounded-xl px-4 py-3" style={{ background: 'rgba(168,118,31,0.12)' }}>
+              <div className="font-display text-[26px] font-semibold" style={{ color: '#A8761F' }}>{unknownIds.size}</div>
+              <div className="text-[12px] font-medium" style={{ color: '#A8761F' }}>still learning</div>
             </div>
           </div>
 
-          <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">+{knew * 5} XP earned this session</p>
-          <button onClick={onClose} className="w-full py-3.5 rounded-2xl font-bold text-white text-sm" style={{ background: 'var(--brand-gradient)' }}>
+          <p className="mt-4 text-[12.5px] leading-[1.55] text-[#4A5566] dark:text-gray-400">
+            {knew > 0 ? `+${knew * 5} XP. ` : ''}
+            Nothing here is scheduled, so the ones you missed will not come back on their own — put
+            them in spaced repetition if you want them to.
+          </p>
+
+          <button
+            onClick={onClose}
+            className="mt-5 flex h-11 w-full items-center justify-center rounded-[10px] text-[14px] font-bold text-white"
+            style={{ background: '#C13F22' }}
+          >
             Done
           </button>
         </div>
@@ -110,73 +143,135 @@ export default function BookmarkFlashcards({ bookmarks, onClose }: BookmarkFlash
     );
   }
 
-  const korean       = card.korean;
-  const english      = card.english;
-  const romanization = isVocab(card) ? card.romanization : undefined;
-  const context      = !isVocab(card) ? (card as any).context : undefined;
-  const progress     = ((idx) / cards.length) * 100;
+  const romanization = card.romanization;
+  const context = isPhrase(card) ? card.context : undefined;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+    <div className={SHELL}>
       <div className="w-full max-w-md">
-
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-white/70 text-sm font-semibold">{idx + 1} / {cards.length}</span>
-          <button onClick={onClose} aria-label="Close flashcards" className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
-            <X className="w-4 h-4" />
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-[15px] font-semibold text-white">
+              Flashcards · card {idx + 1} of {cards.length}
+            </div>
+            <div className="text-[12px] text-white/55">Saved words only · nothing is scheduled</div>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Close flashcards"
+            className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] bg-white/10 text-white transition-colors hover:bg-white/20"
+          >
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Progress bar */}
-        <div className="w-full h-1.5 bg-white/20 rounded-full mb-6 overflow-hidden">
-          <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progress}%`, background: 'var(--brand-gradient-h)' }} />
-        </div>
+        {/* Deck position. Plain spans, not buttons — a run of small buttons would
+            be forced to 44px each below 640px by the global touch rule, and a
+            long deck would wrap into a block. Capped, because an unlimited
+            bookmark list can be hundreds long. */}
+        {cards.length <= 20 ? (
+          <div className="mb-4 flex flex-wrap items-center gap-1.5" aria-hidden>
+            {cards.map((c, i) => (
+              <span
+                key={c.korean + i}
+                className="h-1.5 rounded-full transition-all duration-300"
+                style={{
+                  width: i === idx ? 20 : 7,
+                  background: i === idx ? '#fff' : i < idx ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.2)',
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-white/20">
+            <div
+              className="h-full rounded-full bg-white transition-all duration-300"
+              style={{ width: `${(idx / cards.length) * 100}%` }}
+            />
+          </div>
+        )}
 
         {/* Card */}
-        <div
-          onClick={flip}
-          className="cursor-pointer select-none bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 text-center mb-5 min-h-[220px] flex flex-col items-center justify-center transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
-        >
-          {cardState === 'front' ? (
-            <>
-              <div className="text-5xl font-black text-gray-900 dark:text-white mb-3" style={{ fontFamily: 'Pretendard Variable,sans-serif' }}>
-                {korean}
-              </div>
-              <p className="text-gray-400 text-sm">Tap to reveal</p>
-            </>
+        <div className="kl-card flex min-h-[236px] flex-col items-center justify-center rounded-[20px] px-6 py-8 text-center shadow-2xl">
+          <div
+            className="text-[44px] font-black leading-none text-[#16202F] dark:text-white"
+            style={{ fontFamily: 'Pretendard Variable, sans-serif' }}
+          >
+            {card.korean}
+          </div>
+          <div className="mt-2 text-[14px] text-[#4A5566] dark:text-gray-400">{romanization}</div>
+
+          <button
+            onClick={() => speak(card.korean)}
+            className="mt-3 flex h-9 items-center gap-2 rounded-[9px] border border-[rgba(20,32,47,0.2)] px-3.5 text-[12.5px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-white/25 dark:text-gray-100"
+          >
+            <Volume2 className="h-3.5 w-3.5" /> Hear it
+          </button>
+
+          {revealed ? (
+            <div className="mt-5 w-full border-t border-[rgba(20,32,47,0.12)] pt-4 dark:border-gray-800">
+              <div className="text-[19px] font-bold text-[#16202F] dark:text-white">{card.english}</div>
+              {context && (
+                <div className="mt-1 text-[12.5px] text-[#4A5566] dark:text-gray-400">{context}</div>
+              )}
+            </div>
           ) : (
             <>
-              <div className="text-3xl font-black text-gray-900 dark:text-white mb-1" style={{ fontFamily: 'Pretendard Variable,sans-serif' }}>
-                {korean}
-              </div>
-              {romanization && <div className="text-gray-400 text-sm mb-2 italic">/{romanization}/</div>}
-              <div className="text-xl font-bold text-gray-700 dark:text-gray-200 mb-1">{english}</div>
-              {context && <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">{context}</div>}
+              <p className="mt-5 text-[12.5px] text-[#4A5566] dark:text-gray-400">
+                Say the meaning out loud, then reveal.
+              </p>
+              <button
+                onClick={() => setRevealed(true)}
+                className="mt-3 flex h-11 items-center rounded-[10px] px-5 text-[14px] font-bold text-white transition-transform hover:scale-[1.02]"
+                style={{ background: '#C13F22' }}
+              >
+                Show the meaning
+              </button>
             </>
           )}
         </div>
 
-        {/* Action buttons — only show when flipped */}
-        {cardState === 'back' ? (
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => advance(false)}
-              className="py-4 rounded-2xl font-bold text-sm border-2 border-orange-200 dark:border-orange-800 text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 hover:scale-[1.02] transition-transform"
-            >
-              Still learning 🔄
-            </button>
-            <button
-              onClick={() => advance(true)}
-              className="py-4 rounded-2xl font-bold text-sm text-white hover:scale-[1.02] transition-transform"
-              style={{ background: 'linear-gradient(135deg,#10B981,#059669)' }}
-            >
-              Got it ✓ +5 XP
-            </button>
-          </div>
-        ) : (
-          <p className="text-center text-white/50 text-xs">Tap the card to see the answer</p>
-        )}
+        {/* Controls */}
+        <div className="mt-4">
+          {revealed ? (
+            <div className="flex gap-3">
+              <button
+                onClick={() => advance(false)}
+                className="h-12 flex-1 rounded-[11px] border-[1.5px] text-[13.5px] font-bold transition-transform hover:scale-[1.01]"
+                style={{ borderColor: 'rgba(168,118,31,0.55)', color: '#E2B45C', background: 'rgba(168,118,31,0.12)' }}
+              >
+                Still learning
+              </button>
+              <button
+                onClick={() => advance(true)}
+                className="h-12 flex-1 rounded-[11px] text-[13.5px] font-bold text-white transition-transform hover:scale-[1.01]"
+                style={{ background: '#2E6B59' }}
+              >
+                I knew it · +5 XP
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between gap-3">
+              <button
+                onClick={goBack}
+                disabled={idx === 0}
+                className="flex h-10 items-center px-2 text-[13px] font-semibold text-white/70 transition-colors hover:text-white disabled:opacity-30 disabled:hover:text-white/70"
+              >
+                ← Previous
+              </button>
+              <span className="text-[12px] text-white/45">
+                {knownIds.size} known · {unknownIds.size} to revisit
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* The distinction that keeps the two study surfaces apart. */}
+        <p className="mt-4 text-center text-[11.5px] leading-[1.55] text-white/45">
+          This is not spaced repetition — a free run through what you saved, in the order you saved
+          it. Nothing here is scheduled.
+        </p>
       </div>
     </div>
   );
