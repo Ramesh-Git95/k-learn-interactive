@@ -404,9 +404,11 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                 same element would override animation-name and freeze the glow. */}
             <div className={loaded ? 'kl-hero-right' : 'opacity-0'}>
             <div className="kl-border-glow rounded-3xl p-[2px] shadow-2xl">
-            <div className="relative rounded-[22px] overflow-hidden" style={{ background: 'var(--brand-gradient-hero)' }}>
-              <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 20%, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-              <div className="relative z-10 p-6 sm:p-8">
+            <div className="kl-mesh relative rounded-[22px] overflow-hidden">
+              {/* The dot grid stays, but fainter — over a mesh it reads as
+                  texture rather than the pattern it was on a flat gradient. */}
+              <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 20%, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+              <div className="relative z-10 p-5 sm:p-7">
                 {/* The mixer carries its own badge and heading, so the old
                     "Try Hangul Right Now" row would just repeat it. */}
                 <HangulMixer />

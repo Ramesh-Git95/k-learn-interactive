@@ -171,13 +171,11 @@ export default function TryItShowcase({ onNavigate }: TryItShowcaseProps) {
   return (
     <section className="kl-reveal py-20 px-4 bg-gray-50 dark:bg-gray-900/60">
       <div className="max-w-6xl mx-auto">
-        <div className="kl-tryit-card relative overflow-hidden rounded-[32px] p-8 sm:p-12 shadow-xl dark:shadow-2xl">
-          {/* Soft brand glows, dark mode only. On the cream page they landed
-              behind the specimen card as an orange stain in the corner rather
-              than the warm wash they are on ink — and the card now carries its
-              own lit border, so light mode has all the colour it needs. */}
-          <div className="pointer-events-none absolute -left-16 -top-16 h-72 w-72 rounded-full opacity-0 dark:opacity-100" style={{ background: 'radial-gradient(circle,rgba(228,87,46,.30),transparent 70%)', filter: 'blur(20px)' }} />
-          <div className="pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full opacity-0 dark:opacity-100" style={{ background: 'radial-gradient(circle,rgba(63,133,113,.28),transparent 70%)', filter: 'blur(20px)' }} />
+        <div className="kl-tryit-card kl-dotfield relative overflow-hidden rounded-[32px] p-8 sm:p-12 shadow-xl dark:shadow-2xl">
+          {/* The two blurred glows that used to sit here are gone: kl-tryit-card
+              is a mesh now, which is the same effect done properly — blooms
+              blended by their own falloff rather than two circles blurred on
+              top. Stacking both just muddied the corners. */}
 
           <div className="relative z-10 grid items-stretch gap-10 lg:grid-cols-2">
             {/* ── The stage — real content from the section you picked ── */}

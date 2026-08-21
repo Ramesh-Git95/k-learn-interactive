@@ -148,13 +148,33 @@
    the faint ring backdrops so they invert with the theme. */
 .kl-tryit-card {
   --kl-ring-track: rgba(20, 32, 47, 0.08);
-  background: linear-gradient(150deg, #FFFCF4 0%, #FAF1E3 55%, #F5E9DC 100%);
   border: 1px solid rgba(20, 32, 47, 0.07);
+  /* A mesh rather than a two-stop sweep, but a PALE one — the reference this
+     came from is a dark interface, and lifting its values straight over would
+     have put a dark slab on a cream page. So the same construction, an eighth
+     of the strength: four blooms you notice as warmth rather than as colour.
+     Anything stronger and the specimen card sitting on top stops separating. */
+  background-color: #FFFCF4;
+  background-image:
+    radial-gradient(at 50% 42%, rgba(142, 59, 84, 0.07) 0px, transparent 56%),
+    radial-gradient(at 10% 14%, rgba(46, 107, 89, 0.10) 0px, transparent 48%),
+    radial-gradient(at 90% 10%, rgba(47, 93, 138, 0.09) 0px, transparent 45%),
+    radial-gradient(at 16% 86%, rgba(168, 118, 31, 0.09) 0px, transparent 44%);
 }
 .dark .kl-tryit-card {
   --kl-ring-track: rgba(255, 255, 255, 0.08);
-  background: linear-gradient(150deg, #16202F 0%, #1A2438 55%, #221A30 100%);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  /* On ink the blooms can carry their full weight, which is where this style
+     comes from in the first place. The plum sits at the centre rather than in a
+     corner, so the dot field above it has a warm middle to fade out of — that
+     coloured core is what the reference is really doing. */
+  background-color: #131A26;
+  background-image:
+    radial-gradient(at 50% 42%, rgba(142, 59, 84, 0.34) 0px, transparent 58%),
+    radial-gradient(at 14% 16%, rgba(46, 107, 89, 0.36) 0px, transparent 52%),
+    radial-gradient(at 86% 12%, rgba(47, 93, 138, 0.34) 0px, transparent 48%),
+    radial-gradient(at 20% 84%, rgba(168, 118, 31, 0.18) 0px, transparent 44%),
+    radial-gradient(at 84% 88%, rgba(19, 26, 38, 0.55) 0px, transparent 62%);
 }
 
 /* The specimen stage inside the Try-It inset. Light mode tints the hanji cream
@@ -294,7 +314,11 @@
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
-  animation: klRing 4s linear infinite;
+  /* 18s, not 4. At four seconds the light laps the card fifteen times a minute,
+     which pulls the eye off the Korean it is meant to be framing — the point of
+     the thing is the specimen, not the border. Slow enough now that it reads as
+     drift rather than as a spinner. */
+  animation: klRing 18s linear infinite;
   pointer-events: none;
 }
 .kl-specimen-ring::before { z-index: -1; }
@@ -600,6 +624,51 @@
 }
 
 /* Drawer content reveal — the mockup's klFade. */
+/* ── Dot field ────────────────────────────────────────────────────────────────
+   A dot grid that fades from the middle outward, over whatever surface it sits
+   on. The fade is the whole trick: an even grid reads as wallpaper, while one
+   that dissolves toward the edges reads as depth, and gives the centre of the
+   panel somewhere to sit.
+   Deliberately fainter than the reference this came from. That design puts its
+   dots on a large, near-empty canvas; this card carries a specimen stage, three
+   cards and a stats strip, so dots at that strength would compete with all of
+   it. These are meant to be noticed second, not first.
+   Applied as ::before so it never interferes with the element's own background,
+   and pointer-events:none so it cannot swallow a click. */
+.kl-dotfield { position: relative; }
+.kl-dotfield::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(20, 32, 47, 0.16) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(ellipse 62% 58% at 50% 42%, #000 0%, rgba(0, 0, 0, 0.35) 45%, transparent 76%);
+  mask-image: radial-gradient(ellipse 62% 58% at 50% 42%, #000 0%, rgba(0, 0, 0, 0.35) 45%, transparent 76%);
+}
+.dark .kl-dotfield::before {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+}
+
+/* ── Mesh gradient ────────────────────────────────────────────────────────────
+   The hero demo's surface. A mesh gradient is just several soft radial blooms
+   over a dark base, blended by their own falloff — no image, no canvas.
+   Deliberately built from the muted end of the palette (pine, slate, plum, a
+   little ochre) rather than the persimmon used everywhere else: this panel sits
+   directly beside the headline, and a bright surface there competes with it
+   instead of holding the demo.
+   The blooms are placed off-centre and at different radii so no two meet
+   symmetrically, which is what keeps it from reading as a plain vignette. */
+.kl-mesh {
+  background-color: #131A26;
+  background-image:
+    radial-gradient(at 16% 20%, rgba(46, 107, 89, 0.46) 0px, transparent 56%),
+    radial-gradient(at 84% 14%, rgba(47, 93, 138, 0.44) 0px, transparent 52%),
+    radial-gradient(at 74% 84%, rgba(142, 59, 84, 0.40) 0px, transparent 55%),
+    radial-gradient(at 22% 80%, rgba(168, 118, 31, 0.24) 0px, transparent 48%),
+    radial-gradient(at 52% 48%, rgba(19, 26, 38, 0.62) 0px, transparent 72%);
+}
+
 /* ── Word strip ───────────────────────────────────────────────────────────────
    Each syllable of the leading word is uncovered left to right, in the order
    Hangul is written, so the word reads as brushed in rather than faded in. One

@@ -94,7 +94,9 @@ const STARTS: Record<string, { word: string; meaning: string }> = {
 };
 
 const TOTAL_COMBOS = CHO.length * JUNG.length; // 36
-const PARTICLE_COLORS = ['#E4572E', '#D9A441', '#3F8571', '#2F5D8A', '#8E3B54'];
+// Muted to match the mesh the burst now fires over — at full strength these
+// read as confetti rather than as part of the panel.
+const PARTICLE_COLORS = ['#C9A98F', '#A8761F', '#5C9E88', '#5C86B4', '#A3708A'];
 
 const compose = (choI: number, jungI: number) =>
   String.fromCharCode(0xac00 + CHO[choI].idx * 588 + JUNG[jungI].idx * 28);
@@ -211,14 +213,14 @@ export default function HangulMixer() {
     : meaning
     ? {
         eyebrow: 'REAL WORD',
-        eyebrowColor: '#5CFFB1',
+        eyebrowColor: '#8FD3B8',
         title: meaning,
         titleColor: '#FFFFFF',
         sub: <>You just read a Korean word.{opensLine}</>,
       }
     : {
         eyebrow: 'VALID SYLLABLE',
-        eyebrowColor: '#F8C4AE',
+        eyebrowColor: '#C9A98F',
         title: 'No meaning on its own',
         titleColor: 'rgba(255,255,255,0.62)',
         sub: opens
@@ -236,8 +238,20 @@ export default function HangulMixer() {
   // columns feel like they're feeding the wheel between them.
   const arc = (i: number, len: number) => Math.sin((i / (len - 1)) * Math.PI) * 10;
 
+  // 38px rather than 44. Six chips a column, twice over, is what sets this
+  // panel's height, so the chip is the single biggest lever on it — this and
+  // the smaller wheel take about 90px out of the block.
+  // min-h/min-w are set explicitly to beat the global `button { min-height:
+  // 44px }` in index.css, which otherwise snaps these back to 44 below 640px —
+  // and since twelve chips in two columns of six are what set this panel's
+  // height, the mobile block would not have shrunk at all.
+  //
+  // 38px is a deliberate trade, not an oversight: WCAG 2.2 AA asks for 24px and
+  // this clears it comfortably. These are six adjacent chips in a picker where
+  // a mis-tap costs one more tap, which is not the same risk as a 38px Delete.
   const chipBase =
-    'w-11 h-11 rounded-full flex items-center justify-center text-lg font-black text-white ' +
+    'w-[38px] h-[38px] min-w-[38px] min-h-[38px] rounded-full flex items-center justify-center ' +
+    'text-[17px] font-black text-white ' +
     'transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70';
 
   return (
@@ -245,7 +259,7 @@ export default function HangulMixer() {
       {/* Header */}
       <div className="flex items-center justify-between gap-3 mb-1.5">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-bold text-white">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#5CFFB1] animate-pulse-gentle" />
+          <span className="h-1.5 w-1.5 rounded-full bg-[#8FD3B8] animate-pulse-gentle" />
           Interactive · Syllable Mixer
         </span>
         <button
@@ -257,7 +271,7 @@ export default function HangulMixer() {
           🎲
         </button>
       </div>
-      <p className="mb-5 text-[13px] font-medium text-white/60">
+      <p className="mb-4 text-[12.5px] font-medium text-white/60">
         Combine a consonant + a vowel — watch real Hangul assemble instantly
       </p>
 
@@ -265,7 +279,7 @@ export default function HangulMixer() {
       <div className="flex items-center justify-between gap-2">
         {/* Consonants */}
         <div className="flex flex-col items-center gap-2">
-          <span className="mb-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#F8C4AE]">
+          <span className="mb-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#9FCBBB]">
             Consonant
           </span>
           {CHO.map((c, i) => {
@@ -281,8 +295,11 @@ export default function HangulMixer() {
                   marginRight: arc(i, CHO.length),
                   fontFamily: 'Pretendard Variable, sans-serif',
                   border: `1px solid rgba(255,255,255,${sel ? 0.6 : 0.16})`,
-                  background: sel ? 'linear-gradient(135deg,#F07A55,#E4572E)' : 'rgba(255,255,255,.07)',
-                  boxShadow: sel ? '0 0 0 4px rgba(228,87,46,.25), 0 6px 16px -4px rgba(0,0,0,.5)' : 'none',
+                  // Pine, not persimmon. The panel is a mesh of muted colour
+                  // now, and a hot orange chip sat on top of it rather than in
+                  // it.
+                  background: sel ? 'linear-gradient(135deg,#3F8571,#2E6B59)' : 'rgba(255,255,255,.06)',
+                  boxShadow: sel ? '0 0 0 3px rgba(46,107,89,.30), 0 6px 16px -6px rgba(0,0,0,.55)' : 'none',
                 }}
               >
                 {c.ch}
@@ -292,21 +309,23 @@ export default function HangulMixer() {
         </div>
 
         {/* The wheel */}
-        <div className="relative flex h-[340px] w-[190px] flex-none items-center justify-center">
+        <div className="relative flex h-[262px] w-[150px] flex-none items-center justify-center">
           <div
-            className="kl-mix-ring absolute h-[168px] w-[168px] rounded-full transition-opacity duration-500"
+            className="kl-mix-ring absolute h-[142px] w-[142px] rounded-full transition-opacity duration-500"
             style={{
               opacity: hasResult ? 1 : 0.35,
               background:
-                'conic-gradient(from 0deg, #E4572E, #D9A441, #3F8571, #2F5D8A, #8E3B54, #E4572E)',
+                // Softened to sit on the mesh — the full-strength brand hues
+                // read as a spinning toy against a surface this quiet.
+                'conic-gradient(from 0deg, #B4593C, #A8761F, #3F8571, #2F5D8A, #7A4055, #B4593C)',
             }}
           />
           <div
-            className="absolute h-[156px] w-[156px] rounded-full"
+            className="absolute h-[131px] w-[131px] rounded-full"
             style={{ background: '#16202F', boxShadow: 'inset 0 0 30px rgba(0,0,0,.45)' }}
           />
 
-          <div className="relative flex h-[156px] w-[156px] items-center justify-center">
+          <div className="relative flex h-[131px] w-[131px] items-center justify-center">
             {!hasResult && (
               <div className="kl-mix-idle flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-dashed border-white/30 text-2xl font-black text-white/35">
                 ?
@@ -318,7 +337,7 @@ export default function HangulMixer() {
                 // Keyed by the syllable so a new combination re-triggers the
                 // materialise animation instead of silently swapping glyphs.
                 key={syllable}
-                className="kl-mix-syllable text-6xl font-black text-white"
+                className="kl-mix-syllable text-[52px] font-black leading-none text-white"
                 style={{ fontFamily: 'Pretendard Variable, sans-serif', textShadow: '0 6px 24px rgba(0,0,0,.4)' }}
               >
                 {syllable}
@@ -340,7 +359,7 @@ export default function HangulMixer() {
 
           {toast && (
             <div
-              className="kl-mix-toast absolute bottom-1 left-1/2 whitespace-nowrap rounded-full border border-[#5CFFB1]/40 bg-[#5CFFB1]/15 px-3 py-1.5 text-[12px] font-bold text-[#5CFFB1]"
+              className="kl-mix-toast absolute bottom-1 left-1/2 whitespace-nowrap rounded-full border border-[#8FD3B8]/40 bg-[#8FD3B8]/15 px-3 py-1.5 text-[12px] font-bold text-[#8FD3B8]"
               role="status"
             >
               ✨ {toast.syllable} · {toast.meaning}
@@ -350,7 +369,7 @@ export default function HangulMixer() {
 
         {/* Vowels */}
         <div className="flex flex-col items-center gap-2">
-          <span className="mb-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#9DBBD8]">
+          <span className="mb-0.5 text-[10px] font-black uppercase tracking-[0.06em] text-[#A7BEDA]">
             Vowel
           </span>
           {JUNG.map((v, i) => {
@@ -366,7 +385,7 @@ export default function HangulMixer() {
                   marginLeft: arc(i, JUNG.length),
                   fontFamily: 'Pretendard Variable, sans-serif',
                   border: `1px solid rgba(255,255,255,${sel ? 0.6 : 0.16})`,
-                  background: sel ? 'linear-gradient(135deg,#4A7BB0,#2F5D8A)' : 'rgba(255,255,255,.07)',
+                  background: sel ? 'linear-gradient(135deg,#4A7BB0,#2F5D8A)' : 'rgba(255,255,255,.06)',
                   boxShadow: sel ? '0 0 0 4px rgba(47,93,138,.3), 0 6px 16px -4px rgba(0,0,0,.5)' : 'none',
                 }}
               >
@@ -413,13 +432,13 @@ export default function HangulMixer() {
             className="h-full rounded-full transition-[width] duration-500"
             style={{
               width: `${(tried.size / TOTAL_COMBOS) * 100}%`,
-              background: 'linear-gradient(90deg,#E4572E,#8E3B54)',
+              background: 'linear-gradient(90deg,#3F8571,#2F5D8A)',
             }}
           />
         </div>
 
         {/* The blocks you have turned up so far — a reason to keep going */}
-        <div className="mt-2 min-h-[20px] text-[15px] font-bold tracking-[0.18em] text-[#5CFFB1]">
+        <div className="mt-2 min-h-[20px] text-[15px] font-bold tracking-[0.18em] text-[#8FD3B8]">
           {foundSyllables.join(' ')}
         </div>
       </div>
