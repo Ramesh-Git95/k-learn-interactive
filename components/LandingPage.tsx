@@ -18,12 +18,9 @@ interface LandingPageProps {
 // ─── Static data ──────────────────────────────────────────────────────────────
 
 
-// Rotating hero badge lines — cycle with a small fade/rise animation.
-const HERO_BADGES = [
-  '🎬 Built for K-Drama fans · Not another Duolingo 🇰🇷',
-  '🧠 SM-2 spaced repetition — knowledge that sticks ✨',
-  '☕ Just $4/month · less than a coffee',
-];
+// The three rotating hero badges are gone — the hero states one claim now, and
+// the two it dropped (the price, the algorithm) are both said again further
+// down the page anyway.
 
 
 
@@ -164,13 +161,6 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
   useScrollReveal();
   const { user } = useAuth();
   const [loaded, setLoaded] = useState(false);
-  const [badgeIdx, setBadgeIdx] = useState(0);
-
-  // Cycle the hero badge lines every few seconds
-  useEffect(() => {
-    const t = setInterval(() => setBadgeIdx(i => (i + 1) % HERO_BADGES.length), 3800);
-    return () => clearInterval(t);
-  }, []);
 
   let openRegister: (() => void) | null = null;
   let openLogin: (() => void) | null = null;
@@ -321,25 +311,19 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
 
             {/* ── Left — copy ── */}
             <div className={`text-center lg:text-left ${loaded ? 'kl-hero-left' : 'opacity-0'}`}>
-              {/* Badge */}
-              {/* All three badges occupy the same grid cell, so the pill is
-                  sized by the largest one and never resizes as they rotate.
-                  Previously only the active line was rendered, with nowrap — the
-                  lines differ in length, so the pill changed width every 3.8s.
-                  On mobile the hero is centred, so both edges moved at once and
-                  the whole column visibly jumped. */}
-              <div className="inline-grid max-w-full items-center rounded-full px-5 py-2 mb-8 border overflow-hidden" style={{ background: 'rgba(228,87,46,0.08)', borderColor: 'rgba(228,87,46,0.30)' }}>
-                {HERO_BADGES.map((badge, i) => (
-                  <span
-                    key={i}
-                    aria-hidden={i !== badgeIdx}
-                    className={`col-start-1 row-start-1 text-sm font-semibold text-pink-600 dark:text-pink-400 transition-opacity duration-500 ${
-                      i === badgeIdx ? 'opacity-100' : 'opacity-0'
-                    }`}
-                  >
-                    {badge}
-                  </span>
-                ))}
+              {/* One claim, not three on a timer.
+                  Three rotating badges asked the reader to wait to find out
+                  what this is, and each new line displaced the one they were
+                  halfway through. The other two said the price and the
+                  algorithm, both of which the page states again below — so the
+                  badge keeps the only thing said nowhere else. */}
+              <div
+                className="inline-flex max-w-full items-center rounded-full border px-5 py-2 mb-8"
+                style={{ background: 'rgba(193,63,34,0.08)', borderColor: 'rgba(193,63,34,0.30)' }}
+              >
+                <span className="text-sm font-semibold text-[#C13F22] dark:text-[#F5825E]">
+                  Built for K-drama fans · not another streak app
+                </span>
               </div>
 
               {/* Headline */}
@@ -349,14 +333,14 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
               </h1>
 
               <p className="text-xl sm:text-2xl mb-3 font-bold" style={{ fontFamily: 'Pretendard Variable,sans-serif', color: 'var(--kl-persimmon)' }}>
-                한국어를 진짜로 배워봐요! ✨
+                한국어를 진짜로 배워봐요
               </p>
               <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-4 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                 The only Korean learning app built for K-drama fans.
                 AI conversations, 500+ words &amp; phrases, real grammar — not tourist phrases.
               </p>
               <p className="text-sm sm:text-base font-black mb-8 max-w-lg mx-auto lg:mx-0" style={{ color: 'var(--kl-celadon)' }}>
-                Just $4/month. Cancel anytime. Less than a coffee ☕
+                Just $4/month. Cancel anytime. About 13¢ a day.
               </p>
 
               {/* CTAs */}
@@ -372,8 +356,9 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                 </a>
               </div>
 
+              {/* The price was here too, three lines under where it already
+                  said $4/month and cancel anytime. Said once, it registers. */}
               <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
-                Just $4/month · cancel anytime ·{' '}
                 <button
                   onClick={() => openLogin ? openLogin() : window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }))}
                   className="text-pink-400 hover:underline font-semibold"
@@ -384,12 +369,15 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
 
               {/* vs Duolingo pill */}
               <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/40 rounded-full px-4 py-1.5 mb-8">
-                <span className="text-xs font-black text-green-700 dark:text-green-400">💰 Duolingo costs $84–168/year. K-Learn is just $4/month.</span>
+                <span className="text-xs font-black text-green-700 dark:text-green-400">Duolingo costs $84–168/year. K-Learn is $4/month.</span>
               </div>
 
               {/* Trust row */}
               <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 text-xs sm:text-sm text-gray-400 dark:text-gray-500">
-                {['⚡ Free to start', '🔒 No credit card', '🎬 K-Drama vocab packs', '🧠 SM-2 spaced repetition'].map((t, i, arr) => (
+                {/* K-Drama vocab packs dropped: the badge above already leads
+                    with K-drama, and three proofs read as proof where four read
+                    as a list. */}
+                {['Free to start', 'No card required', 'SM-2 spaced repetition'].map((t, i, arr) => (
                   <React.Fragment key={t}>
                     <span>{t}</span>
                     {i < arr.length - 1 && <span className="hidden sm:inline">·</span>}
@@ -489,10 +477,18 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
               “Learning should be a gift, not a paywall.”
             </p>
 
+            {/* "The K-Learn team" implied a company. The design's own framing is
+                both truer and better: one person, no ads, no investors — which
+                is also the reason the page can promise no tracking and mean it. */}
             <div className="mt-12 flex flex-col items-center">
               <div className="mb-4 h-px w-10 bg-gray-300 dark:bg-gray-700" />
-              <div className="text-sm font-bold text-gray-900 dark:text-white">The K-Learn team</div>
-              <div className="mt-1 text-xs text-gray-400 dark:text-gray-500">Made with 정, for anyone who wants to learn</div>
+              <div className="text-sm font-bold text-gray-900 dark:text-white">
+                No ads. No investors.
+              </div>
+              <div className="mt-1 max-w-[42ch] text-xs leading-relaxed text-gray-400 dark:text-gray-500">
+                A small independent project, made a little better every week — with 정, for anyone
+                who wants to learn.
+              </div>
             </div>
           </FadeIn>
         </div>
