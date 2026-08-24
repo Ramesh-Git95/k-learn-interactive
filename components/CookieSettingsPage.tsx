@@ -1,6 +1,29 @@
 import React, { useState, useEffect } from 'react';
+import { Lock } from 'lucide-react';
 import { useCookieConsent, CookieManager } from '../hooks/useCookieConsent';
-import Icon from './Icon';
+import FooterPageModal, { type FooterPage } from './FooterPageModal';
+
+// Cookie settings.
+//
+// The design's brief is "four categories, each in plain English with the actual
+// consequence of switching it off. Essential is shown as locked, not as a fake
+// toggle" — and that consequence line is the part that was missing. A toggle
+// with no stated effect asks someone to make a decision with nothing to decide
+// on.
+//
+// The design goes further than it knew on one row. Its Marketing entry says
+// "there is nothing to switch — this row exists so you can see it is empty",
+// which is exactly right, and it turns out to be just as true of Analytics:
+// services/thirdPartyIntegrations.ts carries a real Google Analytics loader,
+// but measurementId is still the placeholder 'GA_MEASUREMENT_ID' and a guard
+// skips loading whenever it is. No script is ever injected and no analytics
+// cookie is ever set. The page said "Google Analytics, page view tracking,
+// user journey analysis" and the Marketing row named Facebook Pixel and Google
+// Ads — third parties this app has never contacted.
+//
+// The toggles stay, and saving still writes and clears consent, because the
+// machinery is real and would work the moment an ID is configured. What changes
+// is that the page no longer describes tracking as though it were running.
 
 interface CookieSettings {
   essential: boolean;
@@ -9,323 +32,252 @@ interface CookieSettings {
   preferences: boolean;
 }
 
+type CategoryKey = keyof CookieSettings;
+
+const CATEGORIES: {
+  key: CategoryKey;
+  name: string;
+  what: string;
+  offEffect: string;
+  /** Nothing is wired to this category today. */
+  dormant?: boolean;
+}[] = [
+  {
+    key: 'essential',
+    name: 'Essential',
+    what: 'Signing in, your plan, and which review cards are due.',
+    offEffect: 'Cannot be switched off — without it the app has no way to know who you are.',
+  },
+  {
+    key: 'preferences',
+    name: 'Preferences',
+    what: 'Dark mode, and the settings you have chosen inside a section.',
+    offEffect: 'Turned off: these go back to their defaults every time you arrive.',
+  },
+  {
+    key: 'analytics',
+    name: 'Analytics',
+    what: 'Nothing at present. The integration exists but has never been configured, so no analytics script loads and no analytics cookie is set.',
+    offEffect: 'Nothing changes either way today. The switch is here so it is yours the day that changes.',
+    dormant: true,
+  },
+  {
+    key: 'marketing',
+    name: 'Marketing',
+    what: 'Nothing. We run no advertising and share nothing with ad networks.',
+    offEffect: 'There is nothing to switch off — this row exists so you can see that it is empty.',
+    dormant: true,
+  },
+];
+
+const NEVER = ['No ad networks', 'No selling data', 'No cross-site tracking', 'No third-party profiling'];
+
+const railCard =
+  'rounded-[14px] border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] px-5 py-4 dark:border-gray-800 dark:bg-gray-900';
+
+const toast = (type: 'success' | 'info', message: string) =>
+  window.dispatchEvent(new CustomEvent('show-toast', { detail: { type, message } }));
+
 const CookieSettingsPage: React.FC = () => {
   const { consentStatus, updateConsent, resetConsent } = useCookieConsent();
   const [settings, setSettings] = useState<CookieSettings>(consentStatus.settings);
   const [hasChanges, setHasChanges] = useState(false);
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [legal, setLegal] = useState<FooterPage | null>(null);
 
   useEffect(() => {
     setSettings(consentStatus.settings);
+    setHasChanges(false);
   }, [consentStatus.settings]);
 
-  const toggleCookieType = (type: keyof CookieSettings) => {
-    if (type === 'essential') return; // Essential cookies cannot be disabled
-    
-    const newSettings = {
-      ...settings,
-      [type]: !settings[type]
-    };
-    setSettings(newSettings);
-    setHasChanges(JSON.stringify(newSettings) !== JSON.stringify(consentStatus.settings));
+  const toggle = (key: CategoryKey) => {
+    if (key === 'essential') return;
+    const next = { ...settings, [key]: !settings[key] };
+    setSettings(next);
+    setHasChanges(JSON.stringify(next) !== JSON.stringify(consentStatus.settings));
   };
 
-  const handleSave = () => {
-    updateConsent(settings, 'customized');
+  // Clearing on save is what makes a withdrawn consent mean something, so it
+  // survives unchanged from the previous version.
+  const persist = (next: CookieSettings, kind: 'accepted' | 'declined' | 'customized', message: string) => {
+    updateConsent(next, kind);
+    (Object.keys(next) as CategoryKey[]).forEach(key => {
+      if (!next[key] && consentStatus.settings[key]) CookieManager.clearCookiesByType(key);
+    });
+    setSettings(next);
     setHasChanges(false);
-    
-    // Clear cookies for disabled categories
-    Object.keys(settings).forEach(key => {
-      const cookieType = key as keyof CookieSettings;
-      if (!settings[cookieType] && consentStatus.settings[cookieType]) {
-        CookieManager.clearCookiesByType(cookieType);
-      }
-    });
-
-    // Show success message
-    const event = new CustomEvent('show-toast', {
-      detail: {
-        type: 'success',
-        message: 'Cookie preferences saved successfully!'
-      }
-    });
-    window.dispatchEvent(event);
+    toast('success', message);
   };
 
-  const handleReset = () => {
+  const saveChoices = () => persist(settings, 'customized', 'Your cookie choices are saved.');
+  const acceptAll = () =>
+    persist({ essential: true, analytics: true, marketing: true, preferences: true }, 'accepted', 'All categories allowed.');
+  const essentialOnly = () =>
+    persist({ essential: true, analytics: false, marketing: false, preferences: false }, 'declined', 'Essential cookies only.');
+
+  const startOver = () => {
     resetConsent();
-    setShowResetConfirm(false);
+    (['analytics', 'marketing', 'preferences'] as CategoryKey[]).forEach(k => CookieManager.clearCookiesByType(k));
     setHasChanges(false);
-    
-    // Clear all non-essential cookies
-    CookieManager.clearCookiesByType('analytics');
-    CookieManager.clearCookiesByType('marketing');
-    CookieManager.clearCookiesByType('preferences');
-
-    const event = new CustomEvent('show-toast', {
-      detail: {
-        type: 'info',
-        message: 'Cookie preferences reset. Please set your preferences again.'
-      }
-    });
-    window.dispatchEvent(event);
+    toast('info', 'Cleared. You will be asked again on your next visit.');
   };
 
-  const getConsentStatusBadge = () => {
-    switch (consentStatus.consentType) {
-      case 'accepted':
-        return (
-          <span className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full text-sm font-medium">
-            All Cookies Accepted
-          </span>
-        );
-      case 'declined':
-        return (
-          <span className="px-3 py-1 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 rounded-full text-sm font-medium">
-            Only Essential Cookies
-          </span>
-        );
-      case 'customized':
-        return (
-          <span className="px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded-full text-sm font-medium">
-            Custom Settings
-          </span>
-        );
-      default:
-        return (
-          <span className="px-3 py-1 bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 rounded-full text-sm font-medium">
-            No Consent Given
-          </span>
-        );
-    }
-  };
+  const statusLabel =
+    consentStatus.consentType === 'accepted' ? 'All categories allowed'
+    : consentStatus.consentType === 'declined' ? 'Essential only'
+    : consentStatus.consentType === 'customized' ? 'Your own selection'
+    : 'Not set yet';
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      {/* Page Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Cookie Settings
+    <div className="mx-auto max-w-6xl">
+      {legal && <FooterPageModal page={legal} onClose={() => setLegal(null)} />}
+
+      {/* ── Header ── */}
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b border-[rgba(20,32,47,0.12)] pb-4 dark:border-gray-800">
+        <div className="min-w-0">
+          <div className="mb-2 flex items-center gap-2 text-[12.5px]">
+            <span className="font-medium text-[#4A5566] dark:text-gray-400">Account</span>
+            <span className="text-[#4A5566] dark:text-gray-600">/</span>
+            <span className="font-semibold text-[#C13F22] dark:text-[#F5825E]">Cookie settings</span>
+          </div>
+          <h1 className="font-display text-[26px] font-semibold tracking-[-0.03em] text-[#16202F] sm:text-[28px] dark:text-white">
+            Cookies and data
           </h1>
-          {getConsentStatusBadge()}
-        </div>
-        <p className="text-gray-600 dark:text-gray-400">
-          Manage your cookie preferences and control what data we can collect. Changes take effect immediately.
-        </p>
-      </div>
-
-      {/* Current Status */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-8">
-        <div className="flex items-start space-x-3">
-          <Icon icon="lightbulb" className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-          <div>
-            <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-1">
-              About Cookies
-            </h3>
-            <p className="text-blue-800 dark:text-blue-300 text-sm">
-              Cookies help us provide you with a better experience. Essential cookies are required for the site to function, 
-              while other cookies help us understand how you use our site and personalize your experience.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Cookie Categories */}
-      <div className="space-y-6 mb-8">
-        
-        {/* Essential Cookies */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                <Icon icon="lock" className="w-5 h-5 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Essential Cookies
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Required for basic site functionality
-                </p>
-              </div>
-            </div>
-            <div className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-xs font-medium">
-              Always Active
-            </div>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-            These cookies are necessary for the website to function and cannot be switched off. They are usually only set in 
-            response to actions made by you which amount to a request for services, such as setting your privacy preferences, 
-            logging in or filling in forms.
+          <p className="mt-1.5 text-[13.5px] text-[#4A5566] dark:text-gray-400">
+            Currently: {statusLabel}
           </p>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            <strong>Examples:</strong> Authentication tokens, security settings, accessibility preferences, load balancing
-          </div>
         </div>
-
-        {/* Analytics Cookies */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                <Icon icon="chart" className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Analytics Cookies
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Help us understand site usage
-                </p>
-              </div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.analytics}
-                onChange={() => toggleCookieType('analytics')}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-            These cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site. 
-            They help us to know which pages are the most and least popular and see how visitors move around the site.
-          </p>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            <strong>Examples:</strong> Google Analytics, page view tracking, user journey analysis, performance monitoring
-          </div>
-        </div>
-
-        {/* Marketing Cookies */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-[#DDEBE4] dark:bg-[#153327]/30 rounded-full flex items-center justify-center">
-                <Icon icon="star" className="w-5 h-5 text-[#2E6B59] dark:text-[#6BA88F]" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Marketing Cookies
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Used for targeted advertising
-                </p>
-              </div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.marketing}
-                onChange={() => toggleCookieType('marketing')}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-            These cookies may be set by our advertising partners through our site. They may be used to build a profile of your 
-            interests and show you relevant advertisements on other sites.
-          </p>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            <strong>Examples:</strong> Facebook Pixel, Google Ads, remarketing tags, social media widgets
-          </div>
-        </div>
-
-        {/* Preference Cookies */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
-                <Icon icon="settings" className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Preference Cookies
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Remember your personal settings
-                </p>
-              </div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.preferences}
-                onChange={() => toggleCookieType('preferences')}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-            These cookies enable the website to remember information that changes the way the website behaves or looks, 
-            such as your preferred language or the region that you are in.
-          </p>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            <strong>Examples:</strong> Dark/light theme, language settings, layout preferences, saved filters
-          </div>
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 items-center justify-between p-6 bg-gray-50 dark:bg-gray-950-secondary rounded-lg">
         <button
-          onClick={() => setShowResetConfirm(true)}
-          className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium text-sm transition-colors"
+          onClick={saveChoices}
+          disabled={!hasChanges}
+          className="flex h-11 flex-none items-center rounded-[10px] px-5 text-[14px] font-semibold text-white transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
+          style={{ background: '#C13F22' }}
         >
-          Reset All Preferences
+          {hasChanges ? 'Save choices' : 'Saved'}
         </button>
-        
-        <div className="flex space-x-3">
-          {hasChanges && (
-            <span className="text-sm text-orange-600 dark:text-orange-400 font-medium">
-              You have unsaved changes
-            </span>
-          )}
-          <button
-            onClick={handleSave}
-            disabled={!hasChanges}
-            className={`px-6 py-2 rounded-lg font-medium text-sm transition-colors ${
-              hasChanges
-                ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            Save Preferences
-          </button>
-        </div>
       </div>
 
-      {/* Reset Confirmation Modal */}
-      {showResetConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Reset Cookie Preferences?
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
-              This will reset all your cookie preferences and clear existing cookies. You'll need to set your preferences again.
+      <div className="flex flex-col items-start gap-5 lg:flex-row">
+        <div className="order-1 w-full min-w-0 flex-1">
+          <p className="mb-4 max-w-[64ch] text-[14.5px] leading-[1.6] text-[#3E4A5A] dark:text-gray-400">
+            Four categories, and what actually happens if you turn each one off. You can change these
+            whenever you like — nothing here is permanent.
+          </p>
+
+          <div className="flex flex-col gap-3">
+            {CATEGORIES.map(cat => {
+              const locked = cat.key === 'essential';
+              const on = settings[cat.key];
+              return (
+                <div key={cat.key} className="kl-card flex items-start gap-4 p-5">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[15px] font-semibold text-[#16202F] dark:text-white">{cat.name}</span>
+                      {cat.dormant && (
+                        <span
+                          className="rounded-full px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wide"
+                          style={{ background: 'rgba(20,32,47,0.07)', color: '#4A5566' }}
+                        >
+                          Not in use
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-[13.5px] leading-[1.55] text-[#3E4A5A] dark:text-gray-300">{cat.what}</p>
+                    <p className="mt-1.5 text-[12.5px] leading-[1.5] text-[#4A5566] dark:text-gray-500">
+                      {cat.offEffect}
+                    </p>
+                  </div>
+
+                  {/* Essential is stated as locked rather than drawn as a switch
+                      that silently refuses — a control that does nothing when
+                      pressed is worse than no control. */}
+                  {locked ? (
+                    <span className="flex flex-none items-center gap-1.5 rounded-[9px] px-3 py-2 text-[12px] font-semibold text-[#4A5566] dark:text-gray-400"
+                      style={{ background: 'rgba(20,32,47,0.06)' }}
+                    >
+                      <Lock className="h-3.5 w-3.5" /> Always on
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => toggle(cat.key)}
+                      role="switch"
+                      aria-checked={on}
+                      aria-label={`${cat.name} cookies`}
+                      className="relative h-7 w-12 flex-none rounded-full transition-colors"
+                      style={{ background: on ? '#2E6B59' : 'rgba(20,32,47,0.22)' }}
+                    >
+                      <span
+                        className="absolute top-1 h-5 w-5 rounded-full bg-white transition-all"
+                        style={{ left: on ? 26 : 4 }}
+                      />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <button
+              onClick={acceptAll}
+              className="flex h-11 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[13.5px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200"
+            >
+              Allow all
+            </button>
+            <button
+              onClick={essentialOnly}
+              className="flex h-11 items-center rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.22)] px-5 text-[13.5px] font-semibold text-[#16202F] transition-colors hover:border-[#16202F] dark:border-gray-700 dark:text-gray-200"
+            >
+              Essential only
+            </button>
+            <button
+              onClick={startOver}
+              className="text-[12.5px] font-semibold text-[#4A5566] transition-colors hover:text-[#C13F22] dark:text-gray-500"
+            >
+              Clear my choice and ask again
+            </button>
+          </div>
+        </div>
+
+        {/* ── Rail ── */}
+        <div className="order-2 w-full flex-none lg:w-[290px]">
+          <div className={`${railCard} mb-3.5`}>
+            <div className="mb-2.5 text-[13.5px] font-semibold text-[#16202F] dark:text-white">What we never do</div>
+            <div className="flex flex-col gap-2">
+              {NEVER.map(n => (
+                <div key={n} className="flex items-baseline gap-2 text-[13.5px] text-[#3E4A5A] dark:text-gray-400">
+                  <span style={{ color: '#2E6B59' }}>·</span>
+                  {n}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* The design offers "export or delete". Deletion is real and lives in
+              the profile; there is no export route, so it is not offered here. */}
+          <div className={`${railCard} mb-3.5`}>
+            <div className="mb-2 text-[13.5px] font-semibold text-[#16202F] dark:text-white">Your data</div>
+            <p className="text-[13.5px] leading-[1.55] text-[#3E4A5A] dark:text-gray-400">
+              You can delete your account and everything attached to it from your profile, whenever
+              you like. Deletion is immediate and cannot be undone.
             </p>
-            <div className="flex space-x-3 justify-end">
-              <button
-                onClick={() => setShowResetConfirm(false)}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleReset}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
-              >
-                Reset
-              </button>
+          </div>
+
+          <div className={railCard}>
+            <div className="mb-2.5 text-[13.5px] font-semibold text-[#16202F] dark:text-white">Read more</div>
+            <div className="flex flex-col gap-2">
+              {([['privacy', 'Privacy Policy'], ['terms', 'Terms of Service']] as [FooterPage, string][]).map(([id, label]) => (
+                <button
+                  key={id}
+                  onClick={() => setLegal(id)}
+                  className="text-left text-[13.5px] font-medium text-[#C13F22] transition-opacity hover:opacity-70 dark:text-[#F5825E]"
+                >
+                  {label} →
+                </button>
+              ))}
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -323,7 +323,11 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
             // — CookieConsent.tsx logs to the console and nothing more, and
             // there is no tracking script anywhere in the app. A policy that
             // describes cookies we do not set is a claim we cannot support.
-            body: 'We store what keeps you signed in, and what you have asked us to remember — your theme and your progress. We run no analytics, no advertising, and no third-party profiling: there are no tracking scripts in this app at all. If that ever changes, we will ask before it does.',
+            // Tightened once the integration was read properly: an analytics
+            // loader does exist in the code, but it is unconfigured and a guard
+            // stops it running, so no script is ever loaded. "No tracking
+            // scripts at all" was loose; this is exactly what happens.
+            body: 'We store what keeps you signed in, and what you have asked us to remember — your theme and your progress. We run no analytics and no advertising: no tracking script is loaded, and no analytics or marketing cookie is ever set. If that changes we will ask you first, and you can see the current state any time under Cookie settings.',
           },
           {
             title: '7. Your Rights (GDPR)',
