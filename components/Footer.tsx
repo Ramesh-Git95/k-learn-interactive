@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import FooterPageModal, { type FooterPage } from './FooterPageModal';
 import { useAuth } from '../contexts/AuthContext';
-
-const PUBLIC_SECTIONS = ['vocabulary', 'grammar', 'culture'];
+import { PUBLIC_SECTIONS } from '../constants';
+import type { Section } from '../types';
 
 const Footer: React.FC = () => {
   const year = new Date().getFullYear();
@@ -16,7 +16,7 @@ const Footer: React.FC = () => {
     return () => window.removeEventListener('open-footer-page', handler);
   }, []);
 
-  const nav = [
+  const nav: { name: string; section: Section }[] = [
     { name: 'Dashboard',  section: 'dashboard' },
     { name: 'Hangul',     section: 'hangul' },
     { name: 'Vocabulary', section: 'vocabulary' },
@@ -39,7 +39,7 @@ const Footer: React.FC = () => {
     { name: 'Terms of Service', page: 'terms' },
   ];
 
-  const handleSection = (section: string) => {
+  const handleSection = (section: Section) => {
     if (!isAuthenticated && !PUBLIC_SECTIONS.includes(section)) {
       window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'register' }));
       return;
@@ -47,11 +47,11 @@ const Footer: React.FC = () => {
     window.dispatchEvent(new CustomEvent('navigate-to-section', { detail: section }));
   };
 
-  const openManageCookies = () => {
-    // Re-show the cookie consent banner by clearing the stored choice
-    localStorage.removeItem('cookie-consent');
-    window.dispatchEvent(new CustomEvent('reopen-cookie-consent'));
-  };
+  // Opens the settings page rather than re-showing the first-visit banner.
+  // Reopening the banner meant deleting 'cookie-consent' first, which threw away
+  // the recorded choice and its GDPR audit date merely to look at it — close the
+  // banner without picking again and you were treated as never having consented.
+  const openManageCookies = () => handleSection('cookie-settings');
 
   return (
     <>

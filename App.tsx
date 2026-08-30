@@ -17,12 +17,13 @@ import PastDueBanner from './components/PastDueBanner';
 import CelebrationHost from './components/CelebrationHost';
 import Footer from './components/Footer';
 import CookieConsent from './components/CookieConsent';
+import CookieSettingsPage from './components/CookieSettingsPage';
 import GuestFreeBanner from './components/GuestFreeBanner';
 import { ResetPasswordForm } from './components/auth/ResetPasswordForm';
 import { apiClient } from './services/apiClient';
 import useLocalStorage from './hooks/useLocalStorage';
 import { SRSProvider, useSRSContext } from './contexts/SRSContext';
-import { LS_THEME_KEY, FREE_PHRASES_COUNT } from './constants';
+import { LS_THEME_KEY, FREE_PHRASES_COUNT, PUBLIC_SECTIONS } from './constants';
 import { UpgradeModalProvider } from './contexts/UpgradeModalContext';
 import { useFeatureAccess } from './hooks/useFeatureAccess';
 import { vocabulary, grammarPatterns, commonPhrases, cultureTips, hangulCharacters, koreanRegions, dailyLifeTopics, modernKoreaTopics } from './data/koreanData';
@@ -212,8 +213,7 @@ const AppContent: React.FC = () => {
   // Separate effect to handle activeSection validation for unauthenticated users
   useEffect(() => {
     if (!user && activeSection) {
-      const publicSections: Section[] = ['vocabulary', 'grammar', 'culture'];
-      if (!publicSections.includes(activeSection)) {
+      if (!PUBLIC_SECTIONS.includes(activeSection)) {
         setActiveSection(null);
       }
     }
@@ -299,7 +299,7 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
-      if (hash && ['dashboard', 'hangul', 'vocabulary', 'grammar', 'phrases', 'culture', 'quiz', 'conversation', 'bookmarks', 'srs', 'profile', 'cookie-demo', 'topik', 'topik-test', 'honorifics', 'culture-cards', 'typing', 'writing', 'kdrama', 'kpop', 'reading'].includes(hash as Section)) {
+      if (hash && ['dashboard', 'hangul', 'vocabulary', 'grammar', 'phrases', 'culture', 'quiz', 'conversation', 'bookmarks', 'srs', 'profile', 'cookie-settings', 'topik', 'topik-test', 'honorifics', 'culture-cards', 'typing', 'writing', 'kdrama', 'kpop', 'reading'].includes(hash as Section)) {
         setActiveSection(hash as Section);
       }
     };
@@ -611,6 +611,8 @@ const AppContent: React.FC = () => {
         return <SRSManager onStartStudy={handleStartStudy} />;
       case 'profile':
         return <UserProfile setActiveSection={handleSetActiveSection} />;
+      case 'cookie-settings':
+        return <CookieSettingsPage />;
       default:
         return <Dashboard 
           setActiveSection={setActiveSection} 
@@ -663,10 +665,8 @@ const AppContent: React.FC = () => {
 
   // Show landing page for non-authenticated users (unless they're viewing public sections)
   if (!user && !authLoading && !isLoading) {
-    const publicSections: Section[] = ['vocabulary', 'grammar', 'culture'];
-    
     // If activeSection is null or not a public section, show landing page
-    if (activeSection === null || !publicSections.includes(activeSection)) {
+    if (activeSection === null || !PUBLIC_SECTIONS.includes(activeSection)) {
       return (
         <div className={`flex min-h-screen flex-col ${theme === 'dark' ? 'dark' : ''}`}>
           <Header

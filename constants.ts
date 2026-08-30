@@ -38,6 +38,12 @@ export const FREE_PHRASES_COUNT = 15;
 export const FREE_GRAMMAR_COUNT = Math.ceil(grammarPatterns.length * 0.6);
 export const TOTAL_GRAMMAR_COUNT = grammarPatterns.length;
 
+// Sections a signed-out visitor may open. This existed as three separate
+// hardcoded copies — twice in App.tsx and once in Footer.tsx — which is a bad
+// shape for a list that decides access: adding a section to one and not the
+// others makes the footer offer a link the app then bounces you out of.
+export const PUBLIC_SECTIONS: Section[] = ['vocabulary', 'grammar', 'culture', 'cookie-settings'];
+
 export const LS_THEME_KEY = 'k-learn-theme';
 export const LS_BOOKMARKS_KEY = 'k-learn-bookmarks';
 export const LS_PROGRESS_KEY = 'k-learn-progress';

@@ -15,7 +15,7 @@ const groupOf = (s: Section): string => {
   if (['grammar', 'phrases', 'topik', 'honorifics', 'topik-test'].includes(s)) return 'Learn';
   if (['quiz', 'typing', 'srs', 'bookmarks', 'reading', 'writing'].includes(s)) return 'Practice';
   if (['culture', 'culture-cards', 'kdrama', 'kpop'].includes(s)) return 'Culture';
-  if (['profile', 'cookie-demo'].includes(s)) return 'Account';
+  if (['profile', 'cookie-settings'].includes(s)) return 'Account';
   return 'Home';
 };
 

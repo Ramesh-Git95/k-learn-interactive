@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Lock } from 'lucide-react';
 import { useCookieConsent, CookieManager } from '../hooks/useCookieConsent';
+import { COOKIE_CATEGORIES } from '../data/cookieCategories';
 import FooterPageModal, { type FooterPage } from './FooterPageModal';
 
 // Cookie settings.
@@ -34,41 +35,9 @@ interface CookieSettings {
 
 type CategoryKey = keyof CookieSettings;
 
-const CATEGORIES: {
-  key: CategoryKey;
-  name: string;
-  what: string;
-  offEffect: string;
-  /** Nothing is wired to this category today. */
-  dormant?: boolean;
-}[] = [
-  {
-    key: 'essential',
-    name: 'Essential',
-    what: 'Signing in, your plan, and which review cards are due.',
-    offEffect: 'Cannot be switched off — without it the app has no way to know who you are.',
-  },
-  {
-    key: 'preferences',
-    name: 'Preferences',
-    what: 'Dark mode, and the settings you have chosen inside a section.',
-    offEffect: 'Turned off: these go back to their defaults every time you arrive.',
-  },
-  {
-    key: 'analytics',
-    name: 'Analytics',
-    what: 'Nothing at present. The integration exists but has never been configured, so no analytics script loads and no analytics cookie is set.',
-    offEffect: 'Nothing changes either way today. The switch is here so it is yours the day that changes.',
-    dormant: true,
-  },
-  {
-    key: 'marketing',
-    name: 'Marketing',
-    what: 'Nothing. We run no advertising and share nothing with ad networks.',
-    offEffect: 'There is nothing to switch off — this row exists so you can see that it is empty.',
-    dormant: true,
-  },
-];
+// The category copy now lives in data/cookieCategories.ts, shared with the
+// consent banner so the two surfaces cannot describe this app differently.
+const CATEGORIES = COOKIE_CATEGORIES;
 
 const NEVER = ['No ad networks', 'No selling data', 'No cross-site tracking', 'No third-party profiling'];
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Icon from './Icon';
 import { ThirdPartyIntegrations } from '../services/thirdPartyIntegrations';
+import { COOKIE_CATEGORIES } from '../data/cookieCategories';
 
 interface CookieConsentProps {
   onAccept?: () => void;
@@ -21,6 +22,17 @@ const DEFAULT_COOKIE_SETTINGS: CookieSettings = {
   preferences: false,
 };
 
+// Icon colours only — the wording comes from data/cookieCategories.ts.
+const CATEGORY_ACCENT: Record<keyof CookieSettings, { bg: string; fg: string }> = {
+  essential: { bg: 'bg-green-100 dark:bg-green-900/30', fg: 'text-green-600 dark:text-green-400' },
+  preferences: { bg: 'bg-orange-100 dark:bg-orange-900/30', fg: 'text-orange-600 dark:text-orange-400' },
+  analytics: { bg: 'bg-blue-100 dark:bg-blue-900/30', fg: 'text-blue-600 dark:text-blue-400' },
+  marketing: { bg: 'bg-[#DDEBE4] dark:bg-[#153327]/30', fg: 'text-[#2E6B59] dark:text-[#6BA88F]' },
+};
+
+const TOGGLE_TRACK =
+  "w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600";
+
 const CookieConsent: React.FC<CookieConsentProps> = ({ onAccept, onDecline }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [showCustomizeModal, setShowCustomizeModal] = useState(false);
@@ -36,57 +48,24 @@ const CookieConsent: React.FC<CookieConsentProps> = ({ onAccept, onDecline }) =>
     }
   }, []);
 
-  // Listen for "Manage Cookies" click from footer
-  useEffect(() => {
-    const handler = () => setIsVisible(true);
-    window.addEventListener('reopen-cookie-consent', handler);
-    return () => window.removeEventListener('reopen-cookie-consent', handler);
-  }, []);
+  // The footer's "Manage cookies" used to reopen this banner through a
+  // 'reopen-cookie-consent' event; it now opens the settings page instead, so
+  // the listener is gone. This banner is the first-visit ask and nothing else.
 
-  const saveCookieSettings = (settings: CookieSettings) => {
+  // The recorded type has to match what was actually chosen: this value is what
+  // the settings page reads back to tell you where you stand. It used to be
+  // written as 'customized' every time, so accepting everything reported itself
+  // as "your own selection".
+  const saveCookieSettings = (settings: CookieSettings, type: 'accepted' | 'declined' | 'customized') => {
     localStorage.setItem('cookie-settings', JSON.stringify(settings));
-    localStorage.setItem('cookie-consent', 'customized');
+    localStorage.setItem('cookie-consent', type);
     // GDPR audit trail — record when consent was given/updated
     localStorage.setItem('cookie-consent-date', new Date().toISOString());
-    
-    // Apply cookie settings to actual tracking/analytics
-    applyCookieSettings(settings);
-    
-    // Update third-party integrations
+
+    // Loads or tears down whichever integrations the choice permits. This is
+    // the only thing that acts on consent; the branch that used to sit here
+    // did nothing but log that analytics had been "enabled".
     ThirdPartyIntegrations.updateConsent(settings);
-  };
-
-  const applyCookieSettings = (settings: CookieSettings) => {
-    // Essential cookies are always enabled
-    
-    // Analytics cookies (e.g., Google Analytics)
-    if (settings.analytics) {
-      // Enable analytics tracking
-      console.log('✅ Analytics cookies enabled');
-      // Example: gtag('config', 'GA_MEASUREMENT_ID');
-    } else {
-      // Disable analytics tracking
-      console.log('❌ Analytics cookies disabled');
-      // Example: Remove GA scripts, clear analytics cookies
-    }
-
-    // Marketing cookies (e.g., ads, social media)
-    if (settings.marketing) {
-      console.log('✅ Marketing cookies enabled');
-      // Enable marketing pixels, social media widgets
-    } else {
-      console.log('❌ Marketing cookies disabled');
-      // Disable marketing trackers
-    }
-
-    // Preference cookies (e.g., theme, language)
-    if (settings.preferences) {
-      console.log('✅ Preference cookies enabled');
-      // Allow preference storage
-    } else {
-      console.log('❌ Preference cookies disabled');
-      // Use session storage instead of persistent cookies
-    }
   };
 
   const handleAcceptAll = () => {
@@ -97,7 +76,7 @@ const CookieConsent: React.FC<CookieConsentProps> = ({ onAccept, onDecline }) =>
       preferences: true,
     };
     setCookieSettings(allEnabled);
-    saveCookieSettings(allEnabled);
+    saveCookieSettings(allEnabled, 'accepted');
     setIsVisible(false);
     onAccept?.();
   };
@@ -110,7 +89,7 @@ const CookieConsent: React.FC<CookieConsentProps> = ({ onAccept, onDecline }) =>
       preferences: false,
     };
     setCookieSettings(onlyEssential);
-    saveCookieSettings(onlyEssential);
+    saveCookieSettings(onlyEssential, 'declined');
     setIsVisible(false);
     onDecline?.();
   };
@@ -120,7 +99,7 @@ const CookieConsent: React.FC<CookieConsentProps> = ({ onAccept, onDecline }) =>
   };
 
   const handleSaveCustomSettings = () => {
-    saveCookieSettings(cookieSettings);
+    saveCookieSettings(cookieSettings, 'customized');
     setShowCustomizeModal(false);
     setIsVisible(false);
   };
@@ -161,7 +140,9 @@ const CookieConsent: React.FC<CookieConsentProps> = ({ onAccept, onDecline }) =>
                     We use cookies
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                    We use essential cookies to make our site work. We'd also like to set analytics cookies to help us improve our website. We won't set optional cookies unless you give consent.{' '}
+                    We use what we need to keep you signed in and remember your settings. We run no
+                    analytics or advertising today — nothing is tracked, and nothing is shared with
+                    anyone. The choices below stay yours if that ever changes.{' '}
                     <button
                       onClick={() => window.dispatchEvent(new CustomEvent('open-footer-page', { detail: 'privacy' }))}
                       className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
@@ -211,7 +192,8 @@ const CookieConsent: React.FC<CookieConsentProps> = ({ onAccept, onDecline }) =>
                   Cookie Settings
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  Manage your cookie preferences. You can enable or disable different categories of cookies below.
+                  Four categories, and what actually happens if you turn each one off. You can
+                  change these whenever you like.
                 </p>
               </div>
               <button
@@ -225,115 +207,50 @@ const CookieConsent: React.FC<CookieConsentProps> = ({ onAccept, onDecline }) =>
             {/* Cookie Categories */}
             <div className="space-y-6">
               
-              {/* Essential Cookies */}
-              <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                      <Icon icon="check" className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      Essential Cookies
-                    </h3>
-                  </div>
-                  <div className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-xs font-medium">
-                    Always Active
-                  </div>
-                </div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                  These cookies are necessary for the website to function and cannot be switched off. They enable core functionality such as security, network management, and accessibility.
-                </p>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  <strong>Used for:</strong> Authentication, security, remembering your preferences, load balancing
-                </div>
-              </div>
+              {COOKIE_CATEGORIES.map(cat => {
+                const locked = cat.key === 'essential';
+                const accent = CATEGORY_ACCENT[cat.key];
+                return (
+                  <div key={cat.key} className="border border-gray-200 dark:border-gray-800 rounded-lg p-4">
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <div className="flex items-center space-x-3 min-w-0">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${accent.bg}`}>
+                          <Icon icon={cat.icon} className={`w-4 h-4 ${accent.fg}`} />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {cat.name}
+                        </h3>
+                        {cat.dormant && (
+                          <span className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-[10.5px] font-semibold uppercase tracking-wide flex-shrink-0">
+                            Not in use
+                          </span>
+                        )}
+                      </div>
 
-              {/* Analytics Cookies */}
-              <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                      <Icon icon="chart" className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      {/* Essential says it is locked rather than drawing a switch
+                          that silently refuses to move. */}
+                      {locked ? (
+                        <div className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-xs font-medium flex-shrink-0">
+                          Always Active
+                        </div>
+                      ) : (
+                        <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                          <input
+                            type="checkbox"
+                            checked={cookieSettings[cat.key]}
+                            onChange={() => toggleCookieType(cat.key)}
+                            aria-label={`${cat.name} cookies`}
+                            className="sr-only peer"
+                          />
+                          <div className={TOGGLE_TRACK}></div>
+                        </label>
+                      )}
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      Analytics Cookies
-                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{cat.what}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{cat.offEffect}</p>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={cookieSettings.analytics}
-                      onChange={() => toggleCookieType('analytics')}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                  These cookies help us understand how visitors interact with our website by collecting and reporting information anonymously.
-                </p>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  <strong>Used for:</strong> Page views, user behavior analysis, performance monitoring, A/B testing
-                </div>
-              </div>
-
-              {/* Marketing Cookies */}
-              <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-[#DDEBE4] dark:bg-[#153327]/30 rounded-full flex items-center justify-center">
-                      <Icon icon="star" className="w-4 h-4 text-[#2E6B59] dark:text-[#6BA88F]" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      Marketing Cookies
-                    </h3>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={cookieSettings.marketing}
-                      onChange={() => toggleCookieType('marketing')}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                  These cookies are used to track visitors across websites to display relevant and engaging advertisements.
-                </p>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  <strong>Used for:</strong> Targeted advertising, social media sharing, remarketing campaigns
-                </div>
-              </div>
-
-              {/* Preference Cookies */}
-              <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
-                      <Icon icon="settings" className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      Preference Cookies
-                    </h3>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={cookieSettings.preferences}
-                      onChange={() => toggleCookieType('preferences')}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                  These cookies remember your preferences and settings to provide a personalized experience.
-                </p>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  <strong>Used for:</strong> Theme preferences, language settings, customized layouts, saved filters
-                </div>
-              </div>
+                );
+              })}
             </div>
 
             {/* Modal Actions */}
