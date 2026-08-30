@@ -1,8 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Only URLs a signed-out visitor can actually open belong here. Every other
+  section renders the landing page for a crawler, which is not signed in, so
+  listing them would submit URLs that do not show what they claim to.
+  utils/seo.ts marks those noindex for the same reason; the two must agree.
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://korean-learn.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://korean-learn.com/vocabulary</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://korean-learn.com/grammar</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://korean-learn.com/culture</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
 </urlset>

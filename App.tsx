@@ -24,6 +24,8 @@ import { apiClient } from './services/apiClient';
 import useLocalStorage from './hooks/useLocalStorage';
 import { SRSProvider, useSRSContext } from './contexts/SRSContext';
 import { LS_THEME_KEY, FREE_PHRASES_COUNT, PUBLIC_SECTIONS } from './constants';
+import { pathForSection, sectionFromPath, sectionFromLegacyHash, isKnownPath } from './utils/routes';
+import { applySectionMeta, applyNotFoundMeta } from './utils/seo';
 import { UpgradeModalProvider } from './contexts/UpgradeModalContext';
 import { useFeatureAccess } from './hooks/useFeatureAccess';
 import { vocabulary, grammarPatterns, commonPhrases, cultureTips, hangulCharacters, koreanRegions, dailyLifeTopics, modernKoreaTopics } from './data/koreanData';
@@ -87,12 +89,12 @@ const AppContent: React.FC = () => {
   const activeSectionRef = React.useRef<Section | null>(null);
 
   // Section swaps animate via the View Transitions API — a native cross-fade
-  // that makes hash routing feel app-like. Progressive enhancement: instant
-  // swap on unsupported browsers or when the user prefers reduced motion.
+  // that makes routing feel app-like. Progressive enhancement: instant swap on
+  // unsupported browsers or when the user prefers reduced motion.
   const setActiveSection = useCallback((section: Section | null) => {
-    // Nav clicks also write location.hash, whose hashchange listener echoes
-    // this call with the same section — without this guard the echo starts a
-    // second transition that aborts the first (AbortError + double-fade).
+    // Back/Forward re-enter this with the section that is already showing —
+    // without this guard the echo starts a second transition that aborts the
+    // first (AbortError + double-fade).
     if (section === activeSectionRef.current) return;
     activeSectionRef.current = section;
 
@@ -176,7 +178,7 @@ const AppContent: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     const checkout = params.get('checkout');
     if (!checkout || !isAuthenticated) return;
-    window.history.replaceState({}, '', window.location.pathname + window.location.hash);
+    window.history.replaceState({}, '', window.location.pathname);
 
     if (checkout === 'cancel') {
       showToast('Checkout cancelled — you can upgrade anytime from your profile.', 'info');
@@ -210,20 +212,31 @@ const AppContent: React.FC = () => {
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [isAuthenticated, hasPremiumAccess, refreshUser]);
 
-  // Separate effect to handle activeSection validation for unauthenticated users
+  // Send a signed-out visitor back to the landing page if they open a gated
+  // section.
+  //
+  // The authLoading guard matters more than it looks. `user` is null while the
+  // session is still being restored, so without it a signed-in visitor opening
+  // a gated URL directly is bounced before auth resolves — and the section is
+  // lost, not deferred. That was survivable while sections lived behind a hash
+  // and were rarely linked to; with real URLs, bookmarking /srs and reloading
+  // is an ordinary thing to do. The render guard below already waits for
+  // authLoading; this effect has to agree with it.
   useEffect(() => {
-    if (!user && activeSection) {
-      if (!PUBLIC_SECTIONS.includes(activeSection)) {
-        setActiveSection(null);
-      }
+    if (authLoading || !activeSection || user) return;
+    if (!PUBLIC_SECTIONS.includes(activeSection)) {
+      setActiveSection(null);
+      // Keep the address bar honest — otherwise the URL still reads /quiz
+      // while the landing page is on screen.
+      window.history.replaceState({}, '', '/' + window.location.search);
     }
-  }, [user, activeSection]);
+  }, [user, authLoading, activeSection]);
   
-  // Custom setActiveSection that also updates URL hash
+  // Custom setActiveSection that also updates the URL.
   // null means "back to the landing page" — the header's logo does this for a
-  // logged-out visitor. It used to be forced through with a @ts-ignore, and the
-  // hash assignment below then coerced it to the string "null", leaving anyone
-  // who clicked the logo on korean-learn.com/#null.
+  // logged-out visitor. It was once forced through with a @ts-ignore, and the
+  // old hash assignment coerced it to the string "null", leaving anyone who
+  // clicked the logo on korean-learn.com/#null. It maps to '/' now.
   const handleSetActiveSection = (section: Section | null) => {
     // renderSection() short-circuits to the study overlay whenever isStudying is
     // set, so navigating while a review is open changed the section underneath
@@ -235,12 +248,11 @@ const AppContent: React.FC = () => {
       setStudyDeckId(null);
     }
     setActiveSection(section);
-    if (section) {
-      window.location.hash = section;
-    } else {
-      // Strip the hash rather than writing an empty one, which would leave a
-      // bare "#" in the address bar and push a history entry.
-      window.history.replaceState({}, '', window.location.pathname + window.location.search);
+    // Real paths, not a hash: the server never sees a fragment, so every screen
+    // used to be the same URL to a crawler. pushState keeps Back working.
+    const url = (section ? pathForSection(section) : '/') + window.location.search;
+    if (url !== window.location.pathname + window.location.search) {
+      window.history.pushState({}, '', url);
     }
   };
 
@@ -295,22 +307,35 @@ const AppContent: React.FC = () => {
     };
   }, []);
 
-  // Handle URL hash for navigation
+  // Read the section out of the URL: on first load, and whenever the user uses
+  // Back or Forward (pushState navigations fire popstate, hashchange no longer
+  // applies). An unknown path resolves to null — the landing page — because
+  // .htaccess serves index.html for everything that is not a file, so a typo'd
+  // URL arrives here rather than as a 404.
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1);
-      if (hash && ['dashboard', 'hangul', 'vocabulary', 'grammar', 'phrases', 'culture', 'quiz', 'conversation', 'bookmarks', 'srs', 'profile', 'cookie-settings', 'topik', 'topik-test', 'honorifics', 'culture-cards', 'typing', 'writing', 'kdrama', 'kpop', 'reading'].includes(hash as Section)) {
-        setActiveSection(hash as Section);
-      }
-    };
+    const syncFromUrl = () => setActiveSection(sectionFromPath(window.location.pathname));
 
-    // Check initial hash
-    handleHashChange();
-    
-    // Listen for hash changes
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    // A '#vocabulary' bookmark from when the app was hash-routed still works:
+    // rewrite it to the real path once, then carry on as normal.
+    const legacy = sectionFromLegacyHash(window.location.hash);
+    if (legacy) {
+      window.history.replaceState({}, '', pathForSection(legacy) + window.location.search);
+      setActiveSection(legacy);
+    } else {
+      syncFromUrl();
+    }
+
+    window.addEventListener('popstate', syncFromUrl);
+    return () => window.removeEventListener('popstate', syncFromUrl);
   }, []);
+
+  // Title, description, canonical and robots follow the section on screen.
+  // Without this every path would claim to be the homepage — including the 404,
+  // which has no section and would otherwise inherit exactly that.
+  useEffect(() => {
+    if (isKnownPath(window.location.pathname)) applySectionMeta(activeSection);
+    else applyNotFoundMeta();
+  }, [activeSection]);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -653,7 +678,13 @@ const AppContent: React.FC = () => {
   // Unknown path → branded 404. Placed after every known special route
   // (verify-email, terms, privacy, reset-password). Hostinger's SPA fallback
   // serves index.html for all paths, so the app decides what 404 looks like.
-  if (currentPath !== '/' && currentPath !== '/index.html') {
+  //
+  // isKnownPath, rather than a list of exceptions inline. This check was written
+  // when navigation lived in the hash, so window.location.pathname was always
+  // '/' and anything else really was unknown; once sections became real paths,
+  // every one of them looked like a 404 to a test that only allowed '/'.
+  // Keeping the answer in routes.ts means adding a section cannot 404 it.
+  if (!isKnownPath(currentPath)) {
     return (
       <div className={theme === 'dark' ? 'dark' : ''}>
         <React.Suspense fallback={<AppBootSkeleton />}>
