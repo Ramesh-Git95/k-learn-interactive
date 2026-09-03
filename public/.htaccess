@@ -7,6 +7,19 @@ RewriteEngine On
 RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 
+# Serve the prerendered page for a section when one exists, so that /vocabulary
+# returns vocabulary.html rather than the generic shell. scripts/prerender.cjs
+# writes those files during the build; they are the same app with the section's
+# own title, description and canonical already in the HTML.
+#
+# This matters for link previews. Facebook, WhatsApp, Slack, X, Reddit and
+# iMessage read the raw HTML and never run JavaScript, so the metadata the app
+# sets at runtime is invisible to them — every shared section link unfurled as
+# the homepage. It only fires when the .html file is actually there, so a
+# section without a prerendered page simply falls through to the rule below.
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.+)$ $1.html [L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ index.html [QSA,L]
 
