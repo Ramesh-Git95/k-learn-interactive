@@ -1,9 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 /** Shimmering placeholder block — sized entirely via className. */
 export const Skeleton: React.FC<{ className?: string }> = ({ className = '' }) => (
   <div className={`skeleton ${className}`} aria-hidden="true" />
 );
+
+/**
+ * Explains a wait that has gone on long enough to need explaining.
+ *
+ * The backend sleeps after 15 minutes idle on the free tier, and the request
+ * that wakes it takes 30–50s. Silence for that long reads as broken, and a
+ * progress bar would be a lie — nothing here can know how long the wake will
+ * take, so a bar would reach the end and keep waiting, which is worse than
+ * saying nothing.
+ *
+ * Held back four seconds so a normal load never shows it.
+ */
+const SlowBootNote: React.FC = () => {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShow(true), 4000);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <p
+      className="mx-auto mt-3 max-w-sm text-center text-[12.5px] leading-[1.5] text-gray-500 dark:text-gray-400"
+      role="status"
+    >
+      Waking the server up — it sleeps when nobody is around, and can take up to a minute.
+      Thanks for waiting.
+    </p>
+  );
+};
 
 /** Full-page skeleton shown while auth + progress resolve on app boot.
     Mimics the dashboard layout so the transition feels seamless. */
@@ -34,6 +66,7 @@ export const AppBootSkeleton: React.FC = () => (
         <Skeleton className="h-64 rounded-2xl" />
       </div>
       <p className="text-center mt-8 text-sm font-korean text-[#F07A55]/80">한글배움 · loading…</p>
+      <SlowBootNote />
     </div>
   </div>
 );

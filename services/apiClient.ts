@@ -11,10 +11,15 @@ class ApiClient {
     this.token = localStorage.getItem('token');
   }
 
+  // `status` is the HTTP status, or 0 when the request never got a reply at all
+  // (offline, DNS, connection refused, CORS). Callers need to tell those apart:
+  // a 401 means the token is genuinely rejected, while a 502 or a 0 usually
+  // means the free-tier backend is still waking up — and treating the second as
+  // the first silently signs people out.
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
-  ): Promise<{ data: T; success: boolean; error?: string }> {
+  ): Promise<{ data: T; success: boolean; error?: string; status: number }> {
     const url = `${this.baseURL}${endpoint}`;
     
     // Refresh token from localStorage before each request
@@ -34,31 +39,42 @@ class ApiClient {
 
     try {
       const response = await fetch(url, config);
-      const data = await response.json();
+
+      // A platform error page is HTML, not JSON — Render serves one while a
+      // sleeping service wakes. Parsing it used to throw and lose the status,
+      // making a 502 indistinguishable from being offline.
+      let data: any = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
 
       console.log(`📥 API Response: ${response.status}`, data);
 
       if (!response.ok) {
         // Handle token expiration
-        if (response.status === 401 && data.error === 'TOKEN_EXPIRED') {
+        if (response.status === 401 && data?.error === 'TOKEN_EXPIRED') {
           localStorage.removeItem('token');
           this.token = null;
           window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: 'login' }));
         }
-        
+
         return {
           success: false,
-          error: data.message || `HTTP ${response.status}`,
-          data: data
+          error: data?.message || `HTTP ${response.status}`,
+          data: data,
+          status: response.status
         };
       }
 
-      return { success: true, data };
+      return { success: true, data, status: response.status };
     } catch (error) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Network error',
-        data: null as unknown as T
+        data: null as unknown as T,
+        status: 0
       };
     }
   }

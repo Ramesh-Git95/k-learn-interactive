@@ -2,6 +2,7 @@ import { createContext, useContext, useReducer, useEffect, ReactNode } from 'rea
 import { apiClient, User } from '../services/apiClient';
 import { clearLocalGamification } from '../utils/xpStreak';
 import { clearLocalTopikEstimate } from '../utils/topikEstimate';
+import { readCachedUser, writeCachedUser, clearCachedUser, isAuthRejection } from '../utils/session';
 
 // Auth context
 interface AuthState {
@@ -119,38 +120,76 @@ function authReducer(state: AuthState, action: any): AuthState {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Check for existing token on app load
+  // Restore the session on app load.
+  //
+  // When we have both a token and last visit's profile, the app renders
+  // immediately from that copy and the server is checked in the background. The
+  // token is what authorises the session; fetching the profile confirms its
+  // details. Waiting for it meant every returning visitor sat behind the free
+  // tier's 30–50s cold start looking at a skeleton, because their request was
+  // the one waking the server up.
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
-      validateToken(token);
-    } else {
+    if (!token) {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+      return;
+    }
+
+    const cached = readCachedUser();
+    if (cached) {
+      apiClient.setToken(token);
+      dispatch({ type: AUTH_ACTIONS.LOGIN_SUCCESS, payload: { user: cached, token } });
+      validateToken(token, { alreadyRendered: true });
+    } else {
+      validateToken(token, { alreadyRendered: false });
     }
   }, []);
 
-  // Validate token and get user data
-  const validateToken = async (token: string) => {
-    try {
-      apiClient.setToken(token);
-      const result = await apiClient.getProfile();
-      
-      if (result.success) {
-        dispatch({
-          type: AUTH_ACTIONS.LOGIN_SUCCESS,
-          payload: {
-            user: result.data.user,
-            token
-          }
-        });
-      } else {
-        localStorage.removeItem('token');
-        apiClient.setToken(null);
-        dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
-      }
-    } catch (error) {
+  // Keep the cached profile in step with the one in memory, from one place.
+  // login, register, updateProfile, refreshUser and updateSubscription all
+  // change the user; writing the cache at each of them means the day someone
+  // adds a sixth, next visit silently restores a stale profile.
+  //
+  // Only writes. Clearing is explicit — at logout, and when the server rejects
+  // the token — because state.user is legitimately null in the moment before
+  // the session is restored, and treating that as "signed out" would erase the
+  // cache before it has been read.
+  useEffect(() => {
+    if (state.user) writeCachedUser(state.user);
+  }, [state.user]);
+
+  // Validate token and get user data.
+  //
+  // A failure here only ends the session when the server actually rejected the
+  // token. Previously any failure cleared it, so a 502 from a service that was
+  // still waking up — or a moment offline — signed people out with no
+  // explanation. That is the one outcome worse than a slow load.
+  const validateToken = async (token: string, { alreadyRendered }: { alreadyRendered: boolean }) => {
+    apiClient.setToken(token);
+    const result = await apiClient.getProfile();
+
+    if (result.success) {
+      writeCachedUser(result.data.user);
+      dispatch({
+        type: AUTH_ACTIONS.LOGIN_SUCCESS,
+        payload: { user: result.data.user, token }
+      });
+      return;
+    }
+
+    if (isAuthRejection(result.status)) {
       localStorage.removeItem('token');
+      clearCachedUser();
       apiClient.setToken(null);
+      dispatch({ type: AUTH_ACTIONS.LOGOUT });
+      return;
+    }
+
+    // Server unreachable or erroring. Keep the session: if we are already
+    // showing the cached profile, leave it be and try again on the next call.
+    // If we are not, there is nothing to show, so stop blocking the app — the
+    // user lands signed out but their token survives for the next attempt.
+    if (!alreadyRendered) {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
     }
   };
@@ -243,6 +282,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     
     apiClient.setToken(null);
+    // Same reasoning as the gamification mirror below: left behind, this would
+    // restore the previous user's profile on the next visit to this browser.
+    clearCachedUser();
     // Drop the XP/streak mirror so the next person to sign in on this browser
     // doesn't inherit — or merge up — the previous user's numbers.
     clearLocalGamification();
