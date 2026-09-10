@@ -6,6 +6,7 @@ import HangulMixer from './HangulMixer';
 import FeatureShowcase from './FeatureShowcase';
 import TryItShowcase from './TryItShowcase';
 import JourneyPath from './JourneyPath';
+import WritingDemo from './WritingDemo';
 import WordStrip from './WordStrip';
 import type { Section } from '../types';
 
@@ -436,6 +437,15 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             </div>
           </FadeIn>
           <JourneyPath />
+
+          {/* The path above is the argument; this is one step of it happening.
+              Writing is not the differentiator — conversation and K-drama are —
+              so it sits here as evidence rather than in the hero, where the
+              live Hangul mixer is already the stronger thing: real and
+              clickable rather than recorded. */}
+          <FadeIn delay={120}>
+            <WritingDemo />
+          </FadeIn>
         </div>
       </section>
 
