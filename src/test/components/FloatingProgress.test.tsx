@@ -1,116 +1,157 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import FloatingProgress from '../../../components/FloatingProgress'
 import type { Section } from '../../../types'
 
-const mockProps = {
-  progress: {
-    'hangul_char_0': true,
-    'hangul_char_1': true,
-    'vocab_item_안녕하세요': true,
-  },
-  activeSection: 'vocabulary' as Section,
-  getSectionTotalItems: vi.fn((section: Section) => {
-    const totals = { hangul: 10, vocabulary: 20, grammar: 15, phrases: 12, culture: 25, quiz: 10 }
-    return totals[section] || 0
-  }),
-  getSectionCompletedItems: vi.fn((section: Section) => {
-    const completed = { hangul: 2, vocabulary: 1, grammar: 0, phrases: 0, culture: 0, quiz: 0 }
-    return completed[section] || 0
-  })
+// Rewritten. The previous version tested a component that no longer exists: it
+// passed progress, getSectionTotalItems and getSectionCompletedItems, all of
+// which were removed when XP/streak became account-synced and SRS moved into a
+// context. The component takes activeSection and reads the rest from
+// useXPStreak and useSRSContext, so every test died in useSRSContext before
+// reaching an assertion — 8 red for months, which is worse than none, because
+// a real failure would have hidden among them.
+//
+// The two hooks are mocked rather than provided for real: useSRS pulls in
+// useAuth, which fetches on mount. What is worth testing here is this
+// component's own rules — what it shows, and when it shows nothing.
+
+const xp = {
+  level: 4,
+  xpInLevel: 120,
+  xpForLevel: 300,
+  totalXP: 2450,
+  currentStreak: 7,
+  longestStreak: 12,
+  studiedToday: true,
+  streakAtRisk: false,
+  weekHeatmap: Array.from({ length: 7 }, (_, i) => ({
+    dateStr: `2026-09-0${i + 1}`,
+    label: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Today'][i],
+    studied: i > 3,
+    isToday: i === 6,
+  })),
 }
 
+let xpData = { ...xp }
+let srsDue = 0
+
+vi.mock('../../../hooks/useXPStreak', () => ({
+  useXPStreak: () => xpData,
+}))
+
+vi.mock('../../../contexts/SRSContext', () => ({
+  useSRSContext: () => ({ stats: { totalDue: srsDue } }),
+}))
+
+const renderAt = (section: Section = 'vocabulary') =>
+  render(<FloatingProgress activeSection={section} />)
+
+beforeEach(() => {
+  xpData = { ...xp }
+  srsDue = 0
+})
+
 describe('FloatingProgress', () => {
-  it('renders the floating progress button', () => {
-    render(<FloatingProgress {...mockProps} />)
-    
-    const button = screen.getByRole('button')
+  it('shows the level on the button', () => {
+    renderAt()
+    const button = screen.getByRole('button', { name: /learning progress/i })
     expect(button).toBeInTheDocument()
-    expect(button).toBeInTheDocument()
+    expect(button).toHaveTextContent('LVL')
+    expect(button).toHaveTextContent('4')
   })
 
-  it('shows progress percentage in button', () => {
-    render(<FloatingProgress {...mockProps} />)
-    
-    // Should show calculated overall progress
-    expect(screen.getByText(/\d+%/)).toBeInTheDocument()
+  it('renders nothing on the dashboard, which shows progress already', () => {
+    const { container } = renderAt('dashboard')
+    expect(container).toBeEmptyDOMElement()
   })
 
-  it('expands to show detailed progress when clicked', async () => {
+  it('stays collapsed until it is asked to open', () => {
+    renderAt()
+    expect(screen.queryByText('Your Progress')).not.toBeInTheDocument()
+  })
+
+  it('expands to show XP, streak and the week', async () => {
     const user = userEvent.setup()
-    render(<FloatingProgress {...mockProps} />)
-    
-    const button = screen.getByRole('button')
-    await user.click(button)
-    
-    expect(screen.getByText('Learning Progress')).toBeInTheDocument()
-    expect(screen.getByText('Overall Progress')).toBeInTheDocument()
-    expect(screen.getByText('Hangul')).toBeInTheDocument()
-    expect(screen.getByText('Vocabulary')).toBeInTheDocument()
+    renderAt()
+    await user.click(screen.getByRole('button', { name: /learning progress/i }))
+
+    expect(screen.getByText('Your Progress')).toBeInTheDocument()
+    expect(screen.getByText(/Level 4 · Intermediate/)).toBeInTheDocument()
+    expect(screen.getByText('2,450 XP total')).toBeInTheDocument()
+    expect(screen.getByText('120 / 300 XP')).toBeInTheDocument()
+    expect(screen.getByText('180 to level 5')).toBeInTheDocument()
+    expect(screen.getByText('7 day streak')).toBeInTheDocument()
+    expect(screen.getByText('Best: 12 days')).toBeInTheDocument()
+    expect(screen.getByText('Last 7 days')).toBeInTheDocument()
   })
 
-  it('closes expanded panel when close button is clicked', async () => {
+  it('closes again', async () => {
     const user = userEvent.setup()
-    render(<FloatingProgress {...mockProps} />)
-    
-    // Open the panel
-    const expandButton = screen.getByRole('button')
-    await user.click(expandButton)
-    
-    // Close the panel - find the close button by its SVG content
-    const buttons = screen.getAllByRole('button')
-    const closeButton = buttons.find(button => button.querySelector('svg'))
-    expect(closeButton).toBeDefined()
-    
-    if (closeButton) {
-      await user.click(closeButton)
-    }
-    
-    expect(screen.queryByText('Learning Progress')).not.toBeInTheDocument()
+    renderAt()
+    await user.click(screen.getByRole('button', { name: /learning progress/i }))
+    await user.click(screen.getByRole('button', { name: /close/i }))
+    expect(screen.queryByText('Your Progress')).not.toBeInTheDocument()
+  })
+})
+
+describe('the badge in the corner', () => {
+  // Both badges occupy the same spot, and the streak one is deliberately
+  // suppressed while cards are due. It is an easy rule to break by editing
+  // either branch alone, and nothing on screen would explain the overlap.
+  it('shows the due count when cards are waiting', () => {
+    srsDue = 12
+    renderAt()
+    expect(screen.getByText('12')).toBeInTheDocument()
   })
 
-  it('highlights active section in expanded view', async () => {
+  it('caps a large due count rather than overflowing the badge', () => {
+    srsDue = 250
+    renderAt()
+    expect(screen.getByText('99+')).toBeInTheDocument()
+  })
+
+  it('shows the streak only when nothing is due', () => {
+    srsDue = 0
+    const { rerender } = renderAt()
+    expect(screen.getByText('🔥')).toBeInTheDocument()
+
+    srsDue = 5
+    rerender(<FloatingProgress activeSection={'vocabulary' as Section} />)
+    expect(screen.queryByText('🔥')).not.toBeInTheDocument()
+    expect(screen.getByText('5')).toBeInTheDocument()
+  })
+
+  it('shows no streak badge on a zero streak', () => {
+    xpData = { ...xp, currentStreak: 0 }
+    renderAt()
+    expect(screen.queryByText('🔥')).not.toBeInTheDocument()
+  })
+})
+
+describe('what the streak row says about today', () => {
+  it('confirms a day already studied', async () => {
     const user = userEvent.setup()
-    render(<FloatingProgress {...mockProps} />)
-    
-    const button = screen.getByRole('button')
-    await user.click(button)
-    
-    // Check that vocabulary section is highlighted (active section)
-    const vocabularySection = screen.getByText('Vocabulary').closest('div')?.parentElement
-    expect(vocabularySection).toBeInTheDocument()
+    renderAt()
+    await user.click(screen.getByRole('button', { name: /learning progress/i }))
+    expect(screen.getByText(/Studied today/)).toBeInTheDocument()
   })
 
-  it('does not render on dashboard section', () => {
-    const dashboardProps = { ...mockProps, activeSection: 'dashboard' as Section }
-    const { container } = render(<FloatingProgress {...dashboardProps} />)
-    
-    expect(container.firstChild).toBeNull()
+  it('warns when a streak is about to be lost', async () => {
+    xpData = { ...xp, studiedToday: false, streakAtRisk: true }
+    const user = userEvent.setup()
+    renderAt()
+    await user.click(screen.getByRole('button', { name: /learning progress/i }))
+    expect(screen.getByText(/Study today to keep your streak/)).toBeInTheDocument()
+    expect(screen.queryByText(/Studied today/)).not.toBeInTheDocument()
   })
 
-  it('adapts to mobile screen size', () => {
-    // Mock window.innerWidth for mobile
-    Object.defineProperty(window, 'innerWidth', {
-      writable: true,
-      configurable: true,
-      value: 500,
-    })
-    
-    render(<FloatingProgress {...mockProps} />)
-    
-    // Trigger resize event
-    fireEvent(window, new Event('resize'))
-    
-    const button = screen.getByRole('button')
-    expect(button).toHaveClass('w-12', 'h-12')
-  })
-
-  it('calculates overall progress correctly', () => {
-    render(<FloatingProgress {...mockProps} />)
-    
-    // With our mock data: 3 completed out of 92 total items = ~3%
-    const progressText = screen.getByText(/\d+%/)
-    expect(progressText.textContent).toMatch(/[0-9]+%/)
+  it('says neither when the streak is already gone', async () => {
+    xpData = { ...xp, studiedToday: false, streakAtRisk: true, currentStreak: 0 }
+    const user = userEvent.setup()
+    renderAt()
+    await user.click(screen.getByRole('button', { name: /learning progress/i }))
+    expect(screen.queryByText(/Study today to keep your streak/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Studied today/)).not.toBeInTheDocument()
   })
 })
