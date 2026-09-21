@@ -131,19 +131,22 @@ export const useFeatureAccess = () => {
   
   const subscriptionTier = user?.subscription?.type || 'free';
   const isPremium = hasPremiumAccess();
-  const isActive = user?.subscription?.status === 'active';
-  
-  // Get current user's feature limits
-  const currentLimits = FEATURE_LIMITS[subscriptionTier] || FEATURE_LIMITS.free;
-  
+
+  // The tier whose limits actually apply.
+  //
+  // This used to read subscriptionTier and a separate `status === 'active'`
+  // check, which meant it never looked at the expiry date — so an account whose
+  // period had ended kept full premium limits here while hasPremiumAccess() had
+  // already gone false. isPremium was computed on the line above and only ever
+  // re-exported; the gate that decides what is locked never consulted it.
+  //
+  // isPremium already folds in type, status and expiry — and the server's own
+  // answer when it sent one — so everything hangs off that single value now.
+  const effectiveTier = isPremium ? subscriptionTier : 'free';
+  const currentLimits = FEATURE_LIMITS[effectiveTier] || FEATURE_LIMITS.free;
+
   // Check if user can access a specific feature
-  const canAccess = (featureName: keyof typeof FEATURE_LIMITS.free) => {
-    if (!isActive && subscriptionTier !== 'free') {
-      // If premium/pro subscription is not active, fall back to free limits
-      return FEATURE_LIMITS.free[featureName];
-    }
-    return currentLimits[featureName];
-  };
+  const canAccess = (featureName: keyof typeof FEATURE_LIMITS.free) => currentLimits[featureName];
   
   // Check if user has reached a limit (for countable features)
   const hasReachedLimit = (featureName: keyof typeof FEATURE_LIMITS.free, currentCount: number) => {
@@ -162,7 +165,6 @@ export const useFeatureAccess = () => {
   return {
     subscriptionTier,
     isPremium,
-    isActive,
     canAccess,
     hasReachedLimit,
     getLimit,

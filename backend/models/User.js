@@ -355,6 +355,18 @@ userSchema.methods.hasPremiumAccess = function() {
          (!this.subscription.currentPeriodEnd || this.subscription.currentPeriodEnd > new Date());
 };
 
+// The subscription as the client should see it, with the access decision
+// already made.
+//
+// The client used to decide for itself, and got it wrong: it checked type and
+// status but not currentPeriodEnd, so an account whose period had ended showed
+// every premium feature while this server treated it as free. Sending the
+// answer means the rule exists once — here — and the browser only displays it.
+userSchema.methods.subscriptionPayload = function() {
+  const sub = this.subscription ? this.subscription.toObject() : {};
+  return { ...sub, hasAccess: this.hasPremiumAccess() };
+};
+
 // Whether this account is the site owner.
 //
 // Gates owner-only tools in the UI — currently the Word of the Day caption,

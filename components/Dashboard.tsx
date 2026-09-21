@@ -131,7 +131,9 @@ export default function Dashboard({
   const { user, isAuthenticated }   = useAuth();
   const { syncLocalData, isSyncing } = useProgress();
   const { showToast } = useToastContext();
-  const { subscriptionTier }         = useFeatureAccess();
+  // isPremium, not the tier — a cancelled account keeps type 'premium' forever,
+  // which hid the upgrade prompts from exactly the people most likely to return.
+  const { isPremium }               = useFeatureAccess();
   const { openUpgradeModal }         = useUpgradeModal();
   const { startUpgrade }             = useUpgrade();
   const { stats: srsStats, decks: srsDecks } = useSRSContext();
@@ -482,7 +484,7 @@ export default function Dashboard({
           label="Everything else you could do"
           meta={`${QUICK_ACTIONS.length + PRACTICE_TOOLS.length} modules`}
         >
-          {subscriptionTier === 'free' && (
+          {!isPremium && (
             <button
               onClick={openUpgradeModal}
               className="mb-3.5 text-[12.5px] font-semibold text-[#C13F22] hover:underline dark:text-[#F07A55]"
@@ -500,7 +502,7 @@ export default function Dashboard({
                   onClick={() => setActiveSection(item.id)}
                   className="kl-card group relative p-4 text-left transition-transform duration-200 hover:-translate-y-0.5"
                 >
-                  {tool && subscriptionTier === 'free' && (
+                  {tool && !isPremium && (
                     <span className="absolute right-3 top-3 text-[10.5px] font-medium text-[#4A5566] dark:text-gray-500">
                       {tool.freeLabel}
                     </span>
@@ -559,7 +561,7 @@ export default function Dashboard({
         )}
 
         {/* ── Upgrade Banner (free users) ──────────────── */}
-        {subscriptionTier === 'free' && (
+        {!isPremium && (
           <div className="kl-card flex flex-col justify-between gap-5 p-6 sm:flex-row sm:items-center">
             <div>
               <p className="mb-1.5 text-[12.5px] font-semibold text-[#C13F22] dark:text-[#F07A55]">PREMIUM</p>

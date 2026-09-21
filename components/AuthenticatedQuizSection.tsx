@@ -79,7 +79,9 @@ const AuthenticatedQuizSection: React.FC = () => {
 
 const QuizComponent: React.FC = () => {
   const { updateProgress } = useProgress();
-  const { canAccess, hasReachedLimit, getLimit, subscriptionTier } = useFeatureAccess();
+  // isPremium rather than the tier for the daily cap and the upsell: a
+  // cancelled account keeps type 'premium' forever, so it skipped both.
+  const { canAccess, hasReachedLimit, getLimit, isPremium } = useFeatureAccess();
   const { dailyActivity, trackActivity } = useDailyActivity();
   const { openUpgradeModal } = useUpgradeModal();
   const { decks, actions: srsActions } = useSRSContext();
@@ -243,7 +245,7 @@ const QuizComponent: React.FC = () => {
     const finalScore = score / questions.length;
     const isPerfect = score === questions.length;
 
-    if (subscriptionTier === 'free') trackActivity('quiz', 1);
+    if (!isPremium) trackActivity('quiz', 1);
 
     // +5 XP per correct answer, capped at 30 per session so spamming doesn't inflate level
     earnXP(Math.min(score * 5, 30));
@@ -274,7 +276,7 @@ const QuizComponent: React.FC = () => {
     } catch (error) {
       console.error('Error saving quiz progress:', error);
     }
-  }, [quizCompleted, score, questions, setQuizStats, updateProgress, subscriptionTier, trackActivity]);
+  }, [quizCompleted, score, questions, setQuizStats, updateProgress, isPremium, trackActivity]);
 
   useEffect(() => { generateQuestions(); }, [generateQuestions]);
 
@@ -317,7 +319,7 @@ const QuizComponent: React.FC = () => {
   }, [questions, currentQuestionIndex, selectedAnswer, timeLeft, handleAnswer, handleNext]);
 
   // Daily limit screen
-  if (subscriptionTier === 'free' && hasReachedDailyLimit) {
+  if (!isPremium && hasReachedDailyLimit) {
     return (
       <div className="mx-auto max-w-2xl">
         <div className="kl-card p-8 text-center">
@@ -582,7 +584,7 @@ const QuizComponent: React.FC = () => {
             {isPremium && <Lock className="h-3 w-3" />}
           </button>
         ))}
-        {subscriptionTier === 'free' && (
+        {!isPremium && (
           <span className="ml-auto text-[12.5px] text-[#4A5566] dark:text-gray-500">
             {Math.max(0, dailyLimit - currentDailyCount)} quizzes left today
           </span>

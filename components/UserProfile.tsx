@@ -154,6 +154,20 @@ const UserProfile: React.FC<Props> = ({ setActiveSection }) => {
   const subscriptionType = user.subscription?.type || 'free';
   const subscriptionStatus = user.subscription?.status || 'active';
 
+  // What the plan badge should say.
+  //
+  // It used to print type and status straight from the record, so an account
+  // whose period had ended read "Premium · Active" directly above an "Unlock
+  // all — $4/month" button. Both came from the same screen and only one was
+  // true. The record still says premium; what changed is that access has run
+  // out, and that is what a plan label is for.
+  const planLabel = isPremium ? subscriptionType : 'free';
+  const planState = isPremium
+    ? subscriptionStatus.replace('_', ' ')
+    : subscriptionType === 'free'
+      ? 'active'
+      : 'expired';
+
   // Open the Stripe Customer Portal — 'cancel' jumps straight into the
   // cancellation flow; 'manage' opens the general portal (update card,
   // invoices, resume a scheduled cancellation).
@@ -324,10 +338,10 @@ const UserProfile: React.FC<Props> = ({ setActiveSection }) => {
                         : { background: 'rgba(20,32,47,0.06)', color: '#4A5566' }
                     }
                   >
-                    {subscriptionType}
+                    {planLabel}
                   </span>
                   <span className="text-[12.5px] capitalize text-[#4A5566] dark:text-gray-500">
-                    {subscriptionStatus.replace('_', ' ')}
+                    {planState}
                   </span>
                 </div>
               </div>

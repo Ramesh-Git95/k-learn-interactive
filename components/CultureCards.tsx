@@ -236,8 +236,12 @@ interface CultureCardsProps {
 }
 
 const CultureCards: React.FC<CultureCardsProps> = ({ setActiveSection }) => {
-  const { subscriptionTier } = useFeatureAccess();
-  const isFree = subscriptionTier === 'free';
+  // isPremium, not the tier. The tier is what the subscription record says;
+  // isPremium is whether it currently grants anything. A cancelled account
+  // keeps type 'premium' forever, so reading the tier left every one of these
+  // cards unlocked after access had ended.
+  const { isPremium } = useFeatureAccess();
+  const isFree = !isPremium;
   const { openUpgradeModal } = useUpgradeModal();
   const [activeCategory, setActiveCategory] = useState(isFree ? FREE_CATEGORY : 'All');
   const [search, setSearch] = useState('');

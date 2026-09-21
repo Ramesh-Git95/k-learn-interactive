@@ -375,8 +375,9 @@ interface Props {
 }
 
 const HonorificEngine: React.FC<Props> = ({ setActiveSection }) => {
-  const { subscriptionTier } = useFeatureAccess();
-  const isFree = subscriptionTier === 'free';
+  // isPremium, not the tier — a cancelled account keeps type 'premium' forever.
+  const { isPremium } = useFeatureAccess();
+  const isFree = !isPremium;
   const [activeCat, setActiveCat] = useState(CATEGORIES[0].id);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [soundOut, setSoundOut] = useState<{ korean: string; romanization: string; english: string } | null>(null);

@@ -297,8 +297,9 @@ const PINE = '#2E6B59';
 const OCHRE = '#A8761F';
 
 const TopikPrepSection: React.FC = () => {
-  const { subscriptionTier } = useFeatureAccess();
-  const isFree = subscriptionTier === 'free';
+  // isPremium, not the tier — a cancelled account keeps type 'premium' forever.
+  const { isPremium } = useFeatureAccess();
+  const isFree = !isPremium;
   const { openUpgradeModal } = useUpgradeModal();
   const [level, setLevel] = useState<Level>('I');
   const [category, setCategory] = useState<Category>('vocabulary');

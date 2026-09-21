@@ -96,7 +96,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
   const { openLogin, openRegister } = useAuthModal();
   const { showToast } = useToastContext();
   const { syncLocalData, isSyncing } = useProgress();
-  const { subscriptionTier } = useFeatureAccess();
+  const { isPremium } = useFeatureAccess();
   const { startUpgrade } = useUpgrade();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -188,7 +188,10 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
     return () => document.removeEventListener('mousedown', onClick);
   }, [showMoreMenu, showUserMenu]);
 
-  const tierBadge = subscriptionTier === 'premium'
+  // isPremium, not subscriptionTier: the tier is what the record says, while
+  // isPremium is whether the account actually has access. An expired premium
+  // account showed this badge while every premium feature was locked.
+  const tierBadge = isPremium
     ? { label: '⭐ Premium', cls: 'bg-[#E4572E]/10 dark:bg-[#E4572E]/20 text-[#C13F22] dark:text-[#F07A55]' }
     : { label: 'Free plan', cls: 'bg-[#16202F]/[0.06] dark:bg-gray-800 text-[#4A5566] dark:text-gray-400' };
 
@@ -381,8 +384,10 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, theme,
                         </span>
                       </div>
 
-                      {/* Upgrade banner for free users */}
-                      {subscriptionTier === 'free' && (
+                      {/* Upgrade banner for anyone without access — which now
+                          includes a lapsed premium account, where the offer is
+                          exactly as relevant as it is to a free user. */}
+                      {!isPremium && (
                         <button
                           className="flex items-center gap-3 px-4 py-3 border-b border-[#16202F]/[0.1] dark:border-gray-800 transition-opacity duration-200 hover:opacity-90 w-full text-left"
                           style={{ background: 'linear-gradient(160deg, #1B2637, #0D141F)' }}

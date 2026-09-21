@@ -56,12 +56,13 @@ interface Props {
 }
 
 const EnhancedCultureHub: React.FC<Props> = ({ progress, toggleProgress, setActiveSection }) => {
-  const { subscriptionTier } = useFeatureAccess();
+  // isPremium, not the tier — a cancelled account keeps type 'premium' forever.
+  const { isPremium } = useFeatureAccess();
   const [active, setActive] = useState<Subsection>('insights');
   const [picked, setPicked] = useState<number | null>(null);
   const [upgradeModal, setUpgradeModal] = useState<{ open: boolean; key: string }>({ open: false, key: '' });
 
-  const isFree = subscriptionTier === 'free';
+  const isFree = !isPremium;
   const isTipRead = (i: number) => !!progress[`culture_tip_${i}`];
   const visibleTips = isFree ? cultureTips.slice(0, FREE_TIP_LIMIT) : cultureTips;
   const lockedCount = cultureTips.length - visibleTips.length;

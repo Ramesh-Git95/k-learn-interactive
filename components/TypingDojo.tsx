@@ -76,8 +76,9 @@ const railCard =
   'rounded-[14px] border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] px-5 py-4 dark:border-gray-800 dark:bg-gray-900';
 
 const TypingDojo: React.FC = () => {
-  const { subscriptionTier } = useFeatureAccess();
-  const isFree = subscriptionTier === 'free';
+  // isPremium, not the tier — a cancelled account keeps type 'premium' forever.
+  const { isPremium } = useFeatureAccess();
+  const isFree = !isPremium;
   const { openUpgradeModal } = useUpgradeModal();
   const TOTAL_SECONDS = isFree ? DEMO_SECONDS : FULL_SECONDS;
 

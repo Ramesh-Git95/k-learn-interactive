@@ -3,6 +3,7 @@ import { apiClient, User } from '../services/apiClient';
 import { clearLocalGamification } from '../utils/xpStreak';
 import { clearLocalTopikEstimate } from '../utils/topikEstimate';
 import { readCachedUser, writeCachedUser, clearCachedUser, isAuthRejection } from '../utils/session';
+import { hasPremiumAccess as hasPremiumAccessFor } from '../utils/subscription';
 
 // Auth context
 interface AuthState {
@@ -356,12 +357,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Check if user has premium access
-  const hasPremiumAccess = () => {
-    if (!state.user) return false;
-    return state.user.subscription?.type !== 'free' && 
-           state.user.subscription?.status === 'active';
-  };
+  // Check if user has premium access.
+  //
+  // This used to check type and status but not the expiry date, while the
+  // server checked all three — so an account whose period had ended saw every
+  // premium feature unlocked and then hit failures on anything the API
+  // enforces. The rule now lives in utils/subscription.ts, and the server's own
+  // answer is preferred over computing it here at all.
+  const hasPremiumAccess = () => hasPremiumAccessFor(state.user?.subscription);
 
   // Update subscription data
   const updateSubscription = (subscriptionData: any) => {

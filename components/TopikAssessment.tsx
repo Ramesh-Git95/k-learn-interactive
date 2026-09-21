@@ -65,9 +65,12 @@ type Screen = 'intro' | 'quiz' | 'results';
 const TopikAssessment: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const { openRegister } = useAuthModal();
-  const { subscriptionTier } = useFeatureAccess();
+  // Took isPremium from the hook rather than deriving it from the tier here:
+  // the local version read `subscriptionTier === 'premium'`, which stays true
+  // forever on a cancelled account and shadowed the correct value the hook
+  // already provides.
+  const { isPremium } = useFeatureAccess();
   const { startUpgrade } = useUpgrade();
-  const isPremium = subscriptionTier === 'premium';
 
   const [screen, setScreen] = useState<Screen>('intro');
   const [qIdx, setQIdx] = useState(0);

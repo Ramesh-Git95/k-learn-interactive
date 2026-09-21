@@ -37,7 +37,7 @@ interface Props {
 const EnhancedPhrasesSection: React.FC<Props> = ({
   bookmarks, toggleBookmark, progress, toggleProgress, setActiveSection,
 }) => {
-  const { hasReachedLimit, getLimit, subscriptionTier } = useFeatureAccess();
+  const { hasReachedLimit, getLimit, isPremium } = useFeatureAccess();
   const { dailyActivity, trackActivity } = useDailyActivity();
   const { openUpgradeModal } = useUpgradeModal();
   const [soundOut, setSoundOut] = useState<PhraseItem | null>(null);
@@ -51,18 +51,21 @@ const EnhancedPhrasesSection: React.FC<Props> = ({
   const isPhraseStudied = (i: number) => !!progress[`phrase_${i}`];
   const origIndex = (p: PhraseItem) => commonPhrases.findIndex(x => x.korean === p.korean);
 
+  // isPremium, not subscriptionTier: the tier is what the record says, access is
+  // what it currently grants. Reading the tier meant an account whose period had
+  // ended still saw every phrase.
   const visible = useMemo(
-    () => (subscriptionTier === 'free' ? commonPhrases.slice(0, FREE_PHRASES_COUNT) : commonPhrases),
-    [subscriptionTier],
+    () => (isPremium ? commonPhrases : commonPhrases.slice(0, FREE_PHRASES_COUNT)),
+    [isPremium],
   );
 
   const phrasesLimit = getLimit('phrasesStudyPerDay') as number;
   const currentCount = dailyActivity.phrasesStudied;
-  const limitReached = subscriptionTier === 'free' && hasReachedLimit('phrasesStudyPerDay', currentCount);
+  const limitReached = !isPremium && hasReachedLimit('phrasesStudyPerDay', currentCount);
 
   const handlePhraseStudied = (i: number) => {
     const already = isPhraseStudied(i);
-    if (subscriptionTier === 'free' && !already) {
+    if (!isPremium && !already) {
       if (hasReachedLimit('phrasesStudyPerDay', dailyActivity.phrasesStudied)) return false;
       trackActivity('phrases', 1);
     }
@@ -150,7 +153,7 @@ const EnhancedPhrasesSection: React.FC<Props> = ({
       </div>
 
       {/* ── Daily limit ── */}
-      {subscriptionTier === 'free' && (
+      {!isPremium && (
         <div className="mb-5 flex items-center gap-4">
           <span className="flex-none text-[12.5px] font-medium text-[#4A5566] dark:text-gray-400">Today</span>
           <div className="h-1.5 max-w-xs flex-1 overflow-hidden rounded-full bg-[rgba(20,32,47,0.10)] dark:bg-gray-800">
@@ -258,7 +261,7 @@ const EnhancedPhrasesSection: React.FC<Props> = ({
           </div>
 
           {/* Locked phrases */}
-          {subscriptionTier === 'free' && commonPhrases.length > visible.length && (
+          {!isPremium && commonPhrases.length > visible.length && (
             <div className="mt-4 space-y-2.5">
               {commonPhrases.slice(visible.length, visible.length + 3).map(p => (
                 <button

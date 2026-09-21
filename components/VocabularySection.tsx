@@ -33,7 +33,10 @@ interface VocabularySectionProps {
 }
 
 const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggleBookmark, progress, toggleProgress }) => {
-  const { hasReachedLimit, getLimit, subscriptionTier } = useFeatureAccess();
+  // isPremium, not the tier. A cancelled subscription keeps type 'premium'
+  // forever, so this showed all ten categories to an account whose access had
+  // ended while a never-subscribed account correctly saw three.
+  const { hasReachedLimit, getLimit, isPremium } = useFeatureAccess();
   const { dailyActivity, trackActivity } = useDailyActivity();
   const { isAuthenticated } = useAuth();
   const { openRegister } = useAuthModal();
@@ -46,9 +49,9 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
   const isStudied = (item: VocabItem) => !!progress[`vocab_item_${item.korean}`];
 
   const displayVocabulary = useMemo((): VocabCategory[] => {
-    if (subscriptionTier === 'free') return vocabulary.slice(0, FREE_CATEGORY_COUNT);
+    if (!isPremium) return vocabulary.slice(0, FREE_CATEGORY_COUNT);
     return vocabulary;
-  }, [subscriptionTier]);
+  }, [isPremium]);
 
   // A set counts as complete once every word in it is studied.
   useEffect(() => {
@@ -84,7 +87,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
 
   const currentVocabCount = dailyActivity.vocabularyStudied;
   const vocabLimit = getLimit('vocabularyStudyPerDay') as number;
-  const limitReached = subscriptionTier === 'free' && hasReachedLimit('vocabularyStudyPerDay', currentVocabCount);
+  const limitReached = !isPremium && hasReachedLimit('vocabularyStudyPerDay', currentVocabCount);
 
   const markItemWithLimit = (item: VocabItem) => {
     if (limitReached) return false;
@@ -196,7 +199,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
       )}
 
       {/* Daily limit */}
-      {subscriptionTier === 'free' && isAuthenticated && (
+      {!isPremium && isAuthenticated && (
         <div className="mb-5 flex items-center gap-4">
           <span className="flex-none text-[12.5px] font-medium text-[#4A5566] dark:text-gray-400">Today</span>
           <div className="h-1.5 max-w-xs flex-1 overflow-hidden rounded-full bg-[rgba(20,32,47,0.10)] dark:bg-gray-800">
@@ -268,7 +271,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ bookmarks, toggle
       </div>
 
       {/* Locked sets */}
-      {subscriptionTier === 'free' && vocabulary.length > FREE_CATEGORY_COUNT && (
+      {!isPremium && vocabulary.length > FREE_CATEGORY_COUNT && (
         <div className="mt-6">
           <Drawer
             label="More word sets with Premium"
