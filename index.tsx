@@ -4,6 +4,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
+import { cleanTrackingParamsFromUrl } from './utils/cleanUrl';
+
+// Before React mounts, so nothing ever reads the tracking parameters and the
+// visitor never sees them. ?checkout= and ?token= are left alone — App reads
+// both, and they are removed by name rather than by clearing the query string.
+cleanTrackingParamsFromUrl();
 
 // Register Service Worker for PWA functionality
 if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
