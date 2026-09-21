@@ -355,6 +355,23 @@ userSchema.methods.hasPremiumAccess = function() {
          (!this.subscription.currentPeriodEnd || this.subscription.currentPeriodEnd > new Date());
 };
 
+// Whether this account is the site owner.
+//
+// Gates owner-only tools in the UI — currently the Word of the Day caption,
+// which is written in the page owner's voice and makes no sense from anyone
+// else. Derived from an environment variable rather than stored on the
+// document, so there is no field to accidentally set on a real user and no
+// migration to run; and read on the server rather than compared in the client,
+// so the owner's address never ships inside the JS bundle for scrapers to find.
+//
+// Absent ADMIN_EMAIL this returns false for everyone, which is the right
+// failure: an owner-only button stays hidden rather than appearing for all.
+userSchema.methods.isAdminUser = function() {
+  const admin = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+  if (!admin) return false;
+  return this.email.toLowerCase() === admin;
+};
+
 // Instance method to get safe user data (without password)
 userSchema.methods.toJSON = function() {
   const user = this.toObject();

@@ -388,6 +388,12 @@ export interface User {
     theme: 'light' | 'dark' | 'auto';
   };
   emailVerified: boolean;
+  /**
+   * True only for the site owner. Computed on the server from ADMIN_EMAIL and
+   * never stored, so the address stays out of this bundle. Optional because an
+   * older cached profile predates the field — treat a missing value as false.
+   */
+  isAdmin?: boolean;
   createdAt: Date;
 }
 

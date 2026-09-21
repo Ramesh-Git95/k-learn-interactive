@@ -48,6 +48,7 @@ const sendAuthResponse = (res, user, message = 'Success') => {
       progress: user.progress,
       preferences: user.preferences,
       emailVerified: user.emailVerified,
+      isAdmin: user.isAdminUser(),
       createdAt: user.createdAt
     }
   });
@@ -125,6 +126,7 @@ router.post('/register', authRateLimit, async (req, res) => {
         progress: user.progress,
         preferences: user.preferences,
         emailVerified: user.emailVerified,
+        isAdmin: user.isAdminUser(),
         createdAt: user.createdAt
       },
       emailSent: true,
@@ -232,6 +234,7 @@ router.get('/me', authenticateToken, async (req, res) => {
         progress: req.user.progress,
         preferences: req.user.preferences,
         emailVerified: req.user.emailVerified,
+        isAdmin: req.user.isAdminUser(),
         createdAt: req.user.createdAt,
         updatedAt: req.user.updatedAt
       }
@@ -282,10 +285,11 @@ router.put('/profile', authenticateToken, async (req, res) => {
         subscription: user.subscription,
         progress: user.progress,
         preferences: user.preferences,
-        emailVerified: user.emailVerified
+        emailVerified: user.emailVerified,
+        isAdmin: user.isAdminUser()
       }
     });
-    
+
   } catch (error) {
     console.error('Update profile error:', error);
     

@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { X, Share2, Download } from 'lucide-react';
+import { X, Share2, Download, Copy, Check } from 'lucide-react';
+import { buildWordCaption } from '../utils/wordCaption';
+import { useAuth } from '../contexts/AuthContext';
 
 // Shareable "Word of the Day" card — draws a branded 1080x1350 (4:5, Instagram
 // friendly) image on a canvas with the app's ink/dancheong identity, then
@@ -23,7 +25,15 @@ const H = 1350;
 
 export default function ShareableWordCard({ word, onClose }: ShareableWordCardProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { user } = useAuth();
+  // The caption is written in the page owner's voice — it closes by inviting
+  // replies to a page only they run — so it is theirs alone. Everyone else
+  // still gets the card, which is the part worth sharing.
+  const isOwner = Boolean(user?.isAdmin);
   const [ready, setReady] = useState(false);
+  const [copied, setCopied] = useState(false);
+  /** Set only when the clipboard refused, so the text can be shown to select by hand. */
+  const [captionFallback, setCaptionFallback] = useState<string | null>(null);
 
   // Close on Escape
   useEffect(() => {
@@ -166,6 +176,21 @@ export default function ShareableWordCard({ word, onClose }: ShareableWordCardPr
     URL.revokeObjectURL(url);
   };
 
+  // Copying can fail for reasons the page cannot control — the Clipboard API
+  // needs a secure context and a user gesture, and some browsers refuse it
+  // outright. Falling back to a selected textarea means the caption is always
+  // at least reachable, rather than a button that appears to do nothing.
+  const handleCopyCaption = async () => {
+    const caption = buildWordCaption(word);
+    try {
+      await navigator.clipboard.writeText(caption);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCaptionFallback(caption);
+    }
+  };
+
   const handleShare = async () => {
     const blob = await toBlob();
     if (!blob) return;
@@ -224,8 +249,47 @@ export default function ShareableWordCard({ word, onClose }: ShareableWordCardPr
             <Download className="w-4 h-4" /> Download
           </button>
         </div>
+
+        {/* The caption is the half of a post an image cannot do: searchable
+            text, a link that works, and something a screen reader can read. */}
+        {isOwner && (
+          <>
+            <button
+              onClick={handleCopyCaption}
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-gray-200 py-3 text-sm font-black text-gray-700 transition-colors hover:border-[#E4572E] hover:text-[#E4572E] dark:border-gray-700 dark:text-gray-200"
+            >
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4 text-[#3F8571]" /> Caption copied
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" /> Copy caption
+                </>
+              )}
+            </button>
+
+            {captionFallback && (
+              <div className="mt-2">
+                <p className="mb-1 text-[11px] text-gray-500 dark:text-gray-400">
+                  Your browser blocked copying — select this and copy it by hand:
+                </p>
+                <textarea
+                  readOnly
+                  value={captionFallback}
+                  rows={8}
+                  onFocus={e => e.currentTarget.select()}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 p-2.5 text-[11px] leading-[1.5] text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                />
+              </div>
+            )}
+          </>
+        )}
+
         <p className="text-center text-[11px] text-gray-400 dark:text-gray-500 mt-3">
-          Perfect for Instagram stories · tag your study buddy 🇰🇷
+          {isOwner
+            ? 'Download the card, copy the caption, paste both 🇰🇷'
+            : 'Share today\'s word with someone learning too 🇰🇷'}
         </p>
       </div>
     </div>
