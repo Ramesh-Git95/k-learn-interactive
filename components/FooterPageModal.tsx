@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
+import Icon from './Icon';
+import { FACEBOOK_URL, SUPPORT_EMAIL } from '../constants';
 
 export type FooterPage = 'help' | 'study-guide' | 'community' | 'about' | 'privacy' | 'terms' | 'changelog';
 
@@ -153,38 +155,39 @@ const PAGES: Record<FooterPage, { title: string; emoji: string; content: React.R
     emoji: '🌍',
     content: (
       <div className="space-y-6">
+        {/* This page used to promise a Discord with per-level channels and
+            native speakers dropping in, a Twitter with a hashtag, and an open
+            repository taking pull requests. None of the three existed — the
+            links went to discord.gg/klearn, twitter.com/klearn and
+            github.com/klearn, and the repository is private. One real page is
+            worth more than three invented ones. */}
         <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-          Learning with others accelerates progress. Join the K-Learn community to ask questions, share progress, and practise with fellow learners.
+          K-Learn is one person, so "community" is a small word here — but there is one place
+          to follow along, and a real address to write to.
         </p>
 
         {[
+          ...(FACEBOOK_URL
+            ? [{
+                icon: <Icon icon="facebook" className="h-8 w-8" style={{ color: '#1877F2' }} />,
+                name: 'Facebook',
+                desc: 'A word, a phrase or a piece of Korean culture most days — taken from what is actually in the app. The one account we keep.',
+                action: 'Follow the page',
+                href: FACEBOOK_URL,
+                color: '#1877F2',
+              }]
+            : []),
           {
-            icon: '💬',
-            name: 'Discord Server',
-            desc: 'Chat in real time with other Korean learners. Dedicated channels for each level — beginner to advanced. Native speakers drop in regularly.',
-            action: 'Join Discord',
-            href: 'https://discord.gg/klearn',
-            color: '#5865F2',
+            icon: <span className="text-3xl leading-none">✉️</span>,
+            name: 'Email',
+            desc: 'Questions, bugs, or a word you think belongs in here. It reaches one person, and gets a reply.',
+            action: SUPPORT_EMAIL,
+            href: `mailto:${SUPPORT_EMAIL}`,
+            color: '#E4572E',
           },
-          {
-            icon: '🐦',
-            name: 'Twitter / X',
-            desc: 'Follow us for daily Korean vocabulary, grammar tips, and cultural facts. Share your progress with #KLearnKorean.',
-            action: 'Follow @KLearnApp',
-            href: 'https://twitter.com/klearn',
-            color: '#000000',
-          },
-          {
-            icon: '🐙',
-            name: 'GitHub',
-            desc: 'K-Learn is open to community contributions. Found a bug? Have a feature idea? Open an issue or submit a pull request.',
-            action: 'View on GitHub',
-            href: 'https://github.com/klearn',
-            color: '#333333',
-          },
-        ].map(({ icon, name, desc, action, href, color }) => (
+        ].filter((c): c is NonNullable<typeof c> => Boolean(c)).map(({ icon, name, desc, action, href, color }) => (
           <div key={name} className="border border-gray-100 dark:border-gray-800 rounded-2xl p-5 flex gap-4 items-start">
-            <div className="text-3xl flex-shrink-0">{icon}</div>
+            <div className="flex-shrink-0">{icon}</div>
             <div className="flex-1">
               <h3 className="font-black text-gray-900 dark:text-white mb-1">{name}</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{desc}</p>

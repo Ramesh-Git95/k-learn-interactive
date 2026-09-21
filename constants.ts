@@ -44,6 +44,24 @@ export const TOTAL_GRAMMAR_COUNT = grammarPatterns.length;
 // others makes the footer offer a link the app then bounces you out of.
 export const PUBLIC_SECTIONS: Section[] = ['vocabulary', 'grammar', 'culture', 'cookie-settings'];
 
+// The one social account this project has. Facebook is deliberately the only
+// one: a page posted to daily is worth more than four links to accounts nobody
+// tends.
+//
+// Everything here renders only when this is non-empty, so an unset value shows
+// nothing rather than a dead link. What was here before was worse than nothing
+// — the footer's "GitHub", "Twitter" and "Discord" pointed at github.com,
+// twitter.com and discord.com, the sites' own front pages, and the Community
+// page advertised a Discord with per-level channels, a Twitter hashtag and an
+// invitation to send pull requests to a repository that is private. None of it
+// existed.
+// Annotated `string` rather than inferred: as a literal '' TypeScript narrows
+// every `FACEBOOK_URL ? …` to the empty branch and the link disappears from the
+// build even after a real URL is pasted in.
+export const FACEBOOK_URL: string = 'https://www.facebook.com/KoreanLearnInteractive';
+
+export const SUPPORT_EMAIL = 'noreply@korean-learn.com';
+
 export const LS_THEME_KEY = 'k-learn-theme';
 export const LS_BOOKMARKS_KEY = 'k-learn-bookmarks';
 export const LS_PROGRESS_KEY = 'k-learn-progress';

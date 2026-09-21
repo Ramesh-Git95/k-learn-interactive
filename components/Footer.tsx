@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import FooterPageModal, { type FooterPage } from './FooterPageModal';
+import Icon from './Icon';
 import { useAuth } from '../contexts/AuthContext';
-import { PUBLIC_SECTIONS } from '../constants';
+import { PUBLIC_SECTIONS, FACEBOOK_URL } from '../constants';
 import type { Section } from '../types';
 
 const Footer: React.FC = () => {
@@ -143,24 +144,21 @@ const Footer: React.FC = () => {
               © {year} K-Learn Interactive. All rights reserved.
             </p>
 
-            <div className="flex items-center gap-4">
-              {[
-                { label: 'GitHub',  href: 'https://github.com',  emoji: '🐙' },
-                { label: 'Twitter', href: 'https://twitter.com', emoji: '🐦' },
-                { label: 'Discord', href: 'https://discord.com', emoji: '💬' },
-              ].map(({ label, href, emoji }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-gray-400 hover:text-[#E4572E] dark:hover:text-[#F07A55] transition-colors duration-200"
-                  aria-label={label}
-                >
-                  {emoji}
-                </a>
-              ))}
-            </div>
+            {/* One account, and only once it exists. These were three links to
+                github.com, twitter.com and discord.com — the sites themselves,
+                not any account of ours. */}
+            {FACEBOOK_URL && (
+              <a
+                href={FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="K-Learn on Facebook"
+                className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400 transition-colors duration-200 hover:text-[#E4572E] dark:hover:text-[#F07A55]"
+              >
+                <Icon icon="facebook" className="h-4 w-4" />
+                Facebook
+              </a>
+            )}
 
             <div className="flex items-center gap-3">
               <button
