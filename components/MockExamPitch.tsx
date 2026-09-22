@@ -136,7 +136,11 @@ const MockExamPitch: React.FC = () => {
   // rather than a pre-filled form.
   const picked = step % 2 === 1;
 
-  const colour = timeUp ? RED : seconds <= 10 ? RED : seconds <= 20 ? OCHRE : '#16202F';
+  // Only the alarm colours are set inline. The calm colour is ink in light mode
+  // and white in dark, which an inline style cannot express — it was a fixed
+  // #16202F, near-black on the dark card, so the clock was invisible for the
+  // first half of every run and only appeared once it turned amber.
+  const alarm = timeUp || seconds <= 10 ? RED : seconds <= 20 ? OCHRE : undefined;
 
   return (
     <div ref={hostRef} className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
@@ -150,8 +154,8 @@ const MockExamPitch: React.FC = () => {
                 Time remaining
               </div>
               <div
-                className="mt-1 text-[44px] font-bold leading-none tabular-nums transition-colors duration-500 sm:text-[52px]"
-                style={{ color: colour }}
+                className="mt-1 text-[44px] font-bold leading-none tabular-nums text-[#16202F] transition-colors duration-500 sm:text-[52px] dark:text-white"
+                style={alarm ? { color: alarm } : undefined}
                 aria-hidden="true"
               >
                 {formatClock(seconds)}
@@ -191,12 +195,8 @@ const MockExamPitch: React.FC = () => {
                     return (
                       <div
                         key={i}
-                        className="flex items-center gap-2 rounded-[10px] border-[1.5px] px-3 py-2 transition-all duration-300"
-                        style={
-                          chosen
-                            ? { borderColor: PINE, background: `${PINE}12` }
-                            : { borderColor: 'rgba(20,32,47,0.12)' }
-                        }
+                        className="flex items-center gap-2 rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.12)] px-3 py-2 transition-all duration-300 dark:border-white/15"
+                        style={chosen ? { borderColor: PINE, background: `${PINE}1F` } : undefined}
                       >
                         <span className="text-[13px]" style={{ color: chosen ? PINE : '#9AA4B2' }}>
                           {OPTION_LABELS[i]}
@@ -220,11 +220,20 @@ const MockExamPitch: React.FC = () => {
                 return (
                   <span
                     key={i}
-                    className="flex h-6 items-center justify-center rounded-[5px] text-[9px] transition-all duration-300"
-                    style={{
-                      background: done ? PINE : isActive ? `${OCHRE}2E` : 'rgba(20,32,47,0.09)',
-                      border: isActive ? `1.5px solid ${OCHRE}` : '1.5px solid transparent',
-                    }}
+                    // Blank cells take their colour from the theme. They were
+                    // ink at 9% opacity, which on the dark card is ink on ink:
+                    // the sheet looked like one amber cell floating alone, and
+                    // "four left blank" — the whole point — had nothing to see.
+                    className={`flex h-6 items-center justify-center rounded-[5px] border-[1.5px] border-transparent text-[9px] transition-all duration-300 ${
+                      done || isActive ? '' : 'bg-[rgba(20,32,47,0.09)] dark:bg-white/[0.13]'
+                    }`}
+                    style={
+                      done
+                        ? { background: PINE }
+                        : isActive
+                          ? { background: `${OCHRE}2E`, borderColor: OCHRE }
+                          : undefined
+                    }
                   >
                     {isActive ? '✏️' : ''}
                   </span>

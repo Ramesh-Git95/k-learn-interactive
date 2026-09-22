@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Flag, Clock, AlertTriangle } from 'lucide-react';
 import { useFeatureAccess } from '../hooks/useFeatureAccess';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
@@ -132,7 +132,12 @@ const TopikMockExam: React.FC = () => {
     else finish(false);
   };
   const state = exam ? clockState(secondsLeft, exam.totalSeconds) : 'calm';
-  const clockColour = state === 'urgent' ? RED : state === 'warning' ? OCHRE : '#16202F';
+  // Alarm colours only. The calm state takes its colour from the theme via a
+  // class, because a fixed #16202F is near-black on the dark exam bar — the
+  // clock, the one thing this screen is about, was unreadable in dark mode
+  // until it turned amber.
+  const clockAlarm = state === 'urgent' ? RED : state === 'warning' ? OCHRE : undefined;
+  const clockStyle = clockAlarm ? { color: clockAlarm } : undefined;
 
   // ── Brief ────────────────────────────────────────────────────────────────
   if (screen === 'brief') {
@@ -159,11 +164,11 @@ const TopikMockExam: React.FC = () => {
                 <button
                   key={id}
                   onClick={() => setPaperId(id)}
-                  className="flex-1 rounded-[12px] border-[1.5px] px-4 py-3 text-left transition-colors"
+                  className="flex-1 rounded-[12px] border-[1.5px] border-[rgba(20,32,47,0.14)] px-4 py-3 text-left transition-colors dark:border-gray-700"
                   style={
                     paperId === id
                       ? { borderColor: ACC.light, background: `${ACC.light}14` }
-                      : { borderColor: 'rgba(20,32,47,0.14)' }
+                      : undefined
                   }
                 >
                   <div className="text-[14.5px] font-semibold text-[#16202F] dark:text-white">
@@ -193,9 +198,7 @@ const TopikMockExam: React.FC = () => {
 
               {/* Said plainly, because "mock exam" implies a full paper and this
                   is not one. The pace is real; the length is not. */}
-              <p className="mt-4 rounded-[12px] px-4 py-3 text-[12.5px] leading-[1.55] text-[#3E4A5A] dark:text-gray-400"
-                style={{ background: 'rgba(20,32,47,0.045)' }}
-              >
+              <p className="mt-4 rounded-[12px] bg-[rgba(20,32,47,0.045)] px-4 py-3 text-[12.5px] leading-[1.55] text-[#3E4A5A] dark:bg-white/[0.06] dark:text-gray-400">
                 A real {paper.title} is {paper.realWorld.questions} questions in{' '}
                 {paper.realWorld.minutes} minutes across listening and reading. This is a shorter
                 paper at the same seconds per question — a rehearsal of the pace, not a full
@@ -243,17 +246,17 @@ const TopikMockExam: React.FC = () => {
             it is there. */}
         <div className="sticky top-2 z-20 mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-[rgba(20,32,47,0.14)] bg-[#FFFCF4] px-4 py-3 shadow-sm dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4" style={{ color: clockColour }} />
+            <Clock className="h-4 w-4 text-[#16202F] dark:text-white" style={clockStyle} />
             <span
-              className="text-[20px] font-bold tabular-nums"
-              style={{ color: clockColour }}
+              className="text-[20px] font-bold tabular-nums text-[#16202F] dark:text-white"
+              style={clockStyle}
               role="timer"
               aria-live="off"
             >
               {formatClock(secondsLeft)}
             </span>
             {state !== 'calm' && (
-              <span className="text-[12px] font-semibold" style={{ color: clockColour }}>
+              <span className="text-[12px] font-semibold" style={clockStyle}>
                 {state === 'urgent' ? 'last minute' : 'time is going'}
               </span>
             )}
@@ -284,7 +287,7 @@ const TopikMockExam: React.FC = () => {
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirming(false)}
-                className="h-9 rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.18)] px-4 text-[13px] font-semibold text-[#16202F] dark:text-gray-200"
+                className="h-9 rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.18)] px-4 text-[13px] font-semibold text-[#16202F] dark:border-gray-700 dark:text-gray-200"
               >
                 Keep going
               </button>
@@ -319,14 +322,13 @@ const TopikMockExam: React.FC = () => {
                     <button
                       key={i}
                       onClick={() => choose(i)}
-                      className="flex items-center gap-3 rounded-[12px] border-[1.5px] px-4 py-3 text-left transition-colors"
-                      style={
-                        picked
-                          ? { borderColor: ACC.light, background: `${ACC.light}14` }
-                          : { borderColor: 'rgba(20,32,47,0.14)' }
-                      }
+                      className="flex items-center gap-3 rounded-[12px] border-[1.5px] border-[rgba(20,32,47,0.14)] px-4 py-3 text-left transition-colors dark:border-gray-700"
+                      style={picked ? { borderColor: ACC.light, background: `${ACC.light}14` } : undefined}
                     >
-                      <span className="text-[15px]" style={{ color: picked ? ACC.light : '#4A5566' }}>
+                      <span
+                        className="text-[15px] text-[#4A5566] dark:text-gray-400"
+                        style={picked ? { color: ACC.light } : undefined}
+                      >
                         {OPTION_LABELS[i]}
                       </span>
                       <span className="font-korean text-[15.5px] text-[#16202F] dark:text-white">{opt}</span>
@@ -338,11 +340,11 @@ const TopikMockExam: React.FC = () => {
               <div className="mt-5 flex items-center justify-between gap-3">
                 <button
                   onClick={toggleFlag}
-                  className="flex h-10 items-center gap-1.5 rounded-[10px] border-[1.5px] px-3 text-[13px] font-semibold transition-colors"
+                  className="flex h-10 items-center gap-1.5 rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.18)] px-3 text-[13px] font-semibold text-[#4A5566] transition-colors dark:border-gray-700 dark:text-gray-400"
                   style={
                     flagged.has(qIdx)
                       ? { borderColor: OCHRE, color: OCHRE, background: `${OCHRE}12` }
-                      : { borderColor: 'rgba(20,32,47,0.18)', color: '#4A5566' }
+                      : undefined
                   }
                 >
                   <Flag className="h-3.5 w-3.5" /> {flagged.has(qIdx) ? 'Flagged' : 'Flag'}
@@ -352,7 +354,7 @@ const TopikMockExam: React.FC = () => {
                   <button
                     onClick={() => setQIdx(i => Math.max(0, i - 1))}
                     disabled={qIdx === 0}
-                    className="h-10 rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.18)] px-4 text-[13px] font-semibold text-[#16202F] disabled:opacity-40 dark:text-gray-200"
+                    className="h-10 rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.18)] px-4 text-[13px] font-semibold text-[#16202F] dark:border-gray-700 disabled:opacity-40 dark:text-gray-200"
                   >
                     Back
                   </button>
@@ -399,18 +401,24 @@ const TopikMockExam: React.FC = () => {
                       key={i}
                       onClick={() => setQIdx(i)}
                       aria-label={`Question ${i + 1}${isAnswered ? ', answered' : ', blank'}`}
-                      className="flex h-7 items-center justify-center rounded-md text-[11.5px] font-semibold transition-transform hover:scale-105"
+                      // Blank and current cells take their neutral colours from
+                      // the theme; only the filled states are set inline. A
+                      // blank cell was ink at 5% — invisible on the dark card,
+                      // so the sheet could not show what was still left to do.
+                      className={`flex h-7 items-center justify-center rounded-md text-[11.5px] font-semibold text-[#16202F] transition-transform hover:scale-105 dark:text-gray-200 ${
+                        !isNow && !isFlagged && !isAnswered ? 'bg-[rgba(20,32,47,0.06)] dark:bg-white/10' : ''
+                      }`}
                       style={
                         isNow
-                          ? { border: `1.5px solid ${ACC.light}`, background: `${ACC.light}24`, color: '#16202F' }
+                          ? { border: `1.5px solid ${ACC.light}`, background: `${ACC.light}24` }
                           : isFlagged
                             ? { background: OCHRE, color: '#fff' }
                             : isAnswered
                               ? { background: PINE, color: '#fff' }
-                              : { background: 'rgba(20,32,47,0.05)', color: '#16202F' }
+                              : undefined
                       }
                     >
-                      <span className={isNow || (!isAnswered && !isFlagged) ? 'dark:text-gray-300' : ''}>
+                      <span>
                         {i + 1}
                       </span>
                     </button>
@@ -479,7 +487,7 @@ const TopikMockExam: React.FC = () => {
             </button>
             <button
               onClick={() => setScreen('brief')}
-              className="h-11 rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.18)] px-5 text-[14px] font-semibold text-[#16202F] dark:text-gray-200"
+              className="h-11 rounded-[10px] border-[1.5px] border-[rgba(20,32,47,0.18)] px-5 text-[14px] font-semibold text-[#16202F] dark:border-gray-700 dark:text-gray-200"
             >
               Back to the brief
             </button>
@@ -497,7 +505,10 @@ const TopikMockExam: React.FC = () => {
               return (
                 <div key={q.id} className="kl-well rounded-xl p-4">
                   <div className="mb-1 flex items-center gap-2 text-[12px] font-semibold">
-                    <span style={{ color: right ? PINE : given === null ? '#4A5566' : RED }}>
+                    <span
+                      className="text-[#4A5566] dark:text-gray-400"
+                      style={right ? { color: PINE } : given !== null ? { color: RED } : undefined}
+                    >
                       {i + 1}. {right ? 'Right' : given === null ? 'Blank' : 'Wrong'}
                     </span>
                   </div>
