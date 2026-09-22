@@ -7,6 +7,7 @@ import FeatureShowcase from './FeatureShowcase';
 import TryItShowcase from './TryItShowcase';
 import JourneyPath from './JourneyPath';
 import WritingDemo from './WritingDemo';
+import TopikExamDates from './TopikExamDates';
 import WordStrip from './WordStrip';
 import type { Section } from '../types';
 
@@ -507,6 +508,16 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       {/* ── PRICING ──────────────────────────────────────────────── */}
       <section id="pricing" className="kl-reveal py-20 px-4 bg-white dark:bg-gray-950" style={{ scrollMarginTop: '80px' }}>
         <div className="max-w-5xl mx-auto">
+          {/* One line, not the full list. The page sells to K-drama fans, and a
+              table of exam rounds reads as homework to someone who came to
+              understand dialogue. But TOPIK is a real credential with real
+              deadlines, and naming the next one says this is a study tool
+              rather than a toy — which is the argument the price has to earn.
+              It hides itself entirely once the schedule runs out. */}
+          <FadeIn>
+            <TopikExamDates variant="compact" className="mb-10" />
+          </FadeIn>
+
           <FadeIn>
             <div className="text-center mb-12">
               <span className="inline-block text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full mb-4 bg-[#3F8571]/12 text-[#2E6B59] dark:bg-[#3F8571]/20 dark:text-[#5CFFB1]">

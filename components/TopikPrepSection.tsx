@@ -4,6 +4,7 @@ import { PremiumLockBanner } from './PremiumLock';
 import { earnXP, markStudyToday } from '../utils/xpStreak';
 import { useUpgradeModal } from '../contexts/UpgradeModalContext';
 import { accentFor } from '../utils/moduleAccent';
+import TopikExamDates from './TopikExamDates';
 
 // Free users get 3 sample questions: TOPIK I vocab[0], TOPIK I grammar[0], TOPIK II vocab[0]
 const FREE_QUESTION_LIMIT = 3;
@@ -675,6 +676,11 @@ const TopikPrepSection: React.FC = () => {
               </p>
             )}
           </div>
+
+          {/* The card above says the real exam is timed; this says when it is.
+              Preparation without a date is open-ended, and open-ended study is
+              the kind people abandon. */}
+          <TopikExamDates className="mt-3.5" limit={3} />
         </div>
       </div>
     </div>
