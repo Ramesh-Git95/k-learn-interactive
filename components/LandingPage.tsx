@@ -8,6 +8,7 @@ import TryItShowcase from './TryItShowcase';
 import JourneyPath from './JourneyPath';
 import WritingDemo from './WritingDemo';
 import TopikExamDates from './TopikExamDates';
+import MockExamPitch from './MockExamPitch';
 import WordStrip from './WordStrip';
 import type { Section } from '../types';
 
@@ -446,6 +447,17 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
               clickable rather than recorded. */}
           <FadeIn delay={120}>
             <WritingDemo />
+          </FadeIn>
+
+          {/* The journey ends at 회화; this is the other end of it — the people
+              who need a certificate rather than a conversation. It sits after
+              the writing demo because it is the strongest premium argument on
+              the page: a feeling the reader already has, rather than a feature
+              they have to imagine. */}
+          <FadeIn delay={120}>
+            <div className="mt-20 border-t border-gray-100 pt-16 dark:border-gray-800">
+              <MockExamPitch />
+            </div>
           </FadeIn>
         </div>
       </section>

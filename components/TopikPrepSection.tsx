@@ -666,6 +666,15 @@ const TopikPrepSection: React.FC = () => {
               reasoning shown. There is no clock here — the real TOPIK is timed, so work quickly
               when you sit it.
             </p>
+            {/* The obvious next question after "the real one is timed" is
+                "so what is that like" — which is the whole of the mock exam. */}
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('navigate-to-section', { detail: 'topik-mock' }))}
+              className="mt-2.5 text-[13px] font-semibold hover:underline"
+              style={{ color: ACC.light }}
+            >
+              Sit one against the clock →
+            </button>
             {isFree && (
               <p className="mt-3 text-[12.5px] text-[#4A5566] dark:text-gray-500">
                 {Math.max(0, FREE_QUESTION_LIMIT - totalAnswered)} sample{' '}

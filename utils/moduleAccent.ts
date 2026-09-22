@@ -17,7 +17,7 @@ const ACCENTS: Partial<Record<Section, Accent>> = {
   hangul: PERSIMMON, writing: PERSIMMON, typing: PERSIMMON, dashboard: PERSIMMON,
   vocabulary: PINE, srs: PINE, reading: PINE, bookmarks: PINE,
   grammar: OCHRE, honorifics: OCHRE,
-  phrases: SLATE, quiz: SLATE, topik: SLATE, 'topik-test': SLATE, conversation: SLATE,
+  phrases: SLATE, quiz: SLATE, topik: SLATE, 'topik-test': SLATE, 'topik-mock': SLATE, conversation: SLATE,
   profile: SLATE, 'cookie-settings': SLATE,
   culture: PLUM, 'culture-cards': PLUM, kdrama: PLUM, kpop: PLUM,
 };

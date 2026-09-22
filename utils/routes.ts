@@ -30,6 +30,7 @@ const SECTION_PATHS = {
   profile: 'profile',
   'cookie-settings': 'cookie-settings',
   topik: 'topik',
+  'topik-mock': 'topik-mock',
   'topik-test': 'topik-test',
   honorifics: 'honorifics',
   'culture-cards': 'culture-cards',

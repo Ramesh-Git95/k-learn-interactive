@@ -49,6 +49,7 @@ const SRSManager               = React.lazy(() => import('./components/SRSManage
 const SRSStudySession          = React.lazy(() => import('./components/SRSStudySession'));
 const TopikPrepSection         = React.lazy(() => import('./components/TopikPrepSection'));
 const TopikAssessment          = React.lazy(() => import('./components/TopikAssessment'));
+const TopikMockExam            = React.lazy(() => import('./components/TopikMockExam'));
 const ReadingSection           = React.lazy(() => import('./components/ReadingSection'));
 const WritingSection           = React.lazy(() => import('./components/WritingSection'));
 const HonorificEngine          = React.lazy(() => import('./components/HonorificEngine'));
@@ -636,6 +637,8 @@ const AppContent: React.FC = () => {
         return <SRSManager onStartStudy={handleStartStudy} />;
       case 'profile':
         return <UserProfile setActiveSection={handleSetActiveSection} />;
+      case 'topik-mock':
+        return <TopikMockExam />;
       case 'cookie-settings':
         return <CookieSettingsPage />;
       default:

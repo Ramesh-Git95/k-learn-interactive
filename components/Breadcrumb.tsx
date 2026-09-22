@@ -12,7 +12,7 @@ interface BreadcrumbProps {
 // grouped sections, "Home" for a primary tab, "Account" for profile/cookies.
 const groupOf = (s: Section): string => {
   if (['hangul', 'vocabulary', 'conversation'].includes(s)) return 'Home';
-  if (['grammar', 'phrases', 'topik', 'honorifics', 'topik-test'].includes(s)) return 'Learn';
+  if (['grammar', 'phrases', 'topik', 'honorifics', 'topik-test', 'topik-mock'].includes(s)) return 'Learn';
   if (['quiz', 'typing', 'srs', 'bookmarks', 'reading', 'writing'].includes(s)) return 'Practice';
   if (['culture', 'culture-cards', 'kdrama', 'kpop'].includes(s)) return 'Culture';
   if (['profile', 'cookie-settings'].includes(s)) return 'Account';

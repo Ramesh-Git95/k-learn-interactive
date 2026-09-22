@@ -20,9 +20,9 @@ describe('section <-> path', () => {
   });
 
   it('covers every section in the union', () => {
-    // 21 sections as of this change; the `satisfies` in routes.ts is what
+    // 22 sections as of the mock exam; the `satisfies` in routes.ts is what
     // actually enforces completeness, this just catches an accidental deletion.
-    expect(ALL_SECTIONS.length).toBe(21);
+    expect(ALL_SECTIONS.length).toBe(22);
     expect(new Set(ALL_SECTIONS).size).toBe(ALL_SECTIONS.length);
   });
 

@@ -35,7 +35,7 @@ const pick = (...ids: Section[]): MenuItem[] =>
 //
 // The mechanism stays: add `_isNew: true` to an item and its pill returns.
 const megaMenuGroups: { label: string; items: MenuItem[] }[] = [
-  { label: 'LEARN',    items: pick('grammar', 'phrases', 'topik', 'honorifics', 'topik-test') },
+  { label: 'LEARN',    items: pick('grammar', 'phrases', 'topik', 'topik-mock', 'honorifics', 'topik-test') },
   { label: 'PRACTICE', items: pick('quiz', 'typing', 'srs', 'bookmarks', 'reading', 'writing') },
   { label: 'CULTURE',  items: pick('culture', 'culture-cards', 'kdrama', 'kpop') },
 ];
@@ -46,6 +46,8 @@ const NAV_LABEL: Partial<Record<Section, string>> = {
   conversation: 'AI Chat',
   srs: 'Spaced Rep.',
   'topik-test': 'Level Test',
+  'topik-mock': 'Mock Exam',
+  topik: 'TOPIK Prep',
   kpop: 'K-Pop',
   typing: 'Typing',
 };
